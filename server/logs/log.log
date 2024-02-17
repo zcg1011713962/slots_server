@@ -1,0 +1,966 @@
+2024-02-07T16:16:36.165 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T16:16:36.167 [INFO ] default - 服务器启动成功!
+2024-02-07T16:16:36.167 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T16:16:36.170 [INFO ] default - start at port:13000
+2024-02-07T16:45:52.543 [INFO ] default - socket comein........
+2024-02-07T16:45:52.566 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-07T16:45:52.567 [INFO ] default - 游戏Id:15185
+2024-02-07T16:46:58.421 [INFO ] default - socket comein........
+2024-02-07T16:46:58.435 [INFO ] default - 登录大厅[object Object]
+2024-02-07T16:46:58.450 [INFO ] default - 添加用户:21080
+2024-02-07T16:46:58.453 [INFO ] default - 21080获取道具
+2024-02-07T16:46:58.453 [INFO ] default - 登录成功:[object Object]
+2024-02-07T16:46:58.456 [INFO ] default - 获取积分:[object Object]
+2024-02-07T16:46:58.456 [INFO ] default - 21080添加金币
+2024-02-07T16:46:58.460 [INFO ] default - 21080添加钻石
+2024-02-07T16:46:58.465 [INFO ] default - 21080登录分数9999266
+2024-02-07T16:46:58.466 [INFO ] default - 21080登录钻石10
+2024-02-07T16:46:58.473 [WARN ] default - getMsgToUser-json
+2024-02-07T16:46:58.475 [WARN ] default - getBank-json
+2024-02-07T16:46:58.482 [WARN ] default - updateCharLog-json
+2024-02-07T16:46:58.483 [INFO ] default - []
+2024-02-07T16:47:20.007 [INFO ] default - socket comein........
+2024-02-07T16:47:20.035 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-07T16:47:20.036 [INFO ] default - 游戏Id:15186
+2024-02-07T16:48:06.783 [INFO ] default - disconnect:21080
+2024-02-07T16:48:06.784 [INFO ] default - 用户21080删除!
+2024-02-07T16:48:06.784 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T16:48:06.938 [INFO ] default - 成功保存,删除用户21080 socre:9999266 diamond:10
+2024-02-07T16:48:17.493 [INFO ] default - socket comein........
+2024-02-07T16:48:17.516 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-07T16:48:17.517 [INFO ] default - 游戏Id:15187
+2024-02-07T16:48:22.966 [INFO ] default - socket comein........
+2024-02-07T16:48:22.992 [INFO ] default - 登录大厅[object Object]
+2024-02-07T16:48:23.007 [INFO ] default - 添加用户:21080
+2024-02-07T16:48:23.010 [INFO ] default - 21080获取道具
+2024-02-07T16:48:23.010 [INFO ] default - 登录成功:[object Object]
+2024-02-07T16:48:23.012 [INFO ] default - 获取积分:[object Object]
+2024-02-07T16:48:23.013 [INFO ] default - 21080添加金币
+2024-02-07T16:48:23.016 [INFO ] default - 21080添加钻石
+2024-02-07T16:48:23.021 [INFO ] default - 21080登录分数9999266
+2024-02-07T16:48:23.021 [INFO ] default - 21080登录钻石10
+2024-02-07T16:48:23.032 [WARN ] default - getMsgToUser-json
+2024-02-07T16:48:23.037 [WARN ] default - getBank-json
+2024-02-07T16:48:23.039 [WARN ] default - updateCharLog-json
+2024-02-07T16:48:23.039 [INFO ] default - []
+2024-02-07T16:48:29.074 [INFO ] default - socket comein........
+2024-02-07T16:48:29.094 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-07T16:48:29.095 [INFO ] default - 游戏Id:15186
+2024-02-07T16:48:55.618 [INFO ] default - socket comein........
+2024-02-07T16:48:55.639 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T16:48:55.639 [INFO ] default - 游戏Id:15163
+2024-02-07T16:49:07.701 [INFO ] default - 21080进入游戏15163
+2024-02-07T16:54:54.589 [INFO ] default - disconnect:21080
+2024-02-07T16:54:54.590 [INFO ] default - 用户21080删除!
+2024-02-07T16:56:33.207 [INFO ] default - socket comein........
+2024-02-07T16:56:33.223 [INFO ] default - 登录大厅[object Object]
+2024-02-07T16:56:33.236 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T16:56:33.687 [INFO ] default - 21080当前用户在线15163被强制下线
+2024-02-07T16:56:34.690 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:35.704 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:36.718 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:37.723 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:38.729 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:39.731 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:40.740 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:41.754 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:42.767 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:43.781 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:44.784 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:45.787 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:46.799 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:47.812 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:48.813 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:49.824 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:50.834 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:51.845 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:52.852 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:53.863 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:54.873 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:55.888 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:56.903 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:57.913 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:58.929 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:56:59.929 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:00.937 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:01.950 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:02.953 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:03.964 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:04.964 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:05.964 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:06.980 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:07.982 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:08.983 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:09.994 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:10.894 [INFO ] default - socket comein........
+2024-02-07T16:57:10.905 [INFO ] default - 登录大厅[object Object]
+2024-02-07T16:57:10.922 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T16:57:11.009 [INFO ] default - 21080当前用户在线15163被强制下线
+2024-02-07T16:57:12.008 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:13.019 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:14.020 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:15.034 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:16.046 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:17.059 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:18.073 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:19.087 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:20.086 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:21.098 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:22.112 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:23.123 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:24.127 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:25.133 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:26.138 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:27.143 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:28.145 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:29.154 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:30.162 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:31.166 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:32.180 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:33.192 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:34.199 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:35.205 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:36.209 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:37.216 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:38.231 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:39.243 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:40.250 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:41.253 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:42.261 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:42.380 [INFO ] default - socket comein........
+2024-02-07T16:57:42.404 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-07T16:57:42.405 [INFO ] default - 游戏Id:15186
+2024-02-07T16:57:43.274 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:44.288 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:45.295 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:46.298 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:47.308 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:48.308 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:49.315 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:50.323 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:51.330 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:52.337 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:53.347 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:54.357 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:55.369 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:56.374 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:57.380 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:58.385 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:57:59.397 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:00.405 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:01.411 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:02.420 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:03.428 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:04.434 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:05.447 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:06.462 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:07.469 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:08.481 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:09.492 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:10.506 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:11.517 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:12.520 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:13.532 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:14.542 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:15.552 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:16.560 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:17.573 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:18.582 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:19.595 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:20.601 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:21.604 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:22.612 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:23.623 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:24.634 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:25.645 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:26.660 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:27.669 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:28.676 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:29.684 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:30.696 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:31.705 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:32.709 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:33.723 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:34.733 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:35.739 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:36.745 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:37.755 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:38.764 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:39.769 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:40.777 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:41.785 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:42.786 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:43.793 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:44.798 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:45.802 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:46.803 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:47.805 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:48.806 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:49.817 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:50.822 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:51.821 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:52.827 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T16:58:53.828 [INFO ] default - 21080完全下线了
+2024-02-07T16:58:53.846 [INFO ] default - 添加用户:21080
+2024-02-07T16:58:53.848 [INFO ] default - 21080获取道具
+2024-02-07T16:58:53.851 [INFO ] default - 登录成功:[object Object]
+2024-02-07T16:58:53.853 [INFO ] default - 获取积分:[object Object]
+2024-02-07T16:58:53.853 [INFO ] default - 21080添加金币
+2024-02-07T16:58:53.854 [INFO ] default - 21080添加钻石
+2024-02-07T16:58:53.857 [INFO ] default - 21080登录分数9999266
+2024-02-07T16:58:53.857 [INFO ] default - 21080登录钻石10
+2024-02-07T16:58:53.858 [INFO ] default - 完成添加
+2024-02-07T17:03:08.567 [INFO ] default - socket comein........
+2024-02-07T17:03:08.591 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:03:08.592 [INFO ] default - 游戏Id:15163
+2024-02-07T17:03:12.642 [INFO ] default - socket comein........
+2024-02-07T17:03:12.651 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:03:12.662 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T17:03:13.589 [INFO ] default - 21080用户只在登录服务器被强制下线
+2024-02-07T17:03:14.604 [INFO ] default - 21080完全下线了
+2024-02-07T17:03:14.618 [INFO ] default - 添加用户:21080
+2024-02-07T17:03:14.621 [INFO ] default - 21080获取道具
+2024-02-07T17:03:14.625 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:03:14.627 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:03:14.628 [INFO ] default - 21080添加金币
+2024-02-07T17:03:14.629 [INFO ] default - 21080添加钻石
+2024-02-07T17:03:14.632 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:03:14.633 [INFO ] default - 21080登录钻石10
+2024-02-07T17:03:14.634 [INFO ] default - 完成添加
+2024-02-07T17:03:14.638 [WARN ] default - getMsgToUser-json
+2024-02-07T17:03:14.647 [WARN ] default - getBank-json
+2024-02-07T17:03:14.648 [WARN ] default - updateCharLog-json
+2024-02-07T17:03:14.649 [INFO ] default - []
+2024-02-07T17:04:08.778 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:05:38.860 [INFO ] default - disconnect:21080
+2024-02-07T17:05:38.861 [INFO ] default - 用户21080删除!
+2024-02-07T17:05:47.956 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:05:47.957 [INFO ] default - 服务器启动成功!
+2024-02-07T17:05:47.958 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:05:47.960 [INFO ] default - start at port:13000
+2024-02-07T17:05:50.061 [INFO ] default - socket comein........
+2024-02-07T17:05:50.078 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:05:50.078 [INFO ] default - 游戏Id:15163
+2024-02-07T17:06:34.894 [INFO ] default - socket comein........
+2024-02-07T17:06:34.902 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:06:34.915 [INFO ] default - 添加用户:21080
+2024-02-07T17:06:34.917 [INFO ] default - 21080获取道具
+2024-02-07T17:06:34.920 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:06:34.923 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:06:34.924 [INFO ] default - 21080添加金币
+2024-02-07T17:06:34.926 [INFO ] default - 21080添加钻石
+2024-02-07T17:06:34.930 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:06:34.931 [INFO ] default - 21080登录钻石10
+2024-02-07T17:06:34.938 [WARN ] default - getMsgToUser-json
+2024-02-07T17:06:34.944 [WARN ] default - getBank-json
+2024-02-07T17:06:34.945 [WARN ] default - updateCharLog-json
+2024-02-07T17:06:34.945 [INFO ] default - []
+2024-02-07T17:06:50.419 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:07:20.729 [INFO ] default - disconnect:21080
+2024-02-07T17:07:20.730 [INFO ] default - 用户21080删除!
+2024-02-07T17:08:25.783 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:08:25.785 [INFO ] default - 服务器启动成功!
+2024-02-07T17:08:25.785 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:08:25.789 [INFO ] default - start at port:13000
+2024-02-07T17:08:27.922 [INFO ] default - socket comein........
+2024-02-07T17:08:27.939 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:08:27.940 [INFO ] default - 游戏Id:15163
+2024-02-07T17:08:48.114 [INFO ] default - socket comein........
+2024-02-07T17:08:48.124 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:08:48.141 [INFO ] default - 添加用户:21080
+2024-02-07T17:08:48.144 [INFO ] default - 21080获取道具
+2024-02-07T17:08:48.148 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:08:48.152 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:08:48.153 [INFO ] default - 21080添加金币
+2024-02-07T17:08:48.156 [INFO ] default - 21080添加钻石
+2024-02-07T17:08:48.163 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:08:48.164 [INFO ] default - 21080登录钻石10
+2024-02-07T17:08:48.178 [WARN ] default - getMsgToUser-json
+2024-02-07T17:08:48.183 [WARN ] default - getBank-json
+2024-02-07T17:08:48.184 [WARN ] default - updateCharLog-json
+2024-02-07T17:08:48.185 [INFO ] default - []
+2024-02-07T17:09:05.003 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:11:01.116 [INFO ] default - socket comein........
+2024-02-07T17:11:01.123 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:11:01.123 [INFO ] default - 游戏Id:15163
+2024-02-07T17:11:44.848 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:11:44.849 [INFO ] default - 服务器启动成功!
+2024-02-07T17:11:44.849 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:11:44.851 [INFO ] default - start at port:13000
+2024-02-07T17:11:45.022 [INFO ] default - socket comein........
+2024-02-07T17:11:49.415 [INFO ] default - socket comein........
+2024-02-07T17:11:49.436 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:11:49.436 [INFO ] default - 游戏Id:15163
+2024-02-07T17:13:07.793 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:13:07.794 [INFO ] default - 服务器启动成功!
+2024-02-07T17:13:07.795 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:13:07.797 [INFO ] default - start at port:13000
+2024-02-07T17:13:11.961 [INFO ] default - socket comein........
+2024-02-07T17:13:11.978 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:13:11.979 [INFO ] default - 游戏Id:15163
+2024-02-07T17:13:57.601 [INFO ] default - socket comein........
+2024-02-07T17:13:57.616 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:13:57.628 [INFO ] default - 添加用户:21080
+2024-02-07T17:13:57.631 [INFO ] default - 21080获取道具
+2024-02-07T17:13:57.634 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:13:57.636 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:13:57.637 [INFO ] default - 21080添加金币
+2024-02-07T17:13:57.639 [INFO ] default - 21080添加钻石
+2024-02-07T17:13:57.644 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:13:57.645 [INFO ] default - 21080登录钻石10
+2024-02-07T17:13:57.654 [WARN ] default - getMsgToUser-json
+2024-02-07T17:13:57.656 [WARN ] default - getBank-json
+2024-02-07T17:13:57.659 [WARN ] default - updateCharLog-json
+2024-02-07T17:13:57.659 [INFO ] default - []
+2024-02-07T17:14:39.526 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:16:08.701 [INFO ] default - socket comein........
+2024-02-07T17:16:08.710 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:16:08.711 [INFO ] default - 游戏Id:15163
+2024-02-07T17:16:20.498 [INFO ] default - disconnect:21080
+2024-02-07T17:16:20.500 [INFO ] default - 用户21080删除!
+2024-02-07T17:16:36.298 [INFO ] default - socket comein........
+2024-02-07T17:16:36.314 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:16:36.327 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T17:16:36.642 [INFO ] default - 21080当前用户在线15163被强制下线
+2024-02-07T17:16:37.656 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:38.671 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:39.685 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:40.696 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:41.700 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:42.714 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:43.715 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:44.718 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:45.718 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:46.725 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:47.738 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:48.738 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:49.752 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:50.763 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:51.766 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:52.775 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:53.790 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:54.804 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:55.817 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:56.826 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:57.838 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:58.851 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:16:59.864 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:00.870 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:01.884 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:02.891 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:03.893 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:04.893 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:05.904 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:06.918 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:07.931 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:08.945 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:09.959 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:10.967 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:11.972 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:12.975 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:13.980 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:14.985 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:15.993 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:17.003 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:18.008 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:19.015 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:20.023 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:21.024 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:21.453 [INFO ] default - socket comein........
+2024-02-07T17:17:21.472 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-07T17:17:21.472 [INFO ] default - 游戏Id:15186
+2024-02-07T17:17:22.037 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:23.039 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:24.046 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:25.052 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:26.066 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:27.078 [INFO ] default - 等待游戏服务器过来删除21080
+2024-02-07T17:17:29.586 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:17:29.587 [INFO ] default - 服务器启动成功!
+2024-02-07T17:17:29.588 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:17:29.591 [INFO ] default - start at port:13000
+2024-02-07T17:17:31.560 [INFO ] default - socket comein........
+2024-02-07T17:17:31.576 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:17:31.577 [INFO ] default - 游戏Id:15163
+2024-02-07T17:18:29.294 [INFO ] default - socket comein........
+2024-02-07T17:18:29.305 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:18:29.320 [INFO ] default - 添加用户:21080
+2024-02-07T17:18:29.323 [INFO ] default - 21080获取道具
+2024-02-07T17:18:29.327 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:18:29.330 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:18:29.330 [INFO ] default - 21080添加金币
+2024-02-07T17:18:29.334 [INFO ] default - 21080添加钻石
+2024-02-07T17:18:29.342 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:18:29.343 [INFO ] default - 21080登录钻石10
+2024-02-07T17:18:29.350 [WARN ] default - getMsgToUser-json
+2024-02-07T17:18:29.353 [WARN ] default - getBank-json
+2024-02-07T17:18:29.356 [WARN ] default - updateCharLog-json
+2024-02-07T17:18:29.357 [INFO ] default - []
+2024-02-07T17:18:52.581 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:28:23.614 [INFO ] default - disconnect:21080
+2024-02-07T17:28:23.617 [INFO ] default - 用户21080删除!
+2024-02-07T17:28:29.878 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:28:29.879 [INFO ] default - 服务器启动成功!
+2024-02-07T17:28:29.879 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:28:29.882 [INFO ] default - start at port:13000
+2024-02-07T17:28:33.955 [INFO ] default - socket comein........
+2024-02-07T17:28:33.973 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:28:33.973 [INFO ] default - 游戏Id:15163
+2024-02-07T17:29:08.816 [INFO ] default - socket comein........
+2024-02-07T17:29:08.821 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:29:08.834 [INFO ] default - 添加用户:21080
+2024-02-07T17:29:08.837 [INFO ] default - 21080获取道具
+2024-02-07T17:29:08.840 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:29:08.843 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:29:08.843 [INFO ] default - 21080添加金币
+2024-02-07T17:29:08.846 [INFO ] default - 21080添加钻石
+2024-02-07T17:29:08.851 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:29:08.851 [INFO ] default - 21080登录钻石10
+2024-02-07T17:29:08.859 [WARN ] default - getMsgToUser-json
+2024-02-07T17:29:08.866 [WARN ] default - getBank-json
+2024-02-07T17:29:08.867 [WARN ] default - updateCharLog-json
+2024-02-07T17:29:08.868 [INFO ] default - []
+2024-02-07T17:29:47.083 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:42:43.306 [INFO ] default - socket comein........
+2024-02-07T17:42:43.344 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:42:43.345 [INFO ] default - 游戏Id:15163
+2024-02-07T17:42:43.532 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:47:21.540 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:47:21.541 [INFO ] default - 服务器启动成功!
+2024-02-07T17:47:21.541 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:47:21.545 [INFO ] default - start at port:13000
+2024-02-07T17:47:21.558 [INFO ] default - socket comein........
+2024-02-07T17:47:23.707 [INFO ] default - socket comein........
+2024-02-07T17:47:23.727 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:47:23.727 [INFO ] default - 游戏Id:15163
+2024-02-07T17:47:46.282 [INFO ] default - socket comein........
+2024-02-07T17:47:46.293 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:47:46.305 [INFO ] default - 添加用户:21080
+2024-02-07T17:47:46.308 [INFO ] default - 21080获取道具
+2024-02-07T17:47:46.312 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:47:46.315 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:47:46.316 [INFO ] default - 21080添加金币
+2024-02-07T17:47:46.319 [INFO ] default - 21080添加钻石
+2024-02-07T17:47:46.326 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:47:46.326 [INFO ] default - 21080登录钻石10
+2024-02-07T17:47:46.334 [WARN ] default - getMsgToUser-json
+2024-02-07T17:47:46.338 [WARN ] default - getBank-json
+2024-02-07T17:47:46.344 [WARN ] default - updateCharLog-json
+2024-02-07T17:47:46.344 [INFO ] default - []
+2024-02-07T17:47:55.357 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:48:08.089 [INFO ] default - disconnect:21080
+2024-02-07T17:48:08.090 [INFO ] default - 用户21080删除!
+2024-02-07T17:48:29.574 [INFO ] default - 登录服务器 v2.0.0
+2024-02-07T17:48:29.575 [INFO ] default - 服务器启动成功!
+2024-02-07T17:48:29.575 [INFO ] default - 更新时间:2017.12.17
+2024-02-07T17:48:29.578 [INFO ] default - start at port:13000
+2024-02-07T17:48:34.448 [INFO ] default - socket comein........
+2024-02-07T17:48:34.466 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:48:34.466 [INFO ] default - 游戏Id:15163
+2024-02-07T17:49:19.333 [INFO ] default - socket comein........
+2024-02-07T17:49:19.343 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:49:19.363 [INFO ] default - 添加用户:21080
+2024-02-07T17:49:19.366 [INFO ] default - 21080获取道具
+2024-02-07T17:49:19.367 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:49:19.370 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:49:19.370 [INFO ] default - 21080添加金币
+2024-02-07T17:49:19.374 [INFO ] default - 21080添加钻石
+2024-02-07T17:49:19.379 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:49:19.380 [INFO ] default - 21080登录钻石10
+2024-02-07T17:49:19.394 [WARN ] default - getMsgToUser-json
+2024-02-07T17:49:19.396 [WARN ] default - getBank-json
+2024-02-07T17:49:19.399 [WARN ] default - updateCharLog-json
+2024-02-07T17:49:19.399 [INFO ] default - []
+2024-02-07T17:49:44.389 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:49:44.397 [INFO ] default - disconnect:21080
+2024-02-07T17:49:44.398 [INFO ] default - 用户21080删除!
+2024-02-07T17:50:52.478 [INFO ] default - socket comein........
+2024-02-07T17:50:52.497 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:50:52.498 [INFO ] default - 游戏Id:15163
+2024-02-07T17:50:56.047 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:51:00.808 [INFO ] default - userDisconnect:
+2024-02-07T17:51:00.809 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9999266,
+  gameId: 15163,
+  nolog: true
+}
+2024-02-07T17:51:00.809 [INFO ] default - 21080清除游戏ID
+2024-02-07T17:51:00.810 [INFO ] default - 游戏ID0
+2024-02-07T17:51:00.810 [INFO ] default - 用户21080删除!
+2024-02-07T17:51:00.810 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T17:51:01.066 [INFO ] default - 成功保存,删除用户21080 socre:9999266 diamond:10
+2024-02-07T17:51:19.689 [INFO ] default - socket comein........
+2024-02-07T17:51:19.707 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:51:19.720 [INFO ] default - 添加用户:21080
+2024-02-07T17:51:19.722 [INFO ] default - 21080获取道具
+2024-02-07T17:51:19.722 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:51:19.724 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:51:19.725 [INFO ] default - 21080添加金币
+2024-02-07T17:51:19.727 [INFO ] default - 21080添加钻石
+2024-02-07T17:51:19.731 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:51:19.731 [INFO ] default - 21080登录钻石10
+2024-02-07T17:51:19.741 [WARN ] default - getMsgToUser-json
+2024-02-07T17:51:19.743 [WARN ] default - getBank-json
+2024-02-07T17:51:19.745 [WARN ] default - updateCharLog-json
+2024-02-07T17:51:19.745 [INFO ] default - []
+2024-02-07T17:51:28.252 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:51:28.258 [INFO ] default - disconnect:21080
+2024-02-07T17:51:28.259 [INFO ] default - 用户21080删除!
+2024-02-07T17:52:19.292 [INFO ] default - socket comein........
+2024-02-07T17:52:19.318 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-07T17:52:19.319 [INFO ] default - 游戏Id:15163
+2024-02-07T17:52:22.710 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:52:24.189 [INFO ] default - userDisconnect:
+2024-02-07T17:52:24.190 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9999266,
+  gameId: 15163,
+  nolog: true
+}
+2024-02-07T17:52:24.191 [INFO ] default - 21080清除游戏ID
+2024-02-07T17:52:24.191 [INFO ] default - 游戏ID0
+2024-02-07T17:52:24.191 [INFO ] default - 用户21080删除!
+2024-02-07T17:52:24.191 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T17:52:24.719 [INFO ] default - 成功保存,删除用户21080 socre:9999266 diamond:10
+2024-02-07T17:52:43.141 [INFO ] default - socket comein........
+2024-02-07T17:52:43.153 [INFO ] default - 登录大厅[object Object]
+2024-02-07T17:52:43.170 [INFO ] default - 添加用户:21080
+2024-02-07T17:52:43.173 [INFO ] default - 21080获取道具
+2024-02-07T17:52:43.173 [INFO ] default - 登录成功:[object Object]
+2024-02-07T17:52:43.176 [INFO ] default - 获取积分:[object Object]
+2024-02-07T17:52:43.177 [INFO ] default - 21080添加金币
+2024-02-07T17:52:43.180 [INFO ] default - 21080添加钻石
+2024-02-07T17:52:43.185 [INFO ] default - 21080登录分数9999266
+2024-02-07T17:52:43.185 [INFO ] default - 21080登录钻石10
+2024-02-07T17:52:43.192 [WARN ] default - getMsgToUser-json
+2024-02-07T17:52:43.194 [WARN ] default - getBank-json
+2024-02-07T17:52:43.196 [WARN ] default - updateCharLog-json
+2024-02-07T17:52:43.197 [INFO ] default - []
+2024-02-07T17:52:51.877 [INFO ] default - 21080进入游戏15163
+2024-02-07T17:52:51.884 [INFO ] default - disconnect:21080
+2024-02-07T17:52:51.885 [INFO ] default - 用户21080删除!
+2024-02-07T17:55:53.444 [INFO ] default - userDisconnect:
+2024-02-07T17:55:53.445 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9999146,
+  gameId: 15163,
+  nolog: true
+}
+2024-02-07T17:55:53.446 [INFO ] default - 21080清除游戏ID
+2024-02-07T17:55:53.446 [INFO ] default - 游戏ID0
+2024-02-07T17:55:53.447 [INFO ] default - 用户21080删除!
+2024-02-07T17:55:53.447 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T17:55:53.476 [INFO ] default - 成功保存,删除用户21080 socre:9999146 diamond:10
+2024-02-07T18:24:57.101 [INFO ] default - socket comein........
+2024-02-07T18:24:57.109 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:24:57.124 [INFO ] default - 添加用户:21080
+2024-02-07T18:24:57.128 [INFO ] default - 21080获取道具
+2024-02-07T18:24:57.128 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:24:57.131 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:24:57.131 [INFO ] default - 21080添加金币
+2024-02-07T18:24:57.134 [INFO ] default - 21080添加钻石
+2024-02-07T18:24:57.139 [INFO ] default - 21080登录分数9999146
+2024-02-07T18:24:57.139 [INFO ] default - 21080登录钻石10
+2024-02-07T18:24:57.157 [WARN ] default - getMsgToUser-json
+2024-02-07T18:24:57.166 [WARN ] default - getBank-json
+2024-02-07T18:24:57.169 [WARN ] default - updateCharLog-json
+2024-02-07T18:24:57.170 [INFO ] default - []
+2024-02-07T18:25:38.813 [INFO ] default - socket comein........
+2024-02-07T18:25:38.823 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:25:38.835 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T18:25:38.972 [INFO ] default - 21080用户只在登录服务器被强制下线
+2024-02-07T18:25:38.976 [INFO ] default - disconnect:21080
+2024-02-07T18:25:38.977 [INFO ] default - 用户21080删除!
+2024-02-07T18:25:38.977 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T18:25:38.982 [INFO ] default - 成功保存,删除用户21080 socre:9999146 diamond:10
+2024-02-07T18:25:39.986 [INFO ] default - 21080完全下线了
+2024-02-07T18:25:39.999 [INFO ] default - 添加用户:21080
+2024-02-07T18:25:40.002 [INFO ] default - 21080获取道具
+2024-02-07T18:25:40.002 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:25:40.004 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:25:40.005 [INFO ] default - 21080添加金币
+2024-02-07T18:25:40.007 [INFO ] default - 21080添加钻石
+2024-02-07T18:25:40.010 [INFO ] default - 21080登录分数9999146
+2024-02-07T18:25:40.010 [INFO ] default - 21080登录钻石10
+2024-02-07T18:25:40.012 [INFO ] default - 完成添加
+2024-02-07T18:25:40.015 [WARN ] default - getMsgToUser-json
+2024-02-07T18:25:40.019 [WARN ] default - getBank-json
+2024-02-07T18:25:40.020 [WARN ] default - updateCharLog-json
+2024-02-07T18:25:40.021 [INFO ] default - []
+2024-02-07T18:26:26.596 [INFO ] default - socket comein........
+2024-02-07T18:26:26.618 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:26:26.619 [INFO ] default - 游戏Id:15188
+2024-02-07T18:26:31.019 [INFO ] default - 21080进入游戏15188
+2024-02-07T18:26:31.026 [INFO ] default - disconnect:21080
+2024-02-07T18:26:31.027 [INFO ] default - 用户21080删除!
+2024-02-07T18:26:58.860 [INFO ] default - socket comein........
+2024-02-07T18:26:58.878 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:26:58.879 [INFO ] default - 游戏Id:15188
+2024-02-07T18:29:40.518 [INFO ] default - socket comein........
+2024-02-07T18:29:40.545 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:29:40.546 [INFO ] default - 游戏Id:15188
+2024-02-07T18:31:36.887 [INFO ] default - socket comein........
+2024-02-07T18:31:36.905 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:31:36.906 [INFO ] default - 游戏Id:15188
+2024-02-07T18:32:05.770 [INFO ] default - socket comein........
+2024-02-07T18:32:05.792 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:32:05.807 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-07T18:32:06.189 [INFO ] default - 21080当前用户在线15188被强制下线
+2024-02-07T18:32:06.194 [INFO ] default - userDisconnect:
+2024-02-07T18:32:06.195 [INFO ] default - { ResultCode: 0, userId: 21080 }
+2024-02-07T18:32:07.205 [INFO ] default - 21080完全下线了
+2024-02-07T18:32:07.219 [INFO ] default - 添加用户:21080
+2024-02-07T18:32:07.222 [INFO ] default - 21080获取道具
+2024-02-07T18:32:07.222 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:32:07.225 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:32:07.225 [INFO ] default - 21080添加金币
+2024-02-07T18:32:07.227 [INFO ] default - 21080添加钻石
+2024-02-07T18:32:07.230 [INFO ] default - 21080登录分数9999146
+2024-02-07T18:32:07.231 [INFO ] default - 21080登录钻石10
+2024-02-07T18:32:07.232 [INFO ] default - 完成添加
+2024-02-07T18:32:07.236 [WARN ] default - getMsgToUser-json
+2024-02-07T18:32:07.239 [WARN ] default - getBank-json
+2024-02-07T18:32:07.241 [WARN ] default - updateCharLog-json
+2024-02-07T18:32:07.241 [INFO ] default - []
+2024-02-07T18:32:18.286 [INFO ] default - 21080进入游戏15188
+2024-02-07T18:32:18.293 [INFO ] default - disconnect:21080
+2024-02-07T18:32:18.294 [INFO ] default - 用户21080删除!
+2024-02-07T18:34:12.337 [INFO ] default - socket comein........
+2024-02-07T18:34:12.366 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:34:12.366 [INFO ] default - 游戏Id:15188
+2024-02-07T18:34:12.539 [INFO ] default - 21080进入游戏15188
+2024-02-07T18:38:06.690 [INFO ] default - socket comein........
+2024-02-07T18:38:06.724 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-07T18:38:06.725 [INFO ] default - 游戏Id:15188
+2024-02-07T18:38:06.735 [INFO ] default - 21080进入游戏15188
+2024-02-07T18:38:13.967 [INFO ] default - userDisconnect:
+2024-02-07T18:38:13.968 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9999146,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-07T18:38:13.968 [INFO ] default - 21080清除游戏ID
+2024-02-07T18:38:13.969 [INFO ] default - 游戏ID0
+2024-02-07T18:38:13.969 [INFO ] default - 用户21080删除!
+2024-02-07T18:38:13.969 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T18:38:14.427 [INFO ] default - 成功保存,删除用户21080 socre:9999146 diamond:10
+2024-02-07T18:38:30.236 [INFO ] default - socket comein........
+2024-02-07T18:38:30.248 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:38:30.264 [INFO ] default - 添加用户:21080
+2024-02-07T18:38:30.266 [INFO ] default - 21080获取道具
+2024-02-07T18:38:30.267 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:38:30.269 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:38:30.269 [INFO ] default - 21080添加金币
+2024-02-07T18:38:30.271 [INFO ] default - 21080添加钻石
+2024-02-07T18:38:30.277 [INFO ] default - 21080登录分数9999146
+2024-02-07T18:38:30.277 [INFO ] default - 21080登录钻石10
+2024-02-07T18:38:30.287 [WARN ] default - getMsgToUser-json
+2024-02-07T18:38:30.290 [WARN ] default - getBank-json
+2024-02-07T18:38:30.295 [WARN ] default - updateCharLog-json
+2024-02-07T18:38:30.295 [INFO ] default - []
+2024-02-07T18:38:39.281 [INFO ] default - 21080进入游戏15188
+2024-02-07T18:38:39.287 [INFO ] default - disconnect:21080
+2024-02-07T18:38:39.288 [INFO ] default - 用户21080删除!
+2024-02-07T18:43:33.276 [INFO ] default - userDisconnect:
+2024-02-07T18:43:33.277 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9998746,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-07T18:43:33.277 [INFO ] default - 21080清除游戏ID
+2024-02-07T18:43:33.278 [INFO ] default - 游戏ID0
+2024-02-07T18:43:33.278 [INFO ] default - 用户21080删除!
+2024-02-07T18:43:33.278 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T18:43:34.101 [INFO ] default - 成功保存,删除用户21080 socre:9998746 diamond:10
+2024-02-07T18:43:45.580 [INFO ] default - socket comein........
+2024-02-07T18:43:45.601 [INFO ] default - 拉霸游戏_283_UltimateStriker | 服务器连接成功!
+2024-02-07T18:43:45.602 [INFO ] default - 游戏Id:15183
+2024-02-07T18:43:49.613 [INFO ] default - socket comein........
+2024-02-07T18:43:49.626 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:43:49.645 [INFO ] default - 添加用户:21080
+2024-02-07T18:43:49.648 [INFO ] default - 21080获取道具
+2024-02-07T18:43:49.649 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:43:49.651 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:43:49.652 [INFO ] default - 21080添加金币
+2024-02-07T18:43:49.656 [INFO ] default - 21080添加钻石
+2024-02-07T18:43:49.662 [INFO ] default - 21080登录分数9998746
+2024-02-07T18:43:49.663 [INFO ] default - 21080登录钻石10
+2024-02-07T18:43:49.678 [WARN ] default - getMsgToUser-json
+2024-02-07T18:43:49.681 [WARN ] default - getBank-json
+2024-02-07T18:43:49.683 [WARN ] default - updateCharLog-json
+2024-02-07T18:43:49.684 [INFO ] default - []
+2024-02-07T18:44:14.358 [INFO ] default - 21080进入游戏15183
+2024-02-07T18:44:14.366 [INFO ] default - disconnect:21080
+2024-02-07T18:44:14.367 [INFO ] default - 用户21080删除!
+2024-02-07T18:44:26.809 [INFO ] default - socket comein........
+2024-02-07T18:44:26.839 [INFO ] default - 拉霸游戏_283_UltimateStriker | 服务器连接成功!
+2024-02-07T18:44:26.840 [INFO ] default - 游戏Id:15183
+2024-02-07T18:44:26.928 [INFO ] default - 21080进入游戏15183
+2024-02-07T18:45:44.601 [INFO ] default - userDisconnect:
+2024-02-07T18:45:44.602 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9998706,
+  gameId: 15183,
+  nolog: true
+}
+2024-02-07T18:45:44.603 [INFO ] default - 21080清除游戏ID
+2024-02-07T18:45:44.603 [INFO ] default - 游戏ID0
+2024-02-07T18:45:44.604 [INFO ] default - 用户21080删除!
+2024-02-07T18:45:44.604 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T18:45:45.426 [INFO ] default - 成功保存,删除用户21080 socre:9998706 diamond:10
+2024-02-07T18:46:00.931 [INFO ] default - socket comein........
+2024-02-07T18:46:00.942 [INFO ] default - 登录大厅[object Object]
+2024-02-07T18:46:00.957 [INFO ] default - 添加用户:21080
+2024-02-07T18:46:00.960 [INFO ] default - 21080获取道具
+2024-02-07T18:46:00.961 [INFO ] default - 登录成功:[object Object]
+2024-02-07T18:46:00.963 [INFO ] default - 获取积分:[object Object]
+2024-02-07T18:46:00.964 [INFO ] default - 21080添加金币
+2024-02-07T18:46:00.967 [INFO ] default - 21080添加钻石
+2024-02-07T18:46:00.972 [INFO ] default - 21080登录分数9998706
+2024-02-07T18:46:00.973 [INFO ] default - 21080登录钻石10
+2024-02-07T18:46:00.986 [WARN ] default - getMsgToUser-json
+2024-02-07T18:46:00.994 [WARN ] default - getBank-json
+2024-02-07T18:46:00.995 [WARN ] default - updateCharLog-json
+2024-02-07T18:46:00.996 [INFO ] default - []
+2024-02-07T18:47:15.395 [INFO ] default - socket comein........
+2024-02-07T18:47:15.431 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-07T18:47:15.432 [INFO ] default - 游戏Id:15187
+2024-02-07T18:47:18.807 [INFO ] default - 21080进入游戏15187
+2024-02-07T18:47:18.816 [INFO ] default - disconnect:21080
+2024-02-07T18:47:18.817 [INFO ] default - 用户21080删除!
+2024-02-07T18:48:45.519 [INFO ] default - socket comein........
+2024-02-07T18:48:45.540 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-07T18:48:45.540 [INFO ] default - 游戏Id:15187
+2024-02-07T18:48:45.659 [INFO ] default - 21080进入游戏15187
+2024-02-07T18:50:22.712 [INFO ] default - socket comein........
+2024-02-07T18:50:22.739 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-07T18:50:22.739 [INFO ] default - 游戏Id:15187
+2024-02-07T18:50:22.928 [INFO ] default - 21080进入游戏15187
+2024-02-07T18:53:26.709 [INFO ] default - userDisconnect:
+2024-02-07T18:53:26.710 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9998506,
+  gameId: 15187,
+  nolog: true
+}
+2024-02-07T18:53:26.711 [INFO ] default - 21080清除游戏ID
+2024-02-07T18:53:26.711 [INFO ] default - 游戏ID0
+2024-02-07T18:53:26.712 [INFO ] default - 用户21080删除!
+2024-02-07T18:53:26.712 [INFO ] default - 用户21080没有游戏ID
+2024-02-07T18:53:27.720 [INFO ] default - 成功保存,删除用户21080 socre:9998506 diamond:10
+2024-02-07T19:11:12.895 [INFO ] default - socket comein........
+2024-02-07T19:11:12.908 [INFO ] default - 登录大厅[object Object]
+2024-02-07T19:11:12.918 [INFO ] default - 添加用户:21080
+2024-02-07T19:11:12.920 [INFO ] default - 21080获取道具
+2024-02-07T19:11:12.921 [INFO ] default - 登录成功:[object Object]
+2024-02-07T19:11:12.923 [INFO ] default - 获取积分:[object Object]
+2024-02-07T19:11:12.924 [INFO ] default - 21080添加金币
+2024-02-07T19:11:12.926 [INFO ] default - 21080添加钻石
+2024-02-07T19:11:12.931 [INFO ] default - 21080登录分数9998506
+2024-02-07T19:11:12.931 [INFO ] default - 21080登录钻石10
+2024-02-07T19:11:12.941 [WARN ] default - getMsgToUser-json
+2024-02-07T19:11:12.943 [WARN ] default - getBank-json
+2024-02-07T19:11:12.945 [WARN ] default - updateCharLog-json
+2024-02-07T19:11:12.945 [INFO ] default - []
+2024-02-07T19:11:43.437 [INFO ] default - 21080进入游戏15183
+2024-02-07T19:11:43.444 [INFO ] default - disconnect:21080
+2024-02-07T19:11:43.445 [INFO ] default - 用户21080删除!
+2024-02-07T19:14:16.564 [INFO ] default - socket comein........
+2024-02-17T14:25:12.874 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T15:54:26.786 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T15:54:26.787 [INFO ] default - 服务器启动成功!
+2024-02-17T15:54:26.789 [INFO ] default - 更新时间:2017.12.17
+2024-02-17T15:54:26.792 [INFO ] default - start at port:13000
+2024-02-17T15:54:30.300 [INFO ] default - socket comein........
+2024-02-17T15:58:27.014 [INFO ] default - socket comein........
+2024-02-17T15:58:27.021 [INFO ] default - 登录大厅[object Object]
+2024-02-17T15:58:27.068 [INFO ] default - 添加用户:21080
+2024-02-17T15:58:27.081 [INFO ] default - 21080获取道具
+2024-02-17T15:58:27.082 [INFO ] default - 登录成功:[object Object]
+2024-02-17T15:58:27.097 [INFO ] default - 获取积分:[object Object]
+2024-02-17T15:58:27.098 [INFO ] default - 21080添加金币
+2024-02-17T15:58:27.114 [INFO ] default - 21080添加钻石
+2024-02-17T15:58:27.134 [INFO ] default - 21080登录分数9998506
+2024-02-17T15:58:27.134 [INFO ] default - 21080登录钻石10
+2024-02-17T16:01:32.983 [INFO ] default - socket comein........
+2024-02-17T16:01:33.003 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-17T16:01:33.004 [INFO ] default - 游戏Id:15129
+2024-02-17T16:01:41.291 [INFO ] default - 21080进入游戏15129
+2024-02-17T16:01:41.299 [INFO ] default - disconnect:21080
+2024-02-17T16:01:41.300 [INFO ] default - 用户21080删除!
+2024-02-17T16:27:59.887 [INFO ] default - socket comein........
+2024-02-17T16:27:59.895 [INFO ] default - userDisconnect:
+2024-02-17T16:27:59.895 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21080,
+  userScore: 9999030,
+  gameId: 15129,
+  nolog: true
+}
+2024-02-17T16:27:59.896 [INFO ] default - 21080清除游戏ID
+2024-02-17T16:27:59.897 [INFO ] default - 游戏ID0
+2024-02-17T16:27:59.898 [INFO ] default - 用户21080删除!
+2024-02-17T16:27:59.898 [INFO ] default - 用户21080没有游戏ID
+2024-02-17T16:27:59.901 [INFO ] default - 登录大厅[object Object]
+2024-02-17T16:27:59.914 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-17T16:28:00.661 [INFO ] default - 21080用户只在登录服务器被强制下线
+2024-02-17T16:28:00.670 [INFO ] default - 成功保存,删除用户21080 socre:9999030 diamond:10
+2024-02-17T16:28:01.663 [INFO ] default - 21080完全下线了
+2024-02-17T16:28:01.686 [INFO ] default - 添加用户:21080
+2024-02-17T16:28:01.688 [INFO ] default - 21080获取道具
+2024-02-17T16:28:01.689 [INFO ] default - 登录成功:[object Object]
+2024-02-17T16:28:01.691 [INFO ] default - 获取积分:[object Object]
+2024-02-17T16:28:01.691 [INFO ] default - 21080添加金币
+2024-02-17T16:28:01.695 [INFO ] default - 21080添加钻石
+2024-02-17T16:28:01.700 [INFO ] default - 21080登录分数9999030
+2024-02-17T16:28:01.700 [INFO ] default - 21080登录钻石10
+2024-02-17T16:28:01.702 [INFO ] default - 完成添加
+2024-02-17T16:32:27.894 [INFO ] default - disconnect:21080
+2024-02-17T16:32:27.895 [INFO ] default - 用户21080删除!
+2024-02-17T16:32:27.895 [INFO ] default - 用户21080没有游戏ID
+2024-02-17T16:32:28.114 [INFO ] default - 成功保存,删除用户21080 socre:9999030 diamond:10
+2024-02-17T16:32:28.813 [INFO ] default - socket comein........
+2024-02-17T16:32:28.819 [INFO ] default - 登录大厅[object Object]
+2024-02-17T16:32:28.834 [INFO ] default - 添加用户:21080
+2024-02-17T16:32:28.837 [INFO ] default - 21080获取道具
+2024-02-17T16:32:28.838 [INFO ] default - 登录成功:[object Object]
+2024-02-17T16:32:28.841 [INFO ] default - 获取积分:[object Object]
+2024-02-17T16:32:28.841 [INFO ] default - 21080添加金币
+2024-02-17T16:32:28.845 [INFO ] default - 21080添加钻石
+2024-02-17T16:32:28.851 [INFO ] default - 21080登录分数9999030
+2024-02-17T16:32:28.851 [INFO ] default - 21080登录钻石10
+2024-02-17T18:53:07.489 [INFO ] default - socket comein........
+2024-02-17T18:53:07.513 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T18:53:07.522 [INFO ] default - 添加用户:20977
+2024-02-17T18:53:07.524 [INFO ] default - 20977获取道具
+2024-02-17T18:53:07.525 [INFO ] default - 登录成功:[object Object]
+2024-02-17T18:53:07.526 [INFO ] default - 获取积分:[object Object]
+2024-02-17T18:53:07.527 [INFO ] default - 20977添加金币
+2024-02-17T18:53:07.528 [INFO ] default - 20977添加钻石
+2024-02-17T18:53:07.531 [INFO ] default - 20977登录分数75851139
+2024-02-17T18:53:07.532 [INFO ] default - 20977登录钻石10
+2024-02-17T18:53:07.534 [INFO ] default - 20977进入游戏15168
+2024-02-17T18:53:07.538 [INFO ] default - disconnect:20977
+2024-02-17T18:53:07.539 [INFO ] default - 用户20977删除!
+2024-02-17T18:54:42.666 [INFO ] default - socket comein........
+2024-02-17T18:54:42.676 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T18:54:42.685 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-17T18:54:43.505 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-17T18:55:03.519 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T18:55:03.520 [INFO ] default - 服务器启动成功!
+2024-02-17T18:55:03.521 [INFO ] default - 更新时间:2017.12.17
+2024-02-17T18:55:03.523 [INFO ] default - start at port:13000
+2024-02-17T18:55:04.645 [INFO ] default - socket comein........
+2024-02-17T18:55:05.301 [INFO ] default - socket comein........
+2024-02-17T18:55:05.315 [INFO ] default - 登录大厅[object Object]
+2024-02-17T18:55:05.333 [INFO ] default - 添加用户:21080
+2024-02-17T18:55:05.336 [INFO ] default - 21080获取道具
+2024-02-17T18:55:05.337 [INFO ] default - 登录成功:[object Object]
+2024-02-17T18:55:05.339 [INFO ] default - 获取积分:[object Object]
+2024-02-17T18:55:05.339 [INFO ] default - 21080添加金币
+2024-02-17T18:55:05.343 [INFO ] default - 21080添加钻石
+2024-02-17T18:55:05.349 [INFO ] default - 21080登录分数9999030
+2024-02-17T18:55:05.349 [INFO ] default - 21080登录钻石10
+2024-02-17T18:55:08.085 [INFO ] default - socket comein........
+2024-02-17T18:55:08.097 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T18:55:08.107 [INFO ] default - 添加用户:20977
+2024-02-17T18:55:08.110 [INFO ] default - 20977获取道具
+2024-02-17T18:55:08.110 [INFO ] default - 登录成功:[object Object]
+2024-02-17T18:55:08.112 [INFO ] default - 获取积分:[object Object]
+2024-02-17T18:55:08.112 [INFO ] default - 20977添加金币
+2024-02-17T18:55:08.115 [INFO ] default - 20977添加钻石
+2024-02-17T18:55:08.119 [INFO ] default - 20977登录分数75851139
+2024-02-17T18:55:08.119 [INFO ] default - 20977登录钻石10
+2024-02-17T18:55:08.124 [INFO ] default - 20977进入游戏15168
+2024-02-17T18:55:08.128 [INFO ] default - disconnect:20977
+2024-02-17T18:55:08.129 [INFO ] default - 用户20977删除!
+2024-02-17T18:58:18.178 [INFO ] default - socket comein........
+2024-02-17T18:58:18.191 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T18:58:18.201 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-17T18:58:18.486 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-17T18:58:42.259 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T18:58:42.260 [INFO ] default - 服务器启动成功!
+2024-02-17T18:58:42.260 [INFO ] default - 更新时间:2017.12.17
+2024-02-17T18:58:42.264 [INFO ] default - start at port:13000
+2024-02-17T18:58:46.308 [INFO ] default - socket comein........
+2024-02-17T18:58:46.321 [INFO ] default - 登录大厅[object Object]
+2024-02-17T18:58:46.337 [INFO ] default - 添加用户:21080
+2024-02-17T18:58:46.341 [INFO ] default - 21080获取道具
+2024-02-17T18:58:46.342 [INFO ] default - 登录成功:[object Object]
+2024-02-17T18:58:46.345 [INFO ] default - 获取积分:[object Object]
+2024-02-17T18:58:46.346 [INFO ] default - 21080添加金币
+2024-02-17T18:58:46.350 [INFO ] default - 21080添加钻石
+2024-02-17T18:58:46.356 [INFO ] default - 21080登录分数9999030
+2024-02-17T18:58:46.357 [INFO ] default - 21080登录钻石10
+2024-02-17T18:58:46.581 [INFO ] default - socket comein........
+2024-02-17T18:58:53.297 [INFO ] default - socket comein........
+2024-02-17T18:58:53.309 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T18:58:53.319 [INFO ] default - 添加用户:20977
+2024-02-17T18:58:53.321 [INFO ] default - 20977获取道具
+2024-02-17T18:58:53.321 [INFO ] default - 登录成功:[object Object]
+2024-02-17T18:58:53.323 [INFO ] default - 获取积分:[object Object]
+2024-02-17T18:58:53.323 [INFO ] default - 20977添加金币
+2024-02-17T18:58:53.325 [INFO ] default - 20977添加钻石
+2024-02-17T18:58:53.329 [INFO ] default - 20977登录分数75851139
+2024-02-17T18:58:53.329 [INFO ] default - 20977登录钻石10
+2024-02-17T18:58:53.333 [INFO ] default - 20977进入游戏15168
+2024-02-17T18:58:53.337 [INFO ] default - disconnect:20977
+2024-02-17T18:58:53.338 [INFO ] default - 用户20977删除!
+2024-02-17T19:14:11.805 [INFO ] default - socket comein........
+2024-02-17T19:14:11.817 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T19:14:11.827 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-17T19:14:12.620 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-17T19:14:20.102 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T19:14:20.103 [INFO ] default - 服务器启动成功!
+2024-02-17T19:14:20.104 [INFO ] default - 更新时间:2017.12.17
+2024-02-17T19:14:20.107 [INFO ] default - start at port:13000
+2024-02-17T19:14:20.352 [INFO ] default - socket comein........
+2024-02-17T19:14:20.358 [INFO ] default - 登录大厅[object Object]
+2024-02-17T19:14:20.371 [INFO ] default - 添加用户:21080
+2024-02-17T19:14:20.373 [INFO ] default - 21080获取道具
+2024-02-17T19:14:20.374 [INFO ] default - 登录成功:[object Object]
+2024-02-17T19:14:20.377 [INFO ] default - 获取积分:[object Object]
+2024-02-17T19:14:20.377 [INFO ] default - 21080添加金币
+2024-02-17T19:14:20.381 [INFO ] default - 21080添加钻石
+2024-02-17T19:14:20.385 [INFO ] default - 21080登录分数9999030
+2024-02-17T19:14:20.386 [INFO ] default - 21080登录钻石10
+2024-02-17T19:14:20.741 [INFO ] default - socket comein........
+2024-02-17T19:14:21.869 [INFO ] default - socket comein........
+2024-02-17T19:14:26.323 [INFO ] default - socket comein........
+2024-02-17T19:14:26.336 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F"}
+2024-02-17T19:14:26.345 [INFO ] default - 添加用户:20977
+2024-02-17T19:14:26.347 [INFO ] default - 20977获取道具
+2024-02-17T19:14:26.347 [INFO ] default - 登录成功:[object Object]
+2024-02-17T19:14:26.349 [INFO ] default - 获取积分:[object Object]
+2024-02-17T19:14:26.349 [INFO ] default - 20977添加金币
+2024-02-17T19:14:26.351 [INFO ] default - 20977添加钻石
+2024-02-17T19:14:26.354 [INFO ] default - 20977登录分数75851139
+2024-02-17T19:14:26.355 [INFO ] default - 20977登录钻石10
+2024-02-17T19:14:26.360 [INFO ] default - 20977进入游戏15168
+2024-02-17T19:14:26.363 [INFO ] default - disconnect:20977
+2024-02-17T19:14:26.363 [INFO ] default - 用户20977删除!
+2024-02-17T20:18:03.896 [INFO ] default - 登录服务器 v2.0.0
+2024-02-17T20:18:03.897 [INFO ] default - 服务器启动成功!
+2024-02-17T20:18:03.898 [INFO ] default - 更新时间:2017.12.17
+2024-02-17T20:18:03.900 [INFO ] default - start at port:13000
+2024-02-17T20:18:05.304 [INFO ] default - socket comein........
+2024-02-17T20:18:05.312 [INFO ] default - 登录大厅[object Object]
+2024-02-17T20:18:05.327 [INFO ] default - 添加用户:21080
+2024-02-17T20:18:05.331 [INFO ] default - 21080获取道具
+2024-02-17T20:18:05.331 [INFO ] default - 登录成功:[object Object]
+2024-02-17T20:18:05.334 [INFO ] default - 获取积分:[object Object]
+2024-02-17T20:18:05.334 [INFO ] default - 21080添加金币
+2024-02-17T20:18:05.337 [INFO ] default - 21080添加钻石
+2024-02-17T20:18:05.342 [INFO ] default - 21080登录分数9999030
+2024-02-17T20:18:05.342 [INFO ] default - 21080登录钻石10
+2024-02-17T20:18:08.982 [INFO ] default - socket comein........

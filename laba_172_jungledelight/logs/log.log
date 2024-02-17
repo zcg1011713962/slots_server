@@ -1,0 +1,297 @@
+2024-02-06T17:13:11.193 [INFO ] default - 添加库存:38当前库存38
+2024-02-06T17:16:33.076 [INFO ] default - 添加库存:38当前库存38
+2024-02-06T17:18:22.572 [INFO ] default - 添加库存:38当前库存38
+2024-02-06T17:18:22.573 [INFO ] default - 添加奖池:2
+2024-02-06T17:18:29.348 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:18:29.349 [ERROR] default - ReferenceError: chunkArray is not defined
+    at Game.lottery (D:\coding\game_server\laba_172_jungledelight\class\game.js:348:36)
+    at D:\coding\game_server\laba_172_jungledelight\app.js:186:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-02-06T17:19:16.550 [INFO ] default - 添加库存:38当前库存76
+2024-02-06T17:19:16.551 [INFO ] default - 添加奖池:2
+2024-02-06T17:19:16.552 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:19:16.552 [ERROR] default - ReferenceError: chunkArray is not defined
+    at Game.lottery (D:\coding\game_server\laba_172_jungledelight\class\game.js:348:36)
+    at D:\coding\game_server\laba_172_jungledelight\app.js:186:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-02-06T17:23:31.860 [INFO ] default - 添加库存:38当前库存38
+2024-02-06T17:26:21.977 [INFO ] default - 添加库存:38当前库存38
+2024-02-06T17:26:21.981 [INFO ] default - 添加奖池:2
+2024-02-06T17:26:21.983 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:26:21.986 [INFO ] default - 图案排列结果
+2024-02-06T17:26:21.987 [INFO ] default - [ 4, 5, 0 ]
+2024-02-06T17:26:21.988 [INFO ] default - [ 1, 4, 2 ]
+2024-02-06T17:26:21.989 [INFO ] default - [ 3, 1, 8 ]
+2024-02-06T17:26:21.989 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:100
+2024-02-06T17:27:57.541 [INFO ] default - 添加库存:38当前库存76
+2024-02-06T17:30:58.077 [INFO ] default - 添加库存:38当前库存100038
+2024-02-06T17:34:00.478 [INFO ] default - 添加库存:38当前库存100038
+2024-02-06T17:34:00.480 [INFO ] default - 添加奖池:2
+2024-02-06T17:34:00.480 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:34:03.533 [INFO ] default - 减少库存:48库存100038
+2024-02-06T17:34:03.534 [INFO ] default - 减少奖池:0
+2024-02-06T17:34:03.535 [INFO ] default - 图案排列结果
+2024-02-06T17:34:03.535 [INFO ] default - [ 0, 3, 9, 1, 2 ]
+2024-02-06T17:34:03.536 [INFO ] default - [ 2, 2, 2, 4, 2 ]
+2024-02-06T17:34:03.536 [INFO ] default - [ 2, 0, 5, 3, 5 ]
+2024-02-06T17:34:03.537 [INFO ] default - undefined
+2024-02-06T17:34:03.537 [INFO ] default - undefined
+2024-02-06T17:34:03.537 [INFO ] default - 下注:40赢:48获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:34:39.361 [INFO ] default - 添加库存:38当前库存100076
+2024-02-06T17:34:39.362 [INFO ] default - 添加奖池:2
+2024-02-06T17:34:39.363 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:34:39.363 [INFO ] default - 减少库存:44库存100076
+2024-02-06T17:34:39.365 [INFO ] default - 减少奖池:0
+2024-02-06T17:34:39.366 [INFO ] default - 图案排列结果
+2024-02-06T17:34:39.366 [INFO ] default - [ 2, 1, 2, 1, 1 ]
+2024-02-06T17:34:39.367 [INFO ] default - [ 0, 2, 3, 3, 0 ]
+2024-02-06T17:34:39.367 [INFO ] default - [ 3, 3, 5, 1, 2 ]
+2024-02-06T17:34:39.368 [INFO ] default - undefined
+2024-02-06T17:34:39.369 [INFO ] default - undefined
+2024-02-06T17:34:39.369 [INFO ] default - 下注:40赢:44获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:35:10.454 [INFO ] default - 添加库存:38当前库存100114
+2024-02-06T17:35:10.455 [INFO ] default - 添加奖池:2
+2024-02-06T17:35:10.455 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:35:10.456 [INFO ] default - 图案排列结果
+2024-02-06T17:35:10.457 [INFO ] default - [ 0, 4, 0, 0, 0 ]
+2024-02-06T17:35:10.457 [INFO ] default - [ 2, 3, 5, 3, 5 ]
+2024-02-06T17:35:10.458 [INFO ] default - [ 0, 4, 5, 4, 1 ]
+2024-02-06T17:35:10.459 [INFO ] default - undefined
+2024-02-06T17:35:10.460 [INFO ] default - undefined
+2024-02-06T17:35:10.460 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:35:18.867 [INFO ] default - 添加库存:38当前库存100152
+2024-02-06T17:35:18.868 [INFO ] default - 添加奖池:2
+2024-02-06T17:35:18.868 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:35:18.868 [INFO ] default - 减少库存:30库存100152
+2024-02-06T17:35:18.869 [INFO ] default - 减少奖池:0
+2024-02-06T17:35:18.869 [INFO ] default - 图案排列结果
+2024-02-06T17:35:18.869 [INFO ] default - [ 3, 3, 1, 0, 6 ]
+2024-02-06T17:35:18.870 [INFO ] default - [ 1, 1, 5, 3, 5 ]
+2024-02-06T17:35:18.870 [INFO ] default - [ 2, 1, 1, 2, 2 ]
+2024-02-06T17:35:18.870 [INFO ] default - undefined
+2024-02-06T17:35:18.871 [INFO ] default - undefined
+2024-02-06T17:35:18.871 [INFO ] default - 下注:40赢:30获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:35:34.659 [INFO ] default - 添加库存:38当前库存100190
+2024-02-06T17:35:34.659 [INFO ] default - 添加奖池:2
+2024-02-06T17:35:34.659 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:35:34.660 [INFO ] default - 减少库存:1200库存100190
+2024-02-06T17:35:34.660 [INFO ] default - 减少奖池:0
+2024-02-06T17:35:34.661 [INFO ] default - 图案排列结果
+2024-02-06T17:35:34.661 [INFO ] default - [ 3, 4, 1, 0, 6 ]
+2024-02-06T17:35:34.661 [INFO ] default - [ 5, 9, 5, 5, 5 ]
+2024-02-06T17:35:34.662 [INFO ] default - [ 0, 0, 5, 3, 2 ]
+2024-02-06T17:35:34.662 [INFO ] default - undefined
+2024-02-06T17:35:34.662 [INFO ] default - undefined
+2024-02-06T17:35:34.663 [INFO ] default - 下注:40赢:1200获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:35:56.789 [INFO ] default - 添加库存:38当前库存100228
+2024-02-06T17:35:56.790 [INFO ] default - 添加奖池:2
+2024-02-06T17:35:56.790 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:35:56.791 [INFO ] default - 图案排列结果
+2024-02-06T17:35:56.791 [INFO ] default - [ 2, 3, 2, 3, 2 ]
+2024-02-06T17:35:56.791 [INFO ] default - [ 1, 3, 0, 0, 2 ]
+2024-02-06T17:35:56.792 [INFO ] default - [ 2, 0, 6, 3, 4 ]
+2024-02-06T17:35:56.792 [INFO ] default - undefined
+2024-02-06T17:35:56.792 [INFO ] default - undefined
+2024-02-06T17:35:56.793 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:36:05.972 [INFO ] default - 添加库存:38当前库存100266
+2024-02-06T17:36:05.974 [INFO ] default - 添加奖池:2
+2024-02-06T17:36:05.974 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:36:05.975 [INFO ] default - 图案排列结果
+2024-02-06T17:36:05.976 [INFO ] default - [ 0, 3, 0, 9, 4 ]
+2024-02-06T17:36:05.977 [INFO ] default - [ 2, 1, 0, 5, 1 ]
+2024-02-06T17:36:05.977 [INFO ] default - [ 1, 0, 8, 0, 2 ]
+2024-02-06T17:36:05.978 [INFO ] default - undefined
+2024-02-06T17:36:05.978 [INFO ] default - undefined
+2024-02-06T17:36:05.979 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:36:10.421 [INFO ] default - 添加库存:38当前库存100304
+2024-02-06T17:36:10.422 [INFO ] default - 添加奖池:2
+2024-02-06T17:36:10.423 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:36:10.423 [INFO ] default - 减少库存:10库存100304
+2024-02-06T17:36:10.423 [INFO ] default - 减少奖池:0
+2024-02-06T17:36:10.424 [INFO ] default - 图案排列结果
+2024-02-06T17:36:10.425 [INFO ] default - [ 4, 1, 8, 3, 2 ]
+2024-02-06T17:36:10.425 [INFO ] default - [ 0, 0, 5, 1, 0 ]
+2024-02-06T17:36:10.426 [INFO ] default - [ 3, 2, 0, 5, 0 ]
+2024-02-06T17:36:10.426 [INFO ] default - undefined
+2024-02-06T17:36:10.427 [INFO ] default - undefined
+2024-02-06T17:36:10.427 [INFO ] default - 下注:40赢:10获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:38:50.662 [INFO ] default - 添加库存:38当前库存100342
+2024-02-06T17:38:50.663 [INFO ] default - 添加奖池:2
+2024-02-06T17:38:50.663 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:38:50.665 [INFO ] default - 图案排列结果
+2024-02-06T17:38:50.665 [INFO ] default - [ 1, 1, 5, 3, 4 ]
+2024-02-06T17:38:50.666 [INFO ] default - [ 2, 0, 3, 0, 4 ]
+2024-02-06T17:38:50.667 [INFO ] default - [ 2, 3, 1, 4, 3 ]
+2024-02-06T17:38:50.667 [INFO ] default - undefined
+2024-02-06T17:38:50.668 [INFO ] default - undefined
+2024-02-06T17:38:50.668 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:38:54.238 [INFO ] default - 添加库存:38当前库存100380
+2024-02-06T17:38:54.239 [INFO ] default - 添加奖池:2
+2024-02-06T17:38:54.240 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:38:54.240 [INFO ] default - 减少库存:24库存100380
+2024-02-06T17:38:54.241 [INFO ] default - 减少奖池:0
+2024-02-06T17:38:54.242 [INFO ] default - 图案排列结果
+2024-02-06T17:38:54.243 [INFO ] default - [ 3, 0, 2, 0, 1 ]
+2024-02-06T17:38:54.244 [INFO ] default - [ 2, 2, 3, 4, 5 ]
+2024-02-06T17:38:54.245 [INFO ] default - [ 0, 3, 2, 5, 1 ]
+2024-02-06T17:38:54.245 [INFO ] default - undefined
+2024-02-06T17:38:54.246 [INFO ] default - undefined
+2024-02-06T17:38:54.246 [INFO ] default - 下注:40赢:24获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:38:57.173 [INFO ] default - 添加库存:38当前库存100418
+2024-02-06T17:38:57.174 [INFO ] default - 添加奖池:2
+2024-02-06T17:38:57.174 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:38:57.175 [INFO ] default - 图案排列结果
+2024-02-06T17:38:57.176 [INFO ] default - [ 0, 0, 3, 1, 2 ]
+2024-02-06T17:38:57.176 [INFO ] default - [ 5, 1, 2, 0, 0 ]
+2024-02-06T17:38:57.177 [INFO ] default - [ 2, 4, 2, 4, 0 ]
+2024-02-06T17:38:57.178 [INFO ] default - undefined
+2024-02-06T17:38:57.178 [INFO ] default - undefined
+2024-02-06T17:38:57.179 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:39:55.438 [INFO ] default - 添加库存:38当前库存100456
+2024-02-06T17:39:55.439 [INFO ] default - 添加奖池:2
+2024-02-06T17:39:55.439 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:39:55.440 [INFO ] default - 图案排列结果
+2024-02-06T17:39:55.440 [INFO ] default - [ 2, 0, 3, 9, 0 ]
+2024-02-06T17:39:55.441 [INFO ] default - [ 0, 1, 5, 1, 5 ]
+2024-02-06T17:39:55.441 [INFO ] default - [ 2, 1, 2, 2, 3 ]
+2024-02-06T17:39:55.442 [INFO ] default - undefined
+2024-02-06T17:39:55.442 [INFO ] default - undefined
+2024-02-06T17:39:55.442 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:39:59.084 [INFO ] default - 添加库存:38当前库存100494
+2024-02-06T17:39:59.085 [INFO ] default - 添加奖池:2
+2024-02-06T17:39:59.086 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:39:59.087 [INFO ] default - 图案排列结果
+2024-02-06T17:39:59.088 [INFO ] default - [ 3, 5, 3, 1, 5 ]
+2024-02-06T17:39:59.088 [INFO ] default - [ 0, 4, 5, 3, 0 ]
+2024-02-06T17:39:59.089 [INFO ] default - [ 2, 1, 5, 3, 0 ]
+2024-02-06T17:39:59.089 [INFO ] default - undefined
+2024-02-06T17:39:59.090 [INFO ] default - undefined
+2024-02-06T17:39:59.090 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:40:02.524 [INFO ] default - 添加库存:38当前库存100532
+2024-02-06T17:40:02.525 [INFO ] default - 添加奖池:2
+2024-02-06T17:40:02.525 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:40:02.526 [INFO ] default - 图案排列结果
+2024-02-06T17:40:02.526 [INFO ] default - [ 1, 2, 4, 3, 0 ]
+2024-02-06T17:40:02.527 [INFO ] default - [ 2, 1, 4, 5, 0 ]
+2024-02-06T17:40:02.527 [INFO ] default - [ 1, 5, 3, 2, 5 ]
+2024-02-06T17:40:02.528 [INFO ] default - undefined
+2024-02-06T17:40:02.528 [INFO ] default - undefined
+2024-02-06T17:40:02.529 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:40:06.022 [INFO ] default - 添加库存:38当前库存100570
+2024-02-06T17:40:06.023 [INFO ] default - 添加奖池:2
+2024-02-06T17:40:06.023 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:40:06.025 [INFO ] default - 图案排列结果
+2024-02-06T17:40:06.025 [INFO ] default - [ 4, 2, 5, 4, 3 ]
+2024-02-06T17:40:06.026 [INFO ] default - [ 1, 1, 2, 1, 3 ]
+2024-02-06T17:40:06.027 [INFO ] default - [ 2, 8, 3, 5, 2 ]
+2024-02-06T17:40:06.027 [INFO ] default - undefined
+2024-02-06T17:40:06.028 [INFO ] default - undefined
+2024-02-06T17:40:06.028 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:40:09.262 [INFO ] default - 添加库存:38当前库存100608
+2024-02-06T17:40:09.263 [INFO ] default - 添加奖池:2
+2024-02-06T17:40:09.264 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:40:09.265 [INFO ] default - 减少库存:20库存100608
+2024-02-06T17:40:09.266 [INFO ] default - 减少奖池:0
+2024-02-06T17:40:09.267 [INFO ] default - 图案排列结果
+2024-02-06T17:40:09.268 [INFO ] default - [ 0, 4, 1, 2, 5 ]
+2024-02-06T17:40:09.269 [INFO ] default - [ 5, 0, 0, 2, 8 ]
+2024-02-06T17:40:09.270 [INFO ] default - [ 0, 3, 1, 2, 2 ]
+2024-02-06T17:40:09.271 [INFO ] default - undefined
+2024-02-06T17:40:09.272 [INFO ] default - undefined
+2024-02-06T17:40:09.273 [INFO ] default - 下注:40赢:20获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:40:12.855 [INFO ] default - 添加库存:38当前库存100646
+2024-02-06T17:40:12.857 [INFO ] default - 添加奖池:2
+2024-02-06T17:40:12.857 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:40:12.858 [INFO ] default - 减少库存:10库存100646
+2024-02-06T17:40:12.859 [INFO ] default - 减少奖池:0
+2024-02-06T17:40:12.861 [INFO ] default - 图案排列结果
+2024-02-06T17:40:12.862 [INFO ] default - [ 2, 3, 3, 5, 1 ]
+2024-02-06T17:40:12.863 [INFO ] default - [ 2, 1, 6, 2, 2 ]
+2024-02-06T17:40:12.864 [INFO ] default - [ 1, 2, 1, 3, 2 ]
+2024-02-06T17:40:12.865 [INFO ] default - undefined
+2024-02-06T17:40:12.865 [INFO ] default - undefined
+2024-02-06T17:40:12.866 [INFO ] default - 下注:40赢:10获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:40:43.140 [INFO ] default - 添加库存:38当前库存100684
+2024-02-06T17:40:43.141 [INFO ] default - 添加奖池:2
+2024-02-06T17:40:43.142 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:40:43.143 [INFO ] default - 图案排列结果
+2024-02-06T17:40:43.143 [INFO ] default - [ 2, 0, 2, 3, 0 ]
+2024-02-06T17:40:43.144 [INFO ] default - [ 3, 1, 6, 0, 2 ]
+2024-02-06T17:40:43.144 [INFO ] default - [ 4, 0, 0, 0, 2 ]
+2024-02-06T17:40:43.145 [INFO ] default - undefined
+2024-02-06T17:40:43.145 [INFO ] default - undefined
+2024-02-06T17:40:43.145 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:41:20.510 [INFO ] default - 添加库存:38当前库存100722
+2024-02-06T17:41:20.511 [INFO ] default - 添加奖池:2
+2024-02-06T17:41:20.511 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:41:20.513 [INFO ] default - 图案排列结果
+2024-02-06T17:41:20.513 [INFO ] default - [ 1, 4, 3, 8, 1 ]
+2024-02-06T17:41:20.513 [INFO ] default - [ 3, 0, 0, 1, 3 ]
+2024-02-06T17:41:20.514 [INFO ] default - [ 3, 0, 8, 1, 5 ]
+2024-02-06T17:41:20.514 [INFO ] default - undefined
+2024-02-06T17:41:20.515 [INFO ] default - undefined
+2024-02-06T17:41:20.516 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:41:24.165 [INFO ] default - 添加库存:38当前库存100760
+2024-02-06T17:41:24.166 [INFO ] default - 添加奖池:2
+2024-02-06T17:41:24.167 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:41:24.169 [INFO ] default - 图案排列结果
+2024-02-06T17:41:24.170 [INFO ] default - [ 1, 5, 1, 4, 1 ]
+2024-02-06T17:41:24.171 [INFO ] default - [ 3, 0, 5, 5, 3 ]
+2024-02-06T17:41:24.171 [INFO ] default - [ 3, 3, 5, 4, 6 ]
+2024-02-06T17:41:24.172 [INFO ] default - undefined
+2024-02-06T17:41:24.173 [INFO ] default - undefined
+2024-02-06T17:41:24.174 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:41:29.188 [INFO ] default - 添加库存:38当前库存100798
+2024-02-06T17:41:29.189 [INFO ] default - 添加奖池:2
+2024-02-06T17:41:29.190 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:41:29.191 [INFO ] default - 减少库存:60库存100798
+2024-02-06T17:41:29.191 [INFO ] default - 减少奖池:0
+2024-02-06T17:41:29.193 [INFO ] default - 图案排列结果
+2024-02-06T17:41:29.194 [INFO ] default - [ 0, 3, 0, 0, 4 ]
+2024-02-06T17:41:29.195 [INFO ] default - [ 4, 5, 4, 1, 0 ]
+2024-02-06T17:41:29.196 [INFO ] default - [ 4, 4, 1, 1, 1 ]
+2024-02-06T17:41:29.197 [INFO ] default - undefined
+2024-02-06T17:41:29.197 [INFO ] default - undefined
+2024-02-06T17:41:29.198 [INFO ] default - 下注:40赢:60获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:42:41.766 [INFO ] default - 添加库存:38当前库存100836
+2024-02-06T17:42:41.768 [INFO ] default - 添加奖池:2
+2024-02-06T17:42:41.768 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:42:41.770 [INFO ] default - 图案排列结果
+2024-02-06T17:42:41.770 [INFO ] default - [ 3, 3, 1, 0, 1 ]
+2024-02-06T17:42:41.771 [INFO ] default - [ 4, 2, 2, 2, 2 ]
+2024-02-06T17:42:41.771 [INFO ] default - [ 1, 5, 0, 1, 6 ]
+2024-02-06T17:42:41.772 [INFO ] default - undefined
+2024-02-06T17:42:41.773 [INFO ] default - undefined
+2024-02-06T17:42:41.774 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:42:48.685 [INFO ] default - 添加库存:38当前库存100874
+2024-02-06T17:42:48.687 [INFO ] default - 添加奖池:2
+2024-02-06T17:42:48.687 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:42:48.689 [INFO ] default - 图案排列结果
+2024-02-06T17:42:48.689 [INFO ] default - [ 5, 0, 0, 0, 4 ]
+2024-02-06T17:42:48.690 [INFO ] default - [ 1, 9, 0, 1, 6 ]
+2024-02-06T17:42:48.690 [INFO ] default - [ 2, 3, 0, 0, 1 ]
+2024-02-06T17:42:48.691 [INFO ] default - undefined
+2024-02-06T17:42:48.691 [INFO ] default - undefined
+2024-02-06T17:42:48.692 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:42:53.773 [INFO ] default - 添加库存:38当前库存100912
+2024-02-06T17:42:53.775 [INFO ] default - 添加奖池:2
+2024-02-06T17:42:53.775 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:42:53.776 [INFO ] default - 减少库存:10库存100912
+2024-02-06T17:42:53.776 [INFO ] default - 减少奖池:0
+2024-02-06T17:42:53.777 [INFO ] default - 图案排列结果
+2024-02-06T17:42:53.778 [INFO ] default - [ 1, 3, 4, 6, 4 ]
+2024-02-06T17:42:53.778 [INFO ] default - [ 3, 0, 2, 5, 5 ]
+2024-02-06T17:42:53.779 [INFO ] default - [ 0, 4, 9, 4, 2 ]
+2024-02-06T17:42:53.779 [INFO ] default - undefined
+2024-02-06T17:42:53.780 [INFO ] default - undefined
+2024-02-06T17:42:53.780 [INFO ] default - 下注:40赢:10获得jackpot:0source_rtp:0expectRTP:80
+2024-02-06T17:47:51.718 [INFO ] default - 添加库存:38当前库存100950
+2024-02-06T17:47:51.718 [INFO ] default - 添加奖池:2
+2024-02-06T17:47:51.719 [INFO ] default - 配牌器开关:0牌:
+2024-02-06T17:47:51.719 [INFO ] default - 图案排列结果
+2024-02-06T17:47:51.719 [INFO ] default - [ 0, 4, 4, 9, 2 ]
+2024-02-06T17:47:51.720 [INFO ] default - [ 3, 4, 6, 3, 9 ]
+2024-02-06T17:47:51.720 [INFO ] default - [ 1, 2, 1, 9, 2 ]
+2024-02-06T17:47:51.721 [INFO ] default - undefined
+2024-02-06T17:47:51.721 [INFO ] default - undefined
+2024-02-06T17:47:51.721 [INFO ] default - 下注:40赢:0获得jackpot:0source_rtp:0expectRTP:80
