@@ -13,9 +13,8 @@ const  Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
 
+
 var Csocket = Cio(Urls.hall_url);
-
-
 Csocket.on('disconnect', function (data) {
     console.log("登录服务器被断开")
 });

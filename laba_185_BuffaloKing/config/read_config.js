@@ -36,7 +36,7 @@ const readIniFile = function () {
         this.free_card = config['图案信息'].icon_s_type_free ? JSON.parse(config['图案信息'].icon_s_type_free) : null;
 
         // 免费次数
-        this.free_times = config['图案信息'].icon_free_times ? JSON.parse(config['图案信息'].icon_free_times) : null;
+        this.free_times = JSON.parse(config['图案信息'].icon_free_times);
 
         // 图案权重数组
         const weight_string = Object.keys(config['图案权重'])
@@ -94,7 +94,7 @@ const readIniFile = function () {
     if (conf) {
         return {getInstand: conf};
     } else {
-        conf = new Config("digger_config.ini");
+        conf = new Config("buffalo_king_config.ini");
         return {getInstand: conf};
     }
 

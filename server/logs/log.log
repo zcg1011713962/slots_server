@@ -7895,3 +7895,705 @@
 2024-02-21T11:45:52.656 [INFO ] default - socket comein........
 2024-02-21T11:45:52.664 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
 2024-02-21T11:45:52.665 [INFO ] default - 游戏Id:15168
+2024-02-21T12:13:47.669 [INFO ] default - socket comein........
+2024-02-21T12:13:47.687 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
+2024-02-21T12:13:47.688 [INFO ] default - 游戏Id:15168
+2024-02-21T12:14:11.828 [INFO ] default - socket comein........
+2024-02-21T12:14:11.833 [INFO ] default - 登录大厅[object Object]
+2024-02-21T12:14:11.840 [INFO ] default - 添加用户:21084
+2024-02-21T12:14:11.843 [INFO ] default - 21084获取道具
+2024-02-21T12:14:11.844 [INFO ] default - 登录成功:[object Object]
+2024-02-21T12:14:11.845 [INFO ] default - 获取积分:[object Object]
+2024-02-21T12:14:11.846 [INFO ] default - 21084添加金币
+2024-02-21T12:14:11.848 [INFO ] default - 21084添加钻石
+2024-02-21T12:14:11.852 [INFO ] default - 21084登录分数10071955
+2024-02-21T12:14:11.852 [INFO ] default - 21084登录钻石100
+2024-02-21T12:16:33.483 [INFO ] default - disconnect:21084
+2024-02-21T12:16:33.484 [INFO ] default - 用户21084删除!
+2024-02-21T12:16:33.485 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T12:16:33.874 [INFO ] default - 成功保存,删除用户21084 socre:10071955 diamond:100
+2024-02-21T12:52:36.111 [INFO ] default - socket comein........
+2024-02-21T12:52:36.118 [INFO ] default - 登录大厅[object Object]
+2024-02-21T12:52:36.125 [INFO ] default - 添加用户:21084
+2024-02-21T12:52:36.138 [INFO ] default - 21084获取道具
+2024-02-21T12:52:36.139 [INFO ] default - 登录成功:[object Object]
+2024-02-21T12:52:36.142 [INFO ] default - 获取积分:[object Object]
+2024-02-21T12:52:36.143 [INFO ] default - 21084添加金币
+2024-02-21T12:52:36.146 [INFO ] default - 21084添加钻石
+2024-02-21T12:52:36.153 [INFO ] default - 21084登录分数10071955
+2024-02-21T12:52:36.153 [INFO ] default - 21084登录钻石100
+2024-02-21T12:53:57.295 [INFO ] default - socket comein........
+2024-02-21T12:53:57.325 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T12:53:57.326 [INFO ] default - 游戏Id:15188
+2024-02-21T12:54:09.759 [INFO ] default - 21084进入游戏15188
+2024-02-21T12:54:09.764 [INFO ] default - disconnect:21084
+2024-02-21T12:54:09.764 [INFO ] default - 用户21084删除!
+2024-02-21T14:42:54.688 [INFO ] default - socket comein........
+2024-02-21T14:42:54.715 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T14:42:54.716 [INFO ] default - 游戏Id:15188
+2024-02-21T14:42:55.607 [INFO ] default - 21084进入游戏15188
+2024-02-21T14:43:04.177 [INFO ] default - userDisconnect:
+2024-02-21T14:43:04.177 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10071955,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-21T14:43:04.178 [INFO ] default - 21084清除游戏ID
+2024-02-21T14:43:04.178 [INFO ] default - 游戏ID0
+2024-02-21T14:43:04.179 [INFO ] default - 用户21084删除!
+2024-02-21T14:43:04.179 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T14:43:05.055 [INFO ] default - socket comein........
+2024-02-21T14:43:05.059 [INFO ] default - 登录大厅[object Object]
+2024-02-21T14:43:05.062 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-21T14:43:05.161 [INFO ] default - 21084用户只在登录服务器被强制下线
+2024-02-21T14:43:05.167 [INFO ] default - 成功保存,删除用户21084 socre:10071955 diamond:100
+2024-02-21T14:43:06.174 [INFO ] default - 21084完全下线了
+2024-02-21T14:43:06.178 [INFO ] default - 添加用户:21084
+2024-02-21T14:43:06.181 [INFO ] default - 21084获取道具
+2024-02-21T14:43:06.182 [INFO ] default - 登录成功:[object Object]
+2024-02-21T14:43:06.183 [INFO ] default - 获取积分:[object Object]
+2024-02-21T14:43:06.183 [INFO ] default - 21084添加金币
+2024-02-21T14:43:06.185 [INFO ] default - 21084添加钻石
+2024-02-21T14:43:06.188 [INFO ] default - 21084登录分数10071955
+2024-02-21T14:43:06.188 [INFO ] default - 21084登录钻石100
+2024-02-21T14:43:06.190 [INFO ] default - 完成添加
+2024-02-21T14:43:19.236 [INFO ] default - 21084进入游戏15188
+2024-02-21T14:43:19.242 [INFO ] default - disconnect:21084
+2024-02-21T14:43:19.243 [INFO ] default - 用户21084删除!
+2024-02-21T14:43:41.365 [INFO ] default - socket comein........
+2024-02-21T14:43:41.386 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T14:43:41.386 [INFO ] default - 游戏Id:15188
+2024-02-21T14:43:43.535 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:05:38.158 [INFO ] default - socket comein........
+2024-02-21T15:05:38.186 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:05:38.188 [INFO ] default - 游戏Id:15188
+2024-02-21T15:05:38.189 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:05:42.793 [INFO ] default - userDisconnect:
+2024-02-21T15:05:42.794 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10071955,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-21T15:05:42.794 [INFO ] default - 21084清除游戏ID
+2024-02-21T15:05:42.794 [INFO ] default - 游戏ID0
+2024-02-21T15:05:42.795 [INFO ] default - 用户21084删除!
+2024-02-21T15:05:42.795 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T15:05:42.991 [INFO ] default - 成功保存,删除用户21084 socre:10071955 diamond:100
+2024-02-21T15:05:43.697 [INFO ] default - socket comein........
+2024-02-21T15:05:43.702 [INFO ] default - 登录大厅[object Object]
+2024-02-21T15:05:43.705 [INFO ] default - 添加用户:21084
+2024-02-21T15:05:43.707 [INFO ] default - 21084获取道具
+2024-02-21T15:05:43.708 [INFO ] default - 登录成功:[object Object]
+2024-02-21T15:05:43.709 [INFO ] default - 获取积分:[object Object]
+2024-02-21T15:05:43.709 [INFO ] default - 21084添加金币
+2024-02-21T15:05:43.711 [INFO ] default - 21084添加钻石
+2024-02-21T15:05:43.714 [INFO ] default - 21084登录分数10071955
+2024-02-21T15:05:43.714 [INFO ] default - 21084登录钻石100
+2024-02-21T15:05:52.611 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:05:52.619 [INFO ] default - disconnect:21084
+2024-02-21T15:05:52.620 [INFO ] default - 用户21084删除!
+2024-02-21T15:07:45.384 [INFO ] default - socket comein........
+2024-02-21T15:07:45.405 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:07:45.406 [INFO ] default - 游戏Id:15188
+2024-02-21T15:07:45.794 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:08:38.677 [INFO ] default - socket comein........
+2024-02-21T15:08:38.696 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:08:38.697 [INFO ] default - 游戏Id:15188
+2024-02-21T15:08:38.848 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:09:44.555 [INFO ] default - socket comein........
+2024-02-21T15:09:44.578 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:09:44.578 [INFO ] default - 游戏Id:15188
+2024-02-21T15:09:44.717 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:10:21.124 [INFO ] default - socket comein........
+2024-02-21T15:10:21.152 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:10:21.153 [INFO ] default - 游戏Id:15188
+2024-02-21T15:10:21.443 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:10:59.785 [INFO ] default - socket comein........
+2024-02-21T15:10:59.807 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:10:59.807 [INFO ] default - 游戏Id:15188
+2024-02-21T15:11:00.426 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:11:58.264 [INFO ] default - socket comein........
+2024-02-21T15:11:58.284 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:11:58.285 [INFO ] default - 游戏Id:15188
+2024-02-21T15:11:59.199 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:13:47.032 [INFO ] default - socket comein........
+2024-02-21T15:13:47.051 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:13:47.051 [INFO ] default - 游戏Id:15188
+2024-02-21T15:13:47.197 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:16:39.247 [INFO ] default - socket comein........
+2024-02-21T15:16:39.275 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-21T15:16:39.276 [INFO ] default - 游戏Id:15188
+2024-02-21T15:16:39.278 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:16:43.693 [INFO ] default - userDisconnect:
+2024-02-21T15:16:43.694 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10071955,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-21T15:16:43.694 [INFO ] default - 21084清除游戏ID
+2024-02-21T15:16:43.695 [INFO ] default - 游戏ID0
+2024-02-21T15:16:43.695 [INFO ] default - 用户21084删除!
+2024-02-21T15:16:43.696 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T15:16:43.814 [INFO ] default - 成功保存,删除用户21084 socre:10071955 diamond:100
+2024-02-21T15:16:44.545 [INFO ] default - socket comein........
+2024-02-21T15:16:44.549 [INFO ] default - 登录大厅[object Object]
+2024-02-21T15:16:44.552 [INFO ] default - 添加用户:21084
+2024-02-21T15:16:44.553 [INFO ] default - 21084获取道具
+2024-02-21T15:16:44.554 [INFO ] default - 登录成功:[object Object]
+2024-02-21T15:16:44.555 [INFO ] default - 获取积分:[object Object]
+2024-02-21T15:16:44.556 [INFO ] default - 21084添加金币
+2024-02-21T15:16:44.558 [INFO ] default - 21084添加钻石
+2024-02-21T15:16:44.561 [INFO ] default - 21084登录分数10071955
+2024-02-21T15:16:44.561 [INFO ] default - 21084登录钻石100
+2024-02-21T15:16:54.541 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:16:54.547 [INFO ] default - disconnect:21084
+2024-02-21T15:16:54.548 [INFO ] default - 用户21084删除!
+2024-02-21T15:17:21.216 [INFO ] default - userDisconnect:
+2024-02-21T15:17:21.217 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072655,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-21T15:17:21.218 [INFO ] default - 21084清除游戏ID
+2024-02-21T15:17:21.218 [INFO ] default - 游戏ID0
+2024-02-21T15:17:21.218 [INFO ] default - 用户21084删除!
+2024-02-21T15:17:21.219 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T15:17:22.098 [INFO ] default - socket comein........
+2024-02-21T15:17:22.102 [INFO ] default - 登录大厅[object Object]
+2024-02-21T15:17:22.105 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-21T15:17:22.145 [INFO ] default - 21084用户只在登录服务器被强制下线
+2024-02-21T15:17:22.149 [INFO ] default - 成功保存,删除用户21084 socre:10072655 diamond:100
+2024-02-21T15:17:23.150 [INFO ] default - 21084完全下线了
+2024-02-21T15:17:23.155 [INFO ] default - 添加用户:21084
+2024-02-21T15:17:23.158 [INFO ] default - 21084获取道具
+2024-02-21T15:17:23.159 [INFO ] default - 登录成功:[object Object]
+2024-02-21T15:17:23.160 [INFO ] default - 获取积分:[object Object]
+2024-02-21T15:17:23.161 [INFO ] default - 21084添加金币
+2024-02-21T15:17:23.162 [INFO ] default - 21084添加钻石
+2024-02-21T15:17:23.165 [INFO ] default - 21084登录分数10072655
+2024-02-21T15:17:23.166 [INFO ] default - 21084登录钻石100
+2024-02-21T15:17:23.167 [INFO ] default - 完成添加
+2024-02-21T15:18:10.309 [INFO ] default - socket comein........
+2024-02-21T15:18:10.333 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:18:10.333 [INFO ] default - 游戏Id:15187
+2024-02-21T15:18:43.875 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:18:43.881 [INFO ] default - disconnect:21084
+2024-02-21T15:18:43.882 [INFO ] default - 用户21084删除!
+2024-02-21T15:22:37.394 [INFO ] default - userDisconnect:
+2024-02-21T15:22:37.394 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072555,
+  gameId: 15187,
+  nolog: true
+}
+2024-02-21T15:22:37.395 [INFO ] default - 21084清除游戏ID
+2024-02-21T15:22:37.395 [INFO ] default - 游戏ID0
+2024-02-21T15:22:37.395 [INFO ] default - 用户21084删除!
+2024-02-21T15:22:37.396 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T15:22:37.797 [INFO ] default - 成功保存,删除用户21084 socre:10072555 diamond:100
+2024-02-21T15:22:38.262 [INFO ] default - socket comein........
+2024-02-21T15:22:38.270 [INFO ] default - 登录大厅[object Object]
+2024-02-21T15:22:38.273 [INFO ] default - 添加用户:21084
+2024-02-21T15:22:38.274 [INFO ] default - 21084获取道具
+2024-02-21T15:22:38.275 [INFO ] default - 登录成功:[object Object]
+2024-02-21T15:22:38.276 [INFO ] default - 获取积分:[object Object]
+2024-02-21T15:22:38.276 [INFO ] default - 21084添加金币
+2024-02-21T15:22:38.278 [INFO ] default - 21084添加钻石
+2024-02-21T15:22:38.281 [INFO ] default - 21084登录分数10072555
+2024-02-21T15:22:38.282 [INFO ] default - 21084登录钻石100
+2024-02-21T15:22:47.790 [INFO ] default - 21084进入游戏15188
+2024-02-21T15:22:47.796 [INFO ] default - disconnect:21084
+2024-02-21T15:22:47.797 [INFO ] default - 用户21084删除!
+2024-02-21T15:23:00.844 [INFO ] default - userDisconnect:
+2024-02-21T15:23:00.845 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072555,
+  gameId: 15188,
+  nolog: true
+}
+2024-02-21T15:23:00.846 [INFO ] default - 21084清除游戏ID
+2024-02-21T15:23:00.846 [INFO ] default - 游戏ID0
+2024-02-21T15:23:00.847 [INFO ] default - 用户21084删除!
+2024-02-21T15:23:00.847 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T15:23:00.990 [INFO ] default - 成功保存,删除用户21084 socre:10072555 diamond:100
+2024-02-21T15:23:01.597 [INFO ] default - socket comein........
+2024-02-21T15:23:01.602 [INFO ] default - 登录大厅[object Object]
+2024-02-21T15:23:01.605 [INFO ] default - 添加用户:21084
+2024-02-21T15:23:01.606 [INFO ] default - 21084获取道具
+2024-02-21T15:23:01.607 [INFO ] default - 登录成功:[object Object]
+2024-02-21T15:23:01.608 [INFO ] default - 获取积分:[object Object]
+2024-02-21T15:23:01.608 [INFO ] default - 21084添加金币
+2024-02-21T15:23:01.609 [INFO ] default - 21084添加钻石
+2024-02-21T15:23:01.615 [INFO ] default - 21084登录分数10072555
+2024-02-21T15:23:01.616 [INFO ] default - 21084登录钻石100
+2024-02-21T15:23:11.580 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:23:11.586 [INFO ] default - disconnect:21084
+2024-02-21T15:23:11.587 [INFO ] default - 用户21084删除!
+2024-02-21T15:45:27.947 [INFO ] default - socket comein........
+2024-02-21T15:45:27.975 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:45:27.976 [INFO ] default - 游戏Id:15187
+2024-02-21T15:45:32.436 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:46:14.798 [INFO ] default - socket comein........
+2024-02-21T15:46:14.832 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:46:14.833 [INFO ] default - 游戏Id:15187
+2024-02-21T15:46:14.901 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:46:56.891 [INFO ] default - socket comein........
+2024-02-21T15:46:56.917 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:46:56.917 [INFO ] default - 游戏Id:15187
+2024-02-21T15:46:56.984 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:47:36.656 [INFO ] default - socket comein........
+2024-02-21T15:47:36.677 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:47:36.678 [INFO ] default - 游戏Id:15187
+2024-02-21T15:47:37.567 [INFO ] default - 21084进入游戏15187
+2024-02-21T15:55:51.782 [INFO ] default - socket comein........
+2024-02-21T15:55:51.805 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T15:55:51.805 [INFO ] default - 游戏Id:15187
+2024-02-21T15:55:52.122 [INFO ] default - 21084进入游戏15187
+2024-02-21T16:01:20.952 [INFO ] default - socket comein........
+2024-02-21T16:01:20.972 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T16:01:20.972 [INFO ] default - 游戏Id:15187
+2024-02-21T16:01:21.660 [INFO ] default - 21084进入游戏15187
+2024-02-21T16:02:12.380 [INFO ] default - socket comein........
+2024-02-21T16:02:12.399 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-21T16:02:12.400 [INFO ] default - 游戏Id:15187
+2024-02-21T16:02:12.566 [INFO ] default - 21084进入游戏15187
+2024-02-21T16:03:37.690 [INFO ] default - socket comein........
+2024-02-21T16:03:37.694 [INFO ] default - 登录大厅[object Object]
+2024-02-21T16:03:37.699 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-21T16:03:38.628 [INFO ] default - 21084当前用户在线15187被强制下线
+2024-02-21T16:03:39.636 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:40.642 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:41.656 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:42.662 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:43.665 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:44.678 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:45.693 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:46.696 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:47.711 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T16:03:48.954 [INFO ] default - 登录服务器 v2.0.0
+2024-02-21T16:03:48.955 [INFO ] default - 服务器启动成功!
+2024-02-21T16:03:48.956 [INFO ] default - 更新时间:2017.12.17
+2024-02-21T16:03:48.959 [INFO ] default - start at port:13000
+2024-02-21T16:03:49.255 [INFO ] default - socket comein........
+2024-02-21T16:03:49.262 [INFO ] default - 登录大厅[object Object]
+2024-02-21T16:03:49.268 [INFO ] default - 添加用户:21084
+2024-02-21T16:03:49.270 [INFO ] default - 21084获取道具
+2024-02-21T16:03:49.270 [INFO ] default - 登录成功:[object Object]
+2024-02-21T16:03:49.272 [INFO ] default - 获取积分:[object Object]
+2024-02-21T16:03:49.273 [INFO ] default - 21084添加金币
+2024-02-21T16:03:49.275 [INFO ] default - 21084添加钻石
+2024-02-21T16:03:49.279 [INFO ] default - 21084登录分数10072555
+2024-02-21T16:03:49.280 [INFO ] default - 21084登录钻石100
+2024-02-21T16:03:49.340 [INFO ] default - socket comein........
+2024-02-21T16:03:49.341 [INFO ] default - socket comein........
+2024-02-21T16:03:49.357 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-21T16:03:49.357 [INFO ] default - 游戏Id:15129
+2024-02-21T16:03:50.237 [INFO ] default - socket comein........
+2024-02-21T16:03:50.645 [INFO ] default - socket comein........
+2024-02-21T16:03:50.654 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-21T16:03:50.655 [INFO ] default - 游戏Id:15163
+2024-02-21T16:06:04.424 [INFO ] default - socket comein........
+2024-02-21T16:06:04.447 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:06:04.447 [INFO ] default - 游戏Id:15186
+2024-02-21T16:06:19.302 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:06:19.310 [INFO ] default - disconnect:21084
+2024-02-21T16:06:19.311 [INFO ] default - 用户21084删除!
+2024-02-21T16:07:56.134 [INFO ] default - socket comein........
+2024-02-21T16:07:56.154 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:07:56.154 [INFO ] default - 游戏Id:15186
+2024-02-21T16:07:56.870 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:10:43.205 [INFO ] default - socket comein........
+2024-02-21T16:10:43.223 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:10:43.224 [INFO ] default - 游戏Id:15186
+2024-02-21T16:10:46.505 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:15:43.142 [INFO ] default - socket comein........
+2024-02-21T16:15:43.177 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:15:43.177 [INFO ] default - 游戏Id:15186
+2024-02-21T16:15:43.182 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:22:47.211 [INFO ] default - socket comein........
+2024-02-21T16:22:47.238 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:22:47.239 [INFO ] default - 游戏Id:15186
+2024-02-21T16:22:47.924 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:23:36.346 [INFO ] default - socket comein........
+2024-02-21T16:23:36.366 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:23:36.367 [INFO ] default - 游戏Id:15186
+2024-02-21T16:23:36.489 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:23:55.588 [INFO ] default - socket comein........
+2024-02-21T16:23:55.608 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:23:55.609 [INFO ] default - 游戏Id:15186
+2024-02-21T16:23:56.021 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:28:36.532 [INFO ] default - socket comein........
+2024-02-21T16:28:36.541 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:28:36.545 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:28:36.546 [INFO ] default - 游戏Id:15186
+2024-02-21T16:29:46.665 [INFO ] default - socket comein........
+2024-02-21T16:29:46.691 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T16:29:46.692 [INFO ] default - 游戏Id:15186
+2024-02-21T16:29:46.929 [INFO ] default - 21084进入游戏15186
+2024-02-21T16:30:05.028 [INFO ] default - userDisconnect:
+2024-02-21T16:30:05.029 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072455,
+  gameId: 15186,
+  nolog: true
+}
+2024-02-21T16:30:05.030 [INFO ] default - 21084清除游戏ID
+2024-02-21T16:30:05.030 [INFO ] default - 游戏ID0
+2024-02-21T16:30:05.031 [INFO ] default - 用户21084删除!
+2024-02-21T16:30:05.031 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T16:30:05.314 [INFO ] default - 成功保存,删除用户21084 socre:10072455 diamond:100
+2024-02-21T16:30:05.897 [INFO ] default - socket comein........
+2024-02-21T16:30:05.902 [INFO ] default - 登录大厅[object Object]
+2024-02-21T16:30:05.907 [INFO ] default - 添加用户:21084
+2024-02-21T16:30:05.909 [INFO ] default - 21084获取道具
+2024-02-21T16:30:05.910 [INFO ] default - 登录成功:[object Object]
+2024-02-21T16:30:05.912 [INFO ] default - 获取积分:[object Object]
+2024-02-21T16:30:05.912 [INFO ] default - 21084添加金币
+2024-02-21T16:30:05.915 [INFO ] default - 21084添加钻石
+2024-02-21T16:30:05.921 [INFO ] default - 21084登录分数10072455
+2024-02-21T16:30:05.921 [INFO ] default - 21084登录钻石100
+2024-02-21T16:31:09.665 [INFO ] default - socket comein........
+2024-02-21T16:31:09.693 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T16:31:09.694 [INFO ] default - 游戏Id:15185
+2024-02-21T16:31:23.909 [INFO ] default - 21084进入游戏15185
+2024-02-21T16:31:23.916 [INFO ] default - disconnect:21084
+2024-02-21T16:31:23.918 [INFO ] default - 用户21084删除!
+2024-02-21T16:33:11.088 [INFO ] default - socket comein........
+2024-02-21T16:33:11.111 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T16:33:11.112 [INFO ] default - 游戏Id:15185
+2024-02-21T16:33:11.218 [INFO ] default - 21084进入游戏15185
+2024-02-21T16:34:06.326 [INFO ] default - socket comein........
+2024-02-21T16:34:06.353 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T16:34:06.353 [INFO ] default - 游戏Id:15185
+2024-02-21T16:34:07.430 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:10:00.727 [INFO ] default - socket comein........
+2024-02-21T17:10:00.751 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:10:00.752 [INFO ] default - 游戏Id:15185
+2024-02-21T17:10:00.900 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:10:08.720 [INFO ] default - userDisconnect:
+2024-02-21T17:10:08.721 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072455,
+  gameId: 15185,
+  nolog: true
+}
+2024-02-21T17:10:08.721 [INFO ] default - 21084清除游戏ID
+2024-02-21T17:10:08.722 [INFO ] default - 游戏ID0
+2024-02-21T17:10:08.722 [INFO ] default - 用户21084删除!
+2024-02-21T17:10:08.723 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T17:10:08.906 [INFO ] default - 成功保存,删除用户21084 socre:10072455 diamond:100
+2024-02-21T17:10:09.559 [INFO ] default - socket comein........
+2024-02-21T17:10:09.565 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:10:09.568 [INFO ] default - 添加用户:21084
+2024-02-21T17:10:09.569 [INFO ] default - 21084获取道具
+2024-02-21T17:10:09.572 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:10:09.574 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:10:09.574 [INFO ] default - 21084添加金币
+2024-02-21T17:10:09.576 [INFO ] default - 21084添加钻石
+2024-02-21T17:10:09.579 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:10:09.580 [INFO ] default - 21084登录钻石100
+2024-02-21T17:11:02.155 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:11:02.163 [INFO ] default - disconnect:21084
+2024-02-21T17:11:02.164 [INFO ] default - 用户21084删除!
+2024-02-21T17:11:40.617 [INFO ] default - socket comein........
+2024-02-21T17:11:40.647 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:11:40.648 [INFO ] default - 游戏Id:15185
+2024-02-21T17:11:42.064 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:12:44.490 [INFO ] default - socket comein........
+2024-02-21T17:12:44.510 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:12:44.511 [INFO ] default - 游戏Id:15185
+2024-02-21T17:12:46.579 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:12:55.277 [INFO ] default - socket comein........
+2024-02-21T17:12:55.297 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:12:55.298 [INFO ] default - 游戏Id:15185
+2024-02-21T17:12:55.320 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:14:01.998 [INFO ] default - socket comein........
+2024-02-21T17:14:02.031 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:14:02.032 [INFO ] default - 游戏Id:15185
+2024-02-21T17:14:02.050 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:14:54.905 [INFO ] default - socket comein........
+2024-02-21T17:14:54.938 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:14:54.939 [INFO ] default - 游戏Id:15185
+2024-02-21T17:14:59.360 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:15:02.065 [INFO ] default - userDisconnect:
+2024-02-21T17:15:02.066 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: 10072455,
+  gameId: 15185,
+  nolog: true
+}
+2024-02-21T17:15:02.067 [INFO ] default - 21084清除游戏ID
+2024-02-21T17:15:02.068 [INFO ] default - 游戏ID0
+2024-02-21T17:15:02.068 [INFO ] default - 用户21084删除!
+2024-02-21T17:15:02.068 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T17:15:02.479 [INFO ] default - 成功保存,删除用户21084 socre:10072455 diamond:100
+2024-02-21T17:15:02.873 [INFO ] default - socket comein........
+2024-02-21T17:15:02.878 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:15:02.881 [INFO ] default - 添加用户:21084
+2024-02-21T17:15:02.883 [INFO ] default - 21084获取道具
+2024-02-21T17:15:02.885 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:15:02.886 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:15:02.887 [INFO ] default - 21084添加金币
+2024-02-21T17:15:02.888 [INFO ] default - 21084添加钻石
+2024-02-21T17:15:02.894 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:15:02.894 [INFO ] default - 21084登录钻石100
+2024-02-21T17:15:14.036 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:15:14.059 [INFO ] default - disconnect:21084
+2024-02-21T17:15:14.060 [INFO ] default - 用户21084删除!
+2024-02-21T17:16:11.981 [INFO ] default - socket comein........
+2024-02-21T17:16:12.001 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:16:12.004 [INFO ] default - 添加用户:21089
+2024-02-21T17:16:12.006 [INFO ] default - 21089获取道具
+2024-02-21T17:16:12.008 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:16:12.009 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:16:12.010 [INFO ] default - 21089添加金币
+2024-02-21T17:16:12.011 [INFO ] default - 21089添加钻石
+2024-02-21T17:16:12.016 [INFO ] default - 21089登录分数100000
+2024-02-21T17:16:12.016 [INFO ] default - 21089登录钻石10
+2024-02-21T17:16:18.121 [INFO ] default - disconnect:21089
+2024-02-21T17:16:18.122 [INFO ] default - 用户21089删除!
+2024-02-21T17:16:18.123 [INFO ] default - 用户21089没有游戏ID
+2024-02-21T17:16:18.126 [INFO ] default - 成功保存,删除用户21089 socre:100000 diamond:10
+2024-02-21T17:16:39.328 [INFO ] default - socket comein........
+2024-02-21T17:16:39.342 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:16:39.345 [INFO ] default - 添加用户:21089
+2024-02-21T17:16:39.348 [INFO ] default - 21089获取道具
+2024-02-21T17:16:39.350 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:16:39.351 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:16:39.352 [INFO ] default - 21089添加金币
+2024-02-21T17:16:39.354 [INFO ] default - 21089添加钻石
+2024-02-21T17:16:39.358 [INFO ] default - 21089登录分数100000
+2024-02-21T17:16:39.358 [INFO ] default - 21089登录钻石10
+2024-02-21T17:16:42.215 [INFO ] default - disconnect:21089
+2024-02-21T17:16:42.216 [INFO ] default - 用户21089删除!
+2024-02-21T17:16:42.216 [INFO ] default - 用户21089没有游戏ID
+2024-02-21T17:16:42.317 [INFO ] default - 成功保存,删除用户21089 socre:100000 diamond:10
+2024-02-21T17:16:51.439 [INFO ] default - socket comein........
+2024-02-21T17:16:51.483 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:16:51.483 [INFO ] default - 游戏Id:15185
+2024-02-21T17:16:51.638 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:17:08.005 [INFO ] default - socket comein........
+2024-02-21T17:17:08.010 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:17:08.013 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-21T17:17:08.543 [INFO ] default - 21084当前用户在线15185被强制下线
+2024-02-21T17:17:09.556 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:10.163 [INFO ] default - socket comein........
+2024-02-21T17:17:10.183 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:17:10.184 [INFO ] default - 游戏Id:15185
+2024-02-21T17:17:10.556 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:11.570 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:12.575 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:13.578 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:14.583 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:15.590 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:16.591 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:17.605 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:18.611 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:19.624 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:20.650 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:21.663 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:22.669 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:23.669 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:24.683 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:25.685 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:26.697 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:27.710 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:28.712 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:29.726 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:30.741 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:31.756 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:32.767 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:33.772 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:34.788 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:35.791 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:36.791 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:37.804 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:38.812 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:39.819 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:40.824 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:41.828 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:42.838 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:43.854 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:44.865 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:45.878 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:46.888 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:47.902 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:48.913 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:49.926 [INFO ] default - 等待游戏服务器过来删除21084
+2024-02-21T17:17:51.508 [INFO ] default - 登录服务器 v2.0.0
+2024-02-21T17:17:51.510 [INFO ] default - 服务器启动成功!
+2024-02-21T17:17:51.511 [INFO ] default - 更新时间:2017.12.17
+2024-02-21T17:17:51.514 [INFO ] default - start at port:13000
+2024-02-21T17:17:51.614 [INFO ] default - socket comein........
+2024-02-21T17:17:51.619 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:17:51.626 [INFO ] default - 添加用户:21084
+2024-02-21T17:17:51.628 [INFO ] default - 21084获取道具
+2024-02-21T17:17:51.631 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:17:51.633 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:17:51.633 [INFO ] default - 21084添加金币
+2024-02-21T17:17:51.636 [INFO ] default - 21084添加钻石
+2024-02-21T17:17:51.641 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:17:51.642 [INFO ] default - 21084登录钻石100
+2024-02-21T17:17:51.988 [INFO ] default - socket comein........
+2024-02-21T17:17:51.997 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:17:51.997 [INFO ] default - 游戏Id:15185
+2024-02-21T17:17:52.065 [INFO ] default - socket comein........
+2024-02-21T17:17:52.072 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-21T17:17:52.072 [INFO ] default - 游戏Id:15129
+2024-02-21T17:17:52.157 [INFO ] default - socket comein........
+2024-02-21T17:17:52.236 [INFO ] default - socket comein........
+2024-02-21T17:17:52.248 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-21T17:17:52.249 [INFO ] default - 游戏Id:15163
+2024-02-21T17:17:52.503 [INFO ] default - socket comein........
+2024-02-21T17:17:52.913 [INFO ] default - socket comein........
+2024-02-21T17:17:52.923 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T17:17:52.923 [INFO ] default - 游戏Id:15186
+2024-02-21T17:18:04.881 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:18:04.891 [INFO ] default - disconnect:21084
+2024-02-21T17:18:04.892 [INFO ] default - 用户21084删除!
+2024-02-21T17:18:31.501 [INFO ] default - socket comein........
+2024-02-21T17:18:31.532 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:18:31.533 [INFO ] default - 游戏Id:15185
+2024-02-21T17:18:31.670 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:20:56.132 [INFO ] default - socket comein........
+2024-02-21T17:20:56.152 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:20:56.152 [INFO ] default - 游戏Id:15185
+2024-02-21T17:20:56.250 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:25:45.338 [INFO ] default - socket comein........
+2024-02-21T17:25:45.363 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:25:45.364 [INFO ] default - 游戏Id:15185
+2024-02-21T17:25:46.030 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:28:23.983 [INFO ] default - 登录服务器 v2.0.0
+2024-02-21T17:28:23.987 [INFO ] default - 服务器启动成功!
+2024-02-21T17:28:23.987 [INFO ] default - 更新时间:2017.12.17
+2024-02-21T17:28:24.006 [INFO ] default - start at port:13000
+2024-02-21T17:28:24.299 [INFO ] default - socket comein........
+2024-02-21T17:28:24.369 [INFO ] default - socket comein........
+2024-02-21T17:28:24.370 [INFO ] default - socket comein........
+2024-02-21T17:28:24.377 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-21T17:28:24.378 [INFO ] default - 游戏Id:15163
+2024-02-21T17:28:24.385 [INFO ] default - socket comein........
+2024-02-21T17:28:24.391 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-21T17:28:24.392 [INFO ] default - 游戏Id:15129
+2024-02-21T17:28:24.495 [INFO ] default - socket comein........
+2024-02-21T17:28:24.502 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:28:24.503 [INFO ] default - 游戏Id:15185
+2024-02-21T17:28:24.509 [INFO ] default - socket comein........
+2024-02-21T17:28:24.519 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T17:28:24.520 [INFO ] default - 游戏Id:15186
+2024-02-21T17:28:41.439 [INFO ] default - userDisconnect:
+2024-02-21T17:28:41.440 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: null,
+  gameId: 15185,
+  nolog: true
+}
+2024-02-21T17:28:41.441 [INFO ] default - 21084清除游戏ID
+2024-02-21T17:28:41.442 [INFO ] default - 用户21084删除!
+2024-02-21T17:28:42.298 [INFO ] default - socket comein........
+2024-02-21T17:28:42.304 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:28:42.309 [INFO ] default - 添加用户:21084
+2024-02-21T17:28:42.311 [INFO ] default - 21084获取道具
+2024-02-21T17:28:42.313 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:28:42.316 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:28:42.317 [INFO ] default - 21084添加金币
+2024-02-21T17:28:42.320 [INFO ] default - 21084添加钻石
+2024-02-21T17:28:42.324 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:28:42.325 [INFO ] default - 21084登录钻石100
+2024-02-21T17:28:53.418 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:28:53.424 [INFO ] default - disconnect:21084
+2024-02-21T17:28:53.425 [INFO ] default - 用户21084删除!
+2024-02-21T17:30:22.676 [INFO ] default - userDisconnect:
+2024-02-21T17:30:22.676 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: null,
+  gameId: 15185,
+  nolog: true
+}
+2024-02-21T17:30:22.677 [INFO ] default - 21084清除游戏ID
+2024-02-21T17:30:22.678 [INFO ] default - 游戏ID0
+2024-02-21T17:30:22.678 [INFO ] default - 用户21084删除!
+2024-02-21T17:30:22.679 [INFO ] default - 用户21084没有游戏ID
+2024-02-21T17:30:22.681 [ERROR] default - 进入游戏,用户正在删除21084
+2024-02-21T17:30:22.973 [INFO ] default - 成功保存,删除用户21084 socre:10072455 diamond:100
+2024-02-21T17:30:33.412 [INFO ] default - socket comein........
+2024-02-21T17:30:33.419 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:30:33.422 [INFO ] default - 添加用户:21084
+2024-02-21T17:30:33.424 [INFO ] default - 21084获取道具
+2024-02-21T17:30:33.425 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:30:33.427 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:30:33.427 [INFO ] default - 21084添加金币
+2024-02-21T17:30:33.430 [INFO ] default - 21084添加钻石
+2024-02-21T17:30:33.435 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:30:33.436 [INFO ] default - 21084登录钻石100
+2024-02-21T17:30:44.491 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:30:44.496 [INFO ] default - disconnect:21084
+2024-02-21T17:30:44.497 [INFO ] default - 用户21084删除!
+2024-02-21T17:32:34.563 [INFO ] default - socket comein........
+2024-02-21T17:32:34.588 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:32:34.589 [INFO ] default - 游戏Id:15185
+2024-02-21T17:32:34.961 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:33:56.745 [INFO ] default - 登录服务器 v2.0.0
+2024-02-21T17:33:56.746 [INFO ] default - 服务器启动成功!
+2024-02-21T17:33:56.747 [INFO ] default - 更新时间:2017.12.17
+2024-02-21T17:33:56.750 [INFO ] default - start at port:13000
+2024-02-21T17:33:56.805 [INFO ] default - socket comein........
+2024-02-21T17:33:56.913 [INFO ] default - socket comein........
+2024-02-21T17:33:56.922 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-21T17:33:56.923 [INFO ] default - 游戏Id:15163
+2024-02-21T17:33:57.005 [INFO ] default - socket comein........
+2024-02-21T17:33:57.012 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-21T17:33:57.012 [INFO ] default - 游戏Id:15186
+2024-02-21T17:33:57.208 [INFO ] default - socket comein........
+2024-02-21T17:33:57.215 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-21T17:33:57.216 [INFO ] default - 游戏Id:15129
+2024-02-21T17:33:57.503 [INFO ] default - socket comein........
+2024-02-21T17:33:59.547 [INFO ] default - socket comein........
+2024-02-21T17:33:59.554 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:33:59.554 [INFO ] default - 游戏Id:15185
+2024-02-21T17:34:14.013 [INFO ] default - userDisconnect:
+2024-02-21T17:34:14.013 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21084,
+  userScore: null,
+  gameId: 15185,
+  nolog: true
+}
+2024-02-21T17:34:14.014 [INFO ] default - 21084清除游戏ID
+2024-02-21T17:34:14.015 [INFO ] default - 用户21084删除!
+2024-02-21T17:34:14.838 [INFO ] default - socket comein........
+2024-02-21T17:34:14.844 [INFO ] default - 登录大厅[object Object]
+2024-02-21T17:34:14.849 [INFO ] default - 添加用户:21084
+2024-02-21T17:34:14.851 [INFO ] default - 21084获取道具
+2024-02-21T17:34:14.853 [INFO ] default - 登录成功:[object Object]
+2024-02-21T17:34:14.856 [INFO ] default - 获取积分:[object Object]
+2024-02-21T17:34:14.856 [INFO ] default - 21084添加金币
+2024-02-21T17:34:14.859 [INFO ] default - 21084添加钻石
+2024-02-21T17:34:14.865 [INFO ] default - 21084登录分数10072455
+2024-02-21T17:34:14.866 [INFO ] default - 21084登录钻石100
+2024-02-21T17:34:28.506 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:34:28.512 [INFO ] default - disconnect:21084
+2024-02-21T17:34:28.513 [INFO ] default - 用户21084删除!
+2024-02-21T17:35:40.143 [INFO ] default - socket comein........
+2024-02-21T17:35:40.179 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:35:40.180 [INFO ] default - 游戏Id:15185
+2024-02-21T17:35:40.186 [INFO ] default - 21084进入游戏15185
+2024-02-21T17:37:09.333 [INFO ] default - socket comein........
+2024-02-21T17:37:09.353 [INFO ] default - 拉霸游戏_285_BuffaloKing | 服务器连接成功!
+2024-02-21T17:37:09.354 [INFO ] default - 游戏Id:15185
+2024-02-21T17:37:09.523 [INFO ] default - 21084进入游戏15185

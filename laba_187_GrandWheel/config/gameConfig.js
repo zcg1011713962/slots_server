@@ -8,25 +8,9 @@ gameConfig.port = 15187;		//游戏记录表示
 gameConfig.gameName = "GrandWheel";
 gameConfig.sendMessage_mul = 5;
 
-//筹码
-gameConfig.coinConfig = [1, 10, 100, 1000, 10000];
-gameConfig.tax = 0.99;
-
-gameConfig.seatMax = 30;
-gameConfig.tableMax = 10;
-
 gameConfig.LoginServeSign = "slel3@lsl334xx,deka";
 
 
-//每日获得金币签到活动
-gameConfig.everyWinCoinActivity = true;
-//等级
-gameConfig.lvActivity = true;
-
-gameConfig.GAME_HAND_CARDS_NUMBER_DIAMOND = 3;
-gameConfig.GAME_LINES_DIAMOND = [
-    [1, 2, 3],       //# line 1
-];
 
 gameConfig.GAME_COLORS_DIAMOND = [0, 1, 2, 3, 4, 5, 6, 99];
 gameConfig.Free_GAME_COLORS_DIAMOND = [0, 1, 2, 3, 4, 5, 6, 99];
