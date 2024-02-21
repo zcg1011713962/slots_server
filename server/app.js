@@ -183,11 +183,15 @@ app.post('/checkVersion', function (req, res) {
 
 //商城相关
 app.post('/getShopList', function (req, response) {
-    shopping_dao.selectShopList((res) => {
-        response.writeHead(200, {"Content-Type": "text/plain"});
-        response.write(JSON.stringify(res));
-        response.end();
-    });
+    try {
+        shopping_dao.selectShopList(res => {
+            response.writeHead(200, {"Content-Type": "text/plain"});
+            response.write(JSON.stringify(res));
+            response.end();
+        });
+    }catch (e){
+        log.warn('getShopList-json');
+    }
 });
 
 app.post('/addShoppingGoods', function (req, response) {
@@ -336,6 +340,7 @@ io.on('connection', function (socket) {
                     if (!rows) {
                         const result = {resultid: 0, msg: 'Account or password error,login fail!'};
                         socket.emit('loginResult', result);
+                        return;
                     }
                     //数据库有此用户
                     if (gameInfo.IsPlayerOnline(rows.Id)) {
@@ -906,15 +911,15 @@ io.on('connection', function (socket) {
         gameInfo.setServerRank(_info);
     });
 
-
+    // 日志记录
     socket.on("score_changeLog", function (_info) {
         gameInfo.insertScore_change_log(_info);
     });
-
+    // 日志记录
     socket.on("insertMark", function (_info) {
         gameInfo.insertMark(_info);
     });
-
+    // 日志记录
     socket.on("pro_change", function (_info) {
         gameInfo.pro_change(_info);
     });
@@ -928,17 +933,6 @@ io.on('connection', function (socket) {
             log.warn('getServerRank-json');
         }
         gameInfo.getServerRank(socket, _info);
-    });
-
-    //报名
-    socket.on('applyMatch', function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('applyMatch-json');
-        }
-        gameInfo.ApplyMatch(socket.userId, _info.roomid, socket)
     });
 
     //喇叭说话

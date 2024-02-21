@@ -33,6 +33,10 @@ const readIniFile = function () {
         // 特殊图案
         this.nGameMagicCard = parseInt(config['图案信息'].icon_s_type_WILD);
         this.jackpot_card = parseInt(config['图案信息'].icon_s_type_jackpot);
+        this.free_card = config['图案信息'].icon_s_type_free ? JSON.parse(config['图案信息'].icon_s_type_free) : null;
+
+        // 免费次数
+        this.free_times = JSON.parse(config['图案信息'].icon_free_times);
 
         // 图案权重数组
         const weight_string = Object.keys(config['图案权重'])

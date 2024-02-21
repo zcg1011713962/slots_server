@@ -1,13 +1,11 @@
 const laba_config = require("./config/laba_config");
 const log = require("./../CClass/class/loginfo").getInstand;
-const globalVariableModule = require('./global_variable_module');
 
 module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_bind_switch, icon_type_bind, jp) {
-    const bindCards = globalVariableModule.getGlobalVariable();
-    log.info('配牌器开关:' + icon_bind_switch + "牌:" + bindCards);
     if(icon_bind_switch){
         // 如果开了配牌器
-        return bindCards.length > 0 ? bindCards : icon_type_bind;
+        log.info('配牌器开关:' + icon_bind_switch + "牌:" + icon_type_bind);
+        return icon_type_bind;
     }
     return getCard(cards, cardsNumber, weight_two_array, col_count, line_count, jackpotCard, jp);
 };
@@ -60,7 +58,7 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
 }
 
 
-module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombinations, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameLineDirection, bGameLineRule, nBetList, jackpotCard, jp, dictAnalyseResult) {
+module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombinations, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameLineDirection, bGameLineRule, nBetList, jackpotCard, jp, freeCard, freeTimes, nFreeTimeLowerLimit, dictAnalyseResult) {
     //当前线数
     var nLineNum = 0;
     var nBetSum = 0;
@@ -179,6 +177,10 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
         nLineNum += 1
     }
 
+    // 获取免费次数
+    if (freeCard) {
+        dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCard, freeTimes,nFreeTimeLowerLimit);
+    }
     // 全屏奖乘10倍
     let sameNum = 1;
     for (let i = 1; i < nHandCards.length; i++) {
@@ -198,6 +200,25 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
     return dictAnalyseResult
 };
 
+FreeTimeAnalyse = function (nHandCards, freeCard, freeTimes, nFreeTimeLowerLimit) {
+    //免费次数
+    var dictResult = {
+        bFlag: false,
+        nFreeTime: 0,
+        nIndex: 0
+    };
+    var nCount = 0
+    for (var i in nHandCards) {
+        if (nHandCards[i] === freeCard) {
+            nCount += 1
+        }
+    }
+    if (nCount >= nFreeTimeLowerLimit) {
+        dictResult["bFlag"] = true;
+        dictResult["nFreeTime"] = freeTimes
+    }
+    return dictResult
+};
 
 Sort = function (nLine, nList, nMagicCard, nMinLimit, nCombinations, bRule) {
     /*
@@ -378,6 +399,20 @@ module.exports.chunkArray = function chunkArray(arr, chunkSize) {
     return result;
 }
 
+module.exports.handCardLog = function handCardLog(nHandCards, col_count, line_count, nBetSum, winscore, winJackpot, expectRTP) {
+    // 摇奖日志输出
+    try {
+        const chunkCards = this.chunkArray(nHandCards, col_count);
+        log.info('图案排列结果');
+        for (let i = 0; i < line_count; i++) {
+            log.info(chunkCards[i]);
+        }
+        log.info('下注:' + nBetSum + '赢:' + winscore + 'jackpot:' + winJackpot + 'expectRTP:' + expectRTP);
+    }catch (e){
+        log.err(e);
+    }
+}
+
 /*function getCardByJackpotRate(cards , nGameHandCardsNumber, weight_two_array, col_count, jackpotRate, jackpotCard, jackpotCardLowerLimit) {
     let nHandCards = [];
     // 从左到右发指定数量手牌
@@ -445,7 +480,10 @@ module.exports.CreateRandomCardList = function (init_type_card_list, column, row
     return result_list;
 };
 
-module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCard, nLowerLimit, nColumnNumber, nBet, game_odds, GOLD_Single, is_free) {
+
+
+
+module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCard, nLowerLimit, nColumnNumber, nBet, winJackpot, game_odds) {
     /*
         列数判断型拉把算法
         :param nHandCards: 手牌
@@ -592,21 +630,10 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCard, 
             if (cards_index || cards_index === 0) {
                 var card = nHandCards[cards_index];
                 var win_num = 0;
-                if (is_free) { //# 免费倍数
+                if (nFreeCard) { //# 免费倍数
                     win_num = game_odds[card][x.length] * nBet
                 } else {
-                    console.log("------------------------");
-                    console.log(game_odds);
-                    console.log(card);
-                    console.log(x.length);
-                    console.log(nHandCards);
-                    console.log(cards_index);
-                    console.log(nWinLines);
                     win_num = game_odds[card][x.length] * nBet;
-                    console.log(win_num);
-                    console.log(nBet);
-                    console.log(game_odds[card][x.length]);
-                    console.log(GOLD_Single)
                 }
                 AllWinNum += win_num;
                 var win_line = [];
@@ -645,10 +672,10 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCard, 
     // result["nBet"] = nBet  //# 下注
     result["win"] = AllWinNum; //# 赢钱总数
     result["nWinCards"] = AllWinLinesList; //# 总获胜线
-    result["getOpenBox"] = {"bFlag": false, "nWinOpenBox": 0, "win": 0}; //# 开箱子
-    result["getFreeTime"] = {"bFlag": bIsFree, "nFreeTime": nFreeNum};  //# 免费次数
     result["nBetTime"] = now_time; //# 时间戳
 
+    result["getOpenBox"] = {"bFlag": false, "nWinOpenBox": 0, "win": 0}; //# 开箱子
+    result["getFreeTime"] = {"bFlag": bIsFree, "nFreeTime": nFreeNum};  //# 免费次数
     return result;
 };
 

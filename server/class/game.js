@@ -274,7 +274,6 @@ var GameInfo = function () {
                         socket.emit('loginResult', result);
                         ++self.onlinePlayerCount;
                         callback(null);
-
                     })
                 }
             ], function (err, result) {
@@ -474,11 +473,23 @@ var GameInfo = function () {
         };
 
 
-        //获得用户当前分数
+        // 获得用户当前分数
         this.getUserscore = function (_userId) {
             if (_userId) {
                 return this.userList[_userId]._score;
             }
+        };
+
+        // 增加用户分数
+        this.addUserscore = function (_userId, score) {
+            if (_userId && score) {
+                this.userList[_userId]._score += score;
+            }
+        };
+
+        // 查询商品价值
+        this.searchShopItemValue = function (id, callback) {
+            shopping_dao.selectGoodsInfo(id, callback);
         };
 
         //获得用户
@@ -508,16 +519,9 @@ var GameInfo = function () {
 
         //获得用户
         this.webGetUser = function (_account, callback) {
-            // if (_userId){
-            // 	return this.userList[_userId];
-            // }
-            //以后再拿实效金额
-            //
-            //
             var format = {};
             if (_account) {
                 dao.webGetUser(_account, function (code, result) {
-
                     format.code = code;
                     format.nickname = result.nickname;
                     format.ticket = result.giftTicket;
@@ -2183,11 +2187,11 @@ var GameInfo = function () {
                 } else {
                     let result = {};
                     for (let i = 0; i < res.length; i++) {
-                        if (result[res[i].goodsType]) {
-                            result[res[i].goodsType].push(res[i]);
+                        if (result[res[i].type]) {
+                            result[res[i].type].push(res[i]);
                         } else {
-                            result[res[i].goodsType] = [];
-                            result[res[i].goodsType].push(res[i]);
+                            result[res[i].type] = [];
+                            result[res[i].type].push(res[i]);
                         }
                     }
                     _socket.emit("getShoppingResult", {ResultCode: 1, result: result});

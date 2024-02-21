@@ -4,14 +4,16 @@ const io = require('socket.io')(http);
 const signCode = "slel3@lsl334xx,deka";
 const Cio = require('socket.io-client');
 const log = require("./../CClass/class/loginfo").getInstand;
-const  Urls = require("../util/config/url_config");
+const Urls = require("../util/config/url_config");
 const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
+const laba_config = require("../util/config/laba_config");
+const Config = require("./config/read_config").getInstand;
+const Lottery = require("../util/lottery");
+
 
 const Csocket = Cio(Urls.hall_url);
-
-
 Csocket.on('disconnect', function (data) {
     console.log("登录服务器被断开")
 });
@@ -176,29 +178,15 @@ io.on('connection', function (socket) {
     });
 
 
-    //下注
+    // 摇奖
     socket.on('lottery', function (lottery) {
-        redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-            let jp = jackpot ? parseInt(jackpot) : 0;
-            const parms = JSON.parse(lottery);
-            const result = gameInfo.lottery(socket.userId, parms.bet, jp);
-            console.log('摇奖结果', result);
-            if (result.code < 1) {
-                socket.emit('lotteryResult', {ResultCode: result.code});
-            } else {
-                socket.emit('lotteryResult', {
-                    ResultCode: result.code,
-                    ResultData: {
-                        userscore: result.userscore,
-                        winscore: result.winscore,
-                        viewarray: result.viewarray,
-                        winfreeCount: result.winfreeCount,
-                        freeCount: result.freeCount,
-                        score_pool: result.score_pool
-                    }
-                });
-            }
-        });
+        const parms = JSON.parse(lottery);
+        // 下注
+        const nBetSum = Config.coinConfig[parms.bet];
+        // 游戏奖池划分
+        const jackpot_ratio = Config.jackpot_ratio;
+        // 执行摇奖
+        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
     });
 
     //离线操作

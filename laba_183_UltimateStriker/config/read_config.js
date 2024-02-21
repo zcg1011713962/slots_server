@@ -94,7 +94,7 @@ const readIniFile = function () {
     if (conf) {
         return {getInstand: conf};
     } else {
-        conf = new Config("jungledelight_config.ini");
+        conf = new Config("ultimate_striker_config.ini");
         return {getInstand: conf};
     }
 

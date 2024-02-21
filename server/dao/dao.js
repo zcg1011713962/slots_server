@@ -435,17 +435,13 @@ exports.saveUser = function saveUser(userList, callback) {
     var sql = 'UPDATE userinfo_imp SET score = CASE userId ';
     var string = '';
     var string3 = 'diamond = CASE userId ';
-    var string5 = 'giftTicket = CASE userId ';
-    var string2 = 'END WHERE userId IN (';
+    var string2 = ' WHERE userId IN (';
     var objnull = true;
 
-    //console.log(userList)
     for (var i = 0; i < userList.length; ++i) {
         objnull = false;
-
         string += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._score + ' ';
         string3 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._diamond + ' ';
-        string5 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._giftTicket + ' ';
         string2 += userList[i]._userId;
         string2 += ','
     }
@@ -455,14 +451,10 @@ exports.saveUser = function saveUser(userList, callback) {
         return;
     }
     sql += string + "END,";
-    sql += string3 + "END,";
-    sql += string5;
+    sql += string3 + "END";
 
-    //console.log("leng:" + string2.length)
     string2 = string2.substring(0, string2.length - 1);
-    //console.log(string2)
     string2 += ')';
-
     sql += string2;
 
     var values = [];
@@ -473,21 +465,16 @@ exports.saveUser = function saveUser(userList, callback) {
     // log.info(sql);
     //log.info(values);
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("saveUser");
-                console.log(err);
+                console.log("saveUser" + err);
                 callback([]);
             } else {
                 callback(userList);
             }
         });
-
-
         values = [];
-
     });
 
 };
@@ -2488,7 +2475,6 @@ exports.getScore = function getScore(_userId, callback) {
 
     values.push(_userId);
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
@@ -2512,36 +2498,25 @@ exports.getScore = function getScore(_userId, callback) {
     });
 }
 
+//增加分数
+exports.addScore = function addScore(_userId, score) {
+    const sql = "update userinfo_imp set score = score + ? where userId = ?";
+    let values = [];
+    values.push(score);
+    values.push(_userId);
 
-//东山再起
-exports.dongshanzaiqi = function dongshanzaiqi(userid, callback) {
-    var sql = 'call dongshanzaiqi(?,?)';
-    var values = [];
-
-    values.push(userid);
-    values.push(gameConfig.dongshanzaiqi);
-
-    //console.log(values)
     pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
+        connection.query({sql: sql, values: values}, function (err) {
             connection.release();
             if (err) {
-                console.log("dongshanzaiqi");
+                console.log("addScore");
                 console.log(err);
-            } else {
-                if (rows[0].length) {
-                    callback(1, rows[0][0].k);
-                } else {
-                    callback(0);
-                }
-
             }
         })
-
         values = [];
     });
 }
+
 
 //创建首充
 exports.firstrecharge = function firstrecharge(_userId, callback) {

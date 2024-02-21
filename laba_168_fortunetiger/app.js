@@ -10,6 +10,7 @@ var gameConfig = require('./config/gameConfig');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const globalVariableModule = require("../util/global_variable_module");
 const  Urls = require("../util/config/url_config");
+const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
 
 var Csocket = Cio(Urls.hall_url);
@@ -185,36 +186,10 @@ io.on('connection', function (socket) {
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
         const nBetSum = parseInt(data.nBetList[0]);
-        redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-            let jp = jackpot ? parseInt(jackpot) : 0;
-            // 摇奖
-            const result = gameInfo.lottery(socket.userId, nBetSum, jp);
-            // 下注结果
-            if (result.code < 1) {
-                socket.emit('lotteryResult', {ResultCode: result.code});
-            } else {
-                redis_laba_win_pool.get_redis_win_pool().then(function (j) {
-                    jp = j ? parseInt(j) : 0;
-                    const jackpot_ratio = Config.jackpot_ratio;
-                    socket.emit('lotteryResult', {
-                        ResultCode: result.code,
-                        ResultData: {
-                            userscore: result.userscore,
-                            winscore: result.winscore,
-                            viewarray: result.viewarray,
-                            winfreeCount: result.winfreeCount,
-                            freeCount: result.freeCount,
-                            score_pool: result.score_pool,
-                            win_pool: jp,
-                            grand_jackpot: jp * jackpot_ratio[0],
-                            major_jackpot: jp * jackpot_ratio[1],
-                            minor_jackpot: jp * jackpot_ratio[2],
-                            mini_jackpot: jp * jackpot_ratio[3],
-                        }
-                    });
-                });
-            }
-        });
+        // 游戏奖池划分
+        const jackpot_ratio = Config.jackpot_ratio;
+        // 执行摇奖
+        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
     });
 
     //离线操作

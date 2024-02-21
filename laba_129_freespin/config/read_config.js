@@ -10,10 +10,12 @@ const readIniFile = function () {
         const data = fs.readFileSync(fileName, 'utf-8');
         const config = ini.parse(data);
 
+        // 图案连线
         this.line_count = parseInt(config['图案连线'].line_count);
         this.col_count = parseInt(config['图案连线'].col_count);
-        this.line_direction = parseInt(config['图案连线'].line_direction, 16);
-        this.line_rule = config['图案连线'].line_rule;
+
+        // 下注挡位
+        this.coinConfig = JSON.parse(config['下注挡位'].coin_config);
 
         // 图案数组
         this.iconInfos = Object.keys(config['图案信息'])
@@ -25,13 +27,7 @@ const readIniFile = function () {
             .filter(key => key.startsWith('icon_type_'))
             .map(iconType => parseInt(iconType.split('_')[2].trim()));
 
-        // 图案角标
-        this.nGameLines = Object.keys(config['图案角标'])
-            .filter(key => key.startsWith('game_line_'))
-            .map(key => JSON.parse(config['图案角标'][key]));
-
         // 特殊图案
-        this.nGameMagicCard = parseInt(config['图案信息'].icon_s_type_WILD);
         this.jackpot_card = parseInt(config['图案信息'].icon_s_type_jackpot);
         this.free_card = config['图案信息'].icon_s_type_free ? JSON.parse(config['图案信息'].icon_s_type_free) : null;
 
@@ -94,7 +90,7 @@ const readIniFile = function () {
     if (conf) {
         return {getInstand: conf};
     } else {
-        conf = new Config("jungledelight_config.ini");
+        conf = new Config("freespin_config.ini");
         return {getInstand: conf};
     }
 

@@ -3,17 +3,26 @@ const redis_jackpot_key = "jackpot";
 
 //初始奖池
 exports.redis_win_pool_init  = function redis_win_pool_init() {
-    RedisUtil.set(redis_jackpot_key,0);
+    // 如果不存在奖池,初始化奖池
+    this.get_redis_win_pool().then(jackpot =>{
+        if(!jackpot){
+            RedisUtil.set(redis_jackpot_key, 0);
+        }
+    });
 };
 
 //累加奖池
 exports.redis_win_pool_incrby  = function redis_win_pool_incrby(increment) {
-    RedisUtil.client.incrby(redis_jackpot_key,increment);
+    if(increment > 0){
+        RedisUtil.client.incrbyfloat(redis_jackpot_key,increment.toFixed(2));
+    }
 };
 
 //累减奖池
 exports.redis_win_pool_decrby  = function redis_win_pool_decrby(increment) {
-    RedisUtil.client.decrby(redis_jackpot_key, increment);
+    if(increment > 0){
+        RedisUtil.client.decrbyfloat(redis_jackpot_key, increment.toFixed(2));
+    }
 };
 
 //获取奖池

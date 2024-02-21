@@ -7,12 +7,12 @@ let pool = mysql.createPool({
     user: mysql_config.user,
     password: mysql_config.password,
     port: mysql_config.port,
-    database: 'lobby_shopping'
+    database: 'game_shopping'
 });
 
 //查询商品列表
 exports.selectShopList = function selectShopList(callback) {
-    let sql = "SELECT * FROM shopitem";
+    let sql = "SELECT * FROM shop_item";
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql}, function (err, rows) {
             if (err) {
@@ -27,13 +27,13 @@ exports.selectShopList = function selectShopList(callback) {
             }
         });
         connection.release();
-
     });
 };
 
+
 //插入新的商品信息
 exports.insertNewGoods = function insertNewGoods(_info, callback) {
-    let sql = "REPLACE INTO shopitem(id,goodsName,goodsType,goodsDescribe,goodsUrl,goodsNum,goodsPrice) VALUES(?,?,?,?,?,?,?)";
+    let sql = "REPLACE INTO shop_item(id,goodsName,goodsType,goodsDescribe,goodsUrl,goodsNum,goodsPrice) VALUES(?,?,?,?,?,?,?)";
     let values = [];
     values.push(_info.id);
     values.push(_info.goodsName);
@@ -53,13 +53,12 @@ exports.insertNewGoods = function insertNewGoods(_info, callback) {
             }
         });
         connection.release();
-
     });
 };
 
 //删除商品信息
 exports.delGoods = function delGoods(_info, callback) {
-    let sql = "DELETE FROM shopitem WHERE id = ?";
+    let sql = "DELETE FROM shop_item WHERE id = ?";
     let values = [];
     values.push(_info.id);
 
@@ -79,7 +78,7 @@ exports.delGoods = function delGoods(_info, callback) {
 
 //查询商品信息
 exports.selectGoodsInfo = function selectGoodsInfo(id, callback) {
-    let sql = "SELECT * FROM shopitem WHERE id = ?";
+    let sql = "SELECT * FROM shop_item WHERE id = ?";
     let values = [];
     values.push(id);
     pool.getConnection(function (err, connection) {
@@ -102,7 +101,7 @@ exports.selectGoodsInfo = function selectGoodsInfo(id, callback) {
 
 //更新商品信息
 exports.updateGoodsInfo = function updateGoodsInfo(id, goodsNum, callback) {
-    let sql = "UPDATE shopitem SET goodsNum=? WHERE Id =?";
+    let sql = "UPDATE shop_item SET goodsNum=? WHERE Id =?";
     let values = [];
     values.push(goodsNum);
     values.push(id);

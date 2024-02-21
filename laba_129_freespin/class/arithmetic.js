@@ -33,19 +33,19 @@ arithmetic = function (_idx) {
 	}
 	this.addGamblingBalanceGold = function (Gold, Pool) {
 		// 添加库存 奖池   数据库同步使用
-		this.nGamblingBalanceGold += parseInt(Gold);
+		this.nGamblingBalanceGold += Gold;
 		// redis存储奖池
-		redis_laba_win_pool.redis_win_pool_incrby(parseInt(Pool));
+		redis_laba_win_pool.redis_win_pool_incrby(Pool);
 		log.info("添加库存:" + Gold + "当前库存" + this.nGamblingBalanceGold);
 		log.info("添加奖池:" + Pool);
 	}
 	this.subGamblingBalanceGold = function (Gold, Pool) {
 		//减少库存 奖池
+		this.nGamblingBalanceGold -= Gold;
 		log.info("减少库存:" + Gold +  "库存" + this.nGamblingBalanceGold);
-		this.nGamblingBalanceGold -= parseInt(Gold);
 		log.info("减少奖池:" + Pool);
 		//redis奖池
-		redis_laba_win_pool.redis_win_pool_decrby(parseInt(Pool))
+		redis_laba_win_pool.redis_win_pool_decrby(Pool)
 	}
 	this.getGamblingBalanceLevelBigWin = function () {
 		//获取库存 水位 幸运值  判断中奖使用

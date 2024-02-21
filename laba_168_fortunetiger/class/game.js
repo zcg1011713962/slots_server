@@ -10,6 +10,9 @@ const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const log = require("../../CClass/class/loginfo").getInstand;
 const http_bc = require("./../../util/http_broadcast");
 const {get_redis_win_pool} = require("../../util/redis_laba_win_pool");
+const laba = require("../../util/laba");
+const analyse_result = require("../../util/lottery_analyse_result");
+const lottery_record = require("../../util/lottery_record");
 
 var GameInfo = function () {
 
@@ -93,9 +96,9 @@ var GameInfo = function () {
 
         this.tt = 0;
 
-        this.lottery = function (userId, nBetSum, jackpot) {
+        this.lottery = function (userId, nBetSum, gameJackpot, redisIconTypeBind) {
             // 分析手牌结果
-            const dictAnalyseResult = {
+            let dictAnalyseResult = {
                 code: 2,
                 nHandCards: [],  //# 结果手牌
                 nWinLines: [],  //# 中奖的线数的检索
@@ -140,7 +143,13 @@ var GameInfo = function () {
                 return {code: -2};
             }
 
-
+            // 每条线下注的金额
+            let len = Config.nGameLines.length;
+            const nBetItem = nBetSum / len;
+            const nBetList = [];
+            for (let i = 0; i < len; i++) {
+                nBetList.push(nBetItem)
+            }
             // 行
             const line_count = Config.line_count;
             const col_count = Config.col_count;
@@ -152,25 +161,46 @@ var GameInfo = function () {
             const weight_two_array = Config.weight_two_array;
             // 图案倍数
             const icon_mul = Config.icon_mul;
-            // 万能图案
-            const  nGameMagicCardIndex = Config.nGameMagicCard;
+            // 免费图案
+            const freeCard = Config.free_card;
+            // 中普通图案出现的最少次数
+            const nGameLineWinLowerLimitCardNumber = Config.line_win_lower_limit;
             // 中jackpot出现的最少次数
             const jackpotCardLowerLimit = Config.icon_jackpot_lower_limit;
             // jackpot图案
             const jackpotCard = Config.jackpot_card;
-            // 最低需要单线连续图案数量，才算中奖
-            const  nGameLineWinLowerLimitCardNumber = Config.line_win_lower_limit;
+            // 万能图案
+            const nGameMagicCardIndex = Config.nGameMagicCard;
+            // 游戏奖池比例
+            const jackpotRatio = Config.jackpot_ratio;
+            // 玩家下注
+            const jackpotLevelMoney = Config.jackpot_level_money;
+            // 奖池挡位
+            const jackpotLevelProb = Config.jackpot_level_prob;
+            //
+            const betJackpotLevelBet = Config.bet_jackpot_level_bet;
+            //
+            const betJackpotLevelIndex = Config.bet_jackpot_level_index;
+            //
+            const jackpotPayLevel = Config.jackpot_pay_level;
+            // 配牌器开关
+            const iconBindSwitch = Config.icon_bind_switch;
+            // 配牌
+            const iconTypeBind = redisIconTypeBind ? redisIconTypeBind : Config.icon_type_bind;
+            // 免费次数[]
+            const iconFreeTimes = Config.free_times;
             // 线的判断方向
             const nGameLineDirection = Config.line_direction;
             // 双向判断的情况下，如果两个方向都中奖，取大值或者取小值（True：取大值；False：取小值）
             const bGameLineRule = Config.line_rule;
-
-            // 每条线下注的金额
-            let len = Config.nGameLines.length;
-            const nBetItem = nBetSum / len;
-            const nBetList = [];
-            for (let i = 0; i < len; i++) {
-                nBetList.push(nBetItem)
+            // 中奖图案角标
+            const nGameLines = Config.nGameLines;
+            //
+            const target_rtp_start_position = 10;
+            // 免费卡对应次数
+            let freeTimes = 0;
+            if(freeCard){
+                freeTimes = iconFreeTimes[freeCard];
             }
 
             //用户金币
@@ -188,33 +218,36 @@ var GameInfo = function () {
             const is_luck = false;
             // 目标RTP
             const expectRTP = GamblingBalanceLevelBigWin.expectRTP;
-            const target_rtp_start_position = 100;
+
 
             // 进入奖池的钱
             const addJackpot = nBetSum * parseInt(nGamblingWaterLevelGold) / 100;
             // 进入库存的钱
             const addBalance = nBetSum - addJackpot;
-            //增加库存和奖池
+            // 增加库存和奖池ll
             this.A.addGamblingBalanceGold(addBalance, addJackpot);
+
 
             let nHandCards = [];
             let win = 0;
-            let jp = 0;
+            let winJackpot = 0;
             let fin_value = 0;
             let source_rtp = 0;
             // 生成图案，分析结果（结果不满意继续）
             while(true){
-                // 分析jackpot
-                jp = LABA.JackpotAnalyse(jackpot, nBetSum, Config.jackpot_ratio, Config.jackpot_level_money, Config.jackpot_level_prob, Config.bet_jackpot_level_bet, Config.bet_jackpot_level_index, Config.jackpot_pay_level);
+                if(jackpotCard){
+                    // 分析jackpot
+                    winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
+                }
                 // 生成图案
-                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, Config.icon_bind_switch, Config.icon_type_bind, jp);
+                nHandCards = laba.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
                 // 分析图案
-                LABA.HandCardsAnalyse(nHandCards, Config.nGameLines, icon_mul, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameLineDirection, bGameLineRule, nBetList,jackpotCard, jp, dictAnalyseResult);
+                LABA.HandCardsAnalyse(nHandCards, nGameLines, icon_mul, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameLineDirection, bGameLineRule, nBetList,jackpotCard, winJackpot, freeCard, freeTimes, nGameLineWinLowerLimitCardNumber, dictAnalyseResult);
 
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
-                fin_value = win + jp;
+                fin_value = win + winJackpot;
                 // 普通奖励不能大于库存，除非是开了配牌器
                 if(!Config.icon_bind_switch && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
@@ -238,112 +271,43 @@ var GameInfo = function () {
                 break;
             }
 
-            const winscore = win + jp;
+            // 减少库存和奖池
+            const winscore = parseInt(dictAnalyseResult["win"]) + winJackpot;
             if (winscore > 0) {
-                // 减少库存和奖池
-                this.A.subGamblingBalanceGold(win, jp)
+                this.A.subGamblingBalanceGold(winscore, winJackpot);
             }
-            this.userList[userId].winscore(winscore);
-            const score_current = this.userList[userId].getScore();
-            dictAnalyseResult["user_score"] = score_current;
+            // 结果处理
+            const user = this.userList[userId];
+            const freeCount = dictAnalyseResult["getFreeTime"]["nFreeTime"];
+            const resultArray = analyse_result.build(dictAnalyseResult, gameConfig.gameName, nHandCards, userId, nBetSum, winscore, freeCount, GamblingBalanceLevelBigWin, user, gameConfig.sendMessage_mul);
+            // 剩余免费次数
+            const resFreeCount = user.getFreeCount();
+            const score_current = user.getScore();
+            // 日志记录
+            lottery_record.record(this._Csocket, nGameLines.length, gameConfig.serverId, gameConfig.gameId, userId, nBetSum, winscore, score_before, score_current, freeCount, sourceFreeCount,
+                resFreeCount, gameConfig.logflag, this.lotteryLogList, this.score_changeLogList, resultArray);
+            // 摇奖次数统计
+            this.lotteryTimes(lotteryResult, winscore, nBetSum, fin_value);
+            // 打印图案排列日志
+            LABA.handCardLog(nHandCards, col_count, line_count,nBetSum, winscore, winJackpot, expectRTP);
+            // 返回结果
+            return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, 0);
+        };
 
-
-            // 手牌加1处理，返回给客户端
-            dictAnalyseResult["nHandCards"] = [];
-            for (let i in nHandCards) {
-                dictAnalyseResult["nHandCards"].push(parseInt(nHandCards[i]) + 1)
-            }
-            // 判断是否需要发送中奖信息到通知服
-            if (http_bc &&  win >= nBetSum * gameConfig.sendMessage_mul) {
-                let data = {
-                    userId: userId,
-                    nickName: this.userList[userId]._nickname,
-                    gameName: gameConfig.gameName,
-                    win: win
-                };
-                http_bc.send(data);
-            }
-
-
-            //写入服务器记录
-            //1.写记录
-            const userInfo = {
-                userid: userId,
-                bet: 0,
-                lines: Config.nGameLines.length,
-                nBetSum: nBetSum,
-                score_before: score_before,
-                score_win: winscore,
-                score_current: score_current,
-                result_array: JSON.stringify(dictAnalyseResult),
-                score_linescore: nBetSum,
-                free_count_win: 0,
-                free_count_before: sourceFreeCount,
-                free_count_current: 0
-            };
-            this.lotteryLogList.push(userInfo);
-
-            //记录金钱变化量
-            var userInfolog = {
-                userid: userId,
-                score_before: score_before,
-                score_change: winscore - nBetSum,
-                score_current: score_current,
-                change_type: gameConfig.logflag,
-                isOnline: true
-            };
-
-            this.score_changeLogList.push(userInfolog);
-
-            var CoinLog = [];
-            var logTemp = {
-                userId: userId,
-                useCoin: nBetSum,
-                winCoin: winscore - nBetSum,
-                tax: 0,
-                serverId: gameConfig.serverId,
-                gameId: gameConfig.gameId
-            };
-            CoinLog.push(logTemp);
-            this._Csocket.emit("insertMark", CoinLog);
-
-            //制作结果
-            const Result = {
-                code: 1,
-                userscore: score_current - jp,
-                winscore: dictAnalyseResult["win"],
-                viewarray: dictAnalyseResult,
-                winfreeCount: 0,
-                freeCount: 0,
-                score_pool: this.A.getGamblingBalanceLevelBigWin().nGamblingBalanceGold,
-                dictAnalyseResult: dictAnalyseResult
-            };
-
-            //服务器统计
+        this.lotteryTimes = function (lotteryResult, winscore, nBetSum, fin_value) {
+            // 服务器统计
             ++this.lotteryCount;
             ++this.hourlotteryCount;
             this.totalBet += nBetSum;
             this.totalBackBet += fin_value;
-
             if (lotteryResult === 1) {
+                // 使用金币
                 this.winTotal += (winscore - nBetSum);
-                this.hourWinTotal += (winscore - nBetSum);
             } else if (lotteryResult === 2) {
+                // 使用免费次数
                 this.winTotal += winscore;
-                this.hourWinTotal += winscore;
             }
-            try {
-                const chunkCards = LABA.chunkArray(nHandCards, col_count);
-                log.info('图案排列结果');
-                for (let i = 0; i < line_count; i++) {
-                    log.info(chunkCards[i]);
-                }
-                log.info('下注:' + nBetSum + '赢:' + win + '获得jackpot:' + jp + 'source_rtp:' + source_rtp + 'expectRTP:' + expectRTP);
-            }catch (e){
-                log.err(e);
-            }
-            return Result;
-        };
+        }
 
         this.setIo = function (_io, _Csocket) {
             this.sever.setIo(_io, _Csocket);
