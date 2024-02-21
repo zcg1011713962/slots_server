@@ -2,9 +2,9 @@ const laba_config = require("./config/laba_config");
 const log = require("./../CClass/class/loginfo").getInstand;
 
 module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_bind_switch, icon_type_bind, jp) {
-    if(icon_bind_switch){
+    if(icon_type_bind){
         // 如果开了配牌器
-        log.info('配牌器开关:' + icon_bind_switch + "牌:" + icon_type_bind);
+        log.info('配牌器开关:' + true + "牌:" + icon_type_bind);
         return icon_type_bind;
     }
     return getCard(cards, cardsNumber, weight_two_array, col_count, line_count, jackpotCard, jp);

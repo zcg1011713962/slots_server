@@ -1,0 +1,10 @@
+[
+    { "level": 0, "minRecharge": 0, "minConsumption": 0 },
+    { "level": 1, "minRecharge": 200, "minConsumption": 2000000 },
+    { "level": 2, "minRecharge": 500, "minConsumption": 5000000 },
+    { "level": 3, "minRecharge": 1000, "minConsumption": 10000000 },
+    { "level": 4, "minRecharge": 3000, "minConsumption": 30000000 },
+    { "level": 5, "minRecharge": 7000, "minConsumption": 70000000 },
+    { "level": 6, "minRecharge": 10000, "minConsumption": 100000000 },
+    { "level": 7, "minRecharge": 30000, "minConsumption": 300000000 }
+]
