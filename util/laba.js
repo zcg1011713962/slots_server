@@ -1,5 +1,4 @@
 const laba_config = require("./config/laba_config");
-const gameConfig = require("../laba_187_GrandWheel/config/gameConfig");
 const log = require("./../CClass/class/loginfo").getInstand;
 
 module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_bind_switch, icon_type_bind, jp) {

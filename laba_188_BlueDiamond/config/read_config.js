@@ -94,7 +94,7 @@ const readIniFile = function () {
     if (conf) {
         return {getInstand: conf};
     } else {
-        conf = new Config("grand_wheel_config.ini");
+        conf = new Config("blue_diamond_config.ini");
         return {getInstand: conf};
     }
 
