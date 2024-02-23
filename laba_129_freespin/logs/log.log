@@ -768,3 +768,41 @@
 2024-02-23T10:38:27.971 [INFO ] default - [ 1 ]
 2024-02-23T10:38:27.972 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
 2024-02-23T10:38:27.972 [INFO ] default - 摇奖结果{"code":1,"userscore":114104,"winscore":4,"viewarray":{"code":2,"nWinLines":1,"nBet":10,"win":4,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708655907966,"is_free":false,"user_score":114104},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-23T11:10:09.715 [INFO ] default - 添加库存:9.5当前库存77153
+2024-02-23T11:10:09.717 [INFO ] default - 添加奖池:0.5
+2024-02-23T11:10:09.719 [INFO ] default - 减少库存:800库存76353
+2024-02-23T11:10:09.720 [INFO ] default - 减少奖池:0
+2024-02-23T11:10:09.726 [INFO ] default - 图案排列结果
+2024-02-23T11:10:09.727 [INFO ] default - [ 2 ]
+2024-02-23T11:10:09.728 [INFO ] default - 下注:10赢:800jackpot:0expectRTP:80
+2024-02-23T11:10:09.729 [INFO ] default - 摇奖结果{"code":1,"userscore":100790,"winscore":800,"viewarray":{"code":2,"nWinLines":2,"nBet":10,"win":800,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708657809715,"is_free":false,"user_score":100790},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-23T12:10:04.817 [INFO ] default - 添加库存:9.5当前库存76362.5
+2024-02-23T12:10:04.819 [INFO ] default - 添加奖池:0.5
+2024-02-23T12:10:04.822 [INFO ] default - 图案排列结果
+2024-02-23T12:10:04.823 [INFO ] default - [ 8 ]
+2024-02-23T12:10:04.824 [INFO ] default - 下注:10赢:0jackpot:0expectRTP:80
+2024-02-23T12:10:04.825 [INFO ] default - 摇奖结果{"code":1,"userscore":99990,"winscore":0,"viewarray":{"code":2,"nWinLines":8,"nBet":10,"win":0,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":true,"nFreeTime":10,"nIndex":8},"nBetTime":1708661404816,"is_free":true,"user_score":99990},"winfreeCount":10,"freeCount":10,"score_pool":0}
+2024-02-23T12:10:14.356 [INFO ] default - 添加库存:9.5当前库存76372
+2024-02-23T12:10:14.359 [INFO ] default - 添加奖池:0.5
+2024-02-23T12:10:14.360 [INFO ] default - 减少库存:200库存76172
+2024-02-23T12:10:14.361 [INFO ] default - 减少奖池:0
+2024-02-23T12:10:14.366 [INFO ] default - 图案排列结果
+2024-02-23T12:10:14.367 [INFO ] default - [ 4 ]
+2024-02-23T12:10:14.369 [INFO ] default - 下注:10赢:200jackpot:0expectRTP:80
+2024-02-23T12:10:14.370 [INFO ] default - 摇奖结果{"code":1,"userscore":100190,"winscore":200,"viewarray":{"code":2,"nWinLines":4,"nBet":10,"win":200,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":9,"nFreeType":0},"nBetTime":1708661414356,"is_free":true,"user_score":100190},"winfreeCount":0,"freeCount":9,"score_pool":0}
+2024-02-23T12:10:26.594 [INFO ] default - 添加库存:9.5当前库存76181.5
+2024-02-23T12:10:26.595 [INFO ] default - 添加奖池:0.5
+2024-02-23T12:10:26.596 [INFO ] default - 减少库存:12库存76169.5
+2024-02-23T12:10:26.597 [INFO ] default - 减少奖池:0
+2024-02-23T12:10:26.599 [INFO ] default - 图案排列结果
+2024-02-23T12:10:26.599 [INFO ] default - [ 5 ]
+2024-02-23T12:10:26.600 [INFO ] default - 下注:10赢:12jackpot:0expectRTP:80
+2024-02-23T12:10:26.600 [INFO ] default - 摇奖结果{"code":1,"userscore":100202,"winscore":12,"viewarray":{"code":2,"nWinLines":5,"nBet":10,"win":12,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":8,"nFreeType":0},"nBetTime":1708661426593,"is_free":true,"user_score":100202},"winfreeCount":0,"freeCount":8,"score_pool":0}
+2024-02-23T12:10:38.482 [INFO ] default - 添加库存:9.5当前库存76179
+2024-02-23T12:10:38.483 [INFO ] default - 添加奖池:0.5
+2024-02-23T12:10:38.484 [INFO ] default - 减少库存:4库存76175
+2024-02-23T12:10:38.485 [INFO ] default - 减少奖池:0
+2024-02-23T12:10:38.489 [INFO ] default - 图案排列结果
+2024-02-23T12:10:38.490 [INFO ] default - [ 1 ]
+2024-02-23T12:10:38.491 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
+2024-02-23T12:10:38.492 [INFO ] default - 摇奖结果{"code":1,"userscore":100206,"winscore":4,"viewarray":{"code":2,"nWinLines":1,"nBet":10,"win":4,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":7,"nFreeType":0},"nBetTime":1708661438482,"is_free":true,"user_score":100206},"winfreeCount":0,"freeCount":7,"score_pool":0}

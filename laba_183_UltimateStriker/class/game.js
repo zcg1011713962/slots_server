@@ -261,15 +261,16 @@ var GameInfo = function () {
 
                 let addSpecialCard = (arr, colNum) => {
                     let r1 = RandomNumBoth(0, 3);//出现几组
-                    let card = RandomNumBoth(0, 10);//哪张牌
+                    let card = RandomNumBoth(0, 11);//哪张牌
                     switch (r1) {
                         case 0:
                             break;
                         case 1:
                             let p = RandomNumBoth(1, arr.length - 1);
                             let len = RandomNumBoth(2, p + 1 > 4 ? 4 : p + 1);
+                            len = card === gameConfig.GAME_FREE_TIMES_CARD_DIAMOND ? 2 : len;
                             let bt = RandomNumBoth(1, 2);//1有  2没有
-                            let ls = RandomNumBoth(1, 2);//1金  2银
+                            let ls = 2;//1金  2银  3万能
                             let pos = [];
                             let drl = {r: card + 1, bt: bt, ls: ls};
                             for (let i = 0; i < len; i++) {
@@ -287,9 +288,14 @@ var GameInfo = function () {
                         case 2:
                             let list = RandomNumForList(gameConfig.CARD_ORDERING);
                             for (let i = 0; i < list.length; i++) {
+                                card = RandomNumBoth(0, 11);//哪张牌
+                                if (card === gameConfig.GAME_FREE_TIMES_CARD_DIAMOND) {
+                                    let r2 = RandomNumBoth(0, 5);
+                                    list = gameConfig.CARD_ORDERING[r2];
+                                }
                                 let pos2 = [];
                                 let bt2 = RandomNumBoth(1, 2);//1有  2没有
-                                let ls2 = RandomNumBoth(1, 2);//1金  2银
+                                let ls2 = 2;//1金  2银  3万能
                                 let drl2 = {r: card + 1, bt: bt2, ls: ls2};
                                 for (let j = 0; j < list[i].length; j++) {
                                     arr[list[i][j]] = card;
@@ -307,9 +313,10 @@ var GameInfo = function () {
                         case 3:
                             let list2 = [[0, 1], [2, 3], [4, 5]];
                             for (let i = 0; i < list2.length; i++) {
+                                card = RandomNumBoth(0, 11);//哪张牌
                                 let pos3 = [];
                                 let bt3 = RandomNumBoth(1, 2);//1有  2没有
-                                let ls3 = RandomNumBoth(1, 2);//1金  2银
+                                let ls3 = 2;//1金  2银  3万能
                                 let drl3 = {r: card + 1, bt: bt3, ls: ls3};
                                 for (let j = 0; j < list2[i].length; j++) {
                                     arr[list2[i][j]] = card;
@@ -335,15 +342,15 @@ var GameInfo = function () {
 
                 console.log(col2, col3, col4, col5);
 
-                //免费牌每列只许出现一张
-                if (list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col1) > 1 ||
-                    list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col2) > 1 ||
-                    list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col3) > 1 ||
-                    list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col4) > 1 ||
-                    list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col5) > 1 ||
-                    list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col6) > 1) {
-                    continue;
-                }
+                // //免费牌每列只许出现一张
+                // if (list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col1) > 1 ||
+                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col2) > 1 ||
+                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col3) > 1 ||
+                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col4) > 1 ||
+                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col5) > 1 ||
+                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col6) > 1) {
+                //     continue;
+                // }
 
                 for (var i = 0; i < gameConfig.GAME_HAND_CARDS_NUMBER_DIAMOND; i++) {
                     dictAnalyseResult["nWinCards"].push(false);
@@ -363,7 +370,14 @@ var GameInfo = function () {
 
                 dictAnalyseResult["sr"] = superCardList;
                 dictAnalyseResult["srd"] = superCardDetailList;
+                //# 判断是否进入免费模式
+                var getFreeTime = {"bFlag": false, "nFreeTime": 0};
+                var getOpenBox = {bFlag: false, nWinOpenBox: 0, win: 0};
 
+                if (bFreeTimeFlag) {
+                    dictAnalyseResult["win"] *= freeMul;
+                    dictAnalyseResult["fMultiple"] = freeMul;
+                }
 
                 var res_dict_list = [];
                 var new_hand_card = [];
@@ -374,9 +388,11 @@ var GameInfo = function () {
                 res_dict_list.push(JSON.parse(JSON.stringify(dictAnalyseResult)));
 
                 var combo_num = 0;
+                var all_win = 0;
+                var box_win = 0;
                 while (true) {
                     if (dictAnalyseResult["win"] > 0) { // 中奖了
-                        win += dictAnalyseResult["win"];
+                        all_win += dictAnalyseResult["win"];
                         combo_num += 1;
                         var win_lines_index = [];
                         for (let nwldi in dictAnalyseResult["nWinLinesDetail"]) {
@@ -400,11 +416,14 @@ var GameInfo = function () {
                                         if (superCardDetailList[si].bt === 1) {//有框的需要替换
                                             isFind = true;
                                             if (superCardDetailList[si].ls === 1) {//金框变万能
-                                                typeList[si] = 1;
+                                                typeList[si] = 3;
                                                 nHandCards[x] = gameConfig.GAME_MAGIC_CARD_DIAMOND;
                                             } else if (superCardDetailList[si].ls === 2) {//银框变金框，并随机新的元素
                                                 typeList[si] = 2;
                                             }
+                                        } else if (superCardDetailList[si].ls === 3 && superCardDetailList[si].nt > 1) {//如果是万能
+                                            typeList[si] = 4;
+                                            isFind = true;
                                         } else {//没框的需要删除
                                             typeList[si] = 1;
                                             isFind = false;
@@ -418,7 +437,7 @@ var GameInfo = function () {
                                 }
                             }
                         }
-                        // console.log("typeList:" + JSON.stringify(typeList));
+                        console.log("typeList:" + JSON.stringify(typeList));
                         //整合需要替换的卡牌
                         for (let i in typeList) {
                             if (typeList[i] === 1) {
@@ -432,19 +451,33 @@ var GameInfo = function () {
                                 for (let j in superCardList[i]) {
                                     nHandCards[superCardList[i][j]] = newCard;
                                 }
+                            } else if (typeList[i] === 3) {//转化为万能
+                                let newCard = gameConfig.GAME_MAGIC_CARD_DIAMOND;
+                                superCardDetailList[i].r = newCard + 1;
+                                superCardDetailList[i].bt = 2;
+                                superCardDetailList[i].ls = 3;
+                                superCardDetailList[i].nt = superCardList[i].length;
+                                for (let j in superCardList[i]) {
+                                    nHandCards[superCardList[i][j]] = newCard;
+                                }
+                            } else if (typeList[i] === 4) {//消除万能
+                                superCardDetailList[i].nt -= 1;
                             }
                         }
                         //重新调整长牌的位置
                         for (let i in superCardList) {
                             let lastCard = superCardList[i][superCardList[i].length - 1];
                             let dn = 0;
-                            if (lastCard + 6 < 30 && nHandCards[lastCard + 6] === -1) {
+                            if (lastCard + 6 < 36 && nHandCards[lastCard + 6] === -1) {
                                 dn += 1;
                             }
-                            if (lastCard + 12 < 30 && nHandCards[lastCard + 12] === -1) {
+                            if (lastCard + 12 < 36 && nHandCards[lastCard + 12] === -1) {
                                 dn += 1;
                             }
-                            if (lastCard + 18 < 30 && nHandCards[lastCard + 18] === -1) {
+                            if (lastCard + 18 < 36 && nHandCards[lastCard + 18] === -1) {
+                                dn += 1;
+                            }
+                            if (lastCard + 24 < 36 && nHandCards[lastCard + 24] === -1) {
                                 dn += 1;
                             }
                             for (let j in superCardList[i]) {
@@ -456,18 +489,21 @@ var GameInfo = function () {
                         if (!bFreeTimeFlag) {
                             for (let n_h_i in nHandCards) {
                                 if (nHandCards[n_h_i] === -1) {
-                                    if (parseInt(n_h_i) + 6 < 30 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
+                                    if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
                                         nHandCards[parseInt(n_h_i) + 6] = -1;
-                                    } else if (parseInt(n_h_i) + 12 < 30 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
+                                    } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
                                         nHandCards[parseInt(n_h_i) + 12] = -1;
-                                    } else if (parseInt(n_h_i) + 18 < 30 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
+                                    } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
                                         nHandCards[parseInt(n_h_i) + 18] = -1;
-                                    } else if (parseInt(n_h_i) + 24 < 30 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
+                                    } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
                                         nHandCards[parseInt(n_h_i) + 24] = -1;
+                                    } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
+                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
+                                        nHandCards[parseInt(n_h_i) + 30] = -1;
                                     } else {
                                         nHandCards[n_h_i] = gameConfig.GAME_COLORS_DIAMOND[RandomNumBoth(0, gameConfig.GAME_COLORS_DIAMOND.length - 1)];
                                     }
@@ -476,18 +512,21 @@ var GameInfo = function () {
                         } else {
                             for (let n_h_i in nHandCards) {
                                 if (nHandCards[n_h_i] === -1) {
-                                    if (parseInt(n_h_i) + 6 < 30 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
+                                    if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
                                         nHandCards[parseInt(n_h_i) + 6] = -1;
-                                    } else if (parseInt(n_h_i) + 12 < 30 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
+                                    } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
                                         nHandCards[parseInt(n_h_i) + 12] = -1;
-                                    } else if (parseInt(n_h_i) + 18 < 30 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
+                                    } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
                                         nHandCards[parseInt(n_h_i) + 18] = -1;
-                                    } else if (parseInt(n_h_i) + 24 < 30 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
+                                    } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
                                         nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
                                         nHandCards[parseInt(n_h_i) + 24] = -1;
+                                    } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
+                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
+                                        nHandCards[parseInt(n_h_i) + 30] = -1;
                                     } else {
                                         nHandCards[n_h_i] = gameConfig.Free_GAME_COLORS_DIAMOND[RandomNumBoth(0, gameConfig.Free_GAME_COLORS_DIAMOND.length - 1)];
                                     }
@@ -496,6 +535,9 @@ var GameInfo = function () {
 
                         }
                         nHandCards.reverse();
+
+
+
 
                         dictAnalyseResult = {
                             code: 2,

@@ -10613,3 +10613,1073 @@
 2024-02-23T10:39:50.313 [INFO ] default - 21092添加钻石
 2024-02-23T10:39:50.317 [INFO ] default - 21092登录分数100000
 2024-02-23T10:39:50.317 [INFO ] default - 21092登录钻石10
+2024-02-23T10:41:14.537 [INFO ] default - userDisconnect:
+2024-02-23T10:41:14.538 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21091,
+  userScore: 114104,
+  gameId: 15129,
+  nolog: true
+}
+2024-02-23T10:41:14.539 [INFO ] default - 21091清除游戏ID
+2024-02-23T10:41:14.539 [INFO ] default - 游戏ID0
+2024-02-23T10:41:14.540 [INFO ] default - 用户21091删除!
+2024-02-23T10:41:14.540 [INFO ] default - 用户21091没有游戏ID
+2024-02-23T10:41:15.148 [INFO ] default - 成功保存,删除用户21091 socre:114104 diamond:10
+2024-02-23T10:41:15.348 [INFO ] default - socket comein........
+2024-02-23T10:41:15.352 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:41:15.354 [INFO ] default - 添加用户:21091
+2024-02-23T10:41:15.355 [INFO ] default - 21091获取道具
+2024-02-23T10:41:15.356 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:41:15.357 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:41:15.357 [INFO ] default - 21091添加金币
+2024-02-23T10:41:15.359 [INFO ] default - 21091添加钻石
+2024-02-23T10:41:15.364 [INFO ] default - 21091登录分数114104
+2024-02-23T10:41:15.365 [INFO ] default - 21091登录钻石10
+2024-02-23T10:49:24.893 [INFO ] default - disconnect:21092
+2024-02-23T10:49:24.896 [INFO ] default - 用户21092删除!
+2024-02-23T10:49:24.897 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T10:49:25.741 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T10:49:27.063 [INFO ] default - socket comein........
+2024-02-23T10:49:27.079 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:49:27.085 [INFO ] default - 添加用户:21092
+2024-02-23T10:49:27.089 [INFO ] default - 21092获取道具
+2024-02-23T10:49:27.090 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:49:27.093 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:49:27.094 [INFO ] default - 21092添加金币
+2024-02-23T10:49:27.099 [INFO ] default - 21092添加钻石
+2024-02-23T10:49:27.105 [INFO ] default - 21092登录分数100000
+2024-02-23T10:49:27.106 [INFO ] default - 21092登录钻石10
+2024-02-23T10:49:53.669 [INFO ] default - disconnect:21092
+2024-02-23T10:49:53.671 [INFO ] default - 用户21092删除!
+2024-02-23T10:49:53.673 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T10:49:54.014 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T10:49:56.192 [INFO ] default - socket comein........
+2024-02-23T10:49:56.213 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:49:56.218 [INFO ] default - 添加用户:21092
+2024-02-23T10:49:56.220 [INFO ] default - 21092获取道具
+2024-02-23T10:49:56.221 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:49:56.225 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:49:56.225 [INFO ] default - 21092添加金币
+2024-02-23T10:49:56.229 [INFO ] default - 21092添加钻石
+2024-02-23T10:49:56.235 [INFO ] default - 21092登录分数100000
+2024-02-23T10:49:56.236 [INFO ] default - 21092登录钻石10
+2024-02-23T10:51:57.840 [INFO ] default - disconnect:21092
+2024-02-23T10:51:57.842 [INFO ] default - 用户21092删除!
+2024-02-23T10:51:57.843 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T10:51:58.072 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T10:51:59.593 [INFO ] default - socket comein........
+2024-02-23T10:51:59.615 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:51:59.617 [INFO ] default - 添加用户:21092
+2024-02-23T10:51:59.619 [INFO ] default - 21092获取道具
+2024-02-23T10:51:59.620 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:51:59.622 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:51:59.622 [INFO ] default - 21092添加金币
+2024-02-23T10:51:59.627 [INFO ] default - 21092添加钻石
+2024-02-23T10:51:59.639 [INFO ] default - 21092登录分数100000
+2024-02-23T10:51:59.639 [INFO ] default - 21092登录钻石10
+2024-02-23T10:52:21.176 [INFO ] default - disconnect:21092
+2024-02-23T10:52:21.178 [INFO ] default - 用户21092删除!
+2024-02-23T10:52:21.178 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T10:52:22.187 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T10:52:22.772 [INFO ] default - socket comein........
+2024-02-23T10:52:22.790 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:52:22.798 [INFO ] default - 添加用户:21092
+2024-02-23T10:52:22.801 [INFO ] default - 21092获取道具
+2024-02-23T10:52:22.801 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:52:22.803 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:52:22.803 [INFO ] default - 21092添加金币
+2024-02-23T10:52:22.807 [INFO ] default - 21092添加钻石
+2024-02-23T10:52:22.815 [INFO ] default - 21092登录分数100000
+2024-02-23T10:52:22.815 [INFO ] default - 21092登录钻石10
+2024-02-23T10:59:12.259 [INFO ] default - disconnect:21092
+2024-02-23T10:59:12.260 [INFO ] default - 用户21092删除!
+2024-02-23T10:59:12.261 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T10:59:12.973 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T10:59:13.940 [INFO ] default - socket comein........
+2024-02-23T10:59:13.955 [INFO ] default - 登录大厅[object Object]
+2024-02-23T10:59:13.959 [INFO ] default - 添加用户:21092
+2024-02-23T10:59:13.961 [INFO ] default - 21092获取道具
+2024-02-23T10:59:13.961 [INFO ] default - 登录成功:[object Object]
+2024-02-23T10:59:13.963 [INFO ] default - 获取积分:[object Object]
+2024-02-23T10:59:13.963 [INFO ] default - 21092添加金币
+2024-02-23T10:59:13.971 [INFO ] default - 21092添加钻石
+2024-02-23T10:59:13.978 [INFO ] default - 21092登录分数100000
+2024-02-23T10:59:13.978 [INFO ] default - 21092登录钻石10
+2024-02-23T11:01:50.089 [INFO ] default - disconnect:21092
+2024-02-23T11:01:50.090 [INFO ] default - 用户21092删除!
+2024-02-23T11:01:50.090 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:01:50.588 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:01:53.131 [INFO ] default - socket comein........
+2024-02-23T11:01:54.221 [INFO ] default - socket comein........
+2024-02-23T11:01:54.237 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:01:54.239 [INFO ] default - 添加用户:21092
+2024-02-23T11:01:54.242 [INFO ] default - 21092获取道具
+2024-02-23T11:01:54.242 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:01:54.243 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:01:54.244 [INFO ] default - 21092添加金币
+2024-02-23T11:01:54.247 [INFO ] default - 21092添加钻石
+2024-02-23T11:01:54.253 [INFO ] default - 21092登录分数100000
+2024-02-23T11:01:54.253 [INFO ] default - 21092登录钻石10
+2024-02-23T11:06:01.954 [INFO ] default - socket comein........
+2024-02-23T11:06:01.967 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:06:01.971 [INFO ] default - 添加用户:21094
+2024-02-23T11:06:01.972 [INFO ] default - 21094获取道具
+2024-02-23T11:06:01.973 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:06:01.975 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:06:01.975 [INFO ] default - 21094添加金币
+2024-02-23T11:06:01.978 [INFO ] default - 21094添加钻石
+2024-02-23T11:06:01.983 [INFO ] default - 21094登录分数100000
+2024-02-23T11:06:01.983 [INFO ] default - 21094登录钻石10
+2024-02-23T11:06:13.609 [INFO ] default - disconnect:21094
+2024-02-23T11:06:13.611 [INFO ] default - 用户21094删除!
+2024-02-23T11:06:13.612 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:06:14.116 [INFO ] default - 成功保存,删除用户21094 socre:100000 diamond:10
+2024-02-23T11:06:14.549 [INFO ] default - socket comein........
+2024-02-23T11:06:14.561 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:06:14.565 [INFO ] default - 添加用户:21094
+2024-02-23T11:06:14.567 [INFO ] default - 21094获取道具
+2024-02-23T11:06:14.568 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:06:14.575 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:06:14.576 [INFO ] default - 21094添加金币
+2024-02-23T11:06:14.580 [INFO ] default - 21094添加钻石
+2024-02-23T11:06:14.583 [INFO ] default - 21094登录分数100000
+2024-02-23T11:06:14.584 [INFO ] default - 21094登录钻石10
+2024-02-23T11:06:17.679 [INFO ] default - disconnect:21094
+2024-02-23T11:06:17.680 [INFO ] default - 用户21094删除!
+2024-02-23T11:06:17.680 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:06:18.145 [INFO ] default - 成功保存,删除用户21094 socre:100000 diamond:10
+2024-02-23T11:06:18.460 [INFO ] default - socket comein........
+2024-02-23T11:06:18.479 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:06:18.483 [INFO ] default - 添加用户:21094
+2024-02-23T11:06:18.485 [INFO ] default - 21094获取道具
+2024-02-23T11:06:18.485 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:06:18.486 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:06:18.487 [INFO ] default - 21094添加金币
+2024-02-23T11:06:18.489 [INFO ] default - 21094添加钻石
+2024-02-23T11:06:18.493 [INFO ] default - 21094登录分数100000
+2024-02-23T11:06:18.493 [INFO ] default - 21094登录钻石10
+2024-02-23T11:06:24.960 [INFO ] default - disconnect:21094
+2024-02-23T11:06:24.962 [INFO ] default - 用户21094删除!
+2024-02-23T11:06:24.962 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:06:25.203 [INFO ] default - 成功保存,删除用户21094 socre:100000 diamond:10
+2024-02-23T11:06:25.714 [INFO ] default - socket comein........
+2024-02-23T11:06:25.725 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:06:25.731 [INFO ] default - 添加用户:21094
+2024-02-23T11:06:25.733 [INFO ] default - 21094获取道具
+2024-02-23T11:06:25.733 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:06:25.735 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:06:25.735 [INFO ] default - 21094添加金币
+2024-02-23T11:06:25.746 [INFO ] default - 21094添加钻石
+2024-02-23T11:06:25.758 [INFO ] default - 21094登录分数100000
+2024-02-23T11:06:25.758 [INFO ] default - 21094登录钻石10
+2024-02-23T11:07:34.878 [INFO ] default - disconnect:21091
+2024-02-23T11:07:34.879 [INFO ] default - 用户21091删除!
+2024-02-23T11:07:34.879 [INFO ] default - 用户21091没有游戏ID
+2024-02-23T11:07:34.883 [INFO ] default - 成功保存,删除用户21091 socre:114104 diamond:10
+2024-02-23T11:07:35.787 [INFO ] default - socket comein........
+2024-02-23T11:07:35.792 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:07:35.796 [INFO ] default - 添加用户:21091
+2024-02-23T11:07:35.800 [INFO ] default - 21091获取道具
+2024-02-23T11:07:35.800 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:07:35.803 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:07:35.803 [INFO ] default - 21091添加金币
+2024-02-23T11:07:35.806 [INFO ] default - 21091添加钻石
+2024-02-23T11:07:35.809 [INFO ] default - 21091登录分数114104
+2024-02-23T11:07:35.809 [INFO ] default - 21091登录钻石10
+2024-02-23T11:07:52.955 [INFO ] default - disconnect:21091
+2024-02-23T11:07:52.956 [INFO ] default - 用户21091删除!
+2024-02-23T11:07:52.956 [INFO ] default - 用户21091没有游戏ID
+2024-02-23T11:07:53.095 [INFO ] default - 成功保存,删除用户21091 socre:114104 diamond:10
+2024-02-23T11:10:02.363 [INFO ] default - 21094进入游戏15129
+2024-02-23T11:10:02.375 [INFO ] default - disconnect:21094
+2024-02-23T11:10:02.376 [INFO ] default - 用户21094删除!
+2024-02-23T11:10:15.212 [INFO ] default - userDisconnect:
+2024-02-23T11:10:15.213 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21094,
+  userScore: 100790,
+  gameId: 15129,
+  nolog: true
+}
+2024-02-23T11:10:15.215 [INFO ] default - 21094清除游戏ID
+2024-02-23T11:10:15.216 [INFO ] default - 游戏ID0
+2024-02-23T11:10:15.217 [INFO ] default - 用户21094删除!
+2024-02-23T11:10:15.218 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:10:15.223 [INFO ] default - socket comein........
+2024-02-23T11:10:15.246 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:10:15.251 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T11:10:15.399 [INFO ] default - 21094用户只在登录服务器被强制下线
+2024-02-23T11:10:15.401 [INFO ] default - 成功保存,删除用户21094 socre:100790 diamond:10
+2024-02-23T11:10:16.414 [INFO ] default - 21094完全下线了
+2024-02-23T11:10:16.417 [INFO ] default - 添加用户:21094
+2024-02-23T11:10:16.418 [INFO ] default - 21094获取道具
+2024-02-23T11:10:16.419 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:10:16.422 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:10:16.422 [INFO ] default - 21094添加金币
+2024-02-23T11:10:16.424 [INFO ] default - 21094添加钻石
+2024-02-23T11:10:16.429 [INFO ] default - 21094登录分数100790
+2024-02-23T11:10:16.430 [INFO ] default - 21094登录钻石10
+2024-02-23T11:10:16.431 [INFO ] default - 完成添加
+2024-02-23T11:14:15.017 [INFO ] default - disconnect:21092
+2024-02-23T11:14:15.018 [INFO ] default - 用户21092删除!
+2024-02-23T11:14:15.018 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:14:15.758 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:14:17.502 [INFO ] default - socket comein........
+2024-02-23T11:14:17.519 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:14:17.525 [INFO ] default - 添加用户:21092
+2024-02-23T11:14:17.527 [INFO ] default - 21092获取道具
+2024-02-23T11:14:17.527 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:14:17.529 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:14:17.529 [INFO ] default - 21092添加金币
+2024-02-23T11:14:17.534 [INFO ] default - 21092添加钻石
+2024-02-23T11:14:17.539 [INFO ] default - 21092登录分数100000
+2024-02-23T11:14:17.539 [INFO ] default - 21092登录钻石10
+2024-02-23T11:16:56.193 [INFO ] default - disconnect:21092
+2024-02-23T11:16:56.194 [INFO ] default - 用户21092删除!
+2024-02-23T11:16:56.195 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:16:56.297 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:16:58.149 [INFO ] default - socket comein........
+2024-02-23T11:16:58.170 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:16:58.172 [INFO ] default - 添加用户:21092
+2024-02-23T11:16:58.174 [INFO ] default - 21092获取道具
+2024-02-23T11:16:58.174 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:16:58.177 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:16:58.178 [INFO ] default - 21092添加金币
+2024-02-23T11:16:58.180 [INFO ] default - 21092添加钻石
+2024-02-23T11:16:58.190 [INFO ] default - 21092登录分数100000
+2024-02-23T11:16:58.191 [INFO ] default - 21092登录钻石10
+2024-02-23T11:18:09.757 [INFO ] default - disconnect:21092
+2024-02-23T11:18:09.757 [INFO ] default - 用户21092删除!
+2024-02-23T11:18:09.758 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:18:09.859 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:18:12.296 [INFO ] default - socket comein........
+2024-02-23T11:18:12.317 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:18:12.322 [INFO ] default - 添加用户:21092
+2024-02-23T11:18:12.323 [INFO ] default - 21092获取道具
+2024-02-23T11:18:12.324 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:18:12.325 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:18:12.325 [INFO ] default - 21092添加金币
+2024-02-23T11:18:12.332 [INFO ] default - 21092添加钻石
+2024-02-23T11:18:12.336 [INFO ] default - 21092登录分数100000
+2024-02-23T11:18:12.337 [INFO ] default - 21092登录钻石10
+2024-02-23T11:19:19.426 [INFO ] default - disconnect:21094
+2024-02-23T11:19:19.427 [INFO ] default - 用户21094删除!
+2024-02-23T11:19:19.427 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:19:19.488 [INFO ] default - 成功保存,删除用户21094 socre:100790 diamond:10
+2024-02-23T11:19:20.335 [INFO ] default - socket comein........
+2024-02-23T11:19:20.347 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:19:20.350 [INFO ] default - 添加用户:21094
+2024-02-23T11:19:20.352 [INFO ] default - 21094获取道具
+2024-02-23T11:19:20.352 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:19:20.354 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:19:20.354 [INFO ] default - 21094添加金币
+2024-02-23T11:19:20.355 [INFO ] default - 21094添加钻石
+2024-02-23T11:19:20.359 [INFO ] default - 21094登录分数100790
+2024-02-23T11:19:20.359 [INFO ] default - 21094登录钻石10
+2024-02-23T11:19:25.638 [INFO ] default - disconnect:21094
+2024-02-23T11:19:25.638 [INFO ] default - 用户21094删除!
+2024-02-23T11:19:25.639 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:19:26.482 [INFO ] default - socket comein........
+2024-02-23T11:19:26.495 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:19:26.499 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T11:19:26.550 [INFO ] default - 21094用户只在登录服务器被强制下线
+2024-02-23T11:19:26.553 [INFO ] default - 成功保存,删除用户21094 socre:100790 diamond:10
+2024-02-23T11:19:27.564 [INFO ] default - 21094完全下线了
+2024-02-23T11:19:27.568 [INFO ] default - 添加用户:21094
+2024-02-23T11:19:27.570 [INFO ] default - 21094获取道具
+2024-02-23T11:19:27.570 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:19:27.572 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:19:27.572 [INFO ] default - 21094添加金币
+2024-02-23T11:19:27.574 [INFO ] default - 21094添加钻石
+2024-02-23T11:19:27.576 [INFO ] default - 21094登录分数100790
+2024-02-23T11:19:27.577 [INFO ] default - 21094登录钻石10
+2024-02-23T11:19:27.578 [INFO ] default - 完成添加
+2024-02-23T11:19:42.326 [INFO ] default - disconnect:21094
+2024-02-23T11:19:42.327 [INFO ] default - 用户21094删除!
+2024-02-23T11:19:42.327 [INFO ] default - 用户21094没有游戏ID
+2024-02-23T11:19:42.698 [INFO ] default - 成功保存,删除用户21094 socre:100790 diamond:10
+2024-02-23T11:20:02.697 [INFO ] default - disconnect:21092
+2024-02-23T11:20:02.698 [INFO ] default - 用户21092删除!
+2024-02-23T11:20:02.698 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:20:02.903 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:20:04.711 [INFO ] default - socket comein........
+2024-02-23T11:20:04.726 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:20:04.728 [INFO ] default - 添加用户:21092
+2024-02-23T11:20:04.730 [INFO ] default - 21092获取道具
+2024-02-23T11:20:04.730 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:20:04.733 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:20:04.733 [INFO ] default - 21092添加金币
+2024-02-23T11:20:04.738 [INFO ] default - 21092添加钻石
+2024-02-23T11:20:04.742 [INFO ] default - 21092登录分数100000
+2024-02-23T11:20:04.742 [INFO ] default - 21092登录钻石10
+2024-02-23T11:21:24.914 [INFO ] default - disconnect:21092
+2024-02-23T11:21:24.915 [INFO ] default - 用户21092删除!
+2024-02-23T11:21:24.916 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:21:25.708 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:21:26.570 [INFO ] default - socket comein........
+2024-02-23T11:21:26.588 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:21:26.592 [INFO ] default - 添加用户:21092
+2024-02-23T11:21:26.593 [INFO ] default - 21092获取道具
+2024-02-23T11:21:26.594 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:21:26.595 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:21:26.596 [INFO ] default - 21092添加金币
+2024-02-23T11:21:26.606 [INFO ] default - 21092添加钻石
+2024-02-23T11:21:26.614 [INFO ] default - 21092登录分数100000
+2024-02-23T11:21:26.615 [INFO ] default - 21092登录钻石10
+2024-02-23T11:23:01.345 [INFO ] default - disconnect:21092
+2024-02-23T11:23:01.346 [INFO ] default - 用户21092删除!
+2024-02-23T11:23:01.346 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:23:01.509 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:23:02.635 [INFO ] default - socket comein........
+2024-02-23T11:23:02.668 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:23:02.672 [INFO ] default - 添加用户:21092
+2024-02-23T11:23:02.674 [INFO ] default - 21092获取道具
+2024-02-23T11:23:02.675 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:23:02.677 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:23:02.678 [INFO ] default - 21092添加金币
+2024-02-23T11:23:02.686 [INFO ] default - 21092添加钻石
+2024-02-23T11:23:02.689 [INFO ] default - 21092登录分数100000
+2024-02-23T11:23:02.689 [INFO ] default - 21092登录钻石10
+2024-02-23T11:23:37.350 [INFO ] default - disconnect:21092
+2024-02-23T11:23:37.351 [INFO ] default - 用户21092删除!
+2024-02-23T11:23:37.351 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:23:37.804 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:23:38.837 [INFO ] default - socket comein........
+2024-02-23T11:23:38.853 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:23:38.856 [INFO ] default - 添加用户:21092
+2024-02-23T11:23:38.857 [INFO ] default - 21092获取道具
+2024-02-23T11:23:38.858 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:23:38.859 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:23:38.860 [INFO ] default - 21092添加金币
+2024-02-23T11:23:38.868 [INFO ] default - 21092添加钻石
+2024-02-23T11:23:38.878 [INFO ] default - 21092登录分数100000
+2024-02-23T11:23:38.878 [INFO ] default - 21092登录钻石10
+2024-02-23T11:25:25.277 [INFO ] default - disconnect:21092
+2024-02-23T11:25:25.278 [INFO ] default - 用户21092删除!
+2024-02-23T11:25:25.278 [INFO ] default - 用户21092没有游戏ID
+2024-02-23T11:25:26.272 [INFO ] default - 成功保存,删除用户21092 socre:100000 diamond:10
+2024-02-23T11:32:29.532 [INFO ] default - 登录服务器 v2.0.0
+2024-02-23T11:32:29.533 [INFO ] default - 服务器启动成功!
+2024-02-23T11:32:29.533 [INFO ] default - 更新时间:2017.12.17
+2024-02-23T11:32:29.536 [INFO ] default - start at port:13000
+2024-02-23T11:32:29.600 [INFO ] default - socket comein........
+2024-02-23T11:32:29.616 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-23T11:32:29.617 [INFO ] default - 游戏Id:15163
+2024-02-23T11:32:29.826 [INFO ] default - socket comein........
+2024-02-23T11:32:29.922 [INFO ] default - socket comein........
+2024-02-23T11:32:29.931 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
+2024-02-23T11:32:29.932 [INFO ] default - 游戏Id:15168
+2024-02-23T11:32:29.999 [INFO ] default - socket comein........
+2024-02-23T11:32:30.098 [INFO ] default - socket comein........
+2024-02-23T11:32:30.106 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-23T11:32:30.107 [INFO ] default - 游戏Id:15188
+2024-02-23T11:32:32.061 [INFO ] default - socket comein........
+2024-02-23T11:32:32.070 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-23T11:32:32.070 [INFO ] default - 游戏Id:15129
+2024-02-23T11:37:27.081 [INFO ] default - socket comein........
+2024-02-23T11:37:27.093 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"G4iodPR3GNUtMhS3jKKhdu2tzPB3","email":"","displayName":""}
+2024-02-23T11:37:27.097 [INFO ] default - 添加用户:20977
+2024-02-23T11:37:27.099 [INFO ] default - 20977获取道具
+2024-02-23T11:37:27.100 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:37:27.106 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:37:27.106 [INFO ] default - 20977添加金币
+2024-02-23T11:37:27.109 [INFO ] default - 20977添加钻石
+2024-02-23T11:37:27.114 [INFO ] default - 20977登录分数10000000
+2024-02-23T11:37:27.114 [INFO ] default - 20977登录钻石10
+2024-02-23T11:37:40.600 [INFO ] default - 20977进入游戏15168
+2024-02-23T11:37:40.605 [INFO ] default - disconnect:20977
+2024-02-23T11:37:40.606 [INFO ] default - 用户20977删除!
+2024-02-23T11:38:25.792 [INFO ] default - socket comein........
+2024-02-23T11:38:25.805 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"G4iodPR3GNUtMhS3jKKhdu2tzPB3","email":"","displayName":""}
+2024-02-23T11:38:25.808 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T11:38:26.036 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-23T11:38:26.040 [INFO ] default - userDisconnect:
+2024-02-23T11:38:26.042 [INFO ] default - { ResultCode: 0, userId: 20977 }
+2024-02-23T11:38:27.047 [INFO ] default - 20977完全下线了
+2024-02-23T11:38:27.054 [INFO ] default - 添加用户:20977
+2024-02-23T11:38:27.057 [INFO ] default - 20977获取道具
+2024-02-23T11:38:27.057 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:38:27.059 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:38:27.059 [INFO ] default - 20977添加金币
+2024-02-23T11:38:27.061 [INFO ] default - 20977添加钻石
+2024-02-23T11:38:27.065 [INFO ] default - 20977登录分数10000000
+2024-02-23T11:38:27.066 [INFO ] default - 20977登录钻石10
+2024-02-23T11:38:27.067 [INFO ] default - 完成添加
+2024-02-23T11:38:27.069 [INFO ] default - 20977进入游戏15168
+2024-02-23T11:38:27.071 [INFO ] default - disconnect:20977
+2024-02-23T11:38:27.072 [INFO ] default - 用户20977删除!
+2024-02-23T11:52:52.559 [INFO ] default - socket comein........
+2024-02-23T11:52:52.572 [INFO ] default - 登录大厅[object Object]
+2024-02-23T11:52:52.575 [INFO ] default - 添加用户:21095
+2024-02-23T11:52:52.577 [INFO ] default - 21095获取道具
+2024-02-23T11:52:52.577 [INFO ] default - 登录成功:[object Object]
+2024-02-23T11:52:52.578 [INFO ] default - 获取积分:[object Object]
+2024-02-23T11:52:52.579 [INFO ] default - 21095添加金币
+2024-02-23T11:52:52.581 [INFO ] default - 21095添加钻石
+2024-02-23T11:52:52.584 [INFO ] default - 21095登录分数100000
+2024-02-23T11:52:52.584 [INFO ] default - 21095登录钻石10
+2024-02-23T12:08:48.552 [INFO ] default - socket comein........
+2024-02-23T12:08:48.571 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:08:48.575 [INFO ] default - 添加用户:21096
+2024-02-23T12:08:48.578 [INFO ] default - 21096获取道具
+2024-02-23T12:08:48.579 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:08:48.582 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:08:48.583 [INFO ] default - 21096添加金币
+2024-02-23T12:08:48.585 [INFO ] default - 21096添加钻石
+2024-02-23T12:08:48.591 [INFO ] default - 21096登录分数100000
+2024-02-23T12:08:48.591 [INFO ] default - 21096登录钻石10
+2024-02-23T12:08:54.115 [INFO ] default - 21096进入游戏15129
+2024-02-23T12:08:54.136 [INFO ] default - disconnect:21096
+2024-02-23T12:08:54.137 [INFO ] default - 用户21096删除!
+2024-02-23T12:10:43.779 [INFO ] default - userDisconnect:
+2024-02-23T12:10:43.784 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21096,
+  userScore: 100206,
+  gameId: 15129,
+  nolog: true
+}
+2024-02-23T12:10:43.784 [INFO ] default - 21096清除游戏ID
+2024-02-23T12:10:43.785 [INFO ] default - 游戏ID0
+2024-02-23T12:10:43.786 [INFO ] default - 用户21096删除!
+2024-02-23T12:10:43.787 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:10:43.790 [INFO ] default - socket comein........
+2024-02-23T12:10:43.807 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:10:43.812 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T12:10:44.314 [INFO ] default - 21096用户只在登录服务器被强制下线
+2024-02-23T12:10:44.321 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:10:45.324 [INFO ] default - 21096完全下线了
+2024-02-23T12:10:45.334 [INFO ] default - 添加用户:21096
+2024-02-23T12:10:45.339 [INFO ] default - 21096获取道具
+2024-02-23T12:10:45.341 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:10:45.346 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:10:45.348 [INFO ] default - 21096添加金币
+2024-02-23T12:10:45.352 [INFO ] default - 21096添加钻石
+2024-02-23T12:10:45.358 [INFO ] default - 21096登录分数100206
+2024-02-23T12:10:45.359 [INFO ] default - 21096登录钻石10
+2024-02-23T12:10:45.360 [INFO ] default - 完成添加
+2024-02-23T12:10:50.746 [INFO ] default - 21096进入游戏15168
+2024-02-23T12:10:50.766 [INFO ] default - disconnect:21096
+2024-02-23T12:10:50.767 [INFO ] default - 用户21096删除!
+2024-02-23T12:11:05.545 [INFO ] default - userDisconnect:
+2024-02-23T12:11:05.547 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21096,
+  userScore: 100206,
+  gameId: 15168,
+  nolog: true
+}
+2024-02-23T12:11:05.548 [INFO ] default - 21096清除游戏ID
+2024-02-23T12:11:05.550 [INFO ] default - 游戏ID0
+2024-02-23T12:11:05.551 [INFO ] default - 用户21096删除!
+2024-02-23T12:11:05.553 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:11:06.380 [INFO ] default - socket comein........
+2024-02-23T12:11:06.405 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:11:06.411 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T12:11:06.540 [INFO ] default - 21096用户只在登录服务器被强制下线
+2024-02-23T12:11:06.546 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:11:07.551 [INFO ] default - 21096完全下线了
+2024-02-23T12:11:07.555 [INFO ] default - 添加用户:21096
+2024-02-23T12:11:07.559 [INFO ] default - 21096获取道具
+2024-02-23T12:11:07.559 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:11:07.562 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:11:07.563 [INFO ] default - 21096添加金币
+2024-02-23T12:11:07.567 [INFO ] default - 21096添加钻石
+2024-02-23T12:11:07.571 [INFO ] default - 21096登录分数100206
+2024-02-23T12:11:07.572 [INFO ] default - 21096登录钻石10
+2024-02-23T12:11:07.573 [INFO ] default - 完成添加
+2024-02-23T12:11:55.430 [INFO ] default - disconnect:21096
+2024-02-23T12:11:55.431 [INFO ] default - 用户21096删除!
+2024-02-23T12:11:55.432 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:11:56.002 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:11:56.271 [INFO ] default - socket comein........
+2024-02-23T12:11:56.289 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:11:56.295 [INFO ] default - 添加用户:21096
+2024-02-23T12:11:56.298 [INFO ] default - 21096获取道具
+2024-02-23T12:11:56.299 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:11:56.302 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:11:56.302 [INFO ] default - 21096添加金币
+2024-02-23T12:11:56.306 [INFO ] default - 21096添加钻石
+2024-02-23T12:11:56.316 [INFO ] default - 21096登录分数100206
+2024-02-23T12:11:56.317 [INFO ] default - 21096登录钻石10
+2024-02-23T12:12:36.191 [INFO ] default - disconnect:21096
+2024-02-23T12:12:36.193 [INFO ] default - 用户21096删除!
+2024-02-23T12:12:36.194 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:12:36.432 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:12:37.049 [INFO ] default - socket comein........
+2024-02-23T12:12:37.067 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:12:37.073 [INFO ] default - 添加用户:21096
+2024-02-23T12:12:37.076 [INFO ] default - 21096获取道具
+2024-02-23T12:12:37.077 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:12:37.081 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:12:37.082 [INFO ] default - 21096添加金币
+2024-02-23T12:12:37.087 [INFO ] default - 21096添加钻石
+2024-02-23T12:12:37.093 [INFO ] default - 21096登录分数100206
+2024-02-23T12:12:37.094 [INFO ] default - 21096登录钻石10
+2024-02-23T12:12:59.329 [INFO ] default - socket comein........
+2024-02-23T12:12:59.349 [INFO ] default - 登录大厅[object Object]
+2024-02-23T12:12:59.356 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-23T12:12:59.651 [INFO ] default - 21096用户只在登录服务器被强制下线
+2024-02-23T12:12:59.654 [INFO ] default - disconnect:21096
+2024-02-23T12:12:59.655 [INFO ] default - 用户21096删除!
+2024-02-23T12:12:59.656 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:12:59.665 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:13:00.654 [INFO ] default - 21096完全下线了
+2024-02-23T12:13:00.660 [INFO ] default - 添加用户:21096
+2024-02-23T12:13:00.666 [INFO ] default - 21096获取道具
+2024-02-23T12:13:00.668 [INFO ] default - 登录成功:[object Object]
+2024-02-23T12:13:00.672 [INFO ] default - 获取积分:[object Object]
+2024-02-23T12:13:00.673 [INFO ] default - 21096添加金币
+2024-02-23T12:13:00.676 [INFO ] default - 21096添加钻石
+2024-02-23T12:13:00.679 [INFO ] default - 21096登录分数100206
+2024-02-23T12:13:00.680 [INFO ] default - 21096登录钻石10
+2024-02-23T12:13:00.682 [INFO ] default - 完成添加
+2024-02-23T12:14:14.424 [INFO ] default - disconnect:21096
+2024-02-23T12:14:14.425 [INFO ] default - 用户21096删除!
+2024-02-23T12:14:14.426 [INFO ] default - 用户21096没有游戏ID
+2024-02-23T12:14:15.400 [INFO ] default - 成功保存,删除用户21096 socre:100206 diamond:10
+2024-02-23T12:53:36.005 [INFO ] default - disconnect:21095
+2024-02-23T12:53:36.007 [INFO ] default - 用户21095删除!
+2024-02-23T12:53:36.008 [INFO ] default - 用户21095没有游戏ID
+2024-02-23T12:53:36.339 [INFO ] default - 成功保存,删除用户21095 socre:100000 diamond:10
+2024-02-23T14:07:30.422 [INFO ] default - 登录服务器 v2.0.0
+2024-02-23T14:07:30.423 [INFO ] default - 服务器启动成功!
+2024-02-23T14:07:30.423 [INFO ] default - 更新时间:2017.12.17
+2024-02-23T14:07:30.427 [INFO ] default - start at port:13000
+2024-02-23T14:07:30.452 [INFO ] default - socket comein........
+2024-02-23T14:07:30.994 [INFO ] default - socket comein........
+2024-02-23T14:07:31.003 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-23T14:07:31.004 [INFO ] default - 游戏Id:15163
+2024-02-23T14:07:31.569 [INFO ] default - socket comein........
+2024-02-23T14:07:31.577 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
+2024-02-23T14:07:31.577 [INFO ] default - 游戏Id:15168
+2024-02-23T14:07:33.400 [INFO ] default - socket comein........
+2024-02-23T14:07:33.408 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-23T14:07:33.409 [INFO ] default - 游戏Id:15129
+2024-02-23T14:07:34.351 [INFO ] default - socket comein........
+2024-02-23T14:07:35.272 [INFO ] default - socket comein........
+2024-02-23T14:07:35.280 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-23T14:07:35.281 [INFO ] default - 游戏Id:15188
+2024-02-23T14:07:41.290 [INFO ] default - socket comein........
+2024-02-23T14:07:41.308 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-23T14:07:41.309 [INFO ] default - 游戏Id:15186
+2024-02-23T14:08:11.333 [INFO ] default - socket comein........
+2024-02-23T14:08:11.345 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"G4iodPR3GNUtMhS3jKKhdu2tzPB3","email":"","displayName":""}
+2024-02-23T14:08:11.350 [INFO ] default - 添加用户:20977
+2024-02-23T14:08:11.351 [INFO ] default - 20977获取道具
+2024-02-23T14:08:11.352 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:08:11.354 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:08:11.354 [INFO ] default - 20977添加金币
+2024-02-23T14:08:11.356 [INFO ] default - 20977添加钻石
+2024-02-23T14:08:11.360 [INFO ] default - 20977登录分数10000000
+2024-02-23T14:08:11.361 [INFO ] default - 20977登录钻石10
+2024-02-23T14:09:52.714 [INFO ] default - 登录服务器 v2.0.0
+2024-02-23T14:09:52.715 [INFO ] default - 服务器启动成功!
+2024-02-23T14:09:52.715 [INFO ] default - 更新时间:2017.12.17
+2024-02-23T14:09:52.718 [INFO ] default - start at port:13000
+2024-02-23T14:09:53.277 [INFO ] default - socket comein........
+2024-02-23T14:09:53.396 [INFO ] default - socket comein........
+2024-02-23T14:09:53.406 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-23T14:09:53.406 [INFO ] default - 游戏Id:15186
+2024-02-23T14:09:54.687 [INFO ] default - socket comein........
+2024-02-23T14:09:55.494 [INFO ] default - socket comein........
+2024-02-23T14:09:55.500 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-23T14:09:55.501 [INFO ] default - 游戏Id:15129
+2024-02-23T14:09:57.069 [INFO ] default - socket comein........
+2024-02-23T14:09:57.070 [INFO ] default - socket comein........
+2024-02-23T14:09:57.071 [INFO ] default - socket comein........
+2024-02-23T14:09:57.072 [INFO ] default - socket comein........
+2024-02-23T14:09:57.079 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-23T14:09:57.079 [INFO ] default - 游戏Id:15163
+2024-02-23T14:09:57.080 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-23T14:09:57.081 [INFO ] default - 游戏Id:15188
+2024-02-23T14:09:57.081 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
+2024-02-23T14:09:57.082 [INFO ] default - 游戏Id:15168
+2024-02-23T14:09:58.950 [INFO ] default - socket comein........
+2024-02-23T14:09:58.963 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"G4iodPR3GNUtMhS3jKKhdu2tzPB3","email":"","displayName":""}
+2024-02-23T14:09:58.967 [INFO ] default - 添加用户:20977
+2024-02-23T14:09:58.969 [INFO ] default - 20977获取道具
+2024-02-23T14:09:58.969 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:09:58.979 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:09:58.980 [INFO ] default - 20977添加金币
+2024-02-23T14:09:58.987 [INFO ] default - 20977添加钻石
+2024-02-23T14:09:58.992 [INFO ] default - 20977登录分数10000000
+2024-02-23T14:09:58.992 [INFO ] default - 20977登录钻石10
+2024-02-23T14:10:08.178 [INFO ] default - 20977进入游戏15168
+2024-02-23T14:10:08.182 [INFO ] default - disconnect:20977
+2024-02-23T14:10:08.183 [INFO ] default - 用户20977删除!
+2024-02-23T14:12:54.809 [INFO ] default - socket comein........
+2024-02-23T14:12:54.830 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:13:03.224 [INFO ] default - socket comein........
+2024-02-23T14:13:03.237 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:13:03.242 [INFO ] default - 添加用户:21097
+2024-02-23T14:13:03.245 [INFO ] default - 21097获取道具
+2024-02-23T14:13:03.246 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:13:03.249 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:13:03.250 [INFO ] default - 21097添加金币
+2024-02-23T14:13:03.254 [INFO ] default - 21097添加钻石
+2024-02-23T14:13:03.263 [INFO ] default - 21097登录分数100000
+2024-02-23T14:13:03.264 [INFO ] default - 21097登录钻石10
+2024-02-23T14:26:12.487 [INFO ] default - disconnect:21097
+2024-02-23T14:26:12.489 [INFO ] default - 用户21097删除!
+2024-02-23T14:26:12.490 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:26:13.073 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:26:13.951 [INFO ] default - socket comein........
+2024-02-23T14:26:13.972 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:26:13.976 [INFO ] default - 添加用户:21097
+2024-02-23T14:26:13.977 [INFO ] default - 21097获取道具
+2024-02-23T14:26:13.978 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:26:13.985 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:26:13.986 [INFO ] default - 21097添加金币
+2024-02-23T14:26:13.988 [INFO ] default - 21097添加钻石
+2024-02-23T14:26:14.000 [INFO ] default - 21097登录分数100000
+2024-02-23T14:26:14.001 [INFO ] default - 21097登录钻石10
+2024-02-23T14:31:02.740 [INFO ] default - disconnect:21097
+2024-02-23T14:31:02.742 [INFO ] default - 用户21097删除!
+2024-02-23T14:31:02.742 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:31:03.059 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:31:04.676 [INFO ] default - socket comein........
+2024-02-23T14:31:04.692 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:31:04.696 [INFO ] default - 添加用户:21097
+2024-02-23T14:31:04.699 [INFO ] default - 21097获取道具
+2024-02-23T14:31:04.700 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:31:04.705 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:31:04.705 [INFO ] default - 21097添加金币
+2024-02-23T14:31:04.708 [INFO ] default - 21097添加钻石
+2024-02-23T14:31:04.713 [INFO ] default - 21097登录分数100000
+2024-02-23T14:31:04.714 [INFO ] default - 21097登录钻石10
+2024-02-23T14:33:31.062 [INFO ] default - disconnect:21097
+2024-02-23T14:33:31.064 [INFO ] default - 用户21097删除!
+2024-02-23T14:33:31.065 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:33:31.578 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:33:32.552 [INFO ] default - socket comein........
+2024-02-23T14:33:32.570 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:33:32.572 [INFO ] default - 添加用户:21097
+2024-02-23T14:33:32.574 [INFO ] default - 21097获取道具
+2024-02-23T14:33:32.575 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:33:32.577 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:33:32.577 [INFO ] default - 21097添加金币
+2024-02-23T14:33:32.582 [INFO ] default - 21097添加钻石
+2024-02-23T14:33:32.586 [INFO ] default - 21097登录分数100000
+2024-02-23T14:33:32.586 [INFO ] default - 21097登录钻石10
+2024-02-23T14:34:02.188 [INFO ] default - disconnect:21097
+2024-02-23T14:34:02.189 [INFO ] default - 用户21097删除!
+2024-02-23T14:34:02.190 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:34:02.935 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:34:03.665 [INFO ] default - socket comein........
+2024-02-23T14:34:03.696 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:34:03.700 [INFO ] default - 添加用户:21097
+2024-02-23T14:34:03.702 [INFO ] default - 21097获取道具
+2024-02-23T14:34:03.702 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:34:03.708 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:34:03.708 [INFO ] default - 21097添加金币
+2024-02-23T14:34:03.710 [INFO ] default - 21097添加钻石
+2024-02-23T14:34:03.716 [INFO ] default - 21097登录分数100000
+2024-02-23T14:34:03.716 [INFO ] default - 21097登录钻石10
+2024-02-23T14:34:58.537 [INFO ] default - disconnect:21097
+2024-02-23T14:34:58.538 [INFO ] default - 用户21097删除!
+2024-02-23T14:34:58.538 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:34:59.533 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:35:00.257 [INFO ] default - socket comein........
+2024-02-23T14:35:00.277 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:35:00.281 [INFO ] default - 添加用户:21097
+2024-02-23T14:35:00.282 [INFO ] default - 21097获取道具
+2024-02-23T14:35:00.283 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:35:00.285 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:35:00.286 [INFO ] default - 21097添加金币
+2024-02-23T14:35:00.288 [INFO ] default - 21097添加钻石
+2024-02-23T14:35:00.294 [INFO ] default - 21097登录分数100000
+2024-02-23T14:35:00.295 [INFO ] default - 21097登录钻石10
+2024-02-23T14:43:17.543 [INFO ] default - disconnect:21097
+2024-02-23T14:43:17.545 [INFO ] default - 用户21097删除!
+2024-02-23T14:43:17.547 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:43:18.081 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:43:18.900 [INFO ] default - socket comein........
+2024-02-23T14:43:18.914 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:43:18.917 [INFO ] default - 添加用户:21097
+2024-02-23T14:43:18.919 [INFO ] default - 21097获取道具
+2024-02-23T14:43:18.919 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:43:18.924 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:43:18.925 [INFO ] default - 21097添加金币
+2024-02-23T14:43:18.929 [INFO ] default - 21097添加钻石
+2024-02-23T14:43:18.933 [INFO ] default - 21097登录分数100000
+2024-02-23T14:43:18.933 [INFO ] default - 21097登录钻石10
+2024-02-23T14:48:08.684 [INFO ] default - disconnect:21097
+2024-02-23T14:48:08.686 [INFO ] default - 用户21097删除!
+2024-02-23T14:48:08.687 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:48:08.790 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:48:10.190 [INFO ] default - socket comein........
+2024-02-23T14:48:10.211 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:48:10.219 [INFO ] default - 添加用户:21097
+2024-02-23T14:48:10.225 [INFO ] default - 21097获取道具
+2024-02-23T14:48:10.227 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:48:10.230 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:48:10.232 [INFO ] default - 21097添加金币
+2024-02-23T14:48:10.237 [INFO ] default - 21097添加钻石
+2024-02-23T14:48:10.242 [INFO ] default - 21097登录分数100000
+2024-02-23T14:48:10.243 [INFO ] default - 21097登录钻石10
+2024-02-23T14:52:42.885 [INFO ] default - disconnect:21097
+2024-02-23T14:52:42.887 [INFO ] default - 用户21097删除!
+2024-02-23T14:52:42.888 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:52:43.454 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:52:45.116 [INFO ] default - socket comein........
+2024-02-23T14:52:45.158 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:52:45.163 [INFO ] default - 添加用户:21097
+2024-02-23T14:52:45.165 [INFO ] default - 21097获取道具
+2024-02-23T14:52:45.166 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:52:45.170 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:52:45.171 [INFO ] default - 21097添加金币
+2024-02-23T14:52:45.182 [INFO ] default - 21097添加钻石
+2024-02-23T14:52:45.188 [INFO ] default - 21097登录分数100000
+2024-02-23T14:52:45.188 [INFO ] default - 21097登录钻石10
+2024-02-23T14:54:47.499 [INFO ] default - disconnect:21097
+2024-02-23T14:54:47.500 [INFO ] default - 用户21097删除!
+2024-02-23T14:54:47.500 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T14:54:47.583 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T14:54:49.555 [INFO ] default - socket comein........
+2024-02-23T14:54:49.581 [INFO ] default - 登录大厅[object Object]
+2024-02-23T14:54:49.586 [INFO ] default - 添加用户:21097
+2024-02-23T14:54:49.588 [INFO ] default - 21097获取道具
+2024-02-23T14:54:49.589 [INFO ] default - 登录成功:[object Object]
+2024-02-23T14:54:49.591 [INFO ] default - 获取积分:[object Object]
+2024-02-23T14:54:49.592 [INFO ] default - 21097添加金币
+2024-02-23T14:54:49.594 [INFO ] default - 21097添加钻石
+2024-02-23T14:54:49.600 [INFO ] default - 21097登录分数100000
+2024-02-23T14:54:49.600 [INFO ] default - 21097登录钻石10
+2024-02-23T15:00:34.649 [INFO ] default - disconnect:21097
+2024-02-23T15:00:34.651 [INFO ] default - 用户21097删除!
+2024-02-23T15:00:34.652 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:00:34.706 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:00:36.723 [INFO ] default - socket comein........
+2024-02-23T15:00:36.746 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:00:36.748 [INFO ] default - 添加用户:21097
+2024-02-23T15:00:36.750 [INFO ] default - 21097获取道具
+2024-02-23T15:00:36.750 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:00:36.752 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:00:36.753 [INFO ] default - 21097添加金币
+2024-02-23T15:00:36.754 [INFO ] default - 21097添加钻石
+2024-02-23T15:00:36.758 [INFO ] default - 21097登录分数100000
+2024-02-23T15:00:36.758 [INFO ] default - 21097登录钻石10
+2024-02-23T15:03:08.013 [INFO ] default - disconnect:21097
+2024-02-23T15:03:08.015 [INFO ] default - 用户21097删除!
+2024-02-23T15:03:08.016 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:03:08.983 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:03:55.881 [INFO ] default - socket comein........
+2024-02-23T15:03:55.895 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:03:55.901 [INFO ] default - 添加用户:21097
+2024-02-23T15:03:55.903 [INFO ] default - 21097获取道具
+2024-02-23T15:03:55.904 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:03:55.907 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:03:55.908 [INFO ] default - 21097添加金币
+2024-02-23T15:03:55.913 [INFO ] default - 21097添加钻石
+2024-02-23T15:03:55.920 [INFO ] default - 21097登录分数100000
+2024-02-23T15:03:55.921 [INFO ] default - 21097登录钻石10
+2024-02-23T15:04:00.340 [INFO ] default - disconnect:21097
+2024-02-23T15:04:00.342 [INFO ] default - 用户21097删除!
+2024-02-23T15:04:00.343 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:04:00.425 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:04:02.287 [INFO ] default - socket comein........
+2024-02-23T15:04:02.304 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:04:02.311 [INFO ] default - 添加用户:21097
+2024-02-23T15:04:02.315 [INFO ] default - 21097获取道具
+2024-02-23T15:04:02.316 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:04:02.322 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:04:02.323 [INFO ] default - 21097添加金币
+2024-02-23T15:04:02.328 [INFO ] default - 21097添加钻石
+2024-02-23T15:04:02.334 [INFO ] default - 21097登录分数100000
+2024-02-23T15:04:02.335 [INFO ] default - 21097登录钻石10
+2024-02-23T15:05:57.045 [INFO ] default - socket comein........
+2024-02-23T15:05:57.065 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-23T15:05:57.066 [INFO ] default - 游戏Id:15187
+2024-02-23T15:18:50.215 [INFO ] default - disconnect:21097
+2024-02-23T15:18:50.217 [INFO ] default - 用户21097删除!
+2024-02-23T15:18:50.218 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:18:50.488 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:18:52.451 [INFO ] default - socket comein........
+2024-02-23T15:18:52.468 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:18:52.474 [INFO ] default - 添加用户:21097
+2024-02-23T15:18:52.476 [INFO ] default - 21097获取道具
+2024-02-23T15:18:52.478 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:18:52.481 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:18:52.481 [INFO ] default - 21097添加金币
+2024-02-23T15:18:52.487 [INFO ] default - 21097添加钻石
+2024-02-23T15:18:52.496 [INFO ] default - 21097登录分数100000
+2024-02-23T15:18:52.497 [INFO ] default - 21097登录钻石10
+2024-02-23T15:19:28.031 [INFO ] default - disconnect:21097
+2024-02-23T15:19:28.032 [INFO ] default - 用户21097删除!
+2024-02-23T15:19:28.033 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:19:28.795 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:19:29.983 [INFO ] default - socket comein........
+2024-02-23T15:19:30.004 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:19:30.008 [INFO ] default - 添加用户:21097
+2024-02-23T15:19:30.009 [INFO ] default - 21097获取道具
+2024-02-23T15:19:30.010 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:19:30.012 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:19:30.012 [INFO ] default - 21097添加金币
+2024-02-23T15:19:30.018 [INFO ] default - 21097添加钻石
+2024-02-23T15:19:30.022 [INFO ] default - 21097登录分数100000
+2024-02-23T15:19:30.022 [INFO ] default - 21097登录钻石10
+2024-02-23T15:21:46.756 [INFO ] default - disconnect:21097
+2024-02-23T15:21:46.756 [INFO ] default - 用户21097删除!
+2024-02-23T15:21:46.756 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:21:47.064 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:21:48.849 [INFO ] default - socket comein........
+2024-02-23T15:21:48.865 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:21:48.869 [INFO ] default - 添加用户:21097
+2024-02-23T15:21:48.871 [INFO ] default - 21097获取道具
+2024-02-23T15:21:48.871 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:21:48.872 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:21:48.873 [INFO ] default - 21097添加金币
+2024-02-23T15:21:48.874 [INFO ] default - 21097添加钻石
+2024-02-23T15:21:48.877 [INFO ] default - 21097登录分数100000
+2024-02-23T15:21:48.877 [INFO ] default - 21097登录钻石10
+2024-02-23T15:25:42.502 [INFO ] default - disconnect:21097
+2024-02-23T15:25:42.503 [INFO ] default - 用户21097删除!
+2024-02-23T15:25:42.503 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:25:43.158 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:25:44.027 [INFO ] default - socket comein........
+2024-02-23T15:25:44.052 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:25:44.057 [INFO ] default - 添加用户:21097
+2024-02-23T15:25:44.059 [INFO ] default - 21097获取道具
+2024-02-23T15:25:44.059 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:25:44.061 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:25:44.062 [INFO ] default - 21097添加金币
+2024-02-23T15:25:44.065 [INFO ] default - 21097添加钻石
+2024-02-23T15:25:44.079 [INFO ] default - 21097登录分数100000
+2024-02-23T15:25:44.079 [INFO ] default - 21097登录钻石10
+2024-02-23T15:27:56.501 [INFO ] default - disconnect:21097
+2024-02-23T15:27:56.502 [INFO ] default - 用户21097删除!
+2024-02-23T15:27:56.502 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:27:57.356 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:27:58.595 [INFO ] default - socket comein........
+2024-02-23T15:27:58.616 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:27:58.618 [INFO ] default - 添加用户:21097
+2024-02-23T15:27:58.620 [INFO ] default - 21097获取道具
+2024-02-23T15:27:58.620 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:27:58.621 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:27:58.622 [INFO ] default - 21097添加金币
+2024-02-23T15:27:58.624 [INFO ] default - 21097添加钻石
+2024-02-23T15:27:58.630 [INFO ] default - 21097登录分数100000
+2024-02-23T15:27:58.630 [INFO ] default - 21097登录钻石10
+2024-02-23T15:33:04.738 [INFO ] default - socket comein........
+2024-02-23T15:33:04.785 [INFO ] default - 拉霸游戏_283_UltimateStriker | 服务器连接成功!
+2024-02-23T15:33:04.786 [INFO ] default - 游戏Id:15183
+2024-02-23T15:33:22.036 [INFO ] default - socket comein........
+2024-02-23T15:33:22.042 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:33:22.045 [INFO ] default - 添加用户:21091
+2024-02-23T15:33:22.047 [INFO ] default - 21091获取道具
+2024-02-23T15:33:22.047 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:33:22.048 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:33:22.049 [INFO ] default - 21091添加金币
+2024-02-23T15:33:22.050 [INFO ] default - 21091添加钻石
+2024-02-23T15:33:22.055 [INFO ] default - 21091登录分数114104
+2024-02-23T15:33:22.055 [INFO ] default - 21091登录钻石10
+2024-02-23T15:33:41.554 [INFO ] default - 21091进入游戏15183
+2024-02-23T15:33:41.560 [INFO ] default - disconnect:21091
+2024-02-23T15:33:41.561 [INFO ] default - 用户21091删除!
+2024-02-23T15:33:47.226 [INFO ] default - disconnect:21097
+2024-02-23T15:33:47.227 [INFO ] default - 用户21097删除!
+2024-02-23T15:33:47.227 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:33:47.545 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:33:49.343 [INFO ] default - socket comein........
+2024-02-23T15:33:49.359 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:33:49.361 [INFO ] default - 添加用户:21097
+2024-02-23T15:33:49.363 [INFO ] default - 21097获取道具
+2024-02-23T15:33:49.363 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:33:49.365 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:33:49.365 [INFO ] default - 21097添加金币
+2024-02-23T15:33:49.368 [INFO ] default - 21097添加钻石
+2024-02-23T15:33:49.379 [INFO ] default - 21097登录分数100000
+2024-02-23T15:33:49.380 [INFO ] default - 21097登录钻石10
+2024-02-23T15:34:50.945 [INFO ] default - disconnect:21097
+2024-02-23T15:34:50.947 [INFO ] default - 用户21097删除!
+2024-02-23T15:34:50.947 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:34:51.274 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:35:56.007 [INFO ] default - 登录服务器 v2.0.0
+2024-02-23T15:35:56.008 [INFO ] default - 服务器启动成功!
+2024-02-23T15:35:56.008 [INFO ] default - 更新时间:2017.12.17
+2024-02-23T15:35:56.011 [INFO ] default - start at port:13000
+2024-02-23T15:35:56.159 [INFO ] default - socket comein........
+2024-02-23T15:35:56.179 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:35:56.193 [INFO ] default - 添加用户:21097
+2024-02-23T15:35:56.196 [INFO ] default - 21097获取道具
+2024-02-23T15:35:56.197 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:35:56.201 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:35:56.201 [INFO ] default - 21097添加金币
+2024-02-23T15:35:56.204 [INFO ] default - 21097添加钻石
+2024-02-23T15:35:56.211 [INFO ] default - 21097登录分数100000
+2024-02-23T15:35:56.211 [INFO ] default - 21097登录钻石10
+2024-02-23T15:35:56.274 [INFO ] default - socket comein........
+2024-02-23T15:35:56.282 [INFO ] default - 拉霸游戏_283_UltimateStriker | 服务器连接成功!
+2024-02-23T15:35:56.283 [INFO ] default - 游戏Id:15183
+2024-02-23T15:35:56.307 [INFO ] default - socket comein........
+2024-02-23T15:35:56.323 [INFO ] default - socket comein........
+2024-02-23T15:35:56.330 [INFO ] default - 拉霸游戏_263_ganeshagold | 服务器连接成功!
+2024-02-23T15:35:56.330 [INFO ] default - 游戏Id:15163
+2024-02-23T15:35:56.401 [INFO ] default - socket comein........
+2024-02-23T15:35:56.477 [INFO ] default - socket comein........
+2024-02-23T15:35:56.485 [INFO ] default - 拉霸游戏_286_DigDigDigger | 服务器连接成功!
+2024-02-23T15:35:56.485 [INFO ] default - 游戏Id:15186
+2024-02-23T15:35:56.708 [INFO ] default - socket comein........
+2024-02-23T15:35:56.716 [INFO ] default - 拉霸游戏_287_GrandWheel | 服务器连接成功!
+2024-02-23T15:35:56.717 [INFO ] default - 游戏Id:15187
+2024-02-23T15:35:56.787 [INFO ] default - socket comein........
+2024-02-23T15:35:56.794 [INFO ] default - 拉霸游戏_229_freespin | 服务器连接成功!
+2024-02-23T15:35:56.794 [INFO ] default - 游戏Id:15129
+2024-02-23T15:35:56.819 [INFO ] default - socket comein........
+2024-02-23T15:35:56.826 [INFO ] default - 拉霸游戏_268_fortunetiger | 服务器连接成功!
+2024-02-23T15:35:56.826 [INFO ] default - 游戏Id:15168
+2024-02-23T15:35:58.525 [INFO ] default - socket comein........
+2024-02-23T15:35:58.536 [INFO ] default - 拉霸游戏_288_BlueDiamond | 服务器连接成功!
+2024-02-23T15:35:58.537 [INFO ] default - 游戏Id:15188
+2024-02-23T15:37:17.450 [INFO ] default - disconnect:21097
+2024-02-23T15:37:17.451 [INFO ] default - 用户21097删除!
+2024-02-23T15:37:17.452 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:37:17.819 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:37:19.240 [INFO ] default - socket comein........
+2024-02-23T15:37:19.257 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:37:19.263 [INFO ] default - 添加用户:21097
+2024-02-23T15:37:19.265 [INFO ] default - 21097获取道具
+2024-02-23T15:37:19.266 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:37:19.268 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:37:19.268 [INFO ] default - 21097添加金币
+2024-02-23T15:37:19.274 [INFO ] default - 21097添加钻石
+2024-02-23T15:37:19.280 [INFO ] default - 21097登录分数100000
+2024-02-23T15:37:19.280 [INFO ] default - 21097登录钻石10
+2024-02-23T15:42:24.445 [INFO ] default - disconnect:21097
+2024-02-23T15:42:24.447 [INFO ] default - 用户21097删除!
+2024-02-23T15:42:24.447 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:42:25.133 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:42:25.967 [INFO ] default - socket comein........
+2024-02-23T15:42:25.986 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:42:25.990 [INFO ] default - 添加用户:21097
+2024-02-23T15:42:25.992 [INFO ] default - 21097获取道具
+2024-02-23T15:42:25.992 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:42:25.994 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:42:25.994 [INFO ] default - 21097添加金币
+2024-02-23T15:42:25.996 [INFO ] default - 21097添加钻石
+2024-02-23T15:42:26.001 [INFO ] default - 21097登录分数100000
+2024-02-23T15:42:26.002 [INFO ] default - 21097登录钻石10
+2024-02-23T15:42:40.778 [INFO ] default - disconnect:21097
+2024-02-23T15:42:40.779 [INFO ] default - 用户21097删除!
+2024-02-23T15:42:40.779 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:42:41.280 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:43:19.408 [INFO ] default - socket comein........
+2024-02-23T15:43:19.425 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:43:19.430 [INFO ] default - 添加用户:21097
+2024-02-23T15:43:19.432 [INFO ] default - 21097获取道具
+2024-02-23T15:43:19.433 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:43:19.439 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:43:19.439 [INFO ] default - 21097添加金币
+2024-02-23T15:43:19.443 [INFO ] default - 21097添加钻石
+2024-02-23T15:43:19.451 [INFO ] default - 21097登录分数100000
+2024-02-23T15:43:19.452 [INFO ] default - 21097登录钻石10
+2024-02-23T15:52:19.585 [INFO ] default - userDisconnect:
+2024-02-23T15:52:19.586 [INFO ] default - {
+  ResultCode: 1,
+  userId: 21091,
+  userScore: 113944,
+  gameId: 15183,
+  nolog: true
+}
+2024-02-23T15:52:19.587 [INFO ] default - 21091清除游戏ID
+2024-02-23T15:52:19.588 [INFO ] default - 用户21091删除!
+2024-02-23T15:58:04.762 [INFO ] default - disconnect:21097
+2024-02-23T15:58:04.765 [INFO ] default - 用户21097删除!
+2024-02-23T15:58:04.766 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T15:58:05.216 [INFO ] default - 成功保存,删除用户21097 socre:100000 diamond:10
+2024-02-23T15:58:06.959 [INFO ] default - socket comein........
+2024-02-23T15:58:06.979 [INFO ] default - 登录大厅[object Object]
+2024-02-23T15:58:06.984 [INFO ] default - 添加用户:21097
+2024-02-23T15:58:06.986 [INFO ] default - 21097获取道具
+2024-02-23T15:58:06.986 [INFO ] default - 登录成功:[object Object]
+2024-02-23T15:58:06.988 [INFO ] default - 获取积分:[object Object]
+2024-02-23T15:58:06.988 [INFO ] default - 21097添加金币
+2024-02-23T15:58:06.991 [INFO ] default - 21097添加钻石
+2024-02-23T15:58:06.995 [INFO ] default - 21097登录分数100000
+2024-02-23T15:58:06.995 [INFO ] default - 21097登录钻石10
+2024-02-23T16:00:50.819 [INFO ] default - disconnect:21097
+2024-02-23T16:00:50.821 [INFO ] default - 用户21097删除!
+2024-02-23T16:00:50.822 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:00:50.846 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:00:52.422 [INFO ] default - socket comein........
+2024-02-23T16:00:52.444 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:00:52.448 [INFO ] default - 添加用户:21097
+2024-02-23T16:00:52.450 [INFO ] default - 21097获取道具
+2024-02-23T16:00:52.450 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:00:52.453 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:00:52.453 [INFO ] default - 21097添加金币
+2024-02-23T16:00:52.457 [INFO ] default - 21097添加钻石
+2024-02-23T16:00:52.461 [INFO ] default - 21097登录分数120000
+2024-02-23T16:00:52.462 [INFO ] default - 21097登录钻石10
+2024-02-23T16:01:26.944 [INFO ] default - disconnect:21097
+2024-02-23T16:01:26.946 [INFO ] default - 用户21097删除!
+2024-02-23T16:01:26.947 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:01:27.183 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:01:28.541 [INFO ] default - socket comein........
+2024-02-23T16:01:28.560 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:01:28.564 [INFO ] default - 添加用户:21097
+2024-02-23T16:01:28.566 [INFO ] default - 21097获取道具
+2024-02-23T16:01:28.567 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:01:28.570 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:01:28.571 [INFO ] default - 21097添加金币
+2024-02-23T16:01:28.573 [INFO ] default - 21097添加钻石
+2024-02-23T16:01:28.583 [INFO ] default - 21097登录分数120000
+2024-02-23T16:01:28.584 [INFO ] default - 21097登录钻石10
+2024-02-23T16:01:48.306 [INFO ] default - disconnect:21097
+2024-02-23T16:01:48.306 [INFO ] default - 用户21097删除!
+2024-02-23T16:01:48.307 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:01:48.351 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:01:49.826 [INFO ] default - socket comein........
+2024-02-23T16:01:49.843 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:01:49.848 [INFO ] default - 添加用户:21097
+2024-02-23T16:01:49.850 [INFO ] default - 21097获取道具
+2024-02-23T16:01:49.851 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:01:49.855 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:01:49.855 [INFO ] default - 21097添加金币
+2024-02-23T16:01:49.858 [INFO ] default - 21097添加钻石
+2024-02-23T16:01:49.867 [INFO ] default - 21097登录分数120000
+2024-02-23T16:01:49.867 [INFO ] default - 21097登录钻石10
+2024-02-23T16:02:11.608 [INFO ] default - disconnect:21097
+2024-02-23T16:02:11.609 [INFO ] default - 用户21097删除!
+2024-02-23T16:02:11.610 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:02:12.560 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:02:13.186 [INFO ] default - socket comein........
+2024-02-23T16:02:13.204 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:02:13.208 [INFO ] default - 添加用户:21097
+2024-02-23T16:02:13.210 [INFO ] default - 21097获取道具
+2024-02-23T16:02:13.211 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:02:13.212 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:02:13.213 [INFO ] default - 21097添加金币
+2024-02-23T16:02:13.215 [INFO ] default - 21097添加钻石
+2024-02-23T16:02:13.219 [INFO ] default - 21097登录分数120000
+2024-02-23T16:02:13.219 [INFO ] default - 21097登录钻石10
+2024-02-23T16:04:29.382 [INFO ] default - disconnect:21097
+2024-02-23T16:04:29.383 [INFO ] default - 用户21097删除!
+2024-02-23T16:04:29.383 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:04:29.907 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:04:30.943 [INFO ] default - socket comein........
+2024-02-23T16:04:30.961 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:04:30.965 [INFO ] default - 添加用户:21097
+2024-02-23T16:04:30.966 [INFO ] default - 21097获取道具
+2024-02-23T16:04:30.967 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:04:30.970 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:04:30.970 [INFO ] default - 21097添加金币
+2024-02-23T16:04:30.972 [INFO ] default - 21097添加钻石
+2024-02-23T16:04:30.981 [INFO ] default - 21097登录分数120000
+2024-02-23T16:04:30.981 [INFO ] default - 21097登录钻石10
+2024-02-23T16:05:05.789 [INFO ] default - disconnect:21097
+2024-02-23T16:05:05.790 [INFO ] default - 用户21097删除!
+2024-02-23T16:05:05.791 [INFO ] default - 用户21097没有游戏ID
+2024-02-23T16:05:06.293 [INFO ] default - 成功保存,删除用户21097 socre:120000 diamond:10
+2024-02-23T16:05:07.379 [INFO ] default - socket comein........
+2024-02-23T16:05:07.392 [INFO ] default - 登录大厅[object Object]
+2024-02-23T16:05:07.395 [INFO ] default - 添加用户:21097
+2024-02-23T16:05:07.397 [INFO ] default - 21097获取道具
+2024-02-23T16:05:07.397 [INFO ] default - 登录成功:[object Object]
+2024-02-23T16:05:07.399 [INFO ] default - 获取积分:[object Object]
+2024-02-23T16:05:07.399 [INFO ] default - 21097添加金币
+2024-02-23T16:05:07.401 [INFO ] default - 21097添加钻石
+2024-02-23T16:05:07.403 [INFO ] default - 21097登录分数120000
+2024-02-23T16:05:07.404 [INFO ] default - 21097登录钻石10

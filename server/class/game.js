@@ -535,49 +535,29 @@ var GameInfo = function () {
 
 
         //商城购买
-        this.shopBuy = function (_userId, _productId, _count, callback) {
+        this.Shopping = function (userId, productId, count, socket) {
             //获得商品配置
-            var shopConfig = updateConfig.getShopConfig();
-            if (!shopConfig[_productId]) {
-                //商品不存在
-                callback(2);
+            const shopConfig = updateConfig.getShopConfig();
+
+            if (!shopConfig[productId]) {
+                socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
                 return;
             }
-
-            var self = this;
-            //拿到实效商品券
-
-            this.getUserTicket(_userId, function (giftTicket) {
-                if (giftTicket == -1) {
-                    callback(5);
-                    return;
-                }
-
-                if (shopConfig[_productId].price > giftTicket) {
-                    //礼品券不足
-                    //console.log(giftTicket)
-                    callback(1);
-                    return;
-                }
-
-                //购买成功
-                if (_userId && self.userList[_userId]) {
-                    //用户在线
-                    self.userList[_userId]._giftTicket -= shopConfig[_productId].price;
-                    callback(0);
-                } else {
-                    //去修改数据库
-                    var info = {userid: _userId, count: -shopConfig[_productId].price, change_type: 0}
-                    dao.EditTicket(info, function (rusult) {
-                        if (rusult) {
-                            callback(0);
-                        } else {
-                            callback(4);
-                        }
-                    })
-                }
-
-            })
+            // 购买金币
+            try {
+                // 查询购买的金币道具的数量和价值
+                this.searchShopItemValue(productId, callback => {
+                    if (callback) {
+                        const score = callback[0]['score'] * count;
+                        this.addUserscore(userId, score);
+                        console.log('购买成功 用户增加积分', score);
+                        socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
+                    }
+                });
+            }catch (e) {
+               log.err(e);
+               socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
+            }
         };
 
         //保存所有用户

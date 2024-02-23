@@ -300,6 +300,7 @@ io.on('connection', function (socket) {
         }
     });
 
+    // 登录
     socket.on('login', function (data) {
         // 维护模式
         if (gameInfo.isMaintain()) {
@@ -371,7 +372,7 @@ io.on('connection', function (socket) {
         }
     })
 
-    //登录完成之后先进入游戏房间,来自于游戏服务器
+    // 登录完成之后先进入游戏房间,来自于游戏服务器
     socket.on('LoginGame', function (_userinof) {
         let result;
         if (_userinof.serverSign === serverSign) {
@@ -442,7 +443,7 @@ io.on('connection', function (socket) {
         gameInfo.deleteUser(userInfo);
     });
 
-    //有用户离开
+    // 有用户离开
     socket.on('userDisconnect', function (_userInfo) {
         log.info("userDisconnect:");
         log.info(_userInfo);
@@ -455,7 +456,47 @@ io.on('connection', function (socket) {
         }
     });
 
-    //游戏结算
+    // 发送邮箱验证码
+    socket.on("sendEmailCode", function (toEmail) {
+        try {
+            gameInfo.sendEmailCode(socket, toEmail);
+        } catch (e) {
+            log.warn('sendEmailCode',  e);
+        }
+    });
+
+    // 注册
+    socket.on("register", function (_info) {
+        try {
+            if(_info.type === 0){
+                // 邮箱注册
+                gameInfo.verifyEmailCode(socket, _info.email, _info.code);
+            }
+        } catch (e) {
+            log.warn('sendEmailCode',  e);
+        }
+    });
+
+    // 获得商城商品列表
+    socket.on("getShoppingList", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.getShopping_List(socket);
+        }
+    });
+
+    // 购买商品
+    socket.on("Shopping", function (data) {
+
+        const d = JSON.parse(data);
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
+        }else{
+            socket.emit('ShoppingResult', '{"status":1,"msg":"用户不在线"}');
+        }
+    });
+
+
+    // 游戏结算
     socket.on('GameBalance', function (_Info) {
         if (_Info.signCode == serverSign) {
             gameInfo.GameBalance(_Info);
@@ -762,28 +803,6 @@ io.on('connection', function (socket) {
         }
     });
 
-    // 发送邮箱验证码
-    socket.on("sendEmailCode", function (toEmail) {
-        try {
-            gameInfo.sendEmailCode(socket, toEmail);
-        } catch (e) {
-            log.warn('sendEmailCode',  e);
-        }
-    });
-
-
-    // 注册
-    socket.on("register", function (_info) {
-        try {
-            if(_info.type === 0){
-                // 邮箱注册
-                gameInfo.verifyEmailCode(socket, _info.email, _info.code);
-            }
-        } catch (e) {
-            log.warn('sendEmailCode',  e);
-        }
-    });
-
 
     //绑定手机
     socket.on("bindPhone", function (_info) {
@@ -836,12 +855,7 @@ io.on('connection', function (socket) {
             gameInfo.getDiamondRank(socket);
         }
     });
-    //获得商城商品列表
-    socket.on("getShoppingList", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShopping_List(socket);
-        }
-    });
+
 
     //获得商城用户收货信息
     socket.on("getShopPlayerInfo", function () {
