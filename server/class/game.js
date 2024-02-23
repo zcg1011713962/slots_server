@@ -2825,16 +2825,14 @@ var GameInfo = function () {
             };
             if (!_info.sendUserId || _info.sendUserId <= 0) {
                 log.err(_info.sendUserId + "结算ID不能等于NULL或小于0");
-                //console.log("结算ID不能等于NULL或小于0");
                 return;
             }
 
-            log.info("用户" + _info.sendUserId + "结算");
 
-            var userItem = this.getUser(_info.sendUserId);
+            // 用户在游戏中
+            const userItem = this.getUser(_info.sendUserId);
             if (userItem && userItem.getGameId()) {
                 //存到表,下次添加
-                log.info("结算,在游戏中");
                 var youScore = userItem.getScore();
                 var youDiamond = userItem.getDiamond();
                 if (_info.sendCoin) {
@@ -2844,7 +2842,6 @@ var GameInfo = function () {
                     log.info("========================", _info.diamond, _info.sendUserId);
                     dao.tempAddDiamond(_info.sendUserId, _info.diamond, _info.change_type);
                 }
-
                 return;
             }
 
@@ -2866,29 +2863,6 @@ var GameInfo = function () {
                 }
                 if (_info.diamond) {
                     userItem._socket.emit('sendDiamondResult', {Result: 1, score: _info.diamond, msg: "赠送成功"});
-                }
-
-                if (_info.change_type === 0) {//后台充值
-                    userItem.totalRecharge += parseInt(_info.sendCoin);
-                    if (userItem.vip_level < 1) {
-                        if (userItem.totalRecharge >= activityConfig.levelUpCoinLimit) {
-                            dao.updateVipLevel(_info.sendUserId, 1, (res) => {
-                                if (res === 1) {
-                                    userItem.vip_level = 1;
-                                    userItem._socket.emit('updateVipExpResult', {
-                                        Result: 1,
-                                        level: userItem.vip_level,
-                                        msg: "提升vip成功"
-                                    });
-                                }
-                            });
-                        }
-                    }
-                    dao.updateTotalCharge(_info.sendUserId, userItem.totalRecharge, (res) => {
-                        if (res === 1) {
-
-                        }
-                    });
                 }
 
                 //给别人做争的记录
@@ -2925,31 +2899,29 @@ var GameInfo = function () {
                         }
                     });
                 }
-
-                if (_info.change_type === 0) {//后台充值
-                    dao.checkTotalCharge(_info.sendUserId, (res, data) => {
-                        if (res === 1) {
-                            data.totalRecharge += parseInt(_info.sendCoin);
-                            if (data.housecard < 1) {
-                                if (data.totalRecharge >= activityConfig.levelUpCoinLimit) {
-                                    dao.updateVipLevel(_info.sendUserId, 1, (res) => {
-                                        if (res === 1) {
-                                            console.log("更新等级", _info.sendUserId);
-                                        }
-                                    });
-                                }
-                            }
-                            dao.updateTotalCharge(_info.sendUserId, data.totalRecharge, (res) => {
-                                if (res === 1) {
-                                    console.log("不在线充值累计", _info.sendUserId);
-                                }
-                            });
-                        }
-                    });
-                }
-
             }
         };
+
+        // 充值
+        this.Recharge = function (userId, rechargeCoin) {
+            // 查询累计充值
+            dao.checkTotalCharge(userId, (res, data) => {
+                if (res === 1) {
+                    data.totalRecharge += parseInt(rechargeCoin);
+                    const housecard = data.housecard;
+
+                    // 更新VIP等级
+                    dao.updateVipLevel(userId, 1, (res) => {
+
+                    });
+                    // 修改累计充值
+                    dao.updateTotalCharge(userId, data.totalRecharge, (res) => {
+
+                    });
+                }
+            });
+        }
+
 
         this.GameBalanceSub = function (_info, callback) {
             //被赠送id

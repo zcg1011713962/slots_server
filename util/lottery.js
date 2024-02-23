@@ -1,7 +1,7 @@
 const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require("./redis_laba_win_pool");
 const laba_config = require("./config/laba_config");
-
+const log = require("../CClass/class/loginfo").getInstand;
 
 exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
@@ -13,7 +13,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo
             let gameJackpot = jackpot ? jackpot *  laba_config.game_jackpot_ratio : 0;
             // 摇奖
             const result = gameInfo.lottery(socket.userId, nBetSum, gameJackpot, redisIconTypeBind);
-            console.log('摇奖结果', result);
+            log.info('摇奖结果' + JSON.stringify(result));
 
             if (result.code < 1) {
                 socket.emit('lotteryResult', {ResultCode: result.code});

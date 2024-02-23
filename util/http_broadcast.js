@@ -1,12 +1,11 @@
-var http = require('http');
+const http = require('http');
+const url_config = require('./config/url_config');
 
 module.exports.send = function (requestData) {
 
-    var url = "127.0.0.1";
-
     var postdata = JSON.stringify(requestData);
     var appstore_optios = {
-        hostname: url,
+        hostname: url_config.broadcast_ip,
         port: 13001,
         path: '/addMessage',
         method: 'POST',
@@ -40,11 +39,10 @@ module.exports.send = function (requestData) {
 
 module.exports.getTableKey = function (requestData, cb) {
 
-    var url = "127.0.0.1";
 
     var postdata = JSON.stringify(requestData);
     var appstore_optios = {
-        hostname: url,
+        hostname: url_config.broadcast_ip,
         port: 13001,
         path: '/getTableKey',
         method: 'POST',
@@ -79,11 +77,9 @@ module.exports.getTableKey = function (requestData, cb) {
 
 module.exports.updateTableKey = function (requestData, cb) {
 
-    var url = "127.0.0.1";
-
     var postdata = JSON.stringify(requestData);
     var appstore_optios = {
-        hostname: url,
+        hostname: url_config.broadcast_ip,
         port: 13001,
         path: '/updateTableKey',
         method: 'POST',
@@ -118,11 +114,9 @@ module.exports.updateTableKey = function (requestData, cb) {
 
 module.exports.getUserCtrl = function (requestData, cb) {
 
-    var url = "127.0.0.1";
-
     var postdata = JSON.stringify(requestData);
     var appstore_optios = {
-        hostname: url,
+        hostname: url_config.broadcast_ip,
         port: 13001,
         path: '/getUserCtrl',
         method: 'POST',

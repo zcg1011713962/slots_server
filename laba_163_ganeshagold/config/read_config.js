@@ -41,7 +41,7 @@ const readIniFile = function () {
 
         // 配牌器
         this.icon_bind_switch = parseInt(config['配牌器'].icon_bind_switch);
-        this.icon_type_bind = JSON.parse(config['配牌器'].icon_type_bind);
+        this.icon_type_bind = config['配牌器'].icon_type_bind ? JSON.parse(config['配牌器'].icon_type_bind) : config['配牌器'].icon_type_bind;
         this.icon_bind_jackpot_sum = parseInt(config['配牌器'].icon_bind_jackpot_sum);
         // 中奖配置
         this.line_win_lower_limit = parseInt(config['中奖配置'].line_win_lower_limit);

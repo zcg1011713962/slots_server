@@ -44,50 +44,29 @@ var webGetUser = function(req, callback){
 		}
 	}else if(req.body.act == "webShopBuy"){
 		//验证md5
-		var content = req.body.act + req.body.userId + req.body.productId + req.body.count + req.body.time + key;
+		const content = req.body.act + req.body.userId + req.body.productId + req.body.count + req.body.time + key;
 		if (md53(content) != req.body.sign){
 			sendStr = '{"status":1,"msg":"参数不正确!"}'
 			callback(sendStr);
 			return;
 		}
-
+		// 购买金币
 		if(req.body.productId === 1){
-			// 查询购买的金币道具的数量和价值
-			gameInfo.searchShopItemValue(req.body.productId, callback =>{
-				if(callback){
-					const score = callback[0]['score'] * req.body.count;
-					gameInfo.addUserscore(req.body.userId, score);
-					console.log('用户增加积分', score)
-				}
-			});
-			sendStr = '{"status":0,"msg":"购买成功"}';
-			callback(sendStr);
-		}else{
-			//验证成功
-			gameInfo.shopBuy(req.body.userId,parseInt(req.body.productId),parseInt(req.body.count),function(result){
-				sendStr = '{"status":1,"msg":"购买失败,未知原因"}';
-				switch(result){
-					case 0:
+			try {
+				// 查询购买的金币道具的数量和价值
+				gameInfo.searchShopItemValue(req.body.productId, callback => {
+					if (callback) {
+						const score = callback[0]['score'] * req.body.count;
+						gameInfo.addUserscore(req.body.userId, score);
+						console.log('用户增加积分', score);
 						sendStr = '{"status":0,"msg":"购买成功"}';
-						break;
-					case 1:
-						sendStr = '{"status":2,"msg":"购买失败,礼品券不足"}';
-						break;
-					case 2:
-						sendStr = '{"status":3,"msg":"购买失败,商品ID不存在"}';
-						break;
-					case 3:
-						sendStr = '{"status":4,"msg":"购买失败,所货地址不存在"}';
-						break;
-					case 4:
-						sendStr = '{"status":5,"msg":"数据库操作失败"}';
-						break;
-					case 5:
-						sendStr = '{"status":6,"msg":"用户ID错误"}';
-						break;
-				}
+					}
+				});
+			}catch (e) {
+				sendStr = '{"status":1,"msg":"购买失败"}';
+			}finally {
 				callback(sendStr);
-			});
+			}
 		}
 	}else{
 		sendStr = '{"status":3,"msg":"参数不正确!"}'

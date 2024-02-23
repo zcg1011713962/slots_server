@@ -4,7 +4,6 @@ const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("../config/gameConfig");
-const laba = require("../../util/laba");
 const http_bc = require("./../../util/http_broadcast");
 const redis_send_and_listen = require("../../util/redis_send_and_listen");
 const {getInstand: log} = require("../../CClass/class/loginfo");
@@ -76,7 +75,7 @@ var GameInfo = function () {
                 var nowDate = new Date();
                 var minute = nowDate.getMinutes();
                 var second = nowDate.getSeconds();
-                if (second % 3 === 0) {
+                if (minute % 10 == 0 && second == 1) {
                     self.saveGamblingBalanceGold();
                     console.log("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
@@ -241,20 +240,20 @@ var GameInfo = function () {
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
                 }
                 // 生成图案
-                nHandCards = laba.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
 
                 // 下注倍数
                 const bet_num = parseInt(nBetSum / gameConfig.GAME_GOLD_Single);
 
                 // 分析图案
-                dictAnalyseResult = laba.AnalyseColumnSolt(nHandCards, nGameMagicCardIndex, freeCard, nGameLineWinLowerLimitCardNumber, col_count, bet_num, winJackpot, gameConfig.GAME_COMBINATIONS_DIAMOND);
+                dictAnalyseResult = LABA.AnalyseColumnSolt(nHandCards, nGameMagicCardIndex, freeCard, nGameLineWinLowerLimitCardNumber, col_count, bet_num, winJackpot, gameConfig.GAME_COMBINATIONS_DIAMOND);
                 dictAnalyseResult["nBet"] = nBetSum;
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
                 fin_value = win + winJackpot;
                 // 普通奖励不能大于库存，除非是开了配牌器
-                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break;

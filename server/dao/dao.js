@@ -850,7 +850,7 @@ exports.checkVip = function checkVip(userId, callback) {
 
 //查询累计充值
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
-    var sql = 'select totalRecharge,housecard from newuseraccounts where Id=?';
+    const sql = 'select totalRecharge,housecard from newuseraccounts where Id=?';
     var values = [];
 
     values.push(userId);
@@ -1173,26 +1173,6 @@ exports.getWinCoin = function getWinCoin(_userId, callback) {
     var values = [];
     values.push(_userId);
     callback(0);
-    // pool.getConnection(function (err, connection) {
-    //
-    //     connection.query({sql: sql, values: values}, function (err, rows) {
-    //         connection.release();
-    //         if (err) {
-    //             console.log("getWinCoin");
-    //             console.log(err);
-    //             callback(0);
-    //         } else {
-    //             if (rows.length == 0) {
-    //                 callback(0);
-    //             } else {
-    //                 callback(1, rows[0]);
-    //             }
-    //         }
-    //     })
-    //
-    //     values = [];
-    //
-    // });
 };
 
 

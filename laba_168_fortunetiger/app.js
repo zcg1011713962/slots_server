@@ -39,20 +39,18 @@ Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    log.info("登录" + gameConfig.gameName + "服务器回应:"+ msg.ResultCode);
+    log.info("登录" + gameConfig.gameName + "服务器回应:"+ JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {
         gameInfo.deleteUserById(msg.userid, msg.msg);
     }
-
 });
 
 Csocket.on('addgold', function (msg) {
     if (!msg) {
         return;
     }
-    //console.log(msg);
     var result = gameInfo.addgold(msg.userid, msg.addgold);
     Csocket.emit('addgoldResult', {Result: result});
 

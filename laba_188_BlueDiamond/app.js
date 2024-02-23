@@ -39,7 +39,7 @@ Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    console.log(".登录" + gameConfig.gameName + "服务器回应" + msg);
+    console.log(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {

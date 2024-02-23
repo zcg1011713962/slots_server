@@ -4,7 +4,6 @@ var arithmetic = require("./arithmetic");
 var sever = require("./sever");
 var schedule = require("node-schedule");
 var gameConfig = require("./../config/gameConfig");
-var laba = require("./../../util/laba");
 var http_bc = require("./../../util/http_broadcast");
 var redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
@@ -251,7 +250,7 @@ var GameInfo = function () {
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
                 }
                 // 生成图案
-                nHandCards = laba.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
                 // 分析图案
                 LABA.HandCardsAnalyse(nHandCards, nGameLines, icon_mul, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameLineDirection, bGameLineRule, nBetList,jackpotCard, winJackpot, freeCard, freeTimes, nGameLineWinLowerLimitCardNumber, dictAnalyseResult);
 
@@ -260,7 +259,7 @@ var GameInfo = function () {
                 // 图案最终价值
                 fin_value = win + winJackpot;
                 // 普通奖励不能大于库存，除非是开了配牌器
-                if(!Config.icon_bind_switch && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
 

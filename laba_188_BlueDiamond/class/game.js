@@ -4,7 +4,6 @@ const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("./../config/gameConfig");
-const laba = require("./../../util/laba");
 const http_bc = require("./../../util/http_broadcast");
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
@@ -74,7 +73,7 @@ var GameInfo = function () {
                 var nowDate = new Date();
                 var minute = nowDate.getMinutes();
                 var second = nowDate.getSeconds();
-                if (second % 3 === 0) {
+                if (minute % 10 == 0 && second == 1) {
                     self.saveGamblingBalanceGold();
                     console.log("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
@@ -143,10 +142,8 @@ var GameInfo = function () {
             if (!lotteryResult) {
                 console.log(nBetSum);
                 console.log(userId + "分数不够");
-                //console.log(this.userList[userId])
                 return {code: -2};
             }
-
 
             // 每条线下注的金额
             let len = Config.nGameLines.length;
@@ -229,7 +226,7 @@ var GameInfo = function () {
             const addJackpot = nBetSum * parseInt(nGamblingWaterLevelGold) / 100;
             // 进入库存的钱
             const addBalance = nBetSum - addJackpot;
-            // 增加库存和奖池ll
+            // 增加库存和奖池
             this.A.addGamblingBalanceGold(addBalance, addJackpot);
 
 
@@ -245,16 +242,16 @@ var GameInfo = function () {
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
                 }
                 // 生成图案
-                nHandCards = laba.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
                 // 分析图案
-                LABA.HandCardsAnalyse_Single(nHandCards, cards, nGameLines, icon_mul, nGameMagicCardIndex, nBetSum, cardsNumber, dictAnalyseResult);
+                LABA.HandCardsAnalyse_Single(nHandCards, cards, nGameLines, icon_mul, nGameMagicCardIndex, nBetSum, cardsNumber, freeCard, freeTimes, 1, dictAnalyseResult);
 
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
                 fin_value = win + winJackpot;
                 // 普通奖励不能大于库存，除非是开了配牌器
-                if(!Config.icon_bind_switch && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break;

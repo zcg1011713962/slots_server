@@ -77,6 +77,6 @@ activityConfig.wincoinlv[19] = {value: 887616000};
 activityConfig.wincoinlv[20] = {value: 1607616000};
 
 activityConfig.everyCoin = [1000, 2000, 3000, 4000, 5000, 6000, 7000];
-activityConfig.levelUpCoinLimit = 30000000;
+
 
 module.exports = activityConfig;

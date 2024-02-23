@@ -745,3 +745,26 @@
 2024-02-21T11:25:00.554 [INFO ] default - 图案排列结果
 2024-02-21T11:25:00.555 [INFO ] default - [ 1 ]
 2024-02-21T11:25:00.556 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
+2024-02-22T19:09:22.752 [INFO ] default - 添加库存:9.5当前库存77137.5
+2024-02-22T19:09:22.754 [INFO ] default - 添加奖池:0.5
+2024-02-22T19:09:22.754 [INFO ] default - 配牌器开关:true牌:
+2024-02-22T19:09:22.756 [INFO ] default - 图案排列结果
+2024-02-22T19:09:22.756 [INFO ] default - undefined
+2024-02-22T19:09:22.756 [INFO ] default - 下注:10赢:NaNjackpot:0expectRTP:80
+2024-02-22T19:09:22.757 [INFO ] default - 摇奖结果{"code":1,"userscore":null,"winscore":null,"viewarray":{"code":2,"nBet":10,"win":null,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708600162752,"is_free":false,"user_score":null},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-22T19:16:37.870 [INFO ] default - 添加库存:9.5当前库存77147.5
+2024-02-22T19:16:37.872 [INFO ] default - 添加奖池:0.5
+2024-02-22T19:16:37.873 [INFO ] default - 减少库存:800库存76347.5
+2024-02-22T19:16:37.873 [INFO ] default - 减少奖池:0
+2024-02-22T19:16:37.876 [INFO ] default - 图案排列结果
+2024-02-22T19:16:37.877 [INFO ] default - [ 2 ]
+2024-02-22T19:16:37.878 [INFO ] default - 下注:10赢:800jackpot:0expectRTP:80
+2024-02-22T19:16:37.878 [INFO ] default - 摇奖结果{"code":1,"userscore":110990,"winscore":800,"viewarray":{"code":2,"nWinLines":2,"nBet":10,"win":800,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708600597869,"is_free":false,"user_score":110990},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-23T10:38:27.967 [INFO ] default - 添加库存:9.5当前库存77147.5
+2024-02-23T10:38:27.969 [INFO ] default - 添加奖池:0.5
+2024-02-23T10:38:27.970 [INFO ] default - 减少库存:4库存77143.5
+2024-02-23T10:38:27.970 [INFO ] default - 减少奖池:0
+2024-02-23T10:38:27.971 [INFO ] default - 图案排列结果
+2024-02-23T10:38:27.971 [INFO ] default - [ 1 ]
+2024-02-23T10:38:27.972 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
+2024-02-23T10:38:27.972 [INFO ] default - 摇奖结果{"code":1,"userscore":114104,"winscore":4,"viewarray":{"code":2,"nWinLines":1,"nBet":10,"win":4,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708655907966,"is_free":false,"user_score":114104},"winfreeCount":0,"freeCount":0,"score_pool":0}

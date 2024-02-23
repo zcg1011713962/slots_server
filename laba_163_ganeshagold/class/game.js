@@ -4,7 +4,6 @@ var arithmetic = require("./arithmetic");
 var sever = require("./sever");
 var schedule = require("node-schedule");
 var gameConfig = require("../config/gameConfig");
-var laba = require("../../util/laba");
 var http_bc = require("./../../util/http_broadcast");
 var redis_send_and_listen = require("../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
@@ -223,15 +222,15 @@ var GameInfo = function () {
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
                 }
                 // 生成图案
-                nHandCards = laba.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot)
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot)
                 const bet_num = parseInt(nBetSum / gameConfig.GAME_GOLD_Single);
                 // 分析图案
-                dictAnalyseResult = laba.AnalyseColumnSolt(nHandCards, nGameMagicCardIndex, freeCard, nGameLineWinLowerLimitCardNumber, col_count, bet_num, winJackpot, gameConfig.GAME_COMBINATIONS_DIAMOND);
+                dictAnalyseResult = LABA.AnalyseColumnSolt(nHandCards, nGameMagicCardIndex, freeCard, nGameLineWinLowerLimitCardNumber, col_count, bet_num, winJackpot, gameConfig.GAME_COMBINATIONS_DIAMOND);
                 dictAnalyseResult["nBet"] = nBetSum;
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
                 // 普通奖励不能大于库存
-                if(!Config.icon_bind_switch && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break;

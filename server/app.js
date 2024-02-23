@@ -45,15 +45,12 @@ app.all('*', function (req, res, next) {
 app.engine('html', consolidate.ejs);
 app.set('views', 'template');
 app.set('view engine', 'html');
-
 app.use(bodyParser());
-app.get('/Activity/gameuse', function (req, res) {
-    api(req, function (sendStr) {
-        res.send(sendStr);
-    });
-});
 
-//验证充值
+
+
+
+// 验证充值
 app.post('/apple', function (req, res_s) {
     appleRecharge(req, function (sendStr) {
         res_s.send(sendStr)
@@ -244,7 +241,7 @@ app.post('/getSmsCode', function (req, response) {
     response.write(JSON.stringify({code: 1}));
     response.end();
 });
-//检查验证码
+//校验验证码
 app.post('/checkSmsCode', function (req, response) {
     try {
         let data = {};
