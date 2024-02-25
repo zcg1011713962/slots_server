@@ -1,8 +1,8 @@
-var mysql = require('mysql');
-var async = require('async');
-var gameConfig = require('./../config/gameConfig');
-var log = require("../../CClass/class/loginfo").getInstand;
-var mysql_config = require("../../util/config/mysql_config");
+const mysql = require('mysql');
+const async = require('async');
+const gameConfig = require('./../config/gameConfig');
+const log = require("../../CClass/class/loginfo").getInstand;
+const mysql_config = require("../../util/config/mysql_config");
 
 var pool = mysql.createPool({
     connectionLimit: 10000,
@@ -15,16 +15,23 @@ var pool = mysql.createPool({
 });
 
 
-exports.login = function login(user, socket, callback) {
+exports.login = function login(user, socket, gameInfo, callback) {
     if (user.userName && user.sign) {
         // 用户密码登录
         pwdLogin(user, socket, callback);
     }else if(user.uid){
         // google登录或注册
         googleLogin(user, socket, callback);
-    }else if(user.email){
-        // 邮箱登录
-        emailLogin(user, socket, callback);
+    }else if(user.email && user.code){
+        // 校验验证码
+        gameInfo.verifyEmailCode(user.email, user.code, ret =>{
+            if(ret){
+                // 邮箱登录
+                emailLogin(user, socket, callback);
+            }else{
+                callback(0);
+            }
+        });
     }
 }
 

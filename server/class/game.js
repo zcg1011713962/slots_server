@@ -12,7 +12,6 @@ var async = require('async');
 var updateConfig = require('./update_config').getInstand;
 var RobotConfig = require('./../config/RobotConfig');
 var ml_api = require('./ml_api');
-
 var redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
 var redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const SendEmail = require('../../util/email_send_code');
@@ -58,7 +57,6 @@ var GameInfo = function () {
                 if (Result) {
                     self.server_log_list = rows
                 }
-
             });
 
             this.checkNo = {};
@@ -1761,16 +1759,32 @@ var GameInfo = function () {
         };
 
         // 校验验证码
-        this.verifyEmailCode = function (_socket, email, code) {
-            const key = 'sendEmailCode' + email;
-            RedisUtil.get(key).then(verificationCode =>{
-                if(parseInt(verificationCode) === code){
-                    log.info('校验验证码成功'+ email + 'code:' + code);
-                    // 注册
+        this.register = function (_socket, email, code) {
+            this.verifyEmailCode(email, code, callback =>{
+                if(callback){
+                    // 通过邮箱注册
                     dao.registerByEmail(_socket, email);
                 }else{
-                    log.err('校验验证码失败'+ email + ' verificationCode:' + verificationCode + 'code:' + code);
                     _socket.emit('registerResult', {Result: 0, msg: "注册失败"});
+                }
+            });
+        }
+
+        this.verifyEmailCode = function (email, code, callback) {
+            const key = 'sendEmailCode' + email;
+            RedisUtil.get(key).then(verificationCode =>{
+                try {
+                    if (parseInt(verificationCode) === parseInt(code)) {
+                        log.info('校验验证码成功' + email + 'code:' + code);
+                        callback(1);
+                    } else {
+                        log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                        callback(0);
+                    }
+                }catch (e) {
+                    log.err(e);
+                    log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                    callback(0);
                 }
             });
         }

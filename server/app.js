@@ -274,7 +274,7 @@ io.on('connection', function (socket) {
                 user.sign = user.password;
             }
 
-            dao.login(user, socket, function (state, rows) {
+            dao.login(user, socket, gameInfo, function (state, rows) {
                 if (!state) {
                     if (!rows) {
                         const result = {resultid: 0, msg: 'Account or password error,login fail!'};
@@ -410,8 +410,8 @@ io.on('connection', function (socket) {
     socket.on("register", function (_info) {
         try {
             if(_info.type === 0){
-                // 邮箱注册
-                gameInfo.verifyEmailCode(socket, _info.email, _info.code);
+                // 注册
+                gameInfo.register(socket, _info.email, _info.code);
             }
         } catch (e) {
             log.warn('sendEmailCode',  e);
