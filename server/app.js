@@ -1,10 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var recharge_api = require('./class/recharge_api');
 let withdrawal_api = require('./class/withdrawal_api');
-var webGetUser = require('./class/webGetUser');
-var appleRecharge = require('./class/appleRecharger');
 var schedule = require("node-schedule");
 var bodyParser = require('body-parser');
 var weixin = require('./class/weixin');
@@ -21,7 +18,6 @@ var log = require("../CClass/class/loginfo").getInstand;
 var multer = require('multer');
 var consolidate = require('consolidate');
 var statics = require('express-static');
-var updateConfig = require('./class/updateConfig').getInstand;
 var shopping_dao = require('./dao/shopping_dao');
 const sms = require("./class/sms.js");
 const StringUtil = require("../util/string_util");
@@ -49,59 +45,10 @@ app.set('view engine', 'html');
 app.use(bodyParser());
 
 
-
-
-// 验证充值
-app.post('/apple', function (req, res_s) {
-    appleRecharge(req, function (sendStr) {
-        res_s.send(sendStr)
-    });
-});
-
-
-app.get('/logitech', function (req, res) {
-    var Cun = updateConfig.getUpdateCoifig();
-    res.send(Cun)
-});
-
-//充值相关接口
+// 充值接口
 app.get('/recharge', function (req, res) {
-    recharge_api(req, function (sendStr) {
-        res.send(sendStr)
-    });
-});
-
-//充值支付宝相关接口
-app.get('/rechargeZhifuBao', function (req, res) {
-    //wap
-    if (req.query.payType) {
-        tw_api.rechargeZhifuBao(req, function (result, url, sendStr) {
-            if (result) {
-                res.redirect(url);
-            } else {
-                res.send(sendStr);
-            }
-        });
-    } else {
-        guanfang_api.rechargeZhifuBao(req, function (result, url, sendStr) {
-            if (result) {
-                res.redirect(url);
-            } else {
-                res.send(sendStr);
-            }
-        });
-    }
-});
-
-//充值支付宝相关接口
-app.get('/rechargeZhifuBaoReturn', function (req, res) {
-
-    tw_api.rechargeZhifuBaoReturn(req.query, function (result) {
-        if (result) {
-            res.send("SUCCESS");
-        } else {
-            res.send("FAIL");
-        }
+    gameInfo.Recharge(req.query.userId, req.query.amount,function (sendStr) {
+        res.send(sendStr);
     });
 });
 
@@ -132,7 +79,7 @@ app.post('/gmManage', function (req, res) {
     });
 });
 
-
+// 游客自动注册登录
 app.get('/weixinLogin', function (req, res) {
     //外部接口
     weixin(req, function (act, sendStr) {
@@ -155,14 +102,6 @@ app.get('/ml_api', function (req, res) {
             res.redirect(sendStr);
         }
     });
-});
-
-//商城相关
-app.post('/webGetUser', function (req, res) {
-    webGetUser(req, function (sendStr) {
-        log.info(sendStr);
-        res.send(sendStr);
-    })
 });
 
 
@@ -191,6 +130,7 @@ app.post('/getShopList', function (req, response) {
         log.warn('getShopList-json');
     }
 });
+
 
 app.post('/addShoppingGoods', function (req, response) {
     try {
@@ -496,6 +436,37 @@ io.on('connection', function (socket) {
             }
         }catch (e) {
             socket.emit('ShoppingResult', '{"status":1,"msg":"参数有误"}');
+        }
+    });
+
+
+    // 获取用户信息
+    socket.on("getUserInfo", function () {
+        try {
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                const user = gameInfo.getUser(userId);
+                const userInfo = {
+                    account: user._account,
+                    id: user._userId,
+                    nickname: user._nickname,
+                    score: user._score,
+                    sign: user._sign,
+                    proplist: user._proList,
+                    headimgurl: user._headimgurl,
+                    diamond: user._diamond,
+                    phoneNo: user._phoneNo,
+                    official: user._official,
+                    isVip: user.is_vip,
+                    totalRecharge: user.totalRecharge,
+                    vip_level: user.vip_level,
+                };
+                socket.emit('UserInfoResult', {status: 1, msg: userInfo});
+            }else{
+                socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
+            }
+        }catch (e) {
+            socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
         }
     });
 
@@ -1022,8 +993,6 @@ io.on('connection', function (socket) {
             } else {
                 // _info.ip = "116.196.93.26";
             }
-
-
             gameInfo.scoreOut(socket, _info);
         }
 

@@ -9,7 +9,7 @@ var Post = require('./post');
 var schedule = require("node-schedule");
 var log = require("../../CClass/class/loginfo").getInstand;
 var async = require('async');
-var updateConfig = require('./updateConfig').getInstand;
+var updateConfig = require('./update_config').getInstand;
 var RobotConfig = require('./../config/RobotConfig');
 var ml_api = require('./ml_api');
 
@@ -537,8 +537,8 @@ var GameInfo = function () {
         //商城购买
         this.Shopping = function (userId, productId, count, socket) {
             //获得商品配置
-            this.selectGoodsInfo(productId, callback =>{
-                if(callback){
+            shopping_dao.selectGoodsInfo(productId, callback =>{
+                if(!callback){
                     socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
                 }else{
                     // 购买金币
@@ -546,15 +546,17 @@ var GameInfo = function () {
                         // 查询购买的金币道具的数量和价值
                         this.searchShopItemValue(productId, callback => {
                             if (callback) {
-                                const score = callback[0]['score'] * count;
+                                const score = callback[0]['val'] * count;
                                 this.addUserscore(userId, score);
-                                console.log('购买成功 用户增加积分', score);
+                                console.log('购买成功 用户增加积分', score, '扣减账户余额');
                                 socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
                                 this.addgold(userId, score, callback =>{
                                     if(callback){
                                         console.log('用户在游戏内 用户增加积分成功', score);
                                     }
                                 });
+                            }else{
+                                socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
                             }
                         });
                     }catch (e) {
@@ -584,6 +586,7 @@ var GameInfo = function () {
                 return 0;
             }
         };
+
 
         //获得用户当前分数
         this.getPlayerScore = function (_userId, _callback) {
@@ -638,7 +641,6 @@ var GameInfo = function () {
                 console.log("加分,未登录")
                 return 0
             } else {
-                //console.log(ServerInfo)
                 const gameScoket = ServerInfo.getScoket(this.userList[_userId].getGameId());
                 if(gameScoket){
                     var self = this;
@@ -2888,25 +2890,63 @@ var GameInfo = function () {
         };
 
         // 充值
-        this.Recharge = function (userId, rechargeCoin) {
+        this.Recharge = function (userId, amount, callback) {
+
             // 查询累计充值
-            dao.checkTotalCharge(userId, (res, data) => {
+            dao.checkTotalCharge(parseInt(userId), (res, data) => {
+                if(!amount || amount < 0){
+                    callback("充值失败！");
+                    return;
+                }
                 if (res === 1) {
-                    data.totalRecharge += parseInt(rechargeCoin);
+                    data.totalRecharge += parseInt(amount);
                     const housecard = data.housecard;
 
-                    // 更新VIP等级
-                    dao.updateVipLevel(userId, 1, (res) => {
-
-                    });
+                    const vipConfig = updateConfig.getVipConfig();
+                    // 计算VIP等级
+                    let vipLevel = 0;
+                    for(let i = 0; i < vipConfig.length; i++){
+                        const config = vipConfig[i];
+                        const minRecharge = config.minRecharge;
+                        if(data.totalRecharge >= minRecharge){
+                            vipLevel = config.level;
+                        }
+                        console.log(config);
+                    }
+                    // VIP升级
+                    if(vipLevel > housecard){
+                        // 更新VIP等级
+                        this.updateVipLevel(userId, vipLevel, housecard);
+                    }
                     // 修改累计充值
-                    dao.updateTotalCharge(userId, data.totalRecharge, (res) => {
-
-                    });
+                    this.updateTotalCharge(userId, data.totalRecharge, amount);
+                    callback("充值成功");
+                }else{
+                    callback("充值失败！");
                 }
             });
         }
 
+        // 更新VIP等级
+        this.updateVipLevel = function (userId, vipLevel, housecard) {
+            dao.updateVipLevel(userId, vipLevel, (res) => {
+                if(!res){
+                    log.warn('dao.updateVipLevel' + res);
+                }else{
+                    log.info('充值成功，原等级:' + housecard + '现等级:' + vipLevel);
+                }
+            });
+        }
+        // 修改累计充值
+        this.updateTotalCharge = function (userId, totalRecharge, amount) {
+            dao.updateTotalCharge(userId, totalRecharge, (res) => {
+                if(!res){
+                    log.warn('dao.updateTotalCharge' + res);
+                }else{
+                    log.info('充值成功，充值:' + amount + '累计充值:' + totalRecharge);
+                }
+            });
+        }
 
         this.GameBalanceSub = function (_info, callback) {
             //被赠送id
@@ -3461,9 +3501,8 @@ var GameInfo = function () {
         };
 
         this.sendNotice = function (io) {
-            var noticeConfig = updateConfig.getNoticeConfig();
+            const noticeConfig = updateConfig.getNoticeConfig();
             io.sockets.emit('noticeMsg', {msg: noticeConfig.msg, date: noticeConfig.date});
-            //io.sockets.emit('noticeMsg',{nickname:Robotname[idx].nickname,msg:"成功兑换20元电话卡!"});
         };
 
         this.PostCoin = function () {

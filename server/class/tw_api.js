@@ -5,7 +5,6 @@ var querystring = require("querystring");
 var dao = require("./../dao/dao")
 var log = require("../../CClass/class/loginfo").getInstand;
 var gameInfo = require('./../class/game').getInstand;
-var updateConfig = require('./updateConfig').getInstand;
 
 var get_client_ip = function(req) {
 	if (req && req.connection && req.socket){
@@ -195,88 +194,6 @@ function pay2(userId,out_trade_no,platform,totalFee,payType,ip,callback){
 }
 
 
-
-tw_api.rechargeZhifuBao = function(req,callback){
-	var info = req.query
-
-	var payconfig = updateConfig.getPayConfig();
-
-	//判断使用接口编号
-
-	if (!info.userId){
-		callback(0,"",'{"status":1,"msg":"用户ID未传入!"}');
-		return;
-	}
-
-	if (!info.totalFee || info.totalFee < 1000){
-		//callback(0,"",'{"status":2,"msg":"充值金额不符合规定"}');
-		//return;
-	}
-	
-	//200 支付宝, 1300 微信
-	if (!(info.payType == "200" || info.payType == "1300")){
-		callback(0,"",'{"status":3,"msg":"充值类型无法识别"}')
-		return;
-	}
-
-
-	console.log(payconfig)
-	var go = 1;
-	if (info.payType == "200"){
-		//支付宝
-		go = payconfig.zhifubao_pay;
-	}else{
-		//微信
-		go = payconfig.weixin_pay;
-	}
-
-	console.log("go" + go);
-
-
-	if (!info.platform){
-		//ios,android
-		info.platform = 0;
-	}
-
-
-	if (!info.Account){
-		//游戏账号
-		info.Account = "";
-	}
-	
-	//生成订单号
-	var myDate = new Date();
-	var out_trade_no = String(myDate.getFullYear()) + String(myDate.getMonth() + 1) + String(myDate.getDate()) + String(myDate.getTime()) + todayId;
-	if (todayId > 10000){
-		todayId = 0;
-	}
-
-	todayId++;
-	var userInfo = {userId:info.userId,Account:info.Account,total_fee:info.totalFee,out_trade_no:out_trade_no,goodsid:0};
-	//console.log(userInfo)
-	var self = this;
-	//直接操作数据库
-	dao.create_rechargeSDK(userInfo,function(Rusult){
-		if (Rusult){
-			if (go == 1){
-				var ip = get_client_ip(req);
-				pay1(out_trade_no,info.platform,info.totalFee,info.payType,ip,function(result){
-					callback(result.state,result.url,result.msg)
-				});
-			}else if(go == 2){
-				pay2(userInfo.userId,out_trade_no,info.platform,info.totalFee,info.payType,ip,function(result){
-					callback(result.state,result.url,result.msg)
-				});
-			}
-		}
-		else{
-		//失败
-			callback(0,"",'{"status":4,"msg":"创建订单失败"}')
-		}
-
-	});
-
-}
 
 tw_api.rechargeZhifuBaoReturn = function(info,callback){
 

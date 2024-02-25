@@ -851,7 +851,7 @@ exports.checkVip = function checkVip(userId, callback) {
 //查询累计充值
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
     const sql = 'select totalRecharge,housecard from newuseraccounts where Id=?';
-    var values = [];
+    let values = [];
 
     values.push(userId);
     pool.getConnection(function (err, connection) {
@@ -878,8 +878,8 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
 
 //修改累计充值
 exports.updateTotalCharge = function updateTotalCharge(userId, num, callback) {
-    var sql = 'update newuseraccounts set totalRecharge=? where Id=?';
-    var values = [];
+    const sql = 'update newuseraccounts set totalRecharge=? where Id=?';
+    let values = [];
 
     values.push(num);
     values.push(userId);
@@ -906,18 +906,19 @@ exports.updateTotalCharge = function updateTotalCharge(userId, num, callback) {
 };
 
 //修改vip等级
-exports.updateVipLevel = function updateVipLevel(userId, num, callback) {
-    var sql = 'update newuseraccounts set housecard=? where Id=?';
-    var values = [];
+exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
+    const sql = 'update newuseraccounts set housecard=?,is_vip =? where Id=?';
+    let values = [];
 
-    values.push(num);
+    values.push(vipLevel);
+    values.push(vipLevel > 0 ? 1 : 0);
     values.push(userId);
     pool.getConnection(function (err, connection) {
 
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateTotalCharge");
+                console.log("updateVipLevel");
                 console.log(err);
                 callback(0);
             } else {

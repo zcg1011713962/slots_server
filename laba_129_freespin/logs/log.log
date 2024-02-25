@@ -806,3 +806,35 @@
 2024-02-23T12:10:38.490 [INFO ] default - [ 1 ]
 2024-02-23T12:10:38.491 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
 2024-02-23T12:10:38.492 [INFO ] default - 摇奖结果{"code":1,"userscore":100206,"winscore":4,"viewarray":{"code":2,"nWinLines":1,"nBet":10,"win":4,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":7,"nFreeType":0},"nBetTime":1708661438482,"is_free":true,"user_score":100206},"winfreeCount":0,"freeCount":7,"score_pool":0}
+2024-02-25T10:47:42.523 [INFO ] default - 添加库存:9.5当前库存76184.5
+2024-02-25T10:47:42.524 [INFO ] default - 添加奖池:0.5
+2024-02-25T10:47:42.524 [INFO ] default - 减少库存:12库存76172.5
+2024-02-25T10:47:42.525 [INFO ] default - 减少奖池:0
+2024-02-25T10:47:42.526 [INFO ] default - 图案排列结果
+2024-02-25T10:47:42.526 [INFO ] default - [ 5 ]
+2024-02-25T10:47:42.526 [INFO ] default - 下注:10赢:12jackpot:0expectRTP:80
+2024-02-25T10:47:42.527 [INFO ] default - 摇奖结果{"code":1,"userscore":100002,"winscore":12,"viewarray":{"code":2,"nWinLines":5,"nBet":10,"win":12,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708829262523,"is_free":false,"user_score":100002},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-25T10:47:55.693 [INFO ] default - 添加库存:9.5当前库存76182
+2024-02-25T10:47:55.694 [INFO ] default - 添加奖池:0.5
+2024-02-25T10:47:55.694 [INFO ] default - 减少库存:6库存76176
+2024-02-25T10:47:55.695 [INFO ] default - 减少奖池:0
+2024-02-25T10:47:55.696 [INFO ] default - 图案排列结果
+2024-02-25T10:47:55.696 [INFO ] default - [ 3 ]
+2024-02-25T10:47:55.697 [INFO ] default - 下注:10赢:6jackpot:0expectRTP:80
+2024-02-25T10:47:55.697 [INFO ] default - 摇奖结果{"code":1,"userscore":99998,"winscore":6,"viewarray":{"code":2,"nWinLines":3,"nBet":10,"win":6,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708829275693,"is_free":false,"user_score":99998},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-25T10:48:09.293 [INFO ] default - 添加库存:9.5当前库存76185.5
+2024-02-25T10:48:09.293 [INFO ] default - 添加奖池:0.5
+2024-02-25T10:48:09.294 [INFO ] default - 减少库存:12库存76173.5
+2024-02-25T10:48:09.294 [INFO ] default - 减少奖池:0
+2024-02-25T10:48:09.295 [INFO ] default - 图案排列结果
+2024-02-25T10:48:09.295 [INFO ] default - [ 5 ]
+2024-02-25T10:48:09.295 [INFO ] default - 下注:10赢:12jackpot:0expectRTP:80
+2024-02-25T10:48:09.296 [INFO ] default - 摇奖结果{"code":1,"userscore":100000,"winscore":12,"viewarray":{"code":2,"nWinLines":5,"nBet":10,"win":12,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708829289293,"is_free":false,"user_score":100000},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-02-25T10:48:22.790 [INFO ] default - 添加库存:9.5当前库存76183
+2024-02-25T10:48:22.791 [INFO ] default - 添加奖池:0.5
+2024-02-25T10:48:22.791 [INFO ] default - 减少库存:4库存76179
+2024-02-25T10:48:22.791 [INFO ] default - 减少奖池:0
+2024-02-25T10:48:22.792 [INFO ] default - 图案排列结果
+2024-02-25T10:48:22.793 [INFO ] default - [ 1 ]
+2024-02-25T10:48:22.793 [INFO ] default - 下注:10赢:4jackpot:0expectRTP:80
+2024-02-25T10:48:22.793 [INFO ] default - 摇奖结果{"code":1,"userscore":99994,"winscore":4,"viewarray":{"code":2,"nWinLines":1,"nBet":10,"win":4,"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nFreeType":0},"nBetTime":1708829302790,"is_free":false,"user_score":99994},"winfreeCount":0,"freeCount":0,"score_pool":0}

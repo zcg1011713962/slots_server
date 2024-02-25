@@ -123,12 +123,6 @@ var api = function(req,callback){
 			var md5_sign_login = crypto.createHash('md5');
 			md5_sign_login.update(content);
 
-			// var Buffer = require("buffer").Buffer;
-			// var b = new Buffer(req.query.nickname);
-			// var s = b.toString('base64');
-			//
-			// console.log("==============================================")
-			// console.log(req.query.nickname)
 
 
 			var userInfo = {};
