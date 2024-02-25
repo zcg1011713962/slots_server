@@ -537,27 +537,32 @@ var GameInfo = function () {
         //商城购买
         this.Shopping = function (userId, productId, count, socket) {
             //获得商品配置
-            const shopConfig = updateConfig.getShopConfig();
-
-            if (!shopConfig[productId]) {
-                socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
-                return;
-            }
-            // 购买金币
-            try {
-                // 查询购买的金币道具的数量和价值
-                this.searchShopItemValue(productId, callback => {
-                    if (callback) {
-                        const score = callback[0]['score'] * count;
-                        this.addUserscore(userId, score);
-                        console.log('购买成功 用户增加积分', score);
-                        socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
+            this.selectGoodsInfo(productId, callback =>{
+                if(callback){
+                    socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
+                }else{
+                    // 购买金币
+                    try {
+                        // 查询购买的金币道具的数量和价值
+                        this.searchShopItemValue(productId, callback => {
+                            if (callback) {
+                                const score = callback[0]['score'] * count;
+                                this.addUserscore(userId, score);
+                                console.log('购买成功 用户增加积分', score);
+                                socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
+                                this.addgold(userId, score, callback =>{
+                                    if(callback){
+                                        console.log('用户在游戏内 用户增加积分成功', score);
+                                    }
+                                });
+                            }
+                        });
+                    }catch (e) {
+                        log.err(e);
+                        socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
                     }
-                });
-            }catch (e) {
-               log.err(e);
-               socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
-            }
+                }
+            });
         };
 
         //保存所有用户
@@ -634,22 +639,22 @@ var GameInfo = function () {
                 return 0
             } else {
                 //console.log(ServerInfo)
-                var gameScoket = ServerInfo.getScoket(this.userList[_userId].getGameId())
-                //console.log("1111");
-                var self = this;
-                gameScoket.emit('addgold', {userid: _userId, addgold: score})
-                gameScoket.on('addgoldResult', function (msg) {
-                    //console.log(msg);
-                    if (msg.Result) {
-                        //可以成功加减分
-                        var score_before = self.userList[_userId].getScore();
-                        self.userList[_userId].addgold(score)
-                        callback(1, score_before);
-                    } else {
-                        callback(0)
-                    }
-                    gameScoket.removeAllListeners('addgoldResult');
-                })
+                const gameScoket = ServerInfo.getScoket(this.userList[_userId].getGameId());
+                if(gameScoket){
+                    var self = this;
+                    gameScoket.emit('addgold', {userid: _userId, addgold: score})
+                    gameScoket.on('addgoldResult', function (msg) {
+                        if (msg.Result) {
+                            //可以成功加减分
+                            const score_before = self.userList[_userId].getScore();
+                            self.userList[_userId].addgold(score)
+                            callback(1, score_before);
+                        } else {
+                            callback(0)
+                        }
+                        gameScoket.removeAllListeners('addgoldResult');
+                    })
+                }
             }
 
         }
@@ -2162,7 +2167,7 @@ var GameInfo = function () {
         //商城商品列表
         this.getShopping_List = function (_socket) {
             shopping_dao.selectShopList((res) => {
-                if (res == 0) {
+                if (res === 0) {
                     _socket.emit("getShoppingResult", {ResultCode: 0, msg: "获取商城列表错误"});
                 } else {
                     let result = {};
@@ -2181,7 +2186,7 @@ var GameInfo = function () {
         //获取用户收货信息
         this.getShopPlayerInfo = function (_socket) {
             shopping_dao.selectshouhuoInfo(_socket.userId, (res) => {
-                if (res == 0) {
+                if (res === 0) {
                     console.log("获取用户收货信息失败");
                 } else {
                     _socket.emit("getShopPlayerInfoResult", {ResultCode: 1, result: res});

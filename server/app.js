@@ -24,6 +24,7 @@ var statics = require('express-static');
 var updateConfig = require('./class/updateConfig').getInstand;
 var shopping_dao = require('./dao/shopping_dao');
 const sms = require("./class/sms.js");
+const StringUtil = require("../util/string_util");
 //版本密钥和版本号
 var version = "ymymymymym12121212qwertyuiop5656_";
 var num = "2.0";
@@ -316,7 +317,7 @@ io.on('connection', function (socket) {
         log.info("登录大厅" + data);
 
         try {
-            const user = isJSON(data) ? JSON.parse(data) : data;
+            const user = StringUtil.isJson(data) ? JSON.parse(data) : data;
             if(!user){
                 return;
             }
@@ -486,12 +487,15 @@ io.on('connection', function (socket) {
 
     // 购买商品
     socket.on("Shopping", function (data) {
-
-        const d = JSON.parse(data);
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
-        }else{
-            socket.emit('ShoppingResult', '{"status":1,"msg":"用户不在线"}');
+        try {
+            const d = JSON.parse(data);
+            if (gameInfo.IsPlayerOnline(socket.userId)) {
+                gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
+            }else{
+                socket.emit('ShoppingResult', '{"status":1,"msg":"用户不在线"}');
+            }
+        }catch (e) {
+            socket.emit('ShoppingResult', '{"status":1,"msg":"参数有误"}');
         }
     });
 
@@ -1247,14 +1251,7 @@ setInterval(function () {
 
 dao.clenaLineOut();
 
-function isJSON(str) {
-    try {
-        JSON.parse(str);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
+
 
 log.info("登录服务器 v2.0.0");
 log.info("服务器启动成功!");

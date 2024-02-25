@@ -11,6 +11,7 @@ const gameConfig = require('./config/gameConfig');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const {getInstand: Config} = require("./config/read_config");
 const Lottery = require("../util/lottery");
+const StringUtil = require("../util/string_util");
 
 var Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -178,12 +179,17 @@ io.on('connection', function (socket) {
 
     //下注
     socket.on('lottery', function (lottery) {
-        const data = JSON.parse(lottery);
-        const nBetSum = parseInt(data.nBetList[0]);
-        // 游戏奖池划分
-        const jackpot_ratio = Config.jackpot_ratio;
-        // 执行摇奖
-        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        try {
+            log.info(lottery);
+            const data = StringUtil.isJson(lottery) ? JSON.parse(lottery) : lottery;
+            const nBetSum = parseInt(data.nBetList[0]);
+            // 游戏奖池划分
+            const jackpot_ratio = Config.jackpot_ratio;
+            // 执行摇奖
+            Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        }catch (e) {
+            log.err(e);
+        }
     });
 
     //离线操作

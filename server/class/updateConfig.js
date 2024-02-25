@@ -26,18 +26,6 @@ var updateConfig = function(){
 				})
 			},60000)
 
-			fs.readFile('./config/shopConfig.json',function(err,data){
-			    //UPDATA重要文件
-			    //console.log(data)
-			    self.shopConfig=data.toString().trim();
-			})
-
-			setInterval(function(){
-				fs.readFile('./config/shopConfig.json',function(err,data){
-					//console.log(data)
-					self.shopConfig=data.toString().trim();
-				})
-			},60000)
 
 			fs.readFile('./config/noticeConfig.json','utf-8',function(err,data){
 			    //UPDATA重要文件
@@ -71,15 +59,6 @@ var updateConfig = function(){
 			return this.updateConfig;
 		}
 
-		this.getShopConfig = function(){
-		    try{
-		      var data = JSON.parse(this.shopConfig);
-		      return data;
-		    }
-		    catch(e){
-		      log.warn('getShopConfig');
-		    }
-		}
 
 		this.getNoticeConfig = function(){
 		    try{

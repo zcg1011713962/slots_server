@@ -12,7 +12,7 @@ let pool = mysql.createPool({
 
 //查询商品列表
 exports.selectShopList = function selectShopList(callback) {
-    let sql = "SELECT * FROM shop_item";
+    let sql = "SELECT * FROM shop_item where deleted = 0";
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql}, function (err, rows) {
             if (err) {
@@ -95,7 +95,6 @@ exports.selectGoodsInfo = function selectGoodsInfo(id, callback) {
             }
         });
         connection.release();
-
     });
 };
 
