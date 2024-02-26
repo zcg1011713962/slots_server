@@ -10,11 +10,8 @@ class ErrorCode {
     static get EMAIL_CODE_EXPIRED() { return { code: 'E402', msg: '验证码超时，请重新发送' }; }
     static get EMAIL_CODE_FAILED() { return { code: 'E403', msg: '校验验证码失败' }; }
     static get EMAIL_INPUT_ERROR() { return { code: 'E404', msg: '邮箱输入错误' }; }
-
     static get LOGIN_FAILED_MAINTAIN() { return { code: 'L400', msg: '游戏正在维护中,稍后重试' }; }
     static get LOGIN_FAILED_LOGINAGAIN() { return { code: 'L401', msg: '同一帐号连续登录!,必须退出一个游戏才能进入另一个游戏!' }; }
-
     static get LOGIN_FAILED_INFO_ERROR() { return { code: 'L402', msg: '登录信息有误' }; }
-
-    static get LOGIN_FAILED_INFO_ERROR() { return { code: 'L402', msg: '账户密码错误' }; }
+    static get LOGIN_PED_INFO_ERROR() { return { code: 'L403', msg: '账户密码错误' }; }
 }

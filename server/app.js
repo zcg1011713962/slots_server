@@ -280,7 +280,7 @@ io.on('connection', function (socket) {
             dao.login(user, socket, gameInfo, function (state, rows) {
                 if (!state) {
                     if (!rows) {
-                        socket.emit('loginResult', {code: 0, msg: 'Account or password error,login fail!'});
+                        socket.emit('loginResult', {code: ErrorCode.LOGIN_PED_INFO_ERROR.code, msg: ErrorCode.LOGIN_PED_INFO_ERROR.msg});
                         return;
                     }
                     //数据库有此用户
