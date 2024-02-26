@@ -21,6 +21,9 @@ var statics = require('express-static');
 var shopping_dao = require('./dao/shopping_dao');
 const sms = require("./class/sms.js");
 const StringUtil = require("../util/string_util");
+const gameInfo = require("./class/game").getInstand;
+const ServerInfo = require('./config/ServerInfo').getInstand;
+
 //版本密钥和版本号
 var version = "ymymymymym12121212qwertyuiop5656_";
 var num = "2.0";
@@ -218,8 +221,6 @@ app.get('/bindCards', function (req, response) {
 
 
 var serverSign = "slel3@lsl334xx,deka";
-var gameInfo = require('./class/game').getInstand;
-var ServerInfo = require('./config/ServerInfo').getInstand;
 
 gameInfo.setIo(io);
 
@@ -246,12 +247,13 @@ io.on('connection', function (socket) {
         // 维护模式
         if (gameInfo.isMaintain()) {
             log.info("维护模式,禁止登录!");
-            socket.emit("maintain", {ResultCode: 1, msg: gameConfig.maintain});
+            socket.emit("maintain", {code: ErrorCode.LOGIN_FAILED_MAINTAIN.code, msg: ErrorCode.LOGIN_FAILED_MAINTAIN.msg});
             return;
         }
         // 判断是不是同一socket登录2次**********未完成还要判断每个游戏里，是否在线？以后再去改
         if (gameInfo.isLoginAgain(socket)) {
             log.info("同一帐号连续登录!,必须退出一个游戏才能进入另一个游戏!");
+            socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_LOGINAGAIN.code, msg: ErrorCode.LOGIN_FAILED_LOGINAGAIN.msg});
             return;
         }
         log.info("登录大厅" + data);
@@ -259,6 +261,7 @@ io.on('connection', function (socket) {
         try {
             const user = StringUtil.isJson(data) ? JSON.parse(data) : data;
             if(!user){
+                socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                 return;
             }
             if(user.userName && user.password){
@@ -277,8 +280,7 @@ io.on('connection', function (socket) {
             dao.login(user, socket, gameInfo, function (state, rows) {
                 if (!state) {
                     if (!rows) {
-                        const result = {resultid: 0, msg: 'Account or password error,login fail!'};
-                        socket.emit('loginResult', result);
+                        socket.emit('loginResult', {code: 0, msg: 'Account or password error,login fail!'});
                         return;
                     }
                     //数据库有此用户
@@ -402,7 +404,8 @@ io.on('connection', function (socket) {
         try {
             gameInfo.sendEmailCode(socket, toEmail);
         } catch (e) {
-            log.warn('sendEmailCode',  e);
+            socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
+            log.err('sendEmailCode',  e);
         }
     });
 

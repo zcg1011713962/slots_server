@@ -1739,20 +1739,30 @@ var GameInfo = function () {
         this.sendEmailCode = function (_socket, toEmail) {
             // 邮箱地址校验
             if (!emailValidator(toEmail)) {
-                _socket.emit('sendEmailCodeResult', {Result: 0, msg: "邮箱地址不正确"});
+                _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_INPUT_ERROR.code, msg: ErrorCode.EMAIL_INPUT_ERROR.msg});
                 return;
             }
             const verificationCode = SendEmail(toEmail,  callback =>{
-                const key = 'sendEmailCode' + toEmail;
-                // 存储验证码
-                RedisUtil.set(key, verificationCode).then(result =>{
-                    RedisUtil.expire(key, 180).then(r =>{
-                        if(result && r){
-                            log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
-                            _socket.emit('sendEmailCodeResult', {Result: 1, msg: "发送成功"});
+                const expireKey = 'send_email_code_expire_' + toEmail;
+                // 是否过期存储
+                RedisUtil.set(expireKey, verificationCode).then(ret1 =>{
+                    const key = 'send_email_code_' + toEmail;
+                    RedisUtil.expire(key, 240).then(ret2 =>{
+                        if(ret1 && ret2){
+                            // 存储验证码
+                            RedisUtil.set(key, verificationCode).then(result =>{
+                                RedisUtil.expire(key, 180).then(r =>{
+                                    if(result && r){
+                                        log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
+                                        _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_SUCCESS.code, msg: ErrorCode.EMAIL_CODE_SEND_SUCCESS.msg});
+                                    }else{
+                                        log.err('邮箱验证码发送失败' + toEmail);
+                                        _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
+                                    }
+                                });
+                            });
                         }else{
-                            log.err('邮箱验证码发送失败' + toEmail);
-                            _socket.emit('sendEmailCodeResult', {Result: 0, msg: "发送失败"});
+                            _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
                         }
                     });
                 });
@@ -1761,32 +1771,43 @@ var GameInfo = function () {
 
         // 校验验证码
         this.register = function (_socket, email, code) {
+            if(isNaN(code)){
+                _socket.emit('registerResult', {code: ErrorCode.EMAIL_CODE_INPUT_ERROR.code, msg: ErrorCode.EMAIL_CODE_INPUT_ERROR.msg});
+                return;
+            }
             this.verifyEmailCode(email, code, callback =>{
-                if(callback){
+                if(callback[0] === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                     // 通过邮箱注册
                     dao.registerByEmail(_socket, email);
                 }else{
-                    _socket.emit('registerResult', {Result: 0, msg: "注册失败"});
+                    _socket.emit('registerResult', {code: callback[0], msg: callback[1]});
                 }
             });
         }
 
         this.verifyEmailCode = function (email, code, callback) {
-            const key = 'sendEmailCode' + email;
-            RedisUtil.get(key).then(verificationCode =>{
-                try {
-                    if (parseInt(verificationCode) === parseInt(code)) {
-                        log.info('校验验证码成功' + email + 'code:' + code);
-                        callback(1);
-                    } else {
+            const expireKey = 'send_email_code_expire_' + email;
+            // 是否过期存储
+            RedisUtil.get(expireKey).then(expireCode => {
+                const key = 'send_email_code_' + email;
+                RedisUtil.get(key).then(verificationCode => {
+                    try {
+                        if (parseInt(verificationCode) === parseInt(code)) {
+                            log.info('校验验证码成功' + email + 'code:' + code);
+                            callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
+                        } else if (expireCode === verificationCode) {
+                            log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
+                            callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
+                        } else {
+                            log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                            callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
+                        }
+                    } catch (e) {
+                        log.err(e);
                         log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                        callback(1401);
+                        callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
                     }
-                }catch (e) {
-                    log.err(e);
-                    log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                    callback(1500);
-                }
+                });
             });
         }
 

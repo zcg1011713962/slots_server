@@ -129,9 +129,9 @@ exports.registerByEmail = function registerByEmail(socket, email){
             connection.release();
             if (err) {
                 log.err('register Email' + err);
-                socket.emit('registerResult', {Result: 0, msg: "注册失败"});
+                socket.emit('registerResult', {Result: ErrorCode.REGISTER_ERROR.code, msg: ErrorCode.REGISTER_ERROR.msg});
             } else {
-                socket.emit('registerResult', {Result: 1, msg: "注册成功"});
+                socket.emit('registerResult', {Result: ErrorCode.REGISTER_SUCCESS.code, msg: ErrorCode.REGISTER_SUCCESS.msg});
             }
         })
     });
