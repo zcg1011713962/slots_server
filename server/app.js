@@ -277,39 +277,34 @@ io.on('connection', function (socket) {
                 user.sign = user.password;
             }
 
-            dao.login(user, socket, gameInfo, function (state, rows) {
-                if (!state) {
-                    if (!rows) {
-                        socket.emit('loginResult', {code: ErrorCode.LOGIN_PED_INFO_ERROR.code, msg: ErrorCode.LOGIN_PED_INFO_ERROR.msg});
+            dao.login(user, socket, gameInfo, function (code, msg, data) {
+                if(ErrorCode.LOGIN_SUCCESS.code === code){
+                    if (!data) {
+                        socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                         return;
                     }
                     //数据库有此用户
-                    if (gameInfo.IsPlayerOnline(rows.Id)) {
+                    if (gameInfo.IsPlayerOnline(data.Id)) {
                         //在线
                         log.info("用户在线,进入等待离线列队");
-                        user.id = rows.Id;
+                        user.id = data.Id;
                         user.socket = socket;
-                        user.userName = rows.Account;
-                        user.headimgurl = rows.headimgurl;
+                        user.userName = data.Account;
+                        user.headimgurl = data.headimgurl;
                         //加入登录列队
                         gameInfo.addLoginList(user);
                     } else {
-                        gameInfo.addUser(rows, socket, function (result) {
+                        // 登录成功
+                        gameInfo.addUser(data, socket, function (result) {
                             if (result === 1) {   //断线从连
                                 gameInfo.lineOutSet({userId: user.id})
                             }
                         });
                     }
-                } else if (state === 1) {
-                    const result = {resultid: 0, msg: 'Account or password error,login fail!'};
-                    socket.emit('loginResult', result);
-                    console.log('登录结果', result);
-                } else if (state === 2) {
-                    const result = {resultid: -1, msg: 'This account is disabled!'};
-                    socket.emit('loginResult', result);
-                    console.log('登录结果', result);
+                }else{
+                    socket.emit('loginResult', {code: code, msg: msg});
                 }
-            })
+            });
         } catch (e) {
             log.err('登录异常', e);
         }

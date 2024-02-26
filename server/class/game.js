@@ -1777,8 +1777,15 @@ var GameInfo = function () {
             }
             this.verifyEmailCode(email, code, callback =>{
                 if(callback[0] === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
-                    // 通过邮箱注册
-                    dao.registerByEmail(_socket, email);
+                    //判断邮箱是否注册
+                    dao.emailSearch(email, exits =>{
+                        if(exits){
+                            _socket.emit('registerResult', {code: ErrorCode.ACCOUNT_REGISTERED_ERROR.code, msg: ErrorCode.ACCOUNT_REGISTERED_ERROR.msg});
+                            return;
+                        }
+                        // 通过邮箱注册
+                        dao.registerByEmail(_socket, email);
+                    });
                 }else{
                     _socket.emit('registerResult', {code: callback[0], msg: callback[1]});
                 }

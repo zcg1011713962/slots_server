@@ -25,11 +25,11 @@ exports.login = function login(user, socket, gameInfo, callback) {
     }else if(user.email && user.code){
         // 校验验证码
         gameInfo.verifyEmailCode(user.email, user.code, ret =>{
-            if(ret){
+            if(ret[0] === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                 // 邮箱登录
                 emailLogin(user, socket, callback);
             }else{
-                callback(0);
+                callback(ret);
             }
         });
     }
@@ -48,17 +48,17 @@ function googleLogin(user, socket, callback){
             connection.release();
             if (err) {
                 log.err('uid login', err);
-                callback(0);
+                callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
             } else {
                 if (rows[0].length === 0) {
-                    callback(0);
+                    callback(ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code, ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.msg);
                 } else {
                     if (rows[0][0].account_using === 0) {
-                        callback(2);
+                        callback(ErrorCode.LOGIN_ACCOUNT_NOT_USING.code, ErrorCode.LOGIN_ACCOUNT_NOT_USING.msg);
                     } else {
                         rows[0][0].socket = socket;
                         rows[0][0].gameId = user.gameId;
-                        callback(0, rows[0][0]);
+                        callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
                     }
                 }
             }
@@ -67,23 +67,23 @@ function googleLogin(user, socket, callback){
     });
 }
 function pwdLogin(user, socket, callback){
-    const sql = 'CALL passwordLogin(?,?)';
+    const sql = 'CALL LoginByPassword(?,?)';
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: [user.userName, user.sign]}, function (err, rows) {
             connection.release();
             if (err) {
                 log.err('pwd login', err);
-                callback(0);
+                callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
             } else {
                 if (rows[0].length === 0) {
-                    callback(1);
+                    callback(ErrorCode.LOGIN_PWD_INFO_ERROR.code, ErrorCode.LOGIN_PWD_INFO_ERROR.msg);
                 } else {
                     if (rows[0][0].account_using === 0) {
-                        callback(2);
+                        callback(ErrorCode.LOGIN_ACCOUNT_NOT_USING.code, ErrorCode.LOGIN_ACCOUNT_NOT_USING.msg);
                     } else {
                         rows[0][0].socket = socket;
                         rows[0][0].gameId = user.gameId;
-                        callback(0, rows[0][0]);
+                        callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
                     }
                 }
             }
@@ -101,18 +101,38 @@ function emailLogin(user, socket, callback){
             connection.release();
             if (err) {
                 log.err('email login', err);
+                callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
+            } else {
+                if (rows[0].length === 0) {
+                    callback(ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code, ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.msg);
+                } else {
+                    if (rows[0][0].account_using === 0) {
+                        callback(ErrorCode.LOGIN_ACCOUNT_NOT_USING.code, ErrorCode.LOGIN_ACCOUNT_NOT_USING.msg);
+                    } else {
+                        rows[0][0].socket = socket;
+                        rows[0][0].gameId = user.gameId;
+                        callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
+                    }
+                }
+            }
+        })
+    });
+}
+// 邮箱查询
+exports.emailSearch = function emailSearch(email, callback){
+    const sql = 'CALL LoginByEmail(?)';
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: email}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('email login', err);
                 callback(0);
             } else {
                 if (rows[0].length === 0) {
                     callback(0);
                 } else {
-                    if (rows[0][0].account_using === 0) {
-                        callback(2);
-                    } else {
-                        rows[0][0].socket = socket;
-                        rows[0][0].gameId = user.gameId;
-                        callback(0, rows[0][0]);
-                    }
+                    callback(1);
                 }
             }
         })
