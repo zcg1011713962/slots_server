@@ -409,12 +409,14 @@ io.on('connection', function (socket) {
     // 注册
     socket.on("register", function (_info) {
         try {
-            if(_info.type === 0){
+            log.info(_info);
+            const parm = StringUtil.isJson(_info) ? JSON.parse(_info) : _info;
+            if(parm.type === 0){
                 // 注册
-                gameInfo.register(socket, _info.email, _info.code);
+                gameInfo.register(socket, parm.email, parm.code);
             }
         } catch (e) {
-            log.warn('sendEmailCode',  e);
+            log.err('sendEmailCode',  e);
         }
     });
 

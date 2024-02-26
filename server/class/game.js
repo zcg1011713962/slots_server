@@ -1742,18 +1742,19 @@ var GameInfo = function () {
                 _socket.emit('sendEmailCodeResult', {Result: 0, msg: "邮箱地址不正确"});
                 return;
             }
-            const verificationCode = SendEmail(toEmail);
-            const key = 'sendEmailCode' + toEmail;
-            // 存储验证码
-            RedisUtil.set(key, verificationCode).then(result =>{
-                RedisUtil.expire(key, 180).then(r =>{
-                    if(result && r){
-                        log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
-                        _socket.emit('sendEmailCodeResult', {Result: 1, msg: "发送成功"});
-                    }else{
-                        log.err('邮箱验证码发送失败' + toEmail);
-                        _socket.emit('sendEmailCodeResult', {Result: 0, msg: "发送失败"});
-                    }
+            const verificationCode = SendEmail(toEmail,  callback =>{
+                const key = 'sendEmailCode' + toEmail;
+                // 存储验证码
+                RedisUtil.set(key, verificationCode).then(result =>{
+                    RedisUtil.expire(key, 180).then(r =>{
+                        if(result && r){
+                            log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
+                            _socket.emit('sendEmailCodeResult', {Result: 1, msg: "发送成功"});
+                        }else{
+                            log.err('邮箱验证码发送失败' + toEmail);
+                            _socket.emit('sendEmailCodeResult', {Result: 0, msg: "发送失败"});
+                        }
+                    });
                 });
             });
         };
@@ -1779,12 +1780,12 @@ var GameInfo = function () {
                         callback(1);
                     } else {
                         log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                        callback(0);
+                        callback(1401);
                     }
                 }catch (e) {
                     log.err(e);
                     log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                    callback(0);
+                    callback(1500);
                 }
             });
         }
@@ -2374,14 +2375,6 @@ var GameInfo = function () {
             for (var i = 0; i < max; i++) {
                 if (this.score_changeLogList.length > 0) {
                     ItemTemp = this.score_changeLogList.shift();
-                    //与PC蛋蛋对接已经不需要了
-                    // if (ItemTemp.ChannelType == "pcdandan"){
-                    // 	//发送API
-                    // 	//10秒后
-                    // 	ItemTemp.sendTime = 10;
-                    // 	console.log(ItemTemp)
-                    // 	this.sendApiList.push(ItemTemp);
-                    // }
                     //发送API结束
                     saveListTemp.push(ItemTemp);
                 }

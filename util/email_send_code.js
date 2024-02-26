@@ -17,7 +17,7 @@ const verificationCode = randomstring.generate({
 });
 
 
-const sendVerificationCode = (recipientEmail) => {
+const sendVerificationCode = (recipientEmail, callback) => {
     // 设置邮件内容
     const mailOptions = {
         from: 'zhengchungaung66@gmail.com', // 发送者的邮箱地址
@@ -29,8 +29,10 @@ const sendVerificationCode = (recipientEmail) => {
     // 发送邮件
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
+            callback(0)
             console.error('邮件发送失败:', error.message);
         } else {
+            callback(1)
             console.log('邮件已发送:', info.response);
         }
     });
