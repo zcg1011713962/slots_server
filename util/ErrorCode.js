@@ -19,3 +19,5 @@ class ErrorCode {
     static get LOGIN_ACCOUNT_NOT_FOUND() { return { code: 'L405', msg: '账户不存在' }; }
     static get LOGIN_ERROR() { return { code: 'L406', msg: '登录错误' }; }
 }
+
+module.exports = ErrorCode;

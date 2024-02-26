@@ -16361,3 +16361,253 @@
 2024-02-26T19:35:28.581 [INFO ] default - socket comein........
 2024-02-26T19:35:28.593 [INFO ] default - 登录大厅[object Object]
 2024-02-26T19:35:28.595 [INFO ] default - 校验验证码失败，过期的校验码zcg1011713962@163.comcode:123456
+2024-02-26T20:22:12.188 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:22:12.189 [INFO ] default - 服务器启动成功!
+2024-02-26T20:22:12.190 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:22:12.192 [INFO ] default - start at port:13000
+2024-02-26T20:22:15.791 [INFO ] default - socket comein........
+2024-02-26T20:24:35.026 [INFO ] default - socket comein........
+2024-02-26T20:24:35.040 [INFO ] default - 登录大厅[object Object]
+2024-02-26T20:24:35.042 [INFO ] default - 校验验证码失败，过期的校验码zcg1011713962@163.comcode:123456
+2024-02-26T20:27:12.784 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:27:12.785 [INFO ] default - 服务器启动成功!
+2024-02-26T20:27:12.786 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:27:12.788 [INFO ] default - start at port:13000
+2024-02-26T20:27:13.605 [INFO ] default - socket comein........
+2024-02-26T20:27:15.723 [INFO ] default - socket comein........
+2024-02-26T20:27:23.706 [INFO ] default - socket comein........
+2024-02-26T20:27:23.719 [INFO ] default - 登录大厅[object Object]
+2024-02-26T20:27:23.722 [INFO ] default - 校验验证码失败，过期的校验码zcg1011713962@163.comcode:123456
+2024-02-26T20:27:39.644 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:27:39.645 [INFO ] default - 服务器启动成功!
+2024-02-26T20:27:39.645 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:27:39.648 [INFO ] default - start at port:13000
+2024-02-26T20:27:40.299 [INFO ] default - socket comein........
+2024-02-26T20:27:40.659 [INFO ] default - socket comein........
+2024-02-26T20:27:46.387 [INFO ] default - socket comein........
+2024-02-26T20:27:46.399 [INFO ] default - 登录大厅[object Object]
+2024-02-26T20:27:46.403 [INFO ] default - 校验验证码失败，过期的校验码zcg1011713962@163.comcode:123456
+2024-02-26T20:29:53.337 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:29:53.338 [INFO ] default - 服务器启动成功!
+2024-02-26T20:29:53.338 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:29:53.341 [INFO ] default - start at port:13000
+2024-02-26T20:29:57.369 [INFO ] default - socket comein........
+2024-02-26T20:30:01.033 [INFO ] default - socket comein........
+2024-02-26T20:30:01.046 [INFO ] default - 登录大厅[object Object]
+2024-02-26T20:30:01.049 [ERROR] default - 校验验证码失败zcg1011713962@163.com verificationCode:nullcode:123456
+2024-02-26T20:31:48.479 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:31:48.480 [INFO ] default - 服务器启动成功!
+2024-02-26T20:31:48.481 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:31:48.484 [INFO ] default - start at port:13000
+2024-02-26T20:31:49.048 [INFO ] default - socket comein........
+2024-02-26T20:31:49.060 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:31:49.067 [INFO ] default - 添加用户:20977
+2024-02-26T20:31:49.069 [INFO ] default - 20977获取道具
+2024-02-26T20:31:49.070 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:31:49.074 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:31:49.074 [INFO ] default - 20977添加金币
+2024-02-26T20:31:49.078 [INFO ] default - 20977添加钻石
+2024-02-26T20:31:49.083 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:31:49.084 [INFO ] default - 20977登录钻石10
+2024-02-26T20:31:49.092 [INFO ] default - 20977进入游戏15168
+2024-02-26T20:31:49.094 [INFO ] default - disconnect:20977
+2024-02-26T20:31:49.095 [INFO ] default - 用户20977删除!
+2024-02-26T20:31:52.806 [INFO ] default - socket comein........
+2024-02-26T20:36:05.901 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:36:05.902 [INFO ] default - 服务器启动成功!
+2024-02-26T20:36:05.903 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:36:05.907 [INFO ] default - start at port:13000
+2024-02-26T20:36:06.047 [INFO ] default - socket comein........
+2024-02-26T20:36:16.813 [INFO ] default - socket comein........
+2024-02-26T20:36:16.825 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:36:16.830 [INFO ] default - 添加用户:20977
+2024-02-26T20:36:16.832 [INFO ] default - 20977获取道具
+2024-02-26T20:36:16.833 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:36:16.835 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:36:16.835 [INFO ] default - 20977添加金币
+2024-02-26T20:36:16.838 [INFO ] default - 20977添加钻石
+2024-02-26T20:36:16.842 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:36:16.843 [INFO ] default - 20977登录钻石10
+2024-02-26T20:36:54.986 [INFO ] default - disconnect:20977
+2024-02-26T20:36:54.988 [INFO ] default - 用户20977删除!
+2024-02-26T20:36:54.988 [INFO ] default - 用户20977没有游戏ID
+2024-02-26T20:36:55.296 [INFO ] default - 成功保存,删除用户20977 socre:10010000 diamond:10
+2024-02-26T20:38:02.290 [INFO ] default - socket comein........
+2024-02-26T20:38:02.302 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:38:02.306 [INFO ] default - 添加用户:20977
+2024-02-26T20:38:02.308 [INFO ] default - 20977获取道具
+2024-02-26T20:38:02.309 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:38:02.310 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:38:02.311 [INFO ] default - 20977添加金币
+2024-02-26T20:38:02.312 [INFO ] default - 20977添加钻石
+2024-02-26T20:38:02.316 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:38:02.316 [INFO ] default - 20977登录钻石10
+2024-02-26T20:38:30.430 [INFO ] default - disconnect:20977
+2024-02-26T20:38:30.431 [INFO ] default - 用户20977删除!
+2024-02-26T20:38:30.431 [INFO ] default - 用户20977没有游戏ID
+2024-02-26T20:38:31.100 [INFO ] default - 成功保存,删除用户20977 socre:10010000 diamond:10
+2024-02-26T20:38:36.629 [INFO ] default - socket comein........
+2024-02-26T20:38:36.644 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:38:36.647 [INFO ] default - 添加用户:20977
+2024-02-26T20:38:36.650 [INFO ] default - 20977获取道具
+2024-02-26T20:38:36.650 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:38:36.653 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:38:36.653 [INFO ] default - 20977添加金币
+2024-02-26T20:38:36.658 [INFO ] default - 20977添加钻石
+2024-02-26T20:38:36.670 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:38:36.670 [INFO ] default - 20977登录钻石10
+2024-02-26T20:39:03.581 [INFO ] default - socket comein........
+2024-02-26T20:39:03.594 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:39:03.597 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-26T20:39:04.369 [INFO ] default - 20977用户只在登录服务器被强制下线
+2024-02-26T20:39:04.371 [INFO ] default - disconnect:20977
+2024-02-26T20:39:04.372 [INFO ] default - 用户20977删除!
+2024-02-26T20:39:04.373 [INFO ] default - 用户20977没有游戏ID
+2024-02-26T20:39:04.377 [INFO ] default - 成功保存,删除用户20977 socre:10010000 diamond:10
+2024-02-26T20:39:05.384 [INFO ] default - 20977完全下线了
+2024-02-26T20:41:12.273 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:41:12.274 [INFO ] default - 服务器启动成功!
+2024-02-26T20:41:12.274 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:41:12.278 [INFO ] default - start at port:13000
+2024-02-26T20:41:13.355 [INFO ] default - socket comein........
+2024-02-26T20:41:16.626 [INFO ] default - socket comein........
+2024-02-26T20:41:16.970 [INFO ] default - socket comein........
+2024-02-26T20:41:16.982 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:42:27.423 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:42:27.424 [INFO ] default - 服务器启动成功!
+2024-02-26T20:42:27.425 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:42:27.428 [INFO ] default - start at port:13000
+2024-02-26T20:42:27.794 [INFO ] default - socket comein........
+2024-02-26T20:42:30.046 [INFO ] default - socket comein........
+2024-02-26T20:42:32.111 [INFO ] default - socket comein........
+2024-02-26T20:42:32.124 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:42:46.775 [INFO ] default - 添加用户:20977
+2024-02-26T20:42:46.781 [INFO ] default - 20977获取道具
+2024-02-26T20:42:46.782 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:42:46.785 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:42:46.785 [INFO ] default - 20977添加金币
+2024-02-26T20:42:46.788 [INFO ] default - 20977添加钻石
+2024-02-26T20:42:46.794 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:42:46.794 [INFO ] default - 20977登录钻石10
+2024-02-26T20:42:47.772 [INFO ] default - socket comein........
+2024-02-26T20:43:06.823 [INFO ] default - socket comein........
+2024-02-26T20:43:06.837 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:43:09.239 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-26T20:43:09.242 [INFO ] default - 20977用户只在登录服务器被强制下线
+2024-02-26T20:43:09.242 [INFO ] default - disconnect:20977
+2024-02-26T20:43:09.243 [INFO ] default - 用户20977删除!
+2024-02-26T20:43:09.244 [INFO ] default - 用户20977没有游戏ID
+2024-02-26T20:43:09.249 [INFO ] default - 成功保存,删除用户20977 socre:10010000 diamond:10
+2024-02-26T20:43:10.245 [INFO ] default - 20977完全下线了
+2024-02-26T20:44:07.897 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:44:07.898 [INFO ] default - 服务器启动成功!
+2024-02-26T20:44:07.898 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:44:07.901 [INFO ] default - start at port:13000
+2024-02-26T20:44:08.070 [INFO ] default - socket comein........
+2024-02-26T20:44:12.367 [INFO ] default - socket comein........
+2024-02-26T20:44:14.633 [INFO ] default - socket comein........
+2024-02-26T20:44:14.646 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:44:14.651 [INFO ] default - 添加用户:20977
+2024-02-26T20:44:14.653 [INFO ] default - 20977获取道具
+2024-02-26T20:44:14.654 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:44:14.656 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:44:14.657 [INFO ] default - 20977添加金币
+2024-02-26T20:44:14.659 [INFO ] default - 20977添加钻石
+2024-02-26T20:44:14.663 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:44:14.664 [INFO ] default - 20977登录钻石10
+2024-02-26T20:44:14.669 [INFO ] default - 20977进入游戏15168
+2024-02-26T20:44:14.674 [INFO ] default - disconnect:20977
+2024-02-26T20:44:14.675 [INFO ] default - 用户20977删除!
+2024-02-26T20:44:25.564 [INFO ] default - socket comein........
+2024-02-26T20:44:25.576 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:44:25.587 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-26T20:44:26.051 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-26T20:45:19.798 [INFO ] default - 登录服务器 v2.0.0
+2024-02-26T20:45:19.800 [INFO ] default - 服务器启动成功!
+2024-02-26T20:45:19.800 [INFO ] default - 更新时间:2017.12.17
+2024-02-26T20:45:19.804 [INFO ] default - start at port:13000
+2024-02-26T20:45:22.813 [INFO ] default - socket comein........
+2024-02-26T20:45:24.648 [INFO ] default - socket comein........
+2024-02-26T20:45:25.638 [INFO ] default - socket comein........
+2024-02-26T20:45:25.651 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:45:25.662 [INFO ] default - 添加用户:20977
+2024-02-26T20:45:25.665 [INFO ] default - 20977获取道具
+2024-02-26T20:45:25.665 [INFO ] default - 登录成功:[object Object]
+2024-02-26T20:45:25.667 [INFO ] default - 获取积分:[object Object]
+2024-02-26T20:45:25.668 [INFO ] default - 20977添加金币
+2024-02-26T20:45:25.670 [INFO ] default - 20977添加钻石
+2024-02-26T20:45:25.674 [INFO ] default - 20977登录分数10010000
+2024-02-26T20:45:25.675 [INFO ] default - 20977登录钻石10
+2024-02-26T20:45:25.682 [INFO ] default - 20977进入游戏15168
+2024-02-26T20:45:25.684 [INFO ] default - disconnect:20977
+2024-02-26T20:45:25.685 [INFO ] default - 用户20977删除!
+2024-02-26T20:45:34.201 [INFO ] default - socket comein........
+2024-02-26T20:45:34.213 [INFO ] default - 登录大厅{"userName":"user_1","password":"8I4E5F","uid":"","email":"","displayName":"","code":"" }
+2024-02-26T20:45:34.216 [INFO ] default - 用户在线,进入等待离线列队
+2024-02-26T20:45:34.908 [INFO ] default - 20977当前用户在线15168被强制下线
+2024-02-26T20:45:35.919 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:36.919 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:37.922 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:38.933 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:39.940 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:40.946 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:41.948 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:42.955 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:43.965 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:44.967 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:45.969 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:46.973 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:47.988 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:48.989 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:49.997 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:51.001 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:52.016 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:53.021 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:54.031 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:55.042 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:56.042 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:57.054 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:58.061 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:45:59.061 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:00.061 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:01.073 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:02.078 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:03.086 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:04.101 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:05.113 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:06.115 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:07.120 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:08.134 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:09.140 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:10.155 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:11.171 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:12.186 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:13.189 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:14.194 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:15.196 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:16.207 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:17.222 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:18.225 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:19.227 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:20.233 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:21.239 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:22.248 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:23.254 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:24.262 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:25.271 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:26.274 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:27.289 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:28.303 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:29.306 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:30.316 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:31.322 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:32.326 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:33.336 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:34.343 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:35.344 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:36.356 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:37.361 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:38.364 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:39.367 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:40.372 [INFO ] default - 等待游戏服务器过来删除20977
+2024-02-26T20:46:41.374 [INFO ] default - 等待游戏服务器过来删除20977

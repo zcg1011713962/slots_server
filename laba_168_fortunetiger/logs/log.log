@@ -305,3 +305,4 @@
 2024-02-23T12:10:50.752 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":1,"userInfo":{"_userId":21096,"_account":"abc2024022312084802","_score":100206,"_nickname":"USER4232803","LoginCount":1,"propList":{},"_headimgurl":"3","_Robot":0,"_diamond":10,"is_vip":0}}
 2024-02-23T16:51:10.098 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":1,"userInfo":{"_userId":21098,"_account":"abc2024022316443401","_score":100000,"_nickname":"USER4236402","LoginCount":1,"propList":{},"_headimgurl":"10","_Robot":0,"_diamond":10,"is_vip":0}}
 2024-02-25T10:26:56.516 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":0,"userid":21091,"msg":"用户不存在"}
+2024-02-26T09:43:29.824 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":1,"userInfo":{"_userId":21091,"_account":"abc2024022216143101","_score":174104,"_nickname":"USER4226402","LoginCount":1,"propList":{},"_headimgurl":"4","_Robot":0,"_diamond":10,"is_vip":0}}

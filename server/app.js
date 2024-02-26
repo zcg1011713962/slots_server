@@ -23,6 +23,7 @@ const sms = require("./class/sms.js");
 const StringUtil = require("../util/string_util");
 const gameInfo = require("./class/game").getInstand;
 const ServerInfo = require('./config/ServerInfo').getInstand;
+const ErrorCode = require('../util/ErrorCode');
 
 //版本密钥和版本号
 var version = "ymymymymym12121212qwertyuiop5656_";
@@ -277,7 +278,7 @@ io.on('connection', function (socket) {
                 user.sign = user.password;
             }
 
-            dao.login(user, socket, gameInfo, function (code, msg, data) {
+            dao.login(user, socket, gameInfo, (code, msg, data)=> {
                 if(ErrorCode.LOGIN_SUCCESS.code === code){
                     if (!data) {
                         socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});

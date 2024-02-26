@@ -3,6 +3,7 @@ const async = require('async');
 const gameConfig = require('./../config/gameConfig');
 const log = require("../../CClass/class/loginfo").getInstand;
 const mysql_config = require("../../util/config/mysql_config");
+const ErrorCode = require('../../util/ErrorCode');
 
 var pool = mysql.createPool({
     connectionLimit: 10000,

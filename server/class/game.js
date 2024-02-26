@@ -16,6 +16,7 @@ var redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
 var redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const SendEmail = require('../../util/email_send_code');
 const RedisUtil = require('../../util/redis_util');
+const ErrorCode = require('../../util/ErrorCode');
 
 var GameInfo = function () {
 
@@ -150,15 +151,14 @@ var GameInfo = function () {
         this.addUser = function (userInfo, socket, callback_a) {
             log.info("添加用户:" + userInfo.Id);
 
-            var newDate = new Date();
-            var key = "slezz;e3";
-            var md5 = crypto.createHash('md5');
-            var content = userInfo.Id + userInfo.score + newDate + key;
-            var sign = md5.digest('hex');
-            userInfo.sign = sign;
+            const newDate = new Date();
+            const key = "slezz;e3";
+            const md5 = crypto.createHash('md5');
+            const content = userInfo.Id + userInfo.score + newDate + key;
+            userInfo.sign = md5.digest('hex');
 
             //在没有添加用户之前找到道具列表
-            var self = this;
+            const self = this;
             //console.log(userInfo);
             async.waterfall([
                 //callback到最后
@@ -192,7 +192,7 @@ var GameInfo = function () {
                             totalRecharge: self.userList[userInfo.Id].totalRecharge,
                             vip_level: self.userList[userInfo.Id].vip_level,
                         };
-                        result = {resultid: 1, msg: 'login succeed!', Obj: resultObj};
+                        result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: resultObj};
 
                         log.info("登录成功:" + resultObj);
                         callback(null, result);
@@ -262,7 +262,6 @@ var GameInfo = function () {
                             }
                         }
                         callback(null, result);
-                        //callback(result);
                     });
                 },
                 function (result, callback) {
@@ -318,14 +317,9 @@ var GameInfo = function () {
                             seatId: linemsg.seatId,
                             tableKey: linemsg.tableKey
                         });
-                        // self.lineOutSet({userId:userInfo.Id})
                     }
-                    // console.log("----------------server_log_list")
-                    // console.log(self.server_log_list)
                     socket.emit('noticeMsg', self.server_log_list);
                     console.log("zaixianrenshu----------------------------------", self.onlinePlayerCount);
-
-
                     callback_a(1);
                 }
             });
@@ -795,7 +789,7 @@ var GameInfo = function () {
                             log.info(this._loginList[i].id + "当前用户在线" + this.userList[this._loginList[i].id].getGameId() + "被强制下线");
                             var gameScoket = ServerInfo.getScoket(this.userList[this._loginList[i].id].getGameId())
                             this.userList[this._loginList[i].id]._socket.disconnect();
-                            gameScoket.emit('disconnectUser', {userId: this._loginList[i].id})
+                            if(gameScoket) gameScoket.emit('disconnectUser', {userId: this._loginList[i].id})
                             try {
                                 ServerInfo.getScoket(13900).emit('disconnectUser', {userId: this._loginList[i].id})//断开俱乐部
                             } catch (e) {
@@ -1802,7 +1796,7 @@ var GameInfo = function () {
                         if (parseInt(verificationCode) === parseInt(code)) {
                             log.info('校验验证码成功' + email + 'code:' + code);
                             callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
-                        } else if (expireCode === verificationCode) {
+                        } else if (verificationCode && expireCode === verificationCode) {
                             log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
                             callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
                         } else {
