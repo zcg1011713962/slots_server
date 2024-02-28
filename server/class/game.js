@@ -17,7 +17,7 @@ const SendEmail = require('../../util/email_send_code');
 const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
 const gameConfig = require('../config/gameConfig');
-
+const StringUtil = require('../../util/string_util');
 
 var GameInfo = function () {
 
@@ -230,12 +230,10 @@ var GameInfo = function () {
                             }
                         }
                         callback(null, result);
-                        //callback(result);
                     });
                 },
                 function (result, callback) {
                     log.info(userInfo.Id + "添加钻石");
-                    // log.info(result);
                     dao.LoginaddTempDiamond(userInfo.Id, function (Result, rows) {
                         if (Result) {
                             for (var i = 0; i < rows.length; ++i) {
@@ -259,17 +257,29 @@ var GameInfo = function () {
                     });
                 },
                 function (result, callback) {
+                    // 登录成功返回结果
+                    const login_token_key = 'login_token_key_';
                     redis_laba_win_pool.get_redis_win_pool().then(function (data) {
-                        result.win_pool = data;
-                        console.log('登录结果', result);
-                        socket.emit('loginResult', result);
-                        ++self.onlinePlayerCount;
-                        callback(null);
-                    })
+                        StringUtil.generateUniqueToken().then(token =>{
+                            RedisUtil.set(login_token_key + userInfo.Id, token).then(ret1 =>{
+                                const expire = 7 * 24 * 60 * 60;
+                                RedisUtil.expire(login_token_key + userInfo.Id, expire).then(ret2 =>{
+                                    if(ret1 && ret2){
+                                        result.Obj.token = token;
+                                        result.win_pool = data;
+                                        console.log('登录结果', result);
+                                        socket.emit('loginResult', result);
+                                        ++self.onlinePlayerCount;
+                                    }
+                                });
+                            });
+                        })
+                    });
+                    callback(null);
                 }
             ], function (err, result) {
 
-                log.info(userInfo.Id + "登录分数" + self.userList[userInfo.Id]._score);
+                log.info(userInfo.Id + "登录金币" + self.userList[userInfo.Id]._score);
                 log.info(userInfo.Id + "登录钻石" + self.userList[userInfo.Id]._diamond);
                 self.userList[userInfo.Id].loginEnd = true;
                 if (err) {
@@ -277,11 +287,7 @@ var GameInfo = function () {
                     console.log(result);
                     callback_a(0);
                 } else {
-
                     socket.emit('ServerListResult', {GameInfo: ServerInfo.getServerAll()});
-                    self.getSendPrize(userInfo.Id, function (result) {
-                        socket.emit('prizeListResult', {prizeList: result});
-                    })
 
                     //是否有首次兑换
                     self.getfirstexchange(userInfo.Id, function (result) {
@@ -291,12 +297,6 @@ var GameInfo = function () {
                             zhifubao: result.zhifubao,
                             zhifubaoName: result.zhifubaoName
                         });
-                    })
-
-                    //发送等级信息
-                    self.getLv(userInfo.Id, function (result) {
-                        //console.log(result)
-                        socket.emit('lv', result);
                     })
 
                     //发送是否在房间信息
@@ -517,7 +517,7 @@ var GameInfo = function () {
                     socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
                     return;
                 }
-                let score = vip_conf['vip_score']
+                let vip_score = vip_conf['vip_score']
                 const amount = vip_conf['target_price'] * count;
                 // 暂时测试用
                 this.Recharge(userId, amount, c =>{
@@ -531,16 +531,16 @@ var GameInfo = function () {
                 const config = this.getVipConfigByLevel(vip_level);
                 if(config){
                     const shopScoreAddRate = config.shopScoreAddRate ? config.shopScoreAddRate : 0;
-                    addScore = score *  (shopScoreAddRate/ 100);
-                    score = score + addScore;
+                    addScore = (vip_score *  (shopScoreAddRate/ 100)).toFixed(2);
+                    vip_score = vip_score + addScore;
                 }
 
                 // 扣款成功
                 this.reduce_bx_balance(userId, amount, c =>{
                     if(c){
                         // VIP加成
-                        this.addUserscore(userId, score);
-                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加积分' + score);
+                        this.addUserscore(userId, vip_score);
+                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加积分' + vip_score);
                         socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
                     }else{
                         socket.emit('ShoppingResult', '{"status":1,"msg":"账户余额不足"}');
@@ -1581,31 +1581,32 @@ var GameInfo = function () {
                 _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_INPUT_ERROR.code, msg: ErrorCode.EMAIL_INPUT_ERROR.msg});
                 return;
             }
-            const verificationCode = SendEmail(toEmail,  callback =>{
+            const verificationCode = 666666;
+            //const verificationCode = SendEmail(toEmail,  callback =>{
                 const expireKey = 'send_email_code_expire_' + toEmail;
                 // 是否过期存储
                 RedisUtil.set(expireKey, verificationCode).then(ret1 =>{
                     const key = 'send_email_code_' + toEmail;
-                    RedisUtil.expire(key, 240).then(ret2 =>{
-                        if(ret1 && ret2){
+                    //RedisUtil.expire(key, 240).then(ret2 =>{
+                        //if(ret1 && ret2){
                             // 存储验证码
                             RedisUtil.set(key, verificationCode).then(result =>{
-                                RedisUtil.expire(key, 180).then(r =>{
-                                    if(result && r){
+                                //RedisUtil.expire(key, 180).then(r =>{
+                                    //if(result && r){
                                         log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
                                         _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_SUCCESS.code, msg: ErrorCode.EMAIL_CODE_SEND_SUCCESS.msg});
-                                    }else{
-                                        log.err('邮箱验证码发送失败' + toEmail);
-                                        _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-                                    }
-                                });
+                                    //}else{
+                                    //    log.err('邮箱验证码发送失败' + toEmail);
+                                    //    _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
+                                    //}
+                                //});
                             });
-                        }else{
+                        //}else{
                             _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-                        }
-                    });
+                        //}
+                    //});
                 });
-            });
+            //});
         };
 
         // 校验验证码
@@ -1614,11 +1615,12 @@ var GameInfo = function () {
                 _socket.emit('registerResult', {code: ErrorCode.EMAIL_CODE_INPUT_ERROR.code, msg: ErrorCode.EMAIL_CODE_INPUT_ERROR.msg});
                 return;
             }
-            this.verifyEmailCode(email, code, callback =>{
-                if(callback[0] === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
+            this.verifyEmailCode(email, code, (code, msg) =>{
+                if(code === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                     //判断邮箱是否注册
                     dao.emailSearch(email, exits =>{
                         if(exits){
+                            log.info('邮箱已注册' + email);
                             _socket.emit('registerResult', {code: ErrorCode.ACCOUNT_REGISTERED_ERROR.code, msg: ErrorCode.ACCOUNT_REGISTERED_ERROR.msg});
                             return;
                         }
@@ -1626,7 +1628,7 @@ var GameInfo = function () {
                         dao.registerByEmail(_socket, email);
                     });
                 }else{
-                    _socket.emit('registerResult', {code: callback[0], msg: callback[1]});
+                    _socket.emit('registerResult', {code: code, msg: msg});
                 }
             });
         }
@@ -1641,7 +1643,7 @@ var GameInfo = function () {
                         if (parseInt(verificationCode) === parseInt(code)) {
                             log.info('校验验证码成功' + email + 'code:' + code);
                             callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
-                        } else if (verificationCode && expireCode === verificationCode) {
+                        } else if (verificationCode && expireCode === code) {
                             log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
                             callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
                         } else {
@@ -1711,38 +1713,7 @@ var GameInfo = function () {
 
         }
 
-        //获取未领奖列表
-        this.getSendPrize = function (_userId, callback) {
 
-            if (!this.userList[_userId]) {
-                callback(0);
-                return;
-            }
-            var self = this;
-            dao.getSendPrize(_userId, function (result, rows) {
-                var values = [];
-                if (result) {
-                    for (var i = 0; i < rows.length; i++) {
-                        values.push({
-                            id: rows[i].msgId,
-                            propId: rows[i].winPropId,
-                            propCount: rows[i].winPropCount,
-                            winScore: rows[i].winScore,
-                            rankidx: rows[i].rankIdx,
-                            isGetPrize: rows[i].isGetPrize,
-                            type: rows[i].type,
-                            sendCoinUserId: rows[i].sendCoinUserId,
-                            nickName: rows[i].nickName
-                        });
-                    }
-                }
-                if (self.userList[_userId]) {
-                    self.userList[_userId]._prize = values;
-                }
-
-                callback(values);
-            })
-        }
 
         //每日活动
         this.getdaySendPrize = function (_userId, callback) {
@@ -1989,6 +1960,7 @@ var GameInfo = function () {
             const self = this;
             const saveList = [];
             for (const k in this.tempuserList) {
+                // 登录成功标识
                 if (this.tempuserList[k].loginEnd) {
                     saveList.push(this.tempuserList[k]);
                     delete this.tempuserList[k];
@@ -2458,15 +2430,6 @@ var GameInfo = function () {
             }
         };
 
-        this.getLv = function (_userId, callback) {
-            dao.getWinCoin(_userId, function (result, row) {
-                if (result) {
-                    callback({lv: row.lv, exp: row.wincoin, nextExp: activityConfig.wincoinlv[row.lv + 1].value});
-                } else {
-                    callback({lv: 0, exp: 0, nextExp: activityConfig.wincoinlv[1].value});
-                }
-            })
-        };
 
         this.sendCoinServer = function (_info, callback) {
             //console.log(_info)
@@ -2607,41 +2570,47 @@ var GameInfo = function () {
                     callback(0);
                     return;
                 }
-                if (res === 1) {
-                    data.totalRecharge += parseInt(amount);
-                    const housecard = data.housecard;
-                    const scoreFlow = data.score_flow;
-                    // 增加账户余额
-                    this.add_bx_balance(userId, amount, (ret) => {
-                        if(!ret){
-                            log.err('add_bx_balance' + ret);
-                            callback(0);
-                        }else{
-                            log.info('增加巴西账户余额:' + amount);
-                            // 计算充值获得VIP积分
-                            const rechargeVipScore= (data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100)).toFixed(0);
-                            const flowVipScore= ((scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100)).toFixed(0);
+                try {
+                    if (res === 1) {
+                        data.totalRecharge += parseInt(amount);
+                        const housecard = data.housecard;
+                        const scoreFlow = data.score_flow;
+                        // 增加账户余额
+                        this.add_bx_balance(userId, amount, (ret) => {
+                            if (!ret) {
+                                log.err('add_bx_balance' + ret);
+                                callback(0);
+                            } else {
+                                log.info('增加巴西账户余额:' + amount);
+                                // 计算充值获得VIP积分
+                                const rechargeVipScore = (data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100)).toFixed(0);
+                                const flowVipScore = ((scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100)).toFixed(0);
 
-                            // VIP积分=充值获得积分+消费流水获得积分
-                            const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
-                            // 计算VIP等级
-                            const vipLevel = this.getVipLevelByScore(vScore);
-                            // 更新VIP积分
-                            this.userList[userId].vip_score = vScore;
-                            this.updateVipScore(userId, vScore);
+                                // VIP积分=充值获得积分+消费流水获得积分
+                                const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
+                                // 计算VIP等级
+                                const vipLevel = this.getVipLevelByScore(vScore);
+                                // 更新VIP积分
+                                this.userList[userId].vip_score = vScore;
+                                this.updateVipScore(userId, vScore);
 
-                            // VIP升级
-                            if(vipLevel > housecard){
-                                this.userList[userId].vip_level = vipLevel;
-                                // 更新VIP等级
-                                this.updateVipLevel(userId, vipLevel, housecard);
+                                // VIP升级
+                                if (vipLevel > housecard) {
+                                    this.userList[userId].vip_level = vipLevel;
+                                    // 更新VIP等级
+                                    this.updateVipLevel(userId, vipLevel, housecard);
+                                }
+                                // 修改累计充值
+                                this.updateTotalCharge(userId, data.totalRecharge, amount);
+                                callback(1);
                             }
-                            // 修改累计充值
-                            this.updateTotalCharge(userId, data.totalRecharge, amount);
-                            callback(1);
-                        }
-                    });
-                }else{
+                        });
+
+                    } else {
+                        callback(0);
+                    }
+                }catch (e) {
+                    log.err(e);
                     callback(0);
                 }
             });
@@ -2670,6 +2639,11 @@ var GameInfo = function () {
             }
             console.log('VIP等级' + l);
             return l;
+        }
+
+        // 通过VIP配置
+        this.getVipConfig = function () {
+            return updateConfig.getVipConfig();
         }
 
         // 通过VIP等级获取VIP配置表

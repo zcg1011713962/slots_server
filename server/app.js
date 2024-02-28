@@ -200,7 +200,7 @@ io.on('connection', function (socket) {
         // 维护模式
         if (gameInfo.isMaintain()) {
             log.info("维护模式,禁止登录!");
-            socket.emit("maintain", {code: ErrorCode.LOGIN_FAILED_MAINTAIN.code, msg: ErrorCode.LOGIN_FAILED_MAINTAIN.msg});
+            socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_MAINTAIN.code, msg: ErrorCode.LOGIN_FAILED_MAINTAIN.msg});
             return;
         }
         // 判断是不是同一socket登录2次**********未完成还要判断每个游戏里，是否在线？以后再去改
@@ -213,11 +213,10 @@ io.on('connection', function (socket) {
 
         try {
             const user = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!user){
+            if(!data || !user){
                 socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                 return;
             }
-
             // 账户密码登录
             if(user.userName && user.password){
                 const key_login = "89b5b987124d2ec3";
@@ -232,45 +231,54 @@ io.on('connection', function (socket) {
             }
             // 邮箱登录
             if(user.email && user.code){
-                gameInfo.verifyEmailCode(user.email, user.code, ret =>{
-                    if(ret[0] !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
-                        socket.emit('loginResult', {code: ret[0], msg: ret[1]});
+                gameInfo.verifyEmailCode(user.email, user.code, (code, msg) =>{
+                    if(code !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
+                        socket.emit('loginResult', {code: code, msg: msg});
+                    }else{
+                        databaseCheck(user, socket);
                     }
                 });
+            }else{
+                databaseCheck(user, socket);
             }
-
-            dao.login(user, socket, (code, msg, data)=> {
-                if(ErrorCode.LOGIN_SUCCESS.code === code){
-                    if (!data) {
-                        socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
-                        return;
-                    }
-                    //数据库有此用户
-                    if (gameInfo.IsPlayerOnline(data.Id)) {
-                        //在线
-                        log.info("用户在线,进入等待离线列队");
-                        user.id = data.Id;
-                        user.socket = socket;
-                        user.userName = data.Account;
-                        user.headimgurl = data.headimgurl;
-                        //加入登录列队
-                        gameInfo.addLoginList(user);
-                    } else {
-                        // 登录成功
-                        gameInfo.addUser(data, socket, function (result) {
-                            if (result === 1) {   //断线从连
-                                gameInfo.lineOutSet({userId: user.id})
-                            }
-                        });
-                    }
-                }else{
-                    socket.emit('loginResult', {code: code, msg: msg});
-                }
-            });
         } catch (e) {
+            socket.emit("loginResult", {code: ErrorCode.LOGIN_ERROR.code, msg: ErrorCode.LOGIN_ERROR.msg});
             log.err('登录异常', e);
         }
     })
+    
+    function databaseCheck(user, socket) {
+        dao.login(user, socket, (code, msg, data)=> {
+            if(ErrorCode.LOGIN_SUCCESS.code === code){
+                if (!data) {
+                    socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
+                    return;
+                }
+                //数据库有此用户
+                if (gameInfo.IsPlayerOnline(data.Id)) {
+                    //在线
+                    log.info("用户在线,进入等待离线列队");
+                    user.id = data.Id;
+                    user.socket = socket;
+                    user.userName = data.Account;
+                    user.headimgurl = data.headimgurl;
+                    //加入登录列队
+                    gameInfo.addLoginList(user);
+                } else {
+                    // 登录成功
+                    gameInfo.addUser(data, socket, function (result) {
+                        if (result === 1) {   //断线从连
+                            gameInfo.lineOutSet({userId: user.id})
+                        }
+                    });
+                }
+            }else{
+                log.warn('登陆失败' + msg);
+                socket.emit('loginResult', {code: code, msg: msg});
+            }
+        });
+    }
+    
 
     // 登录完成之后先进入游戏房间,来自于游戏服务器
     socket.on('LoginGame', function (_userinof) {
@@ -403,12 +411,27 @@ io.on('connection', function (socket) {
                     vip_level: user.vip_level,
                     vip_score: user.vip_score,
                 };
+                log.info('getUserInfo' + userInfo)
                 socket.emit('UserInfoResult', {status: 1, msg: userInfo});
             }else{
+                log.info('getUserInfo用户不在线')
                 socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
             }
         }catch (e) {
             socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
+        }
+    });
+
+    // 获取VIP配置
+    socket.on("getVipConfig", function () {
+        try {
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                const config = gameInfo.getVipConfig();
+                socket.emit('getVipConfigResult', {code:1, msg: config});
+            }
+        }catch (e) {
+            socket.emit('getVipConfigResult', {code:1, msg:"用户不在线"});
         }
     });
 

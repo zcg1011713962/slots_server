@@ -1,9 +1,8 @@
 const mysql = require('mysql');
-const async = require('async');
-const gameConfig = require('./../config/gameConfig');
 const log = require("../../CClass/class/loginfo").getInstand;
 const mysql_config = require("../../util/config/mysql_config");
 const ErrorCode = require('../../util/ErrorCode');
+const RedisUtil = require('../../util/redis_util');
 
 var pool = mysql.createPool({
     connectionLimit: 10000,
@@ -17,7 +16,27 @@ var pool = mysql.createPool({
 
 
 exports.login = function login(user, socket, callback) {
-    if (user.userName && user.sign) {
+    if(user.token) {
+        // 通过缓存的token登录
+        const login_token_key  = 'login_token_key_';
+        const keyPattern  = login_token_key + '*';
+        RedisUtil.keys(keyPattern).then(keys =>{
+            if(keys && keys.length > 0) {
+                keys.map(key => key.slice(key.lastIndexOf("_") + 1)).forEach(userId =>{
+                    user.id = parseInt(userId);
+                    RedisUtil.get(login_token_key + userId).then(t =>{
+                        if(t === user.token) {
+                            tokenLogin(user, socket, callback);
+                        }else{
+                            callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
+                        }
+                    });
+                });
+            }else{
+                callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
+            }
+        });
+    }else if(user.userName && user.sign) {
         // 用户密码登录
         pwdLogin(user, socket, callback);
     }else if(user.uid){
@@ -112,6 +131,35 @@ function emailLogin(user, socket, callback){
         })
     });
 }
+
+// token登录
+function tokenLogin(user, socket, callback){
+    // email登录
+    const sql = 'CALL LoginByToken(?)';
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: user.id}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('token login', err);
+                callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
+            } else {
+                if (rows[0].length === 0) {
+                    callback(ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code, ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.msg);
+                } else {
+                    if (rows[0][0].account_using === 0) {
+                        callback(ErrorCode.LOGIN_ACCOUNT_NOT_USING.code, ErrorCode.LOGIN_ACCOUNT_NOT_USING.msg);
+                    } else {
+                        rows[0][0].socket = socket;
+                        rows[0][0].gameId = user.gameId;
+                        callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
+                    }
+                }
+            }
+        })
+    });
+}
+
 // 邮箱查询
 exports.emailSearch = function emailSearch(email, callback){
     const sql = 'CALL LoginByEmail(?)';
@@ -145,6 +193,7 @@ exports.registerByEmail = function registerByEmail(socket, email){
                 log.err('register Email' + err);
                 socket.emit('registerResult', {Result: ErrorCode.REGISTER_ERROR.code, msg: ErrorCode.REGISTER_ERROR.msg});
             } else {
+                log.info('邮箱注册成功' + email);
                 socket.emit('registerResult', {Result: ErrorCode.REGISTER_SUCCESS.code, msg: ErrorCode.REGISTER_SUCCESS.msg});
             }
         })
@@ -1235,13 +1284,7 @@ exports.getUseCoin = function getUseCoin(_userId, callback) {
     });
 };
 
-//获得鱼币消耗
-exports.getWinCoin = function getWinCoin(_userId, callback) {
-    var sql = 'select * from fish.wincoin where userId=?';
-    var values = [];
-    values.push(_userId);
-    callback(0);
-};
+
 
 
 //保存用户变化量
@@ -1671,34 +1714,7 @@ exports.updateProp = function updateProp(_userInfo, callback) {
 };
 
 
-//获取未领奖列表
-exports.getSendPrize = function getSendPrize(_userId, callback) {
-    var sql = 'call getSendPrize(?)';
-    var values = [];
 
-    values.push(_userId);
-    callback(0);
-    // pool.getConnection(function (err, connection) {
-    //
-    //     connection.query({sql: sql, values: values}, function (err, rows) {
-    //         connection.release();
-    //         if (err) {
-    //             console.log("getSendPrize");
-    //             console.log(err);
-    //             callback(0);
-    //         } else {
-    //             if (rows[0].length == 0) {
-    //                 callback(0);
-    //             } else {
-    //                 callback(1, rows[0]);
-    //             }
-    //         }
-    //     })
-    //
-    //     values = [];
-    //
-    // });
-};
 
 //领取奖品
 exports.getPrize = function getPrize(_userId, callback) {

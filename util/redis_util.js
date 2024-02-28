@@ -16,7 +16,7 @@ class RedisUtil {
             this.setAsync = promisify(this.client.set).bind(this.client);
             this.delAsync = promisify(this.client.del).bind(this.client);
             this.expireAsync = promisify(this.client.expire).bind(this.client);
-
+            this.keysAsync = promisify(this.client.keys).bind(this.client);
             // Handle errors
             this.client.on('error', (err) => {
                 console.error(`Redis error: ${err}`);
@@ -38,6 +38,10 @@ class RedisUtil {
 
     async del(key) {
         return this.delAsync(key);
+    }
+
+    async keys(key) {
+        return this.keysAsync(key);
     }
 
     async expire(key, value) {

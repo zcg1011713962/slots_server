@@ -18,6 +18,7 @@ class ErrorCode {
     static get LOGIN_ACCOUNT_NOT_USING() { return { code: 'L404', msg: '账户已停用' }; }
     static get LOGIN_ACCOUNT_NOT_FOUND() { return { code: 'L405', msg: '账户不存在' }; }
     static get LOGIN_ERROR() { return { code: 'L406', msg: '登录错误' }; }
+    static get LOGIN_TOKEN_NOT_FOUND() { return { code: 'L407', msg: 'token过期' }; }
 }
 
 module.exports = ErrorCode;
