@@ -16,7 +16,7 @@ var pool = mysql.createPool({
 });
 
 
-exports.login = function login(user, socket, gameInfo, callback) {
+exports.login = function login(user, socket, callback) {
     if (user.userName && user.sign) {
         // 用户密码登录
         pwdLogin(user, socket, callback);
@@ -24,15 +24,8 @@ exports.login = function login(user, socket, gameInfo, callback) {
         // google登录或注册
         googleLogin(user, socket, callback);
     }else if(user.email && user.code){
-        // 校验验证码
-        gameInfo.verifyEmailCode(user.email, user.code, ret =>{
-            if(ret[0] === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
-                // 邮箱登录
-                emailLogin(user, socket, callback);
-            }else{
-                callback(ret);
-            }
-        });
+        // 邮箱登录
+        emailLogin(user, socket, callback);
     }
 }
 
@@ -48,7 +41,7 @@ function googleLogin(user, socket, callback){
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                log.err('uid login', err);
+                log.err('uid login' + err);
                 callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
             } else {
                 if (rows[0].length === 0) {
@@ -224,12 +217,10 @@ exports.CreateUser = function CreateUser(userInfo, callback) {
 }
 
 
-//用户注册
+// 游客注册
 exports.weixinCreateUser = function CreateUser(userInfo, callback) {
-
-    //var sql = 'INSERT INTO useraccounts(Account,Password,nickname,score,p,phoneNo,email,sex,city,province,headimgurl) VALUES(?,?,?,?,?,?,?,?,?,?,?)';
-    var sql = 'call weixinCreateUser(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    var values = [];
+    const sql = 'call weixinCreateUser(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+    let values = [];
 
     values.push(userInfo.accountname);
     values.push(userInfo.pwd);
@@ -288,25 +279,19 @@ exports.weixinCreateUser = function CreateUser(userInfo, callback) {
     values.push(userInfo.did);
     values.push(userInfo.ip);
 
-    console.log("注册:" + userInfo.pwd)
-    console.log("注册:" + values)
-
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
-
             if (err) {
-                console.log("weixinCreateUser");
+                console.log("游客注册");
                 console.log(err);
                 callback(0);
             } else {
-                console.log("weixinCreateUser" + rows);
                 if (rows[0] && rows[0][0]) {
                     callback(1, rows[0][0].rcode, rows[0]);
                 } else {
                     callback(1);
                 }
-
             }
         });
         values = [];
@@ -450,10 +435,7 @@ exports.phoneCheck = function phoneCheck(userInfo, callback) {
 
             }
         });
-
-
         values = [];
-
     });
 };
 
@@ -485,13 +467,7 @@ exports.saveUser = function saveUser(userList, callback) {
     string2 += ')';
     sql += string2;
 
-    var values = [];
-    //values.push(userInfo.pwd);
-    //values.push(userInfo.accountname);
-    //console.log(userInfo.accountname)
-    //console.log(userInfo.pwd)
-    // log.info(sql);
-    //log.info(values);
+    let values = [];
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
@@ -571,8 +547,6 @@ exports.getUserId = function getUserId(accountname, callback) {
     var values = [];
 
     values.push(accountname);
-    //console.log(user.userName)
-    //console.log(user.password)
 
     pool.getConnection(function (err, connection) {
 
@@ -878,7 +852,7 @@ exports.checkVip = function checkVip(userId, callback) {
 
 //查询累计充值
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
-    const sql = 'select totalRecharge,housecard from newuseraccounts where Id=?';
+    const sql = 'select totalRecharge,housecard,score_flow from newuseraccounts where Id=?';
     let values = [];
 
     values.push(userId);
@@ -950,16 +924,81 @@ exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
                 console.log(err);
                 callback(0);
             } else {
-                if (rows.length == 0) {
-                    callback(0);
-                } else {
-                    callback(1);
-                }
+                callback(1);
             }
         });
 
         values = [];
 
+    });
+};
+
+// 更新VIP积分
+exports.updateVipScore = function updateVipScore(userId, vipScore, callback) {
+    const sql = 'update newuseraccounts set vip_score = ? where Id=?';
+    let values = [];
+
+    values.push(vipScore);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("updateVipScore");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+};
+
+// 增加巴西账户余额
+exports.add_bx_balance = function add_bx_balance(userId, amount, callback) {
+    const sql = 'update userinfo_imp set bx_balance = bx_balance + ? where userId=?';
+    let values = [];
+
+    values.push(amount);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("add_bx_balance");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 减少巴西账户余额
+exports.reduce_bx_balance = function reduce_bx_balance(userId, amount, callback) {
+    const sql = 'update userinfo_imp set bx_balance = bx_balance - ? where userId=? and bx_balance > ?';
+    let values = [];
+    values.push(amount);
+    values.push(userId);
+    values.push(amount);
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("reduce_bx_balance");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
     });
 };
 
@@ -2354,11 +2393,9 @@ exports.deleteLineOut = function saveLineOut(userid) {
 
 
 exports.clenaLineOut = function clenaLineOut() {
-    var sql = 'DELETE FROM lineout';
-    var values = [];
-
+    const sql = 'DELETE FROM lineout';
+    let values = [];
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
@@ -2366,7 +2403,6 @@ exports.clenaLineOut = function clenaLineOut() {
                 console.log(err);
             }
         })
-
         values = [];
     });
 }

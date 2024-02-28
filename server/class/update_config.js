@@ -10,9 +10,7 @@ var update_config = function(){
 		//初始化游戏
 		this.init = function(){
 			//更新配置
-			this.noticeConfig;
-			var self = this;
-			var Cun;
+			const self = this;
 
 			fs.readFile('./config/notice_config.json','utf-8',function(err,data){
 			    self.noticeConfig = data.toString().trim();
@@ -34,6 +32,18 @@ var update_config = function(){
 					self.vipConfig = data.toString().trim();
 				})
 			},60000);
+
+
+			fs.readFile('./config/shop_config.json','utf-8',function(err,data){
+				self.shopConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/shop_config.json','utf-8',function(err,data){
+					self.shopConfig = data.toString().trim();
+				})
+			},60000);
+
 		};
 
 
@@ -51,6 +61,15 @@ var update_config = function(){
 			}
 			catch(e){
 				log.err('getVipConfig');
+			}
+		}
+
+		this.getShopConfig = function(){
+			try{
+				return JSON.parse(this.shopConfig);
+			}
+			catch(e){
+				log.err('getShopConfig');
 			}
 		}
 

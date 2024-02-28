@@ -1,35 +1,8 @@
 var dao = require("./../dao/dao");
-var gameInfo = require('./../class/game').getInstand;
 var crypto = require('crypto');
 var http = require('http');
 let querystring = require("querystring");
 let Buffer = require("buffer").Buffer;
-
-function makeDate(date) {
-
-    try {
-
-        var newDate = new Date(date);
-        //在小于10的月份前补0  
-        var month = eval(newDate.getMonth() + 1) < 10 ? '0' + eval(newDate.getMonth() + 1) : eval(newDate.getMonth() + 1);
-        //在小于10的日期前补0  
-        var day = newDate.getDate() < 10 ? '0' + newDate.getDate() : newDate.getDate();
-        //在小于10的小时前补0  
-        var hours = newDate.getHours() < 10 ? '0' + newDate.getHours() : newDate.getHours();
-        //在小于10的分钟前补0  
-        var minutes = newDate.getMinutes() < 10 ? '0' + newDate.getMinutes() : newDate.getMinutes();
-        //在小于10的秒数前补0  
-        var seconds = newDate.getSeconds() < 10 ? '0' + newDate.getSeconds() : newDate.getSeconds();
-        //拼接时间  
-        var stringDate = newDate.getFullYear() + '-' + month + '-' + day + " " + hours + ":" + minutes + ":" + seconds;
-    } catch (e) {
-        var stringDate = "0000-00-00 00:00:00";
-    } finally {
-        return stringDate;
-    }
-
-}
-
 function md53(data) {
     var Buffer = require("buffer").Buffer;
     var buf = new Buffer(data);
@@ -311,51 +284,6 @@ ml_api.get = function function_name(req, callback) {
                     callback(1, sendStr);
                 }
             });
-            //console.log(postdata)
-            // var req = http.request(appstore_optios, function (res) {
-            //     var size = 0;
-            //     var chunks = [];
-
-            //     res.on('data', function (chunk) {
-            //         size += chunk.length;
-            //         chunks.push(chunk);
-            //     });
-
-            //     res.on('end', function () {
-
-            //         var data = Buffer.concat(chunks, size);
-
-            //         try {
-            //             var product_id = 0;
-            //             //console.log(data.toString());
-            //             //var htmldata = JSON.parse(data.toString());
-            //             //if (htmldata && htmldata.status == "0"){
-
-
-            //             createUser(username, password, fullname, agc, reqIp, function (result, res) {
-            //                 if (result) {
-            //                     sendStr = `{"status":0,"msg":"注册成功!","userid":${res[0].rcode}}`;
-            //                     callback(1, sendStr, res);
-            //                 } else {
-            //                     sendStr = res;
-            //                     callback(1, sendStr);
-            //                 }
-            //             });
-            //             //}else{
-            //             //	sendStr = '{"status":'+ htmldata.status +',"msg":"'+htmldata.msg+'"}'
-            //             //	callback(1,sendStr);
-            //             //}
-
-            //         } catch (e) {
-            //             console.log('post BoSenWebServer error..');
-            //             sendStr = '{"status":4,"msg":"注册api!解析失败"}';
-            //             callback(1, sendStr);
-            //         }
-            //     });
-            // });
-
-            // req.write(postdata);
-            // req.end();
         } else {
             sendStr = '{"status":2,"msg":"参数不全!"}';
             callback(1, sendStr);

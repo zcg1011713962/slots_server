@@ -23,10 +23,7 @@ User = function(userInfo,_socket){
 	this.user_club_id = "";			//用户俱乐部id
 
 	this.is_vip = 0;			//用户是否vip
-
-
-
-	this.table_gold = 0;			//房间内金币
+	this.vip_score = 0;			//vip积分
 
 	this.sign = "";
 	this.bulletList = {};
@@ -71,7 +68,7 @@ User = function(userInfo,_socket){
 			this._proList = _userInfo.propList;
 			this._headimgurl = _userInfo._headimgurl;	//头像地址
 			this._Robot = _userInfo._Robot;
-
+			this.vip_score = _userInfo.vip_score;
 			this.is_vip = _userInfo.is_vip;
 		}
 	}

@@ -1,14 +1,12 @@
 User = function(_userInfo,_socket){
 	//相关属性
-
 	this._userId = "";			//数据库ID
 	this._socket = "";			//socketID
 	this._account = "";			//用户帐号
 	this._score = 0;			//用户数据
 	this._diamond = 0;			//钻石
-
 	this.is_vip = 0;			//vip
-
+	this.vip_score = 0;			//vip积分
 	this._giftTicket = 0;		//礼品券
 	this._nickname = "";		//昵称
 	this._ageinLogin = false;	//重新登录标签
@@ -58,6 +56,7 @@ User = function(_userInfo,_socket){
 		this._diamond = _userInfo.diamond;			//钻石
 
 		this.is_vip = _userInfo.is_vip;			//vip
+		this.vip_score = _userInfo.vip_score;			//vip积分
 		this.totalRecharge = _userInfo.totalRecharge;//累计充值
 		this.vip_level = _userInfo.housecard;//VIP等级
 
@@ -78,24 +77,10 @@ User = function(_userInfo,_socket){
 		this.bankPwd = _userInfo.bankPwd;
 		this.bankScore = _userInfo.bankScore;
 
-		//console.log(this._ChannelType);
-
 		//读取数据库,获取账户道具
 		this.initProp();
-		//console.log("#########" + _userInfo.Id + "##########" + _socket.userId)
-		//console.log(_socket.userId);
 	};
 
-	//更换socket
-	// this.changeSocke = function(_socket,_sign){
-	// 	this._socket = _socket;
-	// 	_socket.userId = _userInfo.Id;
-	// 	this.GameId = 0;
-	// 	this.RoomId = 0;
-	// 	this.SeatId = -1;
-	// 	this._sign = _sign;
-	// 	this._loginTime = new Date();
-	// }
 
 	//进入游戏
 	this.loginGame = function(gametype){

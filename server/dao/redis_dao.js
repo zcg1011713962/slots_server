@@ -26,22 +26,7 @@ exports.saveTask = function saveTask(userId, info, cb) {
     });
 };
 
-exports.queryTask = function queryTask(userId, cb) {
 
-    client.get(keyName + userId, (err, value) => {
-        if (err) {
-            console.error('操作redis失败');
-            throw err;
-        }
-        if (value) {
-            console.log('返回信息是：', value);
-            // 作为入参，返回给回调,这样外部调用就可以难道值了
-            cb(value.toString('utf-8'));
-        } else {
-            cb(null);
-        }
-    });
-};
 
 exports.updateEveryLogin = function updateEveryLogin(userId, isLingqu, cb) {
     // 更新的本质其实还是执行redis的set

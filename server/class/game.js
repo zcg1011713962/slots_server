@@ -1,6 +1,5 @@
 var User = require("./User");
 var dao = require("./../dao/dao");
-let shopping_dao = require("./../dao/shopping_dao");
 var redis_dao = require("./../dao/redis_dao");
 var crypto = require('crypto');
 var ServerInfo = require('./../config/ServerInfo').getInstand;
@@ -17,6 +16,8 @@ var redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const SendEmail = require('../../util/email_send_code');
 const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
+const gameConfig = require('../config/gameConfig');
+
 
 var GameInfo = function () {
 
@@ -69,33 +70,27 @@ var GameInfo = function () {
             this.test = false;
 
             this.todayId = 0;
-            //初始化redis
+            // 初始化奖池
             redis_laba_win_pool.redis_win_pool_init();
 
-            var rule = new schedule.RecurrenceRule();
-            var times = [];
+            const rule = new schedule.RecurrenceRule();
+            const times = [];
             for (var i = 0; i < 60; i++) {
                 times.push(i);
             }
             rule.second = times;
-            var c = 0;
             var self = this;
-            var j = schedule.scheduleJob(rule, function () {
+            schedule.scheduleJob(rule, function () {
                 if (self.maintain) {
-                    --gameConfig.maintainTime;
-                    //console.log(gameConfig.maintainTime);;
-                    if (!gameConfig.maintainTime) {
-                        self.disconnectAllUser();
-                    }
+                    self.disconnectAllUser();
                 }
-
-                var nowDate = new Date();
-                var now_hours = nowDate.getHours();
-                var minute = nowDate.getMinutes();
-                var second = nowDate.getSeconds();
+                const nowDate = new Date();
+                const now_hours = nowDate.getHours();
+                const minute = nowDate.getMinutes();
+                const second = nowDate.getSeconds();
                 self.game_second = second;
-                if (second == 0) {    //彩金推送
-                    // self.userList[_userId]
+                if (second === 0) {
+                    // 奖池推送
                     redis_laba_win_pool.get_redis_win_pool().then(function (data) {
                         for (var i in self.userList) {
                             self.userList[i]._socket.emit("RedisWinPool", data)
@@ -109,12 +104,10 @@ var GameInfo = function () {
                     this.sendCardList = {};
                 }
             });
-
-
         };
 
         this.disconnectAllUser = function () {
-            for (var itme in this.userList) {
+            for (const itme in this.userList) {
                 this.userList[itme]._socket.disconnect();
             }
             console.log("服务器开启维护，已经全部离线");
@@ -191,6 +184,7 @@ var GameInfo = function () {
                             isVip: self.userList[userInfo.Id].is_vip,
                             totalRecharge: self.userList[userInfo.Id].totalRecharge,
                             vip_level: self.userList[userInfo.Id].vip_level,
+                            vip_score: self.userList[userInfo.Id].vip_score,
                         };
                         result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: resultObj};
 
@@ -326,12 +320,6 @@ var GameInfo = function () {
 
         };
 
-        this.logintime = function (_id) {
-            if (this.userList[_id]) {
-                return this.userList[_id].logincheck(new Date());
-            }
-            return 1;
-        };
 
         //获得在线人数
         this.getOnlinePlayerCount = function () {
@@ -355,8 +343,6 @@ var GameInfo = function () {
 
         //删除用户
         this.deleteUser = function (_userinfo) {
-            //console.log("delete")
-            //console.log(_userinfo)
             if (_userinfo.userId) {
                 //指定用户储存
                 log.info("用户" + _userinfo.userId + "删除!");
@@ -479,11 +465,6 @@ var GameInfo = function () {
             }
         };
 
-        // 查询商品价值
-        this.searchShopItemValue = function (id, callback) {
-            shopping_dao.selectGoodsInfo(id, callback);
-        };
-
         //获得用户
         this.getUser = function (_userId) {
             if (_userId) {
@@ -528,35 +509,47 @@ var GameInfo = function () {
 
         //商城购买
         this.Shopping = function (userId, productId, count, socket) {
-            //获得商品配置
-            shopping_dao.selectGoodsInfo(productId, callback =>{
-                if(!callback){
+            try {
+                // 查询购买的金币道具的数量和价值
+                const shopConfig = updateConfig.getShopConfig();
+                const vip_conf = shopConfig.find(item => item.id === productId);
+                if(!vip_conf){
                     socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
-                }else{
-                    // 购买金币
-                    try {
-                        // 查询购买的金币道具的数量和价值
-                        this.searchShopItemValue(productId, callback => {
-                            if (callback) {
-                                const score = callback[0]['val'] * count;
-                                this.addUserscore(userId, score);
-                                console.log('购买成功 用户增加积分', score, '扣减账户余额');
-                                socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
-                                this.addgold(userId, score, callback =>{
-                                    if(callback){
-                                        console.log('用户在游戏内 用户增加积分成功', score);
-                                    }
-                                });
-                            }else{
-                                socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
-                            }
-                        });
-                    }catch (e) {
-                        log.err(e);
-                        socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
-                    }
+                    return;
                 }
-            });
+                let score = vip_conf['vip_score']
+                const amount = vip_conf['target_price'] * count;
+                // 暂时测试用
+                this.Recharge(userId, amount, c =>{
+                    if(c){
+                        console.log('测试用: 购买商品给用户充值成功', amount);
+                    }
+                });
+                // 获取VIP等级额外加积分
+                let addScore = 0;
+                const vip_level = this.userList[userId].vip_level;
+                const config = this.getVipConfigByLevel(vip_level);
+                if(config){
+                    const shopScoreAddRate = config.shopScoreAddRate ? config.shopScoreAddRate : 0;
+                    addScore = score *  (shopScoreAddRate/ 100);
+                    score = score + addScore;
+                }
+
+                // 扣款成功
+                this.reduce_bx_balance(userId, amount, c =>{
+                    if(c){
+                        // VIP加成
+                        this.addUserscore(userId, score);
+                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加积分' + score);
+                        socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
+                    }else{
+                        socket.emit('ShoppingResult', '{"status":1,"msg":"账户余额不足"}');
+                    }
+                });
+            }catch (e) {
+                log.err(e);
+                socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
+            }
         };
 
         //保存所有用户
@@ -717,9 +710,7 @@ var GameInfo = function () {
             //获得对应游戏所需要进入的金币
             if (this.userList[_userId]._sign == _sign) {
                 log.info(_userId + "进入游戏" + gametype);
-                if (gametype != 13900) {
-                    this.userList[_userId].loginGame(gametype);
-                }
+                this.userList[_userId].loginGame(gametype);
                 var userInfo = {};
                 userInfo._userId = this.userList[_userId]._userId;
                 userInfo._account = this.userList[_userId]._account;
@@ -733,7 +724,7 @@ var GameInfo = function () {
                 userInfo._Robot = this.userList[_userId]._Robot;
                 userInfo._diamond = this.userList[_userId]._diamond;   //钻石
                 userInfo.is_vip = this.userList[_userId].is_vip;   //vip
-
+                userInfo.vip_score = this.userList[_userId].vip_score;   //vip积分
 
                 return userInfo;
             } else {
@@ -777,7 +768,7 @@ var GameInfo = function () {
 
         };
 
-        this.updateLogin = function () {
+        this.updateLogin = function (gameInfo) {
 
             for (i = 0; i < this._loginList.length; i++) {
                 if (this.userList[this._loginList[i].id]) {
@@ -789,12 +780,7 @@ var GameInfo = function () {
                             log.info(this._loginList[i].id + "当前用户在线" + this.userList[this._loginList[i].id].getGameId() + "被强制下线");
                             var gameScoket = ServerInfo.getScoket(this.userList[this._loginList[i].id].getGameId())
                             this.userList[this._loginList[i].id]._socket.disconnect();
-                            if(gameScoket) gameScoket.emit('disconnectUser', {userId: this._loginList[i].id})
-                            try {
-                                ServerInfo.getScoket(13900).emit('disconnectUser', {userId: this._loginList[i].id})//断开俱乐部
-                            } catch (e) {
-                                console.log("用户13900服务器断开 try catch server game 819行")
-                            }
+                            if(gameScoket) gameScoket.emit('disconnectUser', {userId: this._loginList[i].id});
 
                             this._loginList[i].state = 4;
                         } else {
@@ -804,23 +790,13 @@ var GameInfo = function () {
                                 delete this.userList[this._loginList[i].id];
                             }
                         }
-
-
-                        //this.userList[userInfo.Id].changeSocke(socket,sign);
                     } else {
                         log.info(this._loginList[i].id + "用户只在登录服务器被强制下线");
                         //先判断socket 是否有真的连接
                         if (this.userList[this._loginList[i].id]._socket.connected) {
                             if (this._loginList[i].state == 1) {
                                 this.userList[this._loginList[i].id]._socket.disconnect();
-                                try {
-                                    ServerInfo.getScoket(13900).emit('disconnectUser', {userId: this._loginList[i].id})//断开俱乐部
-                                } catch (e) {
-                                    console.log("server 13900断开失败 disconnectUser")
-                                }
-
                                 this._loginList[i].state = 2;
-
                             }
                         } else if (!this.userList[this._loginList[i].id].deleteFlag) {
                             delete this.userList[this._loginList[i].id];
@@ -831,158 +807,27 @@ var GameInfo = function () {
                 } else {
                     //完全不在线了,再让他登录一下
                     log.info(this._loginList[i].id + "完全下线了");
-                    var self = this;
+                    const self = this;
                     this._loginList[i].state = 3;
-                    dao.login(this._loginList[i], this._loginList[i].socket, function (state, rows) {
-                        if (!state) {
-                            //如果状态不为3
-                            if (self.getLoginState(rows.Account, 3)) {
+                    const socket = this._loginList[i].socket;
+                    const userId = this._loginList[i];
+                    dao.login(userId, socket, (code, msg, data) => {
+                        if (ErrorCode.LOGIN_SUCCESS.code === code) {
+                            if (self.getLoginState(data.Account, 3)) {
                                 //如果状态为3,才添加
-                                self.deleteLoginList(rows.Account);
-                                self.addUser(rows, rows.socket, function (rusult) {
+                                self.deleteLoginList(data.Account);
+                                self.addUser(data, data.socket, function (rusult) {
                                     log.info("完成添加")
                                 });
-
                             } else {
                                 console.log("状态不为3,又重新登录了")
                             }
-
-                        } else if (state == 1) {
-                            var result = {};
-                            result = {resultid: 0, msg: 'Account or password error,login fail!'};
-                            socket.emit('loginResult', result);
-                            log.info(user)
-                            log.info("登录失败!");
-                        } else if (state == 2) {
-                            var result = {};
-                            result = {resultid: -1, msg: 'This account is disabled!'};
-                            socket.emit('loginResult', result);
-                            log.info("登录失败,帐号被停用!");
+                        }else{
+                            socket.emit('loginResult', {code: code, msg: msg});
                         }
-                    })
+                    });
                 }
             }
-        };
-
-
-        //兑换电话费
-        this.exchange = function (_userId, _info, io) {
-
-            //_info.proId 道具ID
-            //_info.proCount 道具数量
-            var cost = 0;
-            //用户存在
-            if (!this.userList[_userId]) {
-                return;
-            }
-
-            if (!this.userList[_userId]._phoneNo) {
-                this.userList[_userId]._socket.emit('exchangeResult', {Result: 0, msg: "您未绑定手机"});
-                return;
-            }
-
-            if (!(_info.proCount == 20 || _info.proCount == 50 || _info.proCount == 100)) {
-                this.userList[_userId]._socket.emit('exchangeResult', {Result: 0, msg: "道具数量错误"});
-                return;
-            }
-
-            var firstValue = 1;
-            if (!this.userList[_userId]._firstexchange) {
-                firstValue = 0.5
-            }
-
-            switch (_info.proCount) {
-                case 20:
-                    _info.deleteCount = Math.floor((_info.proCount * 10) + 0.1);
-                    // if (this.userList[_userId]._score < 600 * firstValue){
-                    // 	this.userList[_userId]._socket.emit('exchangeResult',{Result:0,msg:"金币不足" + 600 * firstValue});
-                    // 	return;
-                    // }
-                    // cost = 600;
-                    break;
-                case 50:
-                    _info.deleteCount = Math.floor((_info.proCount * 9.6) + 0.1);
-                    // if (this.userList[_userId]._score < 1300 * firstValue){
-                    // 	this.userList[_userId]._socket.emit('exchangeResult',{Result:0,msg:"金币不足" + 1300 * firstValue});
-                    // 	return;
-                    // }
-                    // cost = 1300;
-                    break;
-                case 100:
-                    _info.deleteCount = Math.floor((_info.proCount * 9.2) + 0.1);
-                    // if (this.userList[_userId]._score < 2400 * firstValue){
-                    // 	this.userList[_userId]._socket.emit('exchangeResult',{Result:0,msg:"金币不足" + 2400 * firstValue});
-                    // 	return;
-                    // }
-                    //
-                    // cost = 2400;
-                    break;
-            }
-            if (!this.userList[_userId]._proList[1] || this.userList[_userId]._proList[1] < _info.deleteCount) {
-                this.userList[_userId]._socket.emit('exchangeResult', {Result: 0, msg: "道具数量不足"});
-                return;
-            }
-
-            console.log(_info.deleteCount);
-
-            console.log(this.userList[_userId]._proList[1]);
-
-            var info = {
-                Type: 'A1',
-                Account: this.userList[_userId]._userId,
-                PhoneNo: this.userList[_userId]._phoneNo,
-                OrderId: '1',
-                CardNum: _info.proCount,
-                Key: '89b5b987124d2ec3'
-            };
-
-            this.userList[_userId]._firstexchange = true;
-
-            //调用接口
-            //返回后
-            //发送兑换结果
-            //减掉道具
-            //存储兑换记录
-            var self = this;
-            Post.postExchange(info, function (rusult) {
-                if (rusult) {
-                    self.userList[_userId]._proList[1] -= _info.deleteCount;
-                    var myNowScore = self.userList[_userId]._score;
-                    self.userList[_userId]._score -= (cost * firstValue);
-                    var NowScore = self.userList[_userId]._score;
-                    //console.log(self.userList[_userId]._score)
-                    var info = {userId: _userId, propId: 1, propCount: -_info.deleteCount, roomid: 0, typeid: 2}
-                    dao.updateProp(info, function (result) {
-                    });
-                    dao.updateFirstexchange(_userId);
-
-                    var score_change = parseInt(cost * firstValue);
-                    var userInfo = {
-                        userid: _userId,
-                        score_before: myNowScore,
-                        score_change: -score_change,
-                        score_current: NowScore,
-                        change_type: 4,
-                        isOnline: true
-                    };
-                    self.score_changeLogList.push(userInfo);
-
-                    self.userList[_userId]._socket.emit('exchangeResult', {
-                        Result: 1,
-                        msg: "兑换成功",
-                        deleteCount: -_info.deleteCount,
-                        deleteCoin: -(cost * firstValue)
-                    });
-                    io.sockets.emit('noticeMsg', {
-                        nickname: self.userList[_userId]._nickname,
-                        msg: "成功兑换" + _info.proCount + "元电话卡!"
-                    });
-
-                }
-
-            });
-
-            return;
         };
 
 
@@ -2140,17 +1985,10 @@ var GameInfo = function () {
             this.gameRank[_info.serverId] = _info;
         };
 
-        this.pisaveUser = function () {
-            var self = this;
-
-            var saveList = [];
-            for (var k in this.tempuserList) {
-                if (this.userList[this.tempuserList[k]._userId]) {
-
-                } else {
-                    log.err(this.tempuserList[k]._userId + "不存在");
-                }
-
+        this.saveUser = function () {
+            const self = this;
+            const saveList = [];
+            for (const k in this.tempuserList) {
                 if (this.tempuserList[k].loginEnd) {
                     saveList.push(this.tempuserList[k]);
                     delete this.tempuserList[k];
@@ -2162,16 +2000,14 @@ var GameInfo = function () {
                         log.info("成功保存,删除用户" + result[i]._userId + " socre:" + result[i]._score + " diamond:" + result[i]._diamond);
                         delete self.userList[result[i]._userId];
                         --self.onlinePlayerCount;
-                        //console.log("离线!同时在线:" + self.onlinePlayerCount + "人")
                     }
                 });
             }
         };
         //定时存数据库
         this.pisaveUser2 = function () {
-            var self = this;
-
-            var saveList = [];
+            const self = this;
+            const saveList = [];
             for (var k in this.userList) {
                 if (this.userList[k]._userId > 11000) {
                     saveList.push(this.userList[k]);
@@ -2205,167 +2041,24 @@ var GameInfo = function () {
         };
         //商城商品列表
         this.getShopping_List = function (_socket) {
-            shopping_dao.selectShopList((res) => {
-                if (res === 0) {
-                    _socket.emit("getShoppingResult", {ResultCode: 0, msg: "获取商城列表错误"});
-                } else {
-                    let result = {};
-                    for (let i = 0; i < res.length; i++) {
-                        if (result[res[i].type]) {
-                            result[res[i].type].push(res[i]);
-                        } else {
-                            result[res[i].type] = [];
-                            result[res[i].type].push(res[i]);
-                        }
-                    }
-                    _socket.emit("getShoppingResult", {ResultCode: 1, result: result});
-                }
-            });
-        };
-        //获取用户收货信息
-        this.getShopPlayerInfo = function (_socket) {
-            shopping_dao.selectshouhuoInfo(_socket.userId, (res) => {
-                if (res === 0) {
-                    console.log("获取用户收货信息失败");
-                } else {
-                    _socket.emit("getShopPlayerInfoResult", {ResultCode: 1, result: res});
-                }
-            });
-        };
-        //更新用户收货信息
-        this.updateShopPlayerInfo = function (_socket, _userInfo) {
-            shopping_dao.newshouhuoInfo(_socket.userId, _userInfo.adress, _userInfo.userName, _userInfo.phone, (res) => {
-                _socket.emit("updateShopPlayerInfoResult", {ResultCode: 1, result: res});
-            });
-        };
-        //申请兑换
-        this.requestGetShopItem = function (_socket, _info) {
-            shopping_dao.selectshouhuoInfo(_socket.userId, (res) => {
-                if (res == 0) {
-                    _socket.emit("getShopPlayerInfoResult", {ResultCode: 0, msg: "获取用户收货信息失败"});
-                } else {
-                    shopping_dao.selectGoodsInfo(_info.id, (res1) => {
-                        if (res1 == 0) {
-                            _socket.emit("requestGetShopItemResult", {ResultCode: 0, msg: "获取商品信息失败"});
-                            return;
-                        }
-                        let result = res1[0];
-                        if (result.goodsNum < _info.needNum) {
-                            _socket.emit("requestGetShopItemResult", {ResultCode: 0, msg: "商品剩余数量不足"});
-                            return;
-                        }
-                        if (this.userList[_socket.userId].getDiamond() < result.goodsPrice * _info.needNum) {
-                            _socket.emit("requestGetShopItemResult", {ResultCode: 0, msg: "印花不足"});
-                            return;
-                        }
-                        let num = result.goodsNum - _info.needNum;
-                        shopping_dao.updateGoodsInfo(_info.id, num, (res2) => {
-                            if (res2 == 0) {
-                                _socket.emit("requestGetShopItemResult", {ResultCode: 0, msg: "更新商品信息失败"});
-                            } else {
-                                let userItem = this.userList[_socket.userId];
-                                userItem.adddiamond(-result.goodsPrice * _info.needNum);
-                                userItem._socket.emit('sendDiamondResult', {
-                                    Result: 1,
-                                    diamond: -result.goodsPrice * _info.needNum,
-                                    msg: "扣钻成功"
-                                });
-
-                                shopping_dao.newshouhuoRecord(_socket.userId, result.id, 1, result.goodsName, _info.needNum, result.goodsPrice, (res3) => {
-                                    if (res3 == 0) {
-                                        console.log("创建兑换记录失败");
-                                    } else {
-                                        console.log("创建兑换记录成功");
-                                    }
-                                });
-
-                                _socket.emit("requestGetShopItemResult", {ResultCode: 1});
-                            }
-                        });
-                    });
-                }
-            });
-
-        };
-        //获取商城兑换记录
-        this.getShouhuoRecord = function (_socket) {
-            shopping_dao.selectshouhuoRecord(_socket.userId, (res) => {
-                if (res == 0) {
-                    _socket.emit("getShouhuoRecordResult", {ResultCode: 0, msg: "未查到兑换记录"});
-                } else {
-                    _socket.emit("getShouhuoRecordResult", {ResultCode: 1, result: res});
-                }
-            });
-        };
-        //获取玩家任务信息
-        this.getTaskInfo = function (_socket) {
-            redis_dao.queryTask(_socket.userId, (res) => {
-                if (res) {
-                    let result = JSON.parse(res);
-                    let date = new Date().getTime();
-                    if (this.isCurrentWeek(result.loginTime)) {
-                        if (this.isSameDay(result.loginTime, date)) {
-                            _socket.emit("getTaskInfoResult", {
-                                ResultCode: 1,
-                                result: result,
-                                coinList: activityConfig.everyCoin
-                            });
-                        } else {
-                            redis_dao.saveTask(_socket.userId, result, (res) => {
-                                if (res) {
-                                    _socket.emit("getTaskInfoResult", {
-                                        ResultCode: 1,
-                                        result: res,
-                                        coinList: activityConfig.everyCoin
-                                    });
-                                }
-                            });
-                        }
+            try {
+                const shopConfig = updateConfig.getShopConfig();
+                let result = {};
+                for (let i = 0; i < shopConfig.length; i++) {
+                    if (result[shopConfig[i].type]) {
+                        result[shopConfig[i].type].push(shopConfig[i]);
                     } else {
-                        redis_dao.saveTask(_socket.userId, null, (res) => {
-                            if (res) {
-                                _socket.emit("getTaskInfoResult", {
-                                    ResultCode: 1,
-                                    result: res,
-                                    coinList: activityConfig.everyCoin
-                                });
-                            }
-                        });
+                        result[shopConfig[i].type] = [];
+                        result[shopConfig[i].type].push(shopConfig[i]);
                     }
-                } else {
-                    redis_dao.saveTask(_socket.userId, null, (res) => {
-                        if (res) {
-                            _socket.emit("getTaskInfoResult", {
-                                ResultCode: 1,
-                                result: res,
-                                coinList: activityConfig.everyCoin
-                            });
-                        }
-                    });
                 }
-            });
-        };
-
-        this.isSameDay = function (timeStampA, timeStampB) {
-            let dateA = new Date(timeStampA);
-            let dateB = new Date(timeStampB);
-            return (dateA.setHours(0, 0, 0, 0) == dateB.setHours(0, 0, 0, 0));
-        };
-
-        this.isCurrentWeek = function (past) {
-            const pastTime = new Date(past).getTime();
-            const today = new Date(new Date().toLocaleDateString());
-            let day = today.getDay();
-            day = day == 0 ? 7 : day;
-            const oneDayTime = 60 * 60 * 24 * 1000;
-            const monday = new Date(today.getTime() - (oneDayTime * (day - 1)));
-            const nextMonday = new Date(today.getTime() + (oneDayTime * (8 - day)));
-            if (monday.getTime() <= pastTime && nextMonday.getTime() > pastTime) {
-                return true
-            } else {
-                return false
+                _socket.emit("getShoppingResult", {ResultCode: 1, result: result});
+            }catch (e) {
+                _socket.emit("getShoppingResult", {ResultCode: 0, msg: "获取商城列表错误"});
             }
         };
+
+
         //每日登录奖励
         this.getEveryLogin = function (_socket) {
             redis_dao.updateEveryLogin(_socket.userId, 2, (res) => {
@@ -2764,18 +2457,6 @@ var GameInfo = function () {
                 this.GameBalance(userInfo);
             }
         };
-        //发送API
-        this.sendApi = function () {
-            for (i = 0; i < this.sendApiList.length; i++) {
-                --this.sendApiList[i].sendTime;
-                if (!this.sendApiList[i].sendTime) {
-                    //发送API
-                    //console.log("发送API" + this.sendApiList[i].userid);
-                    Post.sendApi(this.sendApiList[i].userid);
-                    this.sendApiList.splice(i, 1);
-                }
-            }
-        };
 
         this.getLv = function (_userId, callback) {
             dao.getWinCoin(_userId, function (result, row) {
@@ -2920,38 +2601,48 @@ var GameInfo = function () {
 
         // 充值
         this.Recharge = function (userId, amount, callback) {
-
             // 查询累计充值
             dao.checkTotalCharge(parseInt(userId), (res, data) => {
                 if(!amount || amount < 0){
-                    callback("充值失败！");
+                    callback(0);
                     return;
                 }
                 if (res === 1) {
                     data.totalRecharge += parseInt(amount);
                     const housecard = data.housecard;
+                    const scoreFlow = data.score_flow;
+                    // 增加账户余额
+                    this.add_bx_balance(userId, amount, (ret) => {
+                        if(!ret){
+                            log.err('add_bx_balance' + ret);
+                            callback(0);
+                        }else{
+                            log.info('增加巴西账户余额:' + amount);
+                            // 计算充值获得VIP积分
+                            const rechargeVipScore= (data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100)).toFixed(0);
+                            const flowVipScore= ((scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100)).toFixed(0);
 
-                    const vipConfig = updateConfig.getVipConfig();
-                    // 计算VIP等级
-                    let vipLevel = 0;
-                    for(let i = 0; i < vipConfig.length; i++){
-                        const config = vipConfig[i];
-                        const minRecharge = config.minRecharge;
-                        if(data.totalRecharge >= minRecharge){
-                            vipLevel = config.level;
+                            // VIP积分=充值获得积分+消费流水获得积分
+                            const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
+                            // 计算VIP等级
+                            const vipLevel = this.getVipLevelByScore(vScore);
+                            // 更新VIP积分
+                            this.userList[userId].vip_score = vScore;
+                            this.updateVipScore(userId, vScore);
+
+                            // VIP升级
+                            if(vipLevel > housecard){
+                                this.userList[userId].vip_level = vipLevel;
+                                // 更新VIP等级
+                                this.updateVipLevel(userId, vipLevel, housecard);
+                            }
+                            // 修改累计充值
+                            this.updateTotalCharge(userId, data.totalRecharge, amount);
+                            callback(1);
                         }
-                        console.log(config);
-                    }
-                    // VIP升级
-                    if(vipLevel > housecard){
-                        // 更新VIP等级
-                        this.updateVipLevel(userId, vipLevel, housecard);
-                    }
-                    // 修改累计充值
-                    this.updateTotalCharge(userId, data.totalRecharge, amount);
-                    callback("充值成功");
+                    });
                 }else{
-                    callback("充值失败！");
+                    callback(0);
                 }
             });
         }
@@ -2966,6 +2657,56 @@ var GameInfo = function () {
                 }
             });
         }
+        // 通过VIP积分获取VIP等级
+        this.getVipLevelByScore = function (vScore) {
+            const vipConfig = updateConfig.getVipConfig();
+            let l = 0;
+            for(let i = 0; i < vipConfig.length; i++){
+                const config = vipConfig[i];
+                const currVipScore = config.vipScore;
+                if(vScore >= currVipScore){
+                    l = config.level;
+                }
+            }
+            console.log('VIP等级' + l);
+            return l;
+        }
+
+        // 通过VIP等级获取VIP配置表
+        this.getVipConfigByLevel = function (level) {
+            const vipConfig = updateConfig.getVipConfig();
+            let c;
+            for(let i = 0; i < vipConfig.length; i++){
+                const config = vipConfig[i];
+                const l = config.level;
+                if(level >= l){
+                    c = config;
+                }
+            }
+            console.log('VIP配置表'+ c);
+            return c;
+        }
+
+        // 更新VIP积分
+        this.updateVipScore = function (userId, vipScore) {
+            dao.updateVipScore(userId, vipScore, (res) => {
+                if(!res){
+                    log.warn('dao.updateVipScore' + res);
+                }else{
+                    log.info('更新VIP积分:' + vipScore);
+                }
+            });
+        }
+        // 增加巴西账户余额
+        this.add_bx_balance = function (userId, amount, callback) {
+            dao.add_bx_balance(userId, amount, callback);
+        }
+
+        // 减少巴西账户余额
+        this.reduce_bx_balance = function (userId, amount, callback) {
+            dao.reduce_bx_balance(userId, amount, callback);
+        }
+
         // 修改累计充值
         this.updateTotalCharge = function (userId, totalRecharge, amount) {
             dao.updateTotalCharge(userId, totalRecharge, (res) => {
@@ -3110,16 +2851,6 @@ var GameInfo = function () {
             }
         };
 
-        this.getScoreChange = function (_socket, _info) {
-            dao.selectScoreChangeLog(_info.userid, (code, res) => {
-                if (code) {
-                    _socket.emit('getScoreChangeResult', {Result: 1, data: res});
-                } else {
-                    _socket.emit('getCoinLogResult', {Result: 0, msg: "未查到该用户相关记录"});
-                }
-            });
-        };
-
         //查询金币记录2
         this.getCoinLog = function (_socket, _info) {
             dao.selectcoinlog(_info.userid, (code, res) => {
@@ -3135,23 +2866,14 @@ var GameInfo = function () {
         //断线通知
         this.lineOutSet = function (_info) {
             if (_info.state == 1) {
-                //添加
-                // console.log("----------------------------添加lineOutSet")
-                // console.log(_info.serverId)
-                // console.log(this.lineOutList)
-                if (parseInt(_info.serverId) != 13900) {
-                    // console.log("----------------------------进来了")
-                    this.lineOutList[_info.userId] = {
-                        gameId: _info.gameId,
-                        serverId: _info.serverId,
-                        tableId: _info.tableId,
-                        seatId: _info.seatId,
-                        tableKey: _info.tableKey
-                    }
-                    // console.log(_info)
-                    // dao.saveLineOut(_info.userId)
+                this.lineOutList[_info.userId] = {
+                    gameId: _info.gameId,
+                    serverId: _info.serverId,
+                    tableId: _info.tableId,
+                    seatId: _info.seatId,
+                    tableKey: _info.tableKey
                 }
-
+                // dao.saveLineOut(_info.userId)
                 console.log(this.lineOutList[_info.userId]);
             } else {
                 //移除
@@ -3529,54 +3251,6 @@ var GameInfo = function () {
             })
         };
 
-        this.sendNotice = function (io) {
-            const noticeConfig = updateConfig.getNoticeConfig();
-            io.sockets.emit('noticeMsg', {msg: noticeConfig.msg, date: noticeConfig.date});
-        };
-
-        this.PostCoin = function () {
-            //var nowDate = new Date();
-            var nowDate = new Date();
-            nowDate.setMinutes(nowDate.getMinutes() - 3, nowDate.getSeconds(), 0);
-            nowDate = makeDate(nowDate);
-            var self = this;
-            dao.getScoreOut(nowDate, function (result, row) {
-                if (result) {
-                    var info = {
-                        out_biz_no: row.out_trade_no,
-                        payee_account: row.zfb_account,
-                        amount: row.coin,
-                        payee_real_name: row.zfb_name,
-                        Key: '89b5b987124d2ec3'
-                    };
-                    //sconsole.log(info)
-                    Post.postExchangeCoin(info, function (post_result, remark) {
-                        if (!post_result) {
-                            //告知玩家,支付宝帐号有错误，并退款
-                            var info = {userId: row.userId, msg: '你的支付宝有误,重新绑定后,再试!'}
-                            self.sendMsgToUserBySystem(info);
-                            var userInfo = {sendUserId: row.userId, sendCoin: row.score, change_type: 2};
-                            self.GameBalance(userInfo);
-                            remark = remark.substring(0, 50);
-                            post_result = 2;
-                        }
-                        self.updateScoreOut(row.out_trade_no, post_result, remark, function (result) {
-                            switch (result) {
-                                case 0:
-                                    log.info("兑奖更新成功");
-                                    break;
-                                case 1:
-                                    log.err("兑奖更新失败,找不到订单");
-                                    break;
-                            }
-                        });
-                    });
-
-                } else {
-                    //log.info("暂未有数据");
-                }
-            })
-        };
 
         //proTypeId,addProCount,userId,roomid,typeid
         this.pro_change = function (_info) {

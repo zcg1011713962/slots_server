@@ -1,24 +1,18 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 let withdrawal_api = require('./class/withdrawal_api');
-var schedule = require("node-schedule");
-var bodyParser = require('body-parser');
-var weixin = require('./class/weixin');
-var Robotname = require('./config/RobotName');
-var path = require('path');
-var crypto = require('crypto');
-var gm_api = require('./class/gm_api');
-var ml_api = require('./class/ml_api');
-var tw_api = require('./class/tw_api');
-var guanfang_api = require('./class/guanfang_api');
-var dao = require('./dao/dao');
-var gameConfig = require('./config/gameConfig');
-var log = require("../CClass/class/loginfo").getInstand;
-var multer = require('multer');
-var consolidate = require('consolidate');
-var statics = require('express-static');
-var shopping_dao = require('./dao/shopping_dao');
+const bodyParser = require('body-parser');
+const weixin = require('./class/weixin');
+const Robotname = require('./config/RobotName');
+const crypto = require('crypto');
+const gm_api = require('./class/gm_api');
+const ml_api = require('./class/ml_api');
+const tw_api = require('./class/tw_api');
+const dao = require('./dao/dao');
+const log = require("../CClass/class/loginfo").getInstand;
+const consolidate = require('consolidate');
+const statics = require('express-static');
 const sms = require("./class/sms.js");
 const StringUtil = require("../util/string_util");
 const gameInfo = require("./class/game").getInstand;
@@ -26,8 +20,8 @@ const ServerInfo = require('./config/ServerInfo').getInstand;
 const ErrorCode = require('../util/ErrorCode');
 
 //版本密钥和版本号
-var version = "ymymymymym12121212qwertyuiop5656_";
-var num = "2.0";
+const version = "ymymymymym12121212qwertyuiop5656_";
+const num = "2.0";
 
 app.use(statics('./static/'));
 
@@ -51,8 +45,12 @@ app.use(bodyParser());
 
 // 充值接口
 app.get('/recharge', function (req, res) {
-    gameInfo.Recharge(req.query.userId, req.query.amount,function (sendStr) {
-        res.send(sendStr);
+    gameInfo.Recharge(req.query.userId, req.query.amount,function ( callback) {
+        if(callback){
+            res.send("recharge success");
+        }else{
+            res.send("recharge failed");
+        }
     });
 });
 
@@ -83,7 +81,7 @@ app.post('/gmManage', function (req, res) {
     });
 });
 
-// 游客自动注册登录
+// 游客登录
 app.get('/weixinLogin', function (req, res) {
     //外部接口
     weixin(req, function (act, sendStr) {
@@ -122,53 +120,7 @@ app.post('/checkVersion', function (req, res) {
     res.send({code: 1, url: "http://yidali.youmegame.cn/tg/"});
 });
 
-//商城相关
-app.post('/getShopList', function (req, response) {
-    try {
-        shopping_dao.selectShopList(res => {
-            response.writeHead(200, {"Content-Type": "text/plain"});
-            response.write(JSON.stringify(res));
-            response.end();
-        });
-    }catch (e){
-        log.warn('getShopList-json');
-    }
-});
 
-
-app.post('/addShoppingGoods', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('addShoppingGoods-json');
-    }
-    shopping_dao.insertNewGoods(req.body, (res) => {
-        response.writeHead(200, {"Content-Type": "text/plain"});
-        response.write(JSON.stringify({result: res}));
-        response.end();
-    });
-});
-
-app.post('/delShoppingGoods', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('delShoppingGoods-json');
-    }
-    shopping_dao.delGoods(req.body, (res) => {
-        response.writeHead(200, {"Content-Type": "text/plain"});
-        response.write(JSON.stringify({result: res}));
-        response.end();
-    });
-});
 
 //获取验证码
 app.post('/getSmsCode', function (req, response) {
@@ -265,8 +217,9 @@ io.on('connection', function (socket) {
                 socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                 return;
             }
+
+            // 账户密码登录
             if(user.userName && user.password){
-                // 账户密码登录
                 const key_login = "89b5b987124d2ec3";
                 let content = user.userName + user.password + key_login;
                 if(user.userName && user.userName.includes("user_")){
@@ -277,8 +230,16 @@ io.on('connection', function (socket) {
                 user.password = md5_sign.digest('hex');
                 user.sign = user.password;
             }
+            // 邮箱登录
+            if(user.email && user.code){
+                gameInfo.verifyEmailCode(user.email, user.code, ret =>{
+                    if(ret[0] !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
+                        socket.emit('loginResult', {code: ret[0], msg: ret[1]});
+                    }
+                });
+            }
 
-            dao.login(user, socket, gameInfo, (code, msg, data)=> {
+            dao.login(user, socket, (code, msg, data)=> {
                 if(ErrorCode.LOGIN_SUCCESS.code === code){
                     if (!data) {
                         socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
@@ -327,7 +288,8 @@ io.on('connection', function (socket) {
                     serverId: _userinof.serverId,
                     userId: _userinof.userid,
                     tableId: -1,
-                    seatId: -1
+                    seatId: -1,
+                    vip_score: _userinof.vip_score
                 };
                 gameInfo.lineOutSet(info);
             } else {
@@ -338,28 +300,8 @@ io.on('connection', function (socket) {
 
     });
 
-    //登录完成之后进入俱乐部服务器,来自于游戏服务器
-    socket.on('LoginClub', function (_userinof) {
-        if (_userinof.serverSign == serverSign) {
-            //让这个用户进入该游戏
-            //log.info(_userinof)
-            var encoin = ServerInfo.getServerEnterCoinByProt(_userinof.serverId);
-
-            var userInfo = gameInfo.LoginGame(_userinof.userid, _userinof.sign, _userinof.serverId, encoin);
-            var result = {};
-            if (userInfo._userId) {
-                var result = {ResultCode: 1, userInfo: userInfo};
-            } else {
-                var result = {ResultCode: 0, userid: _userinof.userid, msg: userInfo.msg};
-            }
-            socket.emit('LoginClubResult', result);
-        }
-
-    });
-
     //离线操作
     socket.on('disconnect', function () {
-        //log.info("有人离线");
         if (socket.gm_id) {
             console.log("删除gm_socket");
             delete gameInfo.gm_socket[socket.gm_id]
@@ -374,10 +316,8 @@ io.on('connection', function (socket) {
         if (socket.serverGameid) {
             log.info("游戏服务器 -" + ServerInfo.getServerNameById(socket.serverGameid) + "- 已经断开连接");
         }
-
-        log.info("disconnect:" + socket.userId);
-        //log.info("************")
-        //如果用户还存在的话，删除
+        log.info("用户断开连接:" + socket.userId);
+        // 如果用户还存在的话，删除
         var userInfo = {userId: socket.userId, nolog: true};
         gameInfo.deleteUser(userInfo);
     });
@@ -461,6 +401,7 @@ io.on('connection', function (socket) {
                     isVip: user.is_vip,
                     totalRecharge: user.totalRecharge,
                     vip_level: user.vip_level,
+                    vip_score: user.vip_score,
                 };
                 socket.emit('UserInfoResult', {status: 1, msg: userInfo});
             }else{
@@ -509,16 +450,7 @@ io.on('connection', function (socket) {
         gameInfo.addPrize(_info);
     });
 
-    //兑换电话卡
-    socket.on("exchange", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('exchangejson');
-        }
-        gameInfo.exchange(socket.userId, _info, io);
-    });
+
 
     //赠送游戏币给他人
     socket.on("sendCoin", function (_info) {
@@ -833,53 +765,6 @@ io.on('connection', function (socket) {
     });
 
 
-    //获得商城用户收货信息
-    socket.on("getShopPlayerInfo", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShopPlayerInfo(socket);
-        }
-    });
-
-    //更新商城用户收货信息
-    socket.on("updateShopPlayerInfo", function (_info) {
-        try {
-            let data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('updateShopPlayerInfo-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.updateShopPlayerInfo(socket, _info);
-        }
-    });
-
-    //提交商城兑换
-    socket.on("requestGetShopItem", function (_info) {
-        try {
-            let data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('requestGetShopItem-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.requestGetShopItem(socket, _info);
-        }
-    });
-
-    //获取商城兑换记录
-    socket.on("getShouhuoRecord", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShouhuoRecord(socket);
-        }
-    });
-
-    //获得任务信息
-    socket.on("getTaskInfo", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getTaskInfo(socket);
-        }
-    });
-
     //获得每日登录奖励
     socket.on("getEveryLogin", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
@@ -1141,16 +1026,8 @@ io.on('connection', function (socket) {
             });
         }
     });
-    //查询游戏分数
-    socket.on('getScoreChange', function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('getScoreChange-json');
-        }
-        gameInfo.getScoreChange(socket, _info);
-    });
+
+
     //查询游戏分数2
     socket.on('getCoinLog', function (_info) {
         try {
@@ -1184,39 +1061,16 @@ var server = http.listen(app.get('port'), function () {
 });
 
 
-var period = 1000; // 1 second
-var noticeflag = true;
-var times = 0;
-
+const period = 1000;
 setInterval(function () {
-
-    var nowDate = new Date();
-    var hours = nowDate.getHours();
-    var minute = nowDate.getMinutes();
-    var second = nowDate.getSeconds();
-    times++;
-    //比赛时间 8:00 - 24:00
-    if (minute % 10 == 0 && second == 0) {
-        if (noticeflag)
-            gameInfo.sendNotice(io);
-        noticeflag = false;
-    } else {
-        noticeflag = true;
-    }
     //更新登录
     gameInfo.updateLogin();
     //保存用户
-    gameInfo.pisaveUser();
+    gameInfo.saveUser();
     gameInfo.pisaveUser2();
     //保存log
     gameInfo.score_changeLog();
     gameInfo.diamond_changeLog();
-    //PostCoin
-    if (times == 60) {
-        gameInfo.PostCoin();
-        times = 0;
-    }
-
 }, period);
 
 dao.clenaLineOut();
