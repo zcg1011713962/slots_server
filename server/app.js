@@ -370,7 +370,7 @@ io.on('connection', function (socket) {
     // 获得商城商品列表
     socket.on("getShoppingList", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShopping_List(socket);
+            gameInfo.getShoppingGoods(socket);
         }
     });
 
@@ -381,10 +381,10 @@ io.on('connection', function (socket) {
             if (gameInfo.IsPlayerOnline(socket.userId)) {
                 gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
             }else{
-                socket.emit('ShoppingResult', '{"status":1,"msg":"用户不在线"}');
+                socket.emit('ShoppingResult', {code:0,msg:"用户不在线"});
             }
         }catch (e) {
-            socket.emit('ShoppingResult', '{"status":1,"msg":"参数有误"}');
+            socket.emit('ShoppingResult', {code:0,msg:"参数有误"});
         }
     });
 
@@ -412,13 +412,13 @@ io.on('connection', function (socket) {
                     vip_score: user.vip_score,
                 };
                 log.info('getUserInfo' + userInfo)
-                socket.emit('UserInfoResult', {status: 1, msg: userInfo});
+                socket.emit('UserInfoResult', {code: 1, data: userInfo});
             }else{
                 log.info('getUserInfo用户不在线')
-                socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
+                socket.emit('UserInfoResult', {code:0,msg:"用户不在线"});
             }
         }catch (e) {
-            socket.emit('UserInfoResult', '{"status":1,"msg":"用户不在线"}');
+            socket.emit('UserInfoResult', {code:0,msg:"用户不在线"});
         }
     });
 
@@ -431,7 +431,70 @@ io.on('connection', function (socket) {
                 socket.emit('getVipConfigResult', {code:1, msg: config});
             }
         }catch (e) {
-            socket.emit('getVipConfigResult', {code:1, msg:"用户不在线"});
+            socket.emit('getVipConfigResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // vip获取每日每月金币
+    socket.on("vipGetGoldDetail", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.vipGetGoldDetail(socket);
+        }else{
+            socket.emit('vipGetGoldDetailResult', {code:0,msg:"用户不在线"});
+        }
+    });
+
+    // VIP领取金币
+    socket.on("vipGetGold", function (data) {
+        try {
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if (gameInfo.IsPlayerOnline(socket.userId)) {
+                gameInfo.vipGetGold(socket, d.type);
+            }else{
+                socket.emit('vipGetGoldResult', {code:0,msg:"用户不在线"});
+            }
+        }catch (e) {
+            socket.emit('vipGetGoldResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+    // 获取银行分数 用户金币
+    socket.on('getBankScore', function () {
+        try {
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.getBankScore(socket);
+            }
+        }catch (e) {
+            socket.emit('getBankScoreResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 银行取出金币
+    socket.on('bankIntoHallGold', function (data) {
+        try {
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.bankIntoHallGold(socket, d.gold);
+            }
+        }catch (e) {
+            socket.emit('bankIntoHallGoldResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+    // 银行转入金币
+    socket.on('hallGoldIntoBank', function (data) {
+        try {
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.hallGoldIntoBank(socket, d.gold);
+            }
+        }catch (e) {
+            socket.emit('bankIntoHallGoldResult', {code:0,msg:"参数有误"});
         }
     });
 
@@ -706,19 +769,7 @@ io.on('connection', function (socket) {
         }
     });
 
-    //绑定支付宝
-    socket.on("bindZhifubao", function (_info) {
 
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('bindZhifubao-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.bindZhifubao(socket, _info);
-        }
-    });
 
     //发验证码
     socket.on("sendbindPhoneNo", function (_info) {
@@ -1005,15 +1056,7 @@ io.on('connection', function (socket) {
         });
     });
 
-    //获取银行分数
-    socket.on('getBankScore', function () {
-        if (!socket.userId) {
-            return;
-        }
-        socket.emit('getBankScoreResult', {
-            bankScore: gameInfo.userList[socket.userId].bankScore
-        });
-    });
+
 
     //修改银行分数
     socket.on('updateBankScore', function (_info) {

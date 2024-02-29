@@ -44,6 +44,16 @@ var update_config = function(){
 				})
 			},60000);
 
+			fs.readFile('./config/bank_transfer.json','utf-8',function(err,data){
+				self.bankTransferConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/bank_transfer.json','utf-8',function(err,data){
+					self.bankTransferConfig = data.toString().trim();
+				})
+			},60000);
+
 		};
 
 
@@ -72,6 +82,17 @@ var update_config = function(){
 				log.err('getShopConfig');
 			}
 		}
+
+
+		this.getBankTransferConfig = function(){
+			try{
+				return JSON.parse(this.bankTransferConfig);
+			}
+			catch(e){
+				log.err('getShopConfig');
+			}
+		}
+
 
 		//运行初始化
 		this.init();

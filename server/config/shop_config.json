@@ -1,6 +1,7 @@
 [{
     "id": 1,
     "type": 0,
+    "group": 0,
     "name": "金币礼包大礼包一",
     "val": 1000000,
     "source_price": 100,
@@ -13,6 +14,7 @@
 },{
     "id": 2,
     "type": 0,
+    "group": 0,
     "name": "金币礼包大礼包二",
     "val": 2000000,
     "source_price": 200,
@@ -25,6 +27,7 @@
 },{
     "id": 3,
     "type": 0,
+    "group": 0,
     "name": "金币礼包大礼包三",
     "val": 10000000,
     "source_price": 1000,
@@ -37,6 +40,7 @@
 },{
     "id": 4,
     "type": 0,
+    "group": 0,
     "name": "金币礼包大礼包四",
     "val": 50000000,
     "source_price": 5000,
@@ -49,6 +53,7 @@
 },{
     "id": 5,
     "type": 1,
+    "group": 0,
     "name": "钻石大礼包一",
     "val": 10,
     "source_price": 10,
@@ -61,7 +66,8 @@
 },{
     "id": 6,
     "type": 1,
-    "name": "钻石大礼包一",
+    "group": 0,
+    "name": "钻石大礼包二",
     "val": 100,
     "source_price": 100,
     "target_price": 89.99,
@@ -69,6 +75,45 @@
     "vip_score": 100,
     "buy_picture_type": 1,
     "buy_discount_ratio": 20,
+    "buy_icon_type": 0
+},{
+    "id": 7,
+    "type": 0,
+    "group": 1,
+    "name": "首充金币大礼包一",
+    "val": 10000,
+    "source_price": 10,
+    "target_price": 1,
+    "price_type": 0,
+    "vip_score": 100,
+    "buy_picture_type": 0,
+    "buy_discount_ratio": 90,
+    "buy_icon_type": 0
+},{
+    "id": 8,
+    "type": 0,
+    "group": 1,
+    "name": "首充金币大礼包二",
+    "val": 10000,
+    "source_price": 10,
+    "target_price": 1,
+    "price_type": 0,
+    "vip_score": 100,
+    "buy_picture_type": 0,
+    "buy_discount_ratio": 90,
+    "buy_icon_type": 0
+},{
+    "id": 9,
+    "type": 1,
+    "group": 1,
+    "name": "首充钻石大礼包三",
+    "val": 10,
+    "source_price": 10,
+    "target_price": 1,
+    "price_type": 0,
+    "vip_score": 10,
+    "buy_picture_type": 0,
+    "buy_discount_ratio": 90,
     "buy_icon_type": 0
 }
 ]

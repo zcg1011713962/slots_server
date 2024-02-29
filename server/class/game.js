@@ -18,6 +18,7 @@ const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
 const gameConfig = require('../config/gameConfig');
 const StringUtil = require('../../util/string_util');
+const {getUserId} = require("../dao/dao");
 
 var GameInfo = function () {
 
@@ -167,7 +168,7 @@ var GameInfo = function () {
                         } else {
                             userInfo.propList = {};
                         }
-
+                        // 用户信息
                         self.userList[userInfo.Id] = new User(userInfo, socket);
                         const resultObj = {
                             account: self.userList[userInfo.Id]._account,
@@ -258,12 +259,13 @@ var GameInfo = function () {
                 },
                 function (result, callback) {
                     // 登录成功返回结果
-                    const login_token_key = 'login_token_key_';
+                    const login_token_key = 'login_token_key:';
                     redis_laba_win_pool.get_redis_win_pool().then(function (data) {
+                        // 生成新token返回
                         StringUtil.generateUniqueToken().then(token =>{
-                            RedisUtil.set(login_token_key + userInfo.Id, token).then(ret1 =>{
+                            RedisUtil.set(login_token_key + token , userInfo.Id).then(ret1 =>{
                                 const expire = 7 * 24 * 60 * 60;
-                                RedisUtil.expire(login_token_key + userInfo.Id, expire).then(ret2 =>{
+                                RedisUtil.expire(login_token_key + token, expire).then(ret2 =>{
                                     if(ret1 && ret2){
                                         result.Obj.token = token;
                                         result.win_pool = data;
@@ -512,13 +514,23 @@ var GameInfo = function () {
             try {
                 // 查询购买的金币道具的数量和价值
                 const shopConfig = updateConfig.getShopConfig();
-                const vip_conf = shopConfig.find(item => item.id === productId);
-                if(!vip_conf){
-                    socket.emit('ShoppingResult', '{"status":1,"msg":"商品不存在"}');
+                const shopItem = shopConfig.find(item => item.id === productId);
+                if(!shopItem){
+                    socket.emit('ShoppingResult', {code:0,msg:"商品不存在"});
                     return;
                 }
-                let vip_score = vip_conf['vip_score']
-                const amount = vip_conf['target_price'] * count;
+                // 已经首充不用
+                if(this.userList[userId].firstRecharge === 1 && shopItem.group === 1){
+                    socket.emit('ShoppingResult', {code:0,msg:"已经购买过首充礼包"});
+                    return;
+                }
+
+                // 需要充值的金额 折扣价
+                const amount = parseFloat(shopItem['target_price']) * count;
+                // 增加金币 原价
+                const price = parseFloat(shopItem['source_price']) * count;
+                // 充值得到的金币
+                let score = price * gameConfig.score_amount_ratio;
                 // 暂时测试用
                 this.Recharge(userId, amount, c =>{
                     if(c){
@@ -531,25 +543,75 @@ var GameInfo = function () {
                 const config = this.getVipConfigByLevel(vip_level);
                 if(config){
                     const shopScoreAddRate = config.shopScoreAddRate ? config.shopScoreAddRate : 0;
-                    addScore = (vip_score *  (shopScoreAddRate/ 100)).toFixed(2);
-                    vip_score = vip_score + addScore;
+                    addScore = (score *  (shopScoreAddRate/ 100)).toFixed(2);
+                    score = parseFloat(score) + parseFloat(addScore);
                 }
 
                 // 扣款成功
                 this.reduce_bx_balance(userId, amount, c =>{
                     if(c){
                         // VIP加成
-                        this.addUserscore(userId, vip_score);
-                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加积分' + vip_score);
-                        socket.emit('ShoppingResult', '{"status":0,"msg":"购买成功"}');
+                        this.addUserscore(userId, score);
+                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加金币' + score);
+                        // 是否购买了首充礼包
+                        if(shopItem.group === 1 && !this.userList[userId].firstRecharge){
+                            // 更新为已购买首充礼包
+                            this.userList[userId].firstRecharge = 1;
+                        }
+                        socket.emit('ShoppingResult', {code:1,msg:"购买成功"});
                     }else{
-                        socket.emit('ShoppingResult', '{"status":1,"msg":"账户余额不足"}');
+                        socket.emit('ShoppingResult', {code:0,msg:"账户余额不足"});
                     }
                 });
             }catch (e) {
                 log.err(e);
-                socket.emit('ShoppingResult', '{"status":1,"msg":"购买失败"}');
+                socket.emit('ShoppingResult', {code:0,msg:"购买失败"});
             }
+        };
+
+        // VIP领取金币
+        this.vipGetGold = function (socket, type) {
+            const vipLevel = this.userList[socket.userId].vip_level;
+            const dailyGet = this.userList[socket.userId].dailyGetGold;
+            const monthlyGet = this.userList[socket.userId].monthlyGetGold;
+            const currConfig = updateConfig.getVipConfig().find(item => item.level === vipLevel);
+            if(type === 0){
+                // 每日领取
+                if(!dailyGet){
+                    this.userList[socket.userId].score += parseInt(currConfig.dailyGetGold);
+                    this.userList[socket.userId].dailyGetGold = 1;
+                    socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
+                }else{
+                    socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
+                }
+            }else{
+                // 每月领取
+                if(!monthlyGet){
+                    this.userList[socket.userId].score += parseInt(currConfig.monthlyGetGold);
+                    this.userList[socket.userId].monthlyGetGold = 1;
+                    socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
+                }else{
+                    socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
+                }
+            }
+        };
+
+
+        // 查询能领取多少金币
+        this.vipGetGoldDetail = function (socket) {
+            const vipLevel = this.userList[socket.userId].vip_level;
+            const dailyGet = this.userList[socket.userId].dailyGetGold;
+            const monthlyGet = this.userList[socket.userId].monthlyGetGold;
+            const currConfig = updateConfig.getVipConfig().find(item => item.level === vipLevel);
+
+            const result ={
+                vipLevel: vipLevel,
+                monthlyGetGold: currConfig.monthlyGetGold,
+                dailyGetGold: currConfig.dailyGetGold,
+                dailyGet: dailyGet,
+                monthlyGet: monthlyGet
+            }
+            socket.emit('vipGetGoldDetailResult', result);
         };
 
         //保存所有用户
@@ -1286,55 +1348,6 @@ var GameInfo = function () {
         }
 
 
-        //绑定支付宝
-        this.bindZhifubao = function (_socket, _info) {
-            if (!this.userList[_socket.userId]) {
-                log.err("绑定支付宝,用户" + _userId + "不存在");
-                _socket.emit('bindZhifubaoResult', {Result: 1, msg: "ID不存在"});
-                return;
-            }
-
-            //支付宝账号
-            //支付宝真实名字
-            if (_info.zhifubao == "") {
-                _socket.emit('bindZhifubaoResult', {Result: 2, msg: "绑定支付宝账号不能为空"});
-                return;
-            }
-
-            if (_info.name == "") {
-                _socket.emit('bindZhifubaoResult', {Result: 3, msg: "绑定支付宝实名制名字不能为空"});
-                return;
-            }
-
-            if (this.userList[_socket.userId]._zhifubaoEnd == 1) {
-                _socket.emit('bindZhifubaoResult', {Result: 4, msg: "支付宝与帐号已经终生绑定"});
-                return;
-            }
-            var self = this;
-
-            dao.bindZhifubao(_socket.userId, _info.zhifubao, _info.name, function (result, nickName) {
-                if (self.userList[_socket.userId]) {
-                    if (!result) {
-                        self.userList[_socket.userId]._zhifubao = _info.zhifubao;
-                        self.userList[_socket.userId]._zhifubaoName = _info.name;
-                        //log.info("发送" + _socket.userId + "检测ID");
-                        self.userList[_socket.userId]._socket.emit("bindZhifubaoResult", {Result: 0, msg: "绑定支付宝成功"});
-                    } else {
-                        if (result == 1) {
-                            self.userList[_socket.userId]._socket.emit("bindZhifubaoResult", {
-                                Result: 4,
-                                msg: "绑定支付宝已被绑定"
-                            });
-                        } else if (result == 2) {
-                            self.userList[_socket.userId]._socket.emit("bindZhifubaoResult", {
-                                Result: 5,
-                                msg: "有订单正在兑换中"
-                            });
-                        }
-                    }
-                }
-            });
-        };
 
 
         //绑定银行卡
@@ -1969,7 +1982,7 @@ var GameInfo = function () {
             if (saveList.length) {
                 dao.saveUser(saveList, function (result) {
                     for (var i = 0; i < result.length; ++i) {
-                        log.info("成功保存,删除用户" + result[i]._userId + " socre:" + result[i]._score + " diamond:" + result[i]._diamond);
+                        log.info("成功保存用户" + result[i]._userId + " socre:" + result[i]._score + " diamond:" + result[i]._diamond + " bankScore:" + result[i].bankScore );
                         delete self.userList[result[i]._userId];
                         --self.onlinePlayerCount;
                     }
@@ -2011,24 +2024,29 @@ var GameInfo = function () {
                 }
             });
         };
-        //商城商品列表
-        this.getShopping_List = function (_socket) {
+        // 商城商品列表
+        this.getShoppingGoods = function (_socket) {
             try {
                 const shopConfig = updateConfig.getShopConfig();
-                let result = {};
+
+                let result = [];
                 for (let i = 0; i < shopConfig.length; i++) {
-                    if (result[shopConfig[i].type]) {
-                        result[shopConfig[i].type].push(shopConfig[i]);
+                    if (result[shopConfig[i].group]) {
+                        result[shopConfig[i].group].push(shopConfig[i]);
                     } else {
-                        result[shopConfig[i].type] = [];
-                        result[shopConfig[i].type].push(shopConfig[i]);
+                        result[shopConfig[i].group] = [];
+                        result[shopConfig[i].group].push(shopConfig[i]);
                     }
                 }
-                _socket.emit("getShoppingResult", {ResultCode: 1, result: result});
+                _socket.emit("getShoppingResult", {code: 1, data: {
+                        firstRecharge : this.userList[_socket.userId].firstRecharge,
+                        goods : result
+                }});
             }catch (e) {
-                _socket.emit("getShoppingResult", {ResultCode: 0, msg: "获取商城列表错误"});
+                _socket.emit("getShoppingResult", {code: 0, msg: "获取商城列表错误"});
             }
         };
+
 
 
         //每日登录奖励
@@ -2574,7 +2592,7 @@ var GameInfo = function () {
                     if (res === 1) {
                         data.totalRecharge += parseInt(amount);
                         const housecard = data.housecard;
-                        const scoreFlow = data.score_flow;
+                        const scoreFlow = data.score_flow ? data.score_flow: 0;
                         // 增加账户余额
                         this.add_bx_balance(userId, amount, (ret) => {
                             if (!ret) {
@@ -2582,9 +2600,10 @@ var GameInfo = function () {
                                 callback(0);
                             } else {
                                 log.info('增加巴西账户余额:' + amount);
+
                                 // 计算充值获得VIP积分
-                                const rechargeVipScore = (data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100)).toFixed(0);
-                                const flowVipScore = ((scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100)).toFixed(0);
+                                const rechargeVipScore = data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100);
+                                const flowVipScore = (scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100);
 
                                 // VIP积分=充值获得积分+消费流水获得积分
                                 const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
@@ -2644,6 +2663,96 @@ var GameInfo = function () {
         // 通过VIP配置
         this.getVipConfig = function () {
             return updateConfig.getVipConfig();
+        }
+
+        // 获取银行积分 用户金币
+        this.getBankScore = function (socket) {
+            const result = {
+                bankScore: this.userList[socket.userId].bankScore,
+                gold: this.userList[socket.userId]._score
+            }
+            socket.emit('getBankScoreResult', {code:0, data: result });
+        }
+
+        // 银行取出金币到大厅
+        this.bankIntoHallGold = function (socket, gold) {
+            const bankTransferConfig = updateConfig.getBankTransferConfig();
+            // 最低取出
+            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
+            // 转账等级
+            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
+            // 提现倍率
+            const withdraw_proportion = bankTransferConfig.withdraw_proportion;
+            if(!gold_transfer_min || !transfer_vipLv || !withdraw_proportion){
+                return;
+            }
+
+            // 金币最低转账
+            if(gold < gold_transfer_min){
+                socket.emit('bankIntoHallGoldResult', {code:0, msg: "失败!最低转出" + gold_transfer_min });
+                return;
+            }
+            const vipLevel = this.userList[socket.userId].vip_level;
+            // 判断VIP是否达到转账要求
+            if(vipLevel < transfer_vipLv){
+                socket.emit('bankIntoHallGoldResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
+                return;
+            }
+            const bankScore = parseInt(gold / withdraw_proportion);
+            const currBankScore = this.userList[socket.userId].bankScore;
+            if(!bankScore || isNaN(bankScore) || bankScore < 0 || currBankScore < bankScore){
+                socket.emit('bankIntoHallGoldResult', {code:0, msg: "取出数量不合法" });
+                return;
+            }
+            this.userList[socket.userId].bankScore = this.userList[socket.userId].bankScore - bankScore;
+            this.userList[socket.userId]._score =  this.userList[socket.userId]._score + parseInt(gold);
+
+            const result = {
+                bankScore: this.userList[socket.userId].bankScore,
+                gold: this.userList[socket.userId]._score
+            }
+            socket.emit('bankIntoHallGoldResult', {code:1, msg: result });
+        }
+
+        // 银行转入金币
+        this.hallGoldIntoBank = function (socket, gold) {
+            const bankTransferConfig = updateConfig.getBankTransferConfig();
+            // 最低取出
+            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
+            // 转账等级
+            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
+            // 提现倍率
+            const withdraw_proportion = bankTransferConfig.withdraw_proportion;
+            if(!gold_transfer_min || !transfer_vipLv || !withdraw_proportion){
+                return;
+            }
+            // 金币最低转账
+            if(gold < gold_transfer_min){
+                socket.emit('hallGoldIntoBankResult', {code:0, msg: "失败!最低存入" + gold_transfer_min });
+                return;
+            }
+            const vipLevel = this.userList[socket.userId].vip_level;
+            // 判断VIP是否达到转账要求
+            if(vipLevel < transfer_vipLv){
+                socket.emit('hallGoldIntoBankResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
+                return;
+            }
+
+            const currGold = this.userList[socket.userId]._score;
+            if(!gold || isNaN(gold) || gold < 0 || currGold < gold){
+                socket.emit('hallGoldIntoBankResult', {code:0, msg: "存入数量不合法" });
+                return;
+            }
+
+            const addBankScore = parseInt(gold / withdraw_proportion);
+            this.userList[socket.userId]._score =   this.userList[socket.userId]._score - parseInt(gold);
+            this.userList[socket.userId].bankScore =  this.userList[socket.userId].bankScore + addBankScore;
+
+            const result = {
+                bankScore: this.userList[socket.userId].bankScore,
+                gold: this.userList[socket.userId]._score
+            }
+            socket.emit('hallGoldIntoBankResult', {code:1,  msg: result });
         }
 
         // 通过VIP等级获取VIP配置表

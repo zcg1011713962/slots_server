@@ -29,7 +29,6 @@ User = function(_userInfo,_socket){
 	this._chckeNo = "";
 	this._prize = [];
 	this._dayprize = [];
-	this._firstexchange = 1;
 	this._ChannelType = "";
 	this._Robot = false;
 	this._uncouunt = 0;
@@ -37,8 +36,11 @@ User = function(_userInfo,_socket){
 	this._p = "";
 	this._cardList = [];
 	this.deleteFlag = false;
+	this.firstRecharge = 0; // 是否购买了首充礼包
+	this.dailyGetGold = 0; // 是否领取了每日金币
+	this.monthlyGetGold = 0; // 是否领取了每月金币
 
-	this.init = function(_userInfo,_socket){
+		this.init = function(_userInfo,_socket){
 
 		this._userId = _userInfo.Id;
 		this._account = _userInfo.Account;
@@ -50,17 +52,13 @@ User = function(_userInfo,_socket){
 		this.LoginCount = _userInfo.LoginCount + 1;
 		this.LotteryCount = _userInfo.LotteryCount;
 		this._sign = _userInfo.sign;
-		this._loginTime = new Date();
 		//socket绑定用户id
 		_socket.userId = _userInfo.Id;
 		this._diamond = _userInfo.diamond;			//钻石
-
 		this.is_vip = _userInfo.is_vip;			//vip
 		this.vip_score = _userInfo.vip_score;			//vip积分
 		this.totalRecharge = _userInfo.totalRecharge;//累计充值
 		this.vip_level = _userInfo.housecard;//VIP等级
-
-		this._giftTicket = _userInfo.giftTicket;	//礼品券
 		this._proList = _userInfo.propList;			//道具表
 
 		this._phoneNo = _userInfo.phoneNo;			//电话号码
@@ -76,9 +74,8 @@ User = function(_userInfo,_socket){
 		this._p = _userInfo.p;
 		this.bankPwd = _userInfo.bankPwd;
 		this.bankScore = _userInfo.bankScore;
+		this.firstRecharge = _userInfo.first_recharge;
 
-		//读取数据库,获取账户道具
-		this.initProp();
 	};
 
 
@@ -192,39 +189,10 @@ User = function(_userInfo,_socket){
 		return this.freeCount;
 	};
 
-	this.logincheck = function(nowdate){
-		if (nowdate.getTime() - this._loginTime.getTime() > 5000)
-		{
-			return 1;
-		}else{
-			return 0;
-		}
-		
+	this.firstRecharge = function(val){
+		this.firstRecharge = val;
 	};
 
-	this.initProp = function(){
-
-	};
-
-	//获得道具数量
-	this.getPropCount = function(_idx){
-		// for(var obj in this._proList){
-  		//	this._proList[obj];
-  		//}
-  		if (this._proList[_idx]){
-  			return this._proList[_idx];
-  		}else{
-  			return 0;
-  		}
-	};
-
-	this.getPropList = function(){
-
-	};
-
-	this.getCheckNo = function(){
-		return this._chckeNo;
-	};
 
 	this.newCheckNo = function(){
 		this._chckeNo = Math.floor(Math.random()*9000) + 1000;
@@ -235,14 +203,11 @@ User = function(_userInfo,_socket){
 		this._phoneNo = _phoneNo;
 	};
 
-	this.getPhoneNo = function(){
-		return this._phoneNo;
-	};
+
 
 	this.cleanCheckNo = function(){
 		this._chckeNo = null;
 	};
-
 
 
 	this.init(_userInfo,_socket);

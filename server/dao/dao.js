@@ -18,21 +18,12 @@ var pool = mysql.createPool({
 exports.login = function login(user, socket, callback) {
     if(user.token) {
         // 通过缓存的token登录
-        const login_token_key  = 'login_token_key_';
-        const keyPattern  = login_token_key + '*';
-        RedisUtil.keys(keyPattern).then(keys =>{
-            if(keys && keys.length > 0) {
-                keys.map(key => key.slice(key.lastIndexOf("_") + 1)).forEach(userId =>{
-                    user.id = parseInt(userId);
-                    RedisUtil.get(login_token_key + userId).then(t =>{
-                        if(t === user.token) {
-                            tokenLogin(user, socket, callback);
-                        }else{
-                            callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
-                        }
-                    });
-                });
-            }else{
+        const login_token_key  = 'login_token_key:';
+        RedisUtil.get(login_token_key + user.token).then(userId =>{
+            if(userId){
+                user.id = userId;
+                tokenLogin(user, socket, callback);
+            }else {
                 callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
             }
         });
@@ -494,13 +485,18 @@ exports.saveUser = function saveUser(userList, callback) {
     var sql = 'UPDATE userinfo_imp SET score = CASE userId ';
     var string = '';
     var string3 = 'diamond = CASE userId ';
+    var string4 = 'bankScore = CASE userId ';
     var string2 = ' WHERE userId IN (';
     var objnull = true;
+
+
 
     for (var i = 0; i < userList.length; ++i) {
         objnull = false;
         string += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._score + ' ';
         string3 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._diamond + ' ';
+        string4 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i].bankScore + ' ';
+
         string2 += userList[i]._userId;
         string2 += ','
     }
@@ -510,7 +506,8 @@ exports.saveUser = function saveUser(userList, callback) {
         return;
     }
     sql += string + "END,";
-    sql += string3 + "END";
+    sql += string3 + "END,";
+    sql += string4 + "END";
 
     string2 = string2.substring(0, string2.length - 1);
     string2 += ')';
