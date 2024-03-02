@@ -88,7 +88,11 @@
     "vip_score": 100,
     "buy_picture_type": 0,
     "buy_discount_ratio": 90,
-    "buy_icon_type": 0
+    "buy_icon_type": 0,
+    "first_recharge_gift_id": 1,
+    "buy_continue_reward_gold": 999,
+    "buy_continue_reward_diamond": 999,
+    "buy_continue_days": 7
 },{
     "id": 8,
     "type": 0,
@@ -101,7 +105,11 @@
     "vip_score": 100,
     "buy_picture_type": 0,
     "buy_discount_ratio": 90,
-    "buy_icon_type": 0
+    "buy_icon_type": 0,
+    "first_recharge_gift_id": 2,
+    "buy_continue_reward_gold": 999,
+    "buy_continue_reward_diamond": 999,
+    "buy_continue_days": 7
 },{
     "id": 9,
     "type": 1,
@@ -114,6 +122,10 @@
     "vip_score": 10,
     "buy_picture_type": 0,
     "buy_discount_ratio": 90,
-    "buy_icon_type": 0
+    "buy_icon_type": 0,
+    "first_recharge_gift_id": 3,
+    "buy_continue_reward_gold": 999,
+    "buy_continue_reward_diamond": 999,
+    "buy_continue_days": 7
 }
 ]

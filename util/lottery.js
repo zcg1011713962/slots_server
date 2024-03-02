@@ -41,3 +41,4 @@ exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo
         });
     });
 }
+

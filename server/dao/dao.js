@@ -193,7 +193,6 @@ exports.registerByEmail = function registerByEmail(socket, email){
 
 //用户注册
 exports.CreateUser = function CreateUser(userInfo, callback) {
-    //var sql = 'INSERT INTO useraccounts(Account,Password,nickname,score,p,phoneNo,email,sex,city,province,headimgurl) VALUES(?,?,?,?,?,?,?,?,?,?,?)';
     var sql = 'call createUser(?,?,?,?,?,?,?,?,?,?,?,?,?)';
     var values = [];
 
@@ -259,7 +258,7 @@ exports.CreateUser = function CreateUser(userInfo, callback) {
 
 // 游客注册
 exports.weixinCreateUser = function CreateUser(userInfo, callback) {
-    const sql = 'call weixinCreateUser(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+    const sql = 'call RegisterByGuest(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
     let values = [];
 
     values.push(userInfo.accountname);
@@ -518,7 +517,7 @@ exports.saveUser = function saveUser(userList, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("saveUser" + err);
+                console.log("保存用户信息" + err);
                 callback([]);
             } else {
                 callback(userList);
@@ -979,6 +978,60 @@ exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
     });
 };
 
+// 查询转入记录
+exports.searchBankTransferIntoRecord = function searchBankTransferIntoRecord(userId, callback) {
+    const sql = 'select * from gameaccount.log_bank_transfer t left join gameaccount.newuseraccounts n on t.from_userid = n.id where t.to_userid  = ?';
+    let values = [];
+
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("searchBankTransferRecord");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1, rows);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 查询转出记录
+exports.searchBankTransferOutRecord = function searchBankTransferOutRecord(userId, callback) {
+    const sql = 'select * from gameaccount.log_bank_transfer t left join gameaccount.newuseraccounts n on t.to_userid  = n.id where t.from_userid  = ?';
+    let values = [];
+
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("searchBankTransferOutRecord");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1, rows);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
 // 更新VIP积分
 exports.updateVipScore = function updateVipScore(userId, vipScore, callback) {
     const sql = 'update newuseraccounts set vip_score = ? where Id=?';
@@ -1078,27 +1131,32 @@ exports.updateHeadUrl = function updateNickName(userId, url, callback) {
 };
 
 
-//绑定支付宝
-exports.bindZhifubao = function bindZhifubao(userId, zhifubao, name, callback) {
-    var sql = 'update userinfo set zhifubao=?,zhifubaoName=? where userId=?';
-    //	var sql = 'call bindZhifubao(?,?,?)'  //无过程先取消
-    var values = [];
-
-    values.push(zhifubao);
-    values.push(name);
+exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, changeType, callback) {
+    const sql = 'call BankTransfer(?,?,?,?)';
+    let values = [];
     values.push(userId);
-    pool.getConnection(function (err, connection) {
+    values.push(giveUserId);
+    values.push(bankScore);
+    values.push(changeType);
 
+    pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
-            callback(0);
+            if (err) {
+                console.log("BankTransfer");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows[0]) {
+                    callback(rows[0][0]);
+                } else {
+                    callback(0);
+                }
+            }
         });
-
         values = [];
-
     });
-};
-
+}
 
 //添加银行卡
 exports.addBank = function addBank(userId, account, name, bankType, callback) {
@@ -1379,34 +1437,6 @@ exports.AddDiamond = function AddDiamond(userInfo, callback) {
     });
 };
 
-//不在线修改礼品券
-exports.EditTicket = function EditTicket(userInfo, callback) {
-    var sql = 'call EditTicket(?,?,?)';
-    var values = [];
-    values.push(userInfo.userid);
-    values.push(userInfo.count);
-    values.push(userInfo.change_type);
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("EditTicket");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0]) {
-                    callback(rows[0][0].rcode);
-                } else {
-                    callback(0);
-                }
-            }
-        });
-
-        values = [];
-
-    });
-};
 
 //不在线修改金钱(减)
 exports.AddGoldSub = function AddGoldSub(userInfo, callback) {
@@ -1619,14 +1649,13 @@ exports.getRecord = function getRecord(userInfo, callback_c) {
 exports.getLotteryLog = function getLotteryLog(userInfo, callback_c) {
 
 
-    var sql = "CALL selectlotterylog(?,?)";
+    var sql = "CALL LogLotterySearch(?,?)";
     pool.getConnection(function (err, connection) {
 
         var values = [];
 
         values.push(userInfo.gameid);
         values.push(userInfo.lineCount);
-        //console.log(connection);
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
@@ -1713,32 +1742,8 @@ exports.updateProp = function updateProp(_userInfo, callback) {
 
 
 
-//领取奖品
-exports.getPrize = function getPrize(_userId, callback) {
-    var sql = 'call getPrize(?)';
-    var values = [];
-    values.push(_userId);
 
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("getPrize");
-                console.log(err);
-                callback(0);
-            } else {
-                callback(1);
-            }
-        });
-
-
-        values = [];
-
-    });
-};
-
-//领取奖品
+// 发邮件
 exports.sendEmail = function sendEmail(info, callback) {
     var sql = 'call sendEmail(?,?,?,?,?,?,?)';
 
@@ -1796,35 +1801,6 @@ exports.getDayPrize = function getDayPrize(_userId, callback) {
     });
 }
 
-//添加未领取列表
-exports.addPrize = function addPrize(_info, callback) {
-    var sql = 'call addPrize(?,?)';
-    var values = [];
-
-    values.push(_info.roomType);
-    values.push(_info.matchId);
-
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("addPrize");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0].length == 0) {
-                    callback(0);
-                } else {
-                    callback(1, rows[0]);
-                }
-            }
-        })
-
-        values = [];
-
-    });
-}
 
 //获取未领奖列表
 exports.getdaySendPrize = function getdaySendPrize(_userId, callback) {
@@ -2010,37 +1986,6 @@ exports.checkRecharge = function checkRecharge(out_trade_no, callback) {
 };
 
 
-exports.getfirstexchange = function getfirstexchange(_userId, callback) {
-    var sql = "select * from userinfo where userId = ?";
-    var values = [];
-
-    values.push(_userId);
-
-    pool.getConnection(function (err, connection) {
-        if(connection){
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                connection.release();
-                if (err) {
-                    console.log("getfirstexchange");
-                    console.log(err);
-                    callback(0);
-                } else {
-                    if (rows[0]) {
-                        if (rows[0].length == 0) {
-                            callback(0);
-                        } else {
-                            callback(1, rows[0]);
-                        }
-                    }
-                }
-
-            });
-        }else {
-            callback(0);
-        }
-        values = [];
-    });
-};
 
 exports.updateFirstexchange = function updateFirstexchange(_userId) {
     var sql = "update userinfo set firstexchange = 1 where userId = ?";
@@ -2572,68 +2517,6 @@ exports.addScore = function addScore(_userId, score) {
             }
         })
         values = [];
-    });
-}
-
-
-//创建首充
-exports.firstrecharge = function firstrecharge(_userId, callback) {
-    var sql = "call recharge_first(?)";
-    var values = [];
-
-    values.push(_userId);
-
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("firstrecharge");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0].length) {
-                    callback(1, rows[0][0]);
-                } else {
-                    callback(0);
-                }
-            }
-
-        })
-
-        values = [];
-
-    });
-}
-
-//更新首充
-exports.updateFirstrecharge = function updateFirstrecharge(_userId, _goodsid, callback) {
-    var sql = "call update_recharge_first(?,?)";
-    var values = [];
-
-    values.push(_userId);
-    values.push(_goodsid);
-    console.log(_userId);
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("updateFirstrecharge");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0].length) {
-                    callback(1, rows[0][0]);
-                } else {
-                    callback(0);
-                }
-            }
-
-        })
-
-        values = [];
-
     });
 }
 

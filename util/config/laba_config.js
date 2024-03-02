@@ -8,8 +8,11 @@ laba_config.GAME_SLOT_BOTH_WAY = 0x03;
 laba_config.game_jackpot_ratio = 0.6
 // 活动奖池
 laba_config.activity_jackpot_ratio = 0.4
-
-
+// 游戏奖池划分
+laba_config.grand_jackpot_ratio= 0.6;
+laba_config.major_jackpot_ratio= 0.4;
+laba_config.minor_jackpot_ratio= 0.2;
+laba_config.mini_jackpot_ratio= 0.1;
 
 module.exports = laba_config;
 

@@ -3,11 +3,10 @@ User = function(_userInfo,_socket){
 	this._userId = "";			//数据库ID
 	this._socket = "";			//socketID
 	this._account = "";			//用户帐号
-	this._score = 0;			//用户数据
+	this._score = 0;			//金币
 	this._diamond = 0;			//钻石
 	this.is_vip = 0;			//vip
 	this.vip_score = 0;			//vip积分
-	this._giftTicket = 0;		//礼品券
 	this._nickname = "";		//昵称
 	this._ageinLogin = false;	//重新登录标签
 	this.LoginCount = 0;		//登录次数
@@ -26,12 +25,12 @@ User = function(_userInfo,_socket){
 	this._headimgurl = "";		//头像地址
 	this.bankPwd = "";			//银行密码
 	this.bankScore = 0;			//银行分数
+	this.bankLock = 0;			//银行是否被冻结
 	this._chckeNo = "";
 	this._prize = [];
 	this._dayprize = [];
 	this._ChannelType = "";
 	this._Robot = false;
-	this._uncouunt = 0;
 	this._official = false;
 	this._p = "";
 	this._cardList = [];
@@ -55,7 +54,7 @@ User = function(_userInfo,_socket){
 		//socket绑定用户id
 		_socket.userId = _userInfo.Id;
 		this._diamond = _userInfo.diamond;			//钻石
-		this.is_vip = _userInfo.is_vip;			//vip
+		this.is_vip = _userInfo.housecard > 0 ? 1 : 0;	//是否vip
 		this.vip_score = _userInfo.vip_score;			//vip积分
 		this.totalRecharge = _userInfo.totalRecharge;//累计充值
 		this.vip_level = _userInfo.housecard;//VIP等级
@@ -74,7 +73,8 @@ User = function(_userInfo,_socket){
 		this._p = _userInfo.p;
 		this.bankPwd = _userInfo.bankPwd;
 		this.bankScore = _userInfo.bankScore;
-		this.firstRecharge = _userInfo.first_recharge;
+		this.firstRecharge = _userInfo.firstRecharge;
+		this.bankLock = _userInfo.bankLock;
 
 	};
 

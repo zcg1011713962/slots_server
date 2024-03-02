@@ -1,14 +1,14 @@
-﻿var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var Cio = require('socket.io-client');
-var log = require("./../CClass/class/loginfo").getInstand;
-var bodyParser = require('body-parser');
-var gameInfo = require('./class/game').getInstand;
-var gameConfig = require('./config/gameConfig');
+﻿const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const Cio = require('socket.io-client');
+const log = require("./../CClass/class/loginfo").getInstand;
+const bodyParser = require('body-parser');
+const gameInfo = require('./class/game').getInstand;
+const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
 
-var Csocket = Cio(Urls.hall_url);
+const Csocket = Cio(Urls.hall_url);
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -115,7 +115,7 @@ io.on('connection', function (socket) {
 
 app.set('port', process.env.PORT || gameConfig.port);
 
-var server = http.listen(app.get('port'), function () {
+const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
 });
 

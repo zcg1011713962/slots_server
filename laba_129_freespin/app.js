@@ -7,11 +7,9 @@ const log = require("./../CClass/class/loginfo").getInstand;
 const Urls = require("../util/config/url_config");
 const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
-const redis_laba_win_pool = require("../util/redis_laba_win_pool");
-const laba_config = require("../util/config/laba_config");
 const Config = require("./config/read_config").getInstand;
 const Lottery = require("../util/lottery");
-
+const CacheUtil = require('../util/cache_util');
 
 const Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -47,6 +45,7 @@ Csocket.on('LoginGameResult', function (msg) {
     }
 
 });
+
 
 Csocket.on('addgold', function (msg) {
     if (!msg) {
@@ -177,6 +176,13 @@ io.on('connection', function (socket) {
         gameInfo.LoginfreeCount(socket.userId, socket);
     });
 
+    // 获取游戏奖池
+    socket.on('gameJackpot', function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            CacheUtil.getGameJackpot(socket);
+        }
+    });
 
     // 摇奖
     socket.on('lottery', function (lottery) {

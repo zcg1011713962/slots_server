@@ -4,14 +4,12 @@ const io = require('socket.io')(http);
 const signCode = "slel3@lsl334xx,deka";
 const Cio = require('socket.io-client');
 const log = require("./../CClass/class/loginfo").getInstand;
-const http_bc = require("./../util/http_broadcast");
 const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
-const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
-
+const CacheUtil = require('../util/cache_util');
 
 const Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -188,6 +186,15 @@ io.on('connection', function (socket) {
         // 执行摇奖
         Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
     });
+
+    // 获取游戏奖池
+    socket.on('gameJackpot', function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            CacheUtil.getGameJackpot(socket);
+        }
+    });
+
     //离线操作
     socket.on('disconnect', function () {
         if (!socket.userId) {

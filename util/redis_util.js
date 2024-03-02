@@ -51,6 +51,7 @@ class RedisUtil {
     async disconnect() {
         this.client.quit();
     }
+
 }
 
 // 创建单例
