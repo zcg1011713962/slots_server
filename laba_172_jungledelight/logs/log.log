@@ -364,3 +364,101 @@
 2024-02-20T18:56:26.896 [INFO ] default - [ 3, 0, 0, 1, 1 ]
 2024-02-20T18:56:26.897 [INFO ] default - [ 2, 3, 8, 8, 8 ]
 2024-02-20T18:56:26.898 [INFO ] default - 下注:40赢:32jackpot:0expectRTP:80
+2024-03-02T15:12:20.579 [WARN ] default - 未更新用户数据离开
+2024-03-04T10:33:22.905 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-04T10:33:22.913 [INFO ] default - 添加库存:38当前库存100646
+2024-03-04T10:33:22.914 [INFO ] default - 添加奖池:2
+2024-03-04T10:33:22.915 [INFO ] default - 配牌器开关:true牌:3,3,3,1,2,3,0,0,1,1,2,3,8,8,8
+2024-03-04T10:33:22.915 [INFO ] default - 减少库存:32库存100646
+2024-03-04T10:33:22.916 [INFO ] default - 减少奖池:0
+2024-03-04T10:33:22.917 [INFO ] default - 图案排列结果
+2024-03-04T10:33:22.917 [INFO ] default - [ 3, 3, 3, 1, 2 ]
+2024-03-04T10:33:22.917 [INFO ] default - [ 3, 0, 0, 1, 1 ]
+2024-03-04T10:33:22.918 [INFO ] default - [ 2, 3, 8, 8, 8 ]
+2024-03-04T10:33:22.918 [INFO ] default - 下注:40赢:32jackpot:0expectRTP:80
+2024-03-04T10:33:22.919 [INFO ] default - 摇奖结果{"code":1,"userscore":202992,"winscore":32,"viewarray":{"code":2,"nHandCards":[4,4,4,2,3,4,1,1,2,2,3,4,9,9,9],"nWinLines":[1,8],"nWinLinesDetail":[[0,1,2],[5,1,2]],"nWinDetail":[16,16],"nBet":40,"win":32,"nWinCards":[true,true,true,null,null,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":true,"nFreeTime":10,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":16,"nWinCardsDetail":[[3,3,3,1,2],[3,3,3,1,1]],"nBetTime":1709519602913,"is_free":true,"user_score":202992},"winfreeCount":10,"freeCount":10,"score_pool":0}
+2024-03-04T10:33:32.029 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-04T10:33:32.035 [INFO ] default - 添加库存:38当前库存100684
+2024-03-04T10:33:32.036 [INFO ] default - 添加奖池:2
+2024-03-04T10:33:32.036 [INFO ] default - 配牌器开关:true牌:3,3,3,1,2,3,0,0,1,1,2,3,8,8,8
+2024-03-04T10:33:32.037 [INFO ] default - 减少库存:32库存100684
+2024-03-04T10:33:32.037 [INFO ] default - 减少奖池:0
+2024-03-04T10:33:32.038 [INFO ] default - 图案排列结果
+2024-03-04T10:33:32.038 [INFO ] default - [ 3, 3, 3, 1, 2 ]
+2024-03-04T10:33:32.038 [INFO ] default - [ 3, 0, 0, 1, 1 ]
+2024-03-04T10:33:32.038 [INFO ] default - [ 2, 3, 8, 8, 8 ]
+2024-03-04T10:33:32.039 [INFO ] default - 下注:40赢:32jackpot:0expectRTP:80
+2024-03-04T10:33:32.039 [INFO ] default - 摇奖结果{"code":1,"userscore":203024,"winscore":32,"viewarray":{"code":2,"nHandCards":[4,4,4,2,3,4,1,1,2,2,3,4,9,9,9],"nWinLines":[1,8],"nWinLinesDetail":[[0,1,2],[5,1,2]],"nWinDetail":[16,16],"nBet":40,"win":32,"nWinCards":[true,true,true,null,null,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":true,"nFreeTime":19,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":16,"nWinCardsDetail":[[3,3,3,1,2],[3,3,3,1,1]],"nBetTime":1709519612035,"is_free":true,"user_score":203024},"winfreeCount":10,"freeCount":19,"score_pool":0}
+2024-03-05T15:05:47.476 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-05T15:05:47.487 [INFO ] default - 未传用户ID
+2024-03-05T15:05:47.488 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-05T15:05:54.711 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-05T15:05:54.718 [INFO ] default - 未传用户ID
+2024-03-05T15:05:54.720 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-05T17:47:47.803 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-05T17:47:47.938 [INFO ] default - 添加库存:38当前库存100722
+2024-03-05T17:47:47.940 [INFO ] default - 添加奖池:2
+2024-03-05T17:47:47.942 [INFO ] default - 配牌器开关:true牌:3,3,3,1,2,3,0,0,1,1,2,3,8,8,8
+2024-03-05T17:47:47.944 [INFO ] default - 减少库存:32库存100722
+2024-03-05T17:47:47.945 [INFO ] default - 减少奖池:0
+2024-03-05T17:47:47.948 [INFO ] default - 图案排列结果
+2024-03-05T17:47:47.948 [INFO ] default - [ 3, 3, 3, 1, 2 ]
+2024-03-05T17:47:47.949 [INFO ] default - [ 3, 0, 0, 1, 1 ]
+2024-03-05T17:47:47.949 [INFO ] default - [ 2, 3, 8, 8, 8 ]
+2024-03-05T17:47:47.949 [INFO ] default - 下注:40赢:32jackpot:0expectRTP:80
+2024-03-05T17:47:47.950 [INFO ] default - 摇奖结果{"code":1,"userscore":299992,"winscore":32,"viewarray":{"code":2,"nHandCards":[4,4,4,2,3,4,1,1,2,2,3,4,9,9,9],"nWinLines":[1,8],"nWinLinesDetail":[[0,1,2],[5,1,2]],"nWinDetail":[16,16],"nBet":40,"win":32,"nWinCards":[true,true,true,null,null,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":true,"nFreeTime":10,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":16,"nWinCardsDetail":[[3,3,3,1,2],[3,3,3,1,1]],"nBetTime":1709632067937,"is_free":true,"user_score":299992},"winfreeCount":10,"freeCount":10,"score_pool":0}
+2024-03-05T17:47:57.186 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-05T17:47:57.191 [INFO ] default - 添加库存:38当前库存100760
+2024-03-05T17:47:57.192 [INFO ] default - 添加奖池:2
+2024-03-05T17:47:57.192 [INFO ] default - 配牌器开关:true牌:3,3,3,1,2,3,0,0,1,1,2,3,8,8,8
+2024-03-05T17:47:57.193 [INFO ] default - 减少库存:32库存100760
+2024-03-05T17:47:57.193 [INFO ] default - 减少奖池:0
+2024-03-05T17:47:57.194 [INFO ] default - 图案排列结果
+2024-03-05T17:47:57.194 [INFO ] default - [ 3, 3, 3, 1, 2 ]
+2024-03-05T17:47:57.194 [INFO ] default - [ 3, 0, 0, 1, 1 ]
+2024-03-05T17:47:57.194 [INFO ] default - [ 2, 3, 8, 8, 8 ]
+2024-03-05T17:47:57.194 [INFO ] default - 下注:40赢:32jackpot:0expectRTP:80
+2024-03-05T17:47:57.195 [INFO ] default - 摇奖结果{"code":1,"userscore":300024,"winscore":32,"viewarray":{"code":2,"nHandCards":[4,4,4,2,3,4,1,1,2,2,3,4,9,9,9],"nWinLines":[1,8],"nWinLinesDetail":[[0,1,2],[5,1,2]],"nWinDetail":[16,16],"nBet":40,"win":32,"nWinCards":[true,true,true,null,null,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":true,"nFreeTime":19,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":16,"nWinCardsDetail":[[3,3,3,1,2],[3,3,3,1,1]],"nBetTime":1709632077191,"is_free":true,"user_score":300024},"winfreeCount":10,"freeCount":19,"score_pool":0}
+2024-03-06T17:14:35.134 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:14:35.141 [INFO ] default - 21281分数不够
+2024-03-06T17:14:35.142 [INFO ] default - 摇奖结果{"code":-2}
+2024-03-06T17:14:38.370 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:14:38.374 [INFO ] default - 21281分数不够
+2024-03-06T17:14:38.374 [INFO ] default - 摇奖结果{"code":-2}
+2024-03-06T17:14:41.566 [INFO ] default - {"bet":1,"nBetList":[80]}
+2024-03-06T17:14:41.571 [INFO ] default - 21281分数不够
+2024-03-06T17:14:41.571 [INFO ] default - 摇奖结果{"code":-2}
+2024-03-06T17:14:45.649 [INFO ] default - {"bet":9,"nBetList":[50000]}
+2024-03-06T17:14:45.652 [INFO ] default - 21281分数不够
+2024-03-06T17:14:45.653 [INFO ] default - 摇奖结果{"code":-2}
+2024-03-06T17:15:02.470 [INFO ] default - {"bet":4,"nBetList":[200]}
+2024-03-06T17:15:02.475 [INFO ] default - 21281分数不够
+2024-03-06T17:15:02.475 [INFO ] default - 摇奖结果{"code":-2}
+2024-03-06T17:16:03.463 [WARN ] default - 未更新用户数据离开
+2024-03-06T17:17:31.437 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:17:31.443 [INFO ] default - 未传用户ID
+2024-03-06T17:17:31.444 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:17:45.419 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:17:45.423 [INFO ] default - 未传用户ID
+2024-03-06T17:17:45.423 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:17:47.380 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:17:47.384 [INFO ] default - 未传用户ID
+2024-03-06T17:17:47.385 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:17:49.957 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:17:49.963 [INFO ] default - 未传用户ID
+2024-03-06T17:17:49.964 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:17:51.749 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:17:51.755 [INFO ] default - 未传用户ID
+2024-03-06T17:17:51.756 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:18:04.341 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:18:04.347 [INFO ] default - 未传用户ID
+2024-03-06T17:18:04.347 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:18:24.670 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:18:24.676 [INFO ] default - 未传用户ID
+2024-03-06T17:18:24.677 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:18:41.192 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:18:41.194 [INFO ] default - 未传用户ID
+2024-03-06T17:18:41.195 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-06T17:18:51.516 [INFO ] default - {"bet":0,"nBetList":[40]}
+2024-03-06T17:18:51.521 [INFO ] default - 未传用户ID
+2024-03-06T17:18:51.521 [INFO ] default - 摇奖结果{"code":-1}

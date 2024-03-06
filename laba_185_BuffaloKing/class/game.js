@@ -11,6 +11,9 @@ const {getInstand: Config} = require("../config/read_config");
 const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
+const redis_laba_win_pool = require("../../util/redis_laba_win_pool");
+const laba_config = require("../../util/config/laba_config");
+const CacheUtil = require("../../util/cache_util");
 // 读取文件包
 
 
@@ -86,17 +89,7 @@ var GameInfo = function () {
 
                 //推送奖池给玩家
                 if (second % 20 === 0) {
-                    let GamblingBalanceLevelBigWin = self.A.getGamblingBalanceLevelBigWin();
-                    let nGamblingWinPool = GamblingBalanceLevelBigWin.nGamblingWinPool;
-                    nGamblingWinPool = nGamblingWinPool > 0 ? nGamblingWinPool : 0;
-                    let result = {
-                        ResultCode: 1,
-                        nGamblingWinPool: nGamblingWinPool
-                    };
-
-                    for (let item in self.userList) {
-                        self.userList[item]._socket.emit("pushGamblingWinPool", result);
-                    }
+                    CacheUtil.pushGameJackpot(self.userList);
                 }
 
             });

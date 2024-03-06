@@ -479,111 +479,46 @@ exports.phoneCheck = function phoneCheck(userInfo, callback) {
 };
 
 
-//储存指定用户
-exports.saveUser = function saveUser(userList, callback) {
-    var sql = 'UPDATE userinfo_imp SET score = CASE userId ';
-    var string = '';
-    var string3 = 'diamond = CASE userId ';
-    var string4 = 'bankScore = CASE userId ';
-    var string2 = ' WHERE userId IN (';
-    var objnull = true;
 
-
-
-    for (var i = 0; i < userList.length; ++i) {
-        objnull = false;
-        string += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._score + ' ';
-        string3 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i]._diamond + ' ';
-        string4 += 'WHEN ' + userList[i]._userId + ' THEN ' + userList[i].bankScore + ' ';
-
-        string2 += userList[i]._userId;
-        string2 += ','
-    }
-
-    if (objnull) {
-        callback(0);
-        return;
-    }
-    sql += string + "END,";
-    sql += string3 + "END,";
-    sql += string4 + "END";
-
-    string2 = string2.substring(0, string2.length - 1);
-    string2 += ')';
-    sql += string2;
+// 批量更新用户信息
+exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
+    const sql = 'call BatchUpdateAccount(?)';
+    const users = userList.map(user =>{
+        return {
+            id : user._userId,
+            score : user._score,
+            diamond : user._diamond,
+            bankScore : user.bankScore,
+            bankLock : user.bankLock,
+            housecard : user.vip_level,
+            is_vip : user.is_vip,
+            vip_score : user.vip_score,
+            luckyCoin : user.luckyCoin,
+            firstRecharge : user.firstRecharge
+        }
+    });
 
     let values = [];
+    values.push(JSON.stringify(users));
     pool.getConnection(function (err, connection) {
+
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("保存用户信息" + err);
+                console.log("batchUpdateAccount");
+                console.log(err);
                 callback([]);
             } else {
-                callback(userList);
+                callback(users);
             }
         });
         values = [];
     });
-
-};
-
-//储存所有用户
-exports.saveAll = function saveAll(userList, callback) {
-    var sql = 'UPDATE userinfo_imp SET score = CASE userId ';
-    var string = '';
-    var string2 = 'END WHERE userId IN (';
-    var string3 = 'freeCount = CASE Id ';
-    var string4 = 'LoginCount = CASE Id ';
-    var string5 = 'LotteryCount = CASE Id ';
-    var objnull = true;
-    for (var user in userList) {
-        objnull = false;
-        string += 'WHEN ' + userList[user]._userId + ' THEN ' + userList[user]._score + ' ';
-        // string3 += 'WHEN '+ userList[user]._userId +' THEN '+ userList[user].freeCount + ' ';
-        // string4 += 'WHEN '+ userList[user]._userId +' THEN '+ userList[user].LoginCount + ' ';
-        // string5 += 'WHEN '+ userList[user]._userId +' THEN '+ userList[user].LotteryCount + ' ';
-        string2 += userList[user]._userId;
-        string2 += ','
-    }
-
-    if (objnull) {
-        callback(0);
-        return;
-    }
-    sql += string;
-    // sql += string + "END,";
-    // sql += string3 + "END,";
-    // sql += string4 + "END,";
-    // sql += string5;
-    console.log("leng:" + string2.length)
-    string2 = string2.substring(0, string2.length - 1);
-    //console.log(string2)
-    string2 += ')';
-
-    sql += string2;
-
-    var values = [];
-
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("saveAll");
-                console.log(err);
-                callback(0);
-            } else {
-                callback(1);
-            }
-        });
+}
 
 
-        values = [];
 
-    });
 
-};
 
 
 //查询用户id
@@ -756,33 +691,6 @@ exports.updateBankPwdById = function updateBankPwdById(pwd, userid, callback) {
     });
 };
 
-//更新银行分数
-exports.updateBankScoreById = function updateBankScoreById(score, userid, callback) {
-    let sql = 'update newuseraccounts set bankScore=? where Id=?';
-    let values = [];
-
-    values.push(score);
-    values.push(userid);
-
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("updateBankScoreById");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows.length == 0) {
-                    callback(0);
-                } else {
-                    callback(1);
-                }
-            }
-        });
-        values = [];
-    });
-};
 
 exports.checkNickName = function checkNickName(userId, callback) {
     var sql = 'select nickname from newuseraccounts where Id=?';
@@ -1130,13 +1038,13 @@ exports.updateHeadUrl = function updateNickName(userId, url, callback) {
     });
 };
 
-
+// 银行转账
 exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, changeType, callback) {
     const sql = 'call BankTransfer(?,?,?,?)';
     let values = [];
-    values.push(userId);
-    values.push(giveUserId);
-    values.push(bankScore);
+    values.push(Number(userId));
+    values.push(Number(giveUserId));
+    values.push(Number(bankScore));
     values.push(changeType);
 
     pool.getConnection(function (err, connection) {
@@ -1152,6 +1060,56 @@ exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, chan
                 } else {
                     callback(0);
                 }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 用户签到查询
+exports.searchUserSignIn = function searchUserSignIn(userId, callback) {
+    const sql = 'SELECT CONVERT_TZ(last_sign_in_date, \'+00:00\', \'+08:00\') AS last_sign_in_date, consecutive_days FROM activity_sign WHERE userId = ?';
+    let values = [];
+    values.push(userId);
+
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("searchUserSignIn");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows[0]) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 签到
+exports.userSignIn = function userSignIn(userId, callback) {
+    const sql = 'call SignIn(?)';
+    let values = [];
+    values.push(userId);
+
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("userSignIn");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(rows[0][0]);
             }
         });
         values = [];
@@ -2473,8 +2431,8 @@ exports.LoginaddTempDiamond = function LoginaddTempScore(userid, callback) {
 
 //获取分数
 exports.getScore = function getScore(_userId, callback) {
-    var sql = "select * from userinfo_imp where userId = ?";
-    var values = [];
+    const sql = "select * from userinfo_imp where userId = ?";
+    let values = [];
 
     values.push(_userId);
     pool.getConnection(function (err, connection) {

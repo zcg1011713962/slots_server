@@ -1,0 +1,18 @@
+{
+  "luckyRushTime": 4,
+  "luckyCoinGetLimit": 6,
+  "luckyCoinTask": 10,
+  "turntableBuyMulPrice": [{
+    "currencyType": 0,
+    "price": 1.99,
+    "mul": 5
+  },{
+    "currencyType": 0,
+    "price": 5.99,
+    "mul": 15
+  },{
+    "currencyType": 0,
+    "price": 9.99,
+    "mul": 30
+  }]
+}

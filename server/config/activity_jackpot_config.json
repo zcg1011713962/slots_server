@@ -1,0 +1,21 @@
+{
+    "signInRatio": {
+        "totalRatio": 20
+    },
+    "newAccountRatio": {
+        "totalRatio": 20,
+        "loginRatio": 50,
+        "newPotectionRatio": 50
+    },
+    "vipRatio": {
+        "totalRatio": 30,
+        "everydayRatio": 10,
+        "everymonthRatio": 40,
+        "upgradeRatio": 50
+    },
+    "freeRatio": {
+        "totalRatio": 20,
+        "turntableRatio": 60,
+        "luckyGoldRatio": 40
+    }
+}

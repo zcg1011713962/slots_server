@@ -29,18 +29,20 @@ User = function(_userInfo,_socket){
 	this._chckeNo = "";
 	this._prize = [];
 	this._dayprize = [];
-	this._ChannelType = "";
 	this._Robot = false;
 	this._official = false;
 	this._p = "";
 	this._cardList = [];
 	this.deleteFlag = false;
-	this.firstRecharge = 0; // 是否购买了首充礼包
-	this.dailyGetGold = 0; // 是否领取了每日金币
-	this.monthlyGetGold = 0; // 是否领取了每月金币
+	this.firstRecharge = 0;   // 是否购买了首充礼包
+	this.dailyGet = 0;        // 是否领取了每日金币
+	this.monthlyGet = 0;      // 是否领取了每月金币
+	this.AddDate = 0;         // 账户创建时间(时间戳毫秒)
+	this.luckyCoin = 0;       // 活动幸运币数量
+	this.doLuckyCoinTask = 0; // 幸运活动每日完成的任务数量
+	this.luckyRushStartTime = new Date().getTime();
 
-		this.init = function(_userInfo,_socket){
-
+	this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.Id;
 		this._account = _userInfo.Account;
 		this._score = _userInfo.score;
@@ -53,28 +55,29 @@ User = function(_userInfo,_socket){
 		this._sign = _userInfo.sign;
 		//socket绑定用户id
 		_socket.userId = _userInfo.Id;
-		this._diamond = _userInfo.diamond;			//钻石
-		this.is_vip = _userInfo.housecard > 0 ? 1 : 0;	//是否vip
-		this.vip_score = _userInfo.vip_score;			//vip积分
-		this.totalRecharge = _userInfo.totalRecharge;//累计充值
-		this.vip_level = _userInfo.housecard;//VIP等级
-		this._proList = _userInfo.propList;			//道具表
+		this._diamond = _userInfo.diamond;
+		this.is_vip = _userInfo.is_vip;
+		this.vip_score = _userInfo.vip_score;
+		this.totalRecharge = _userInfo.totalRecharge;
+		this.vip_level = _userInfo.housecard;
+		this._proList = _userInfo.propList;
 
-		this._phoneNo = _userInfo.phoneNo;			//电话号码
-		this._email = _userInfo.email;				//电子邮件
-		this._sex = _userInfo.sex;					//性别
-		this._city = _userInfo.city;				//城市
-		this._province = _userInfo.province;		//省份
-		this._country = _userInfo.country;			//国家
-		this._headimgurl = _userInfo.headimgurl;	//头像地址
+		this._phoneNo = _userInfo.phoneNo;
+		this._email = _userInfo.email;
+		this._sex = _userInfo.sex;
+		this._city = _userInfo.city;
+		this._province = _userInfo.province;
+		this._country = _userInfo.country;
+		this._headimgurl = _userInfo.headimgurl;
 		this._Robot = _userInfo.Robot;
-		this._ChannelType = _userInfo.ChannelType;
 		this._official = _userInfo.official;
 		this._p = _userInfo.p;
 		this.bankPwd = _userInfo.bankPwd;
 		this.bankScore = _userInfo.bankScore;
 		this.firstRecharge = _userInfo.firstRecharge;
+		this.addDate = new Date(_userInfo.AddDate).getTime();
 		this.bankLock = _userInfo.bankLock;
+		this.luckyCoin = _userInfo.luckyCoin;
 
 	};
 

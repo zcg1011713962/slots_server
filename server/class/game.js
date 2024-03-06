@@ -4,7 +4,6 @@ var redis_dao = require("./../dao/redis_dao");
 var crypto = require('crypto');
 var ServerInfo = require('./../config/ServerInfo').getInstand;
 var activityConfig = require('./../config/activityConfig');
-var Post = require('./post');
 var schedule = require("node-schedule");
 var log = require("../../CClass/class/loginfo").getInstand;
 var async = require('async');
@@ -18,8 +17,12 @@ const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
 const gameConfig = require('../config/gameConfig');
 const StringUtil = require('../../util/string_util');
-const {getUserId} = require("../dao/dao");
+const Config = require("../config/activity/read_turntable_config").getInstand;
+const LABA = require("../../util/laba");
 const laba_config = require("../../util/config/laba_config");
+const CacheUtil = require("../../util/cache_util");
+
+
 
 var GameInfo = function () {
 
@@ -42,7 +45,7 @@ var GameInfo = function () {
             this._loginList = [];
 
             this.gameRank = {};
-
+            // 离线的用户
             this.tempuserList = {};
 
             this.sendCardList = {};
@@ -91,15 +94,8 @@ var GameInfo = function () {
                 self.game_second = second;
                 if (second === 0) {
                     // 奖池推送
-                    redis_laba_win_pool.get_redis_win_pool().then(function (data) {
-                        for (var i in self.userList) {
-                            self.userList[i]._socket.emit("RedisWinPool", data)
-                        }
-                        // console.log("彩金推送",data)
-
-                    })
+                    CacheUtil.pushGameJackpot(self.userList);
                 }
-
                 if (now_hours == 5) {
                     this.sendCardList = {};
                 }
@@ -169,39 +165,20 @@ var GameInfo = function () {
                         }
                         // 用户信息
                         self.userList[userInfo.Id] = new User(userInfo, socket);
-                        const resultObj = {
-                            account: self.userList[userInfo.Id]._account,
-                            id: self.userList[userInfo.Id]._userId,
-                            nickname: self.userList[userInfo.Id]._nickname,
-                            score: self.userList[userInfo.Id]._score,
-                            sign: self.userList[userInfo.Id]._sign,
-                            proplist: self.userList[userInfo.Id]._proList,
-                            headimgurl: self.userList[userInfo.Id]._headimgurl,
-                            diamond: self.userList[userInfo.Id]._diamond,
-                            giftTicket: self.userList[userInfo.Id]._giftTicket,
-                            phoneNo: self.userList[userInfo.Id]._phoneNo,
-                            official: self.userList[userInfo.Id]._official,
-                            isVip: self.userList[userInfo.Id].is_vip,
-                            totalRecharge: self.userList[userInfo.Id].totalRecharge,
-                            vip_level: self.userList[userInfo.Id].vip_level,
-                            vip_score: self.userList[userInfo.Id].vip_score,
-                        };
-                        result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: resultObj};
+                        const loginUser= self.loginUserInfo(userInfo.Id);
 
-                        log.info("登录成功:" + resultObj);
+                        result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser};
+                        log.info("登录成功:" + result);
                         callback(null, result);
                     })
                 },
                 function (result, callback) {//读取重要数据
                     dao.getScore(userInfo.Id, function (Result, rows) {
-                        //console.log(Result)
                         if (Result) {
                             self.userList[userInfo.Id]._diamond = rows.diamond;
-                            self.userList[userInfo.Id]._giftTicket = rows.giftTicket;
                             self.userList[userInfo.Id]._score = rows.score;
                             result.Obj.score = rows.score;
                             result.Obj.diamond = rows.diamond;
-                            result.Obj.giftTicket = rows.giftTicket;
                             log.info("获取积分:" + result);
                             callback(null, result);
                         }
@@ -334,67 +311,19 @@ var GameInfo = function () {
         //删除用户
         this.deleteUser = function (_userinfo) {
             if (_userinfo.userId) {
-                //指定用户储存
                 log.info("用户" + _userinfo.userId + "删除!");
+                // 用户在大厅，非机器人
                 if (this.userList[_userinfo.userId] && !this.userList[_userinfo.userId].getGameId() && !this.userList[_userinfo.userId].deleteFlag && !this.userList[_userinfo.userId]._Robot) {
                     log.info("用户" + _userinfo.userId + "没有游戏ID");
-                    var score_change = _userinfo.userScore - this.userList[_userinfo.userId]._score;
-                    var score_before = this.userList[_userinfo.userId]._score;
+                    // 用户置为离线
                     this.userList[_userinfo.userId].deleteFlag = true;
+                    // 放到离线用户集合
                     this.tempuserList[_userinfo.userId] = this.userList[_userinfo.userId];
-                    if (_userinfo.userScore != null) {
-                        this.tempuserList[_userinfo.userId]._score = _userinfo.userScore;
-                        //储存玩家游戏金钱变化量
-                        if (!_userinfo.nolog) {
-                            var info = {
-                                userid: _userinfo.userId,
-                                score_before: score_before,
-                                score_change: score_change,
-                                score_current: _userinfo.userScore,
-                                change_type: (_userinfo.gameId + 10),
-                                isOnline: true,
-                                ChannelType: this.userList[_userinfo.userId]._ChannelType
-                            }
-                            this.score_changeLogList.push(info);
-                        }
-                    }
-                    // console.log("-------------------------------钻石")
-                    // console.log(_userinfo.userDiamond)
-                    // console.log(this.userList[_userinfo.userId]._diamond)
-                    var diamond_change = _userinfo.userDiamond - this.userList[_userinfo.userId]._diamond;
-                    var diamond_before = this.userList[_userinfo.userId]._diamond;
-                    if (_userinfo.userDiamond != null) {
-                        this.tempuserList[_userinfo.userId]._diamond = _userinfo.userDiamond;
-
-                        dao.AddDiamondSub({
-                            userid: _userinfo.userId,
-                            diamond: diamond_change,
-                            change_type: 2,
-                        }, function (result_u) {
-                            if (result_u) {
-                                log.info("钻石修改成功 用户:", _userinfo.userId);
-                            } else {
-                                log.err("钻石修改失败 用户:", _userinfo.userId);
-
-                            }
-                        });
-
-                        //储存玩家游戏钻石变化量
-                        if (!_userinfo.nolog) {
-                            var info = {
-                                userid: _userinfo.userId,
-                                diamond_before: diamond_before,
-                                diamond_change: diamond_change,
-                                diamond_current: _userinfo.userDiamond,
-                                change_type: (_userinfo.gameId + 10),
-                                isOnline: true,
-                                ChannelType: this.userList[_userinfo.userId]._ChannelType
-                            }
-                            this.diamond_changeLogList.push(info);
-                        }
-                    }
+                    // 移除用户
+                    delete this.userList[_userinfo.userId];
+                    // 人数减少
+                    --this.onlinePlayerCount;
                 }
-
             }
         };
 
@@ -404,7 +333,6 @@ var GameInfo = function () {
                 if (!this.userList[userid].getGameId() && !this.userList[userid]._ageinLogin) {
                     delete this.userList[userid];
                     --this.onlinePlayerCount;
-                    //console.log("未登录游戏离线!同时在线:" + this.onlinePlayerCount + "人")
                 }
 
                 if (flag) {
@@ -462,23 +390,33 @@ var GameInfo = function () {
             }
         };
 
-        this.getUserTicket = function (_userId, callback) {
-            var giftTicket = 0;
-            if (_userId && this.userList[_userId]) {
-                //用户在线
-                giftTicket = this.userList[_userId]._giftTicket;
-                callback(giftTicket);
-            } else {
-                //去数据库拿
-                dao.getScore(_userId, function (Result, rows) {
-                    if (Result) {
-                        callback(rows.giftTicket);
-                    } else {
-                        callback(-1);
-                    }
-                })
-            }
-        };
+        // 获取用户登录返回信息
+        this.loginUserInfo = function (userId) {
+            const user = this.userList[userId];
+            return {
+                account: user._account,
+                id: user._userId,
+                nickname: user._nickname,
+                score: user._score,
+                sign: user._sign,
+                proplist: user._proList,
+                headimgurl: user._headimgurl,
+                diamond: user._diamond,
+                phoneNo: user._phoneNo,
+                official: user._official,
+                isVip: user.is_vip,
+                totalRecharge: user.totalRecharge,
+                vip_level: user.vip_level,
+                vip_score: user.vip_score,
+                dailyGet: user.dailyGet,
+                monthlyGet: user.monthlyGet,
+                firstRecharge: user.firstRecharge,
+                bankScore: user.bankScore,
+                bankLock: user.bankLock,
+                addDate: user.addDate,
+                existBankPwd: user.bankPwd ? 1 : 0
+            };
+        }
 
         //获得用户
         this.webGetUser = function (_account, callback) {
@@ -582,7 +520,7 @@ var GameInfo = function () {
                 // 每日领取
                 if(!dailyGet){
                     this.userList[socket.userId]._score += parseInt(currConfig.dailyGetGold);
-                    this.userList[socket.userId].dailyGetGold = 1;
+                    this.userList[socket.userId].dailyGet = 1;
                     socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
                 }else{
                     socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
@@ -591,7 +529,7 @@ var GameInfo = function () {
                 // 每月领取
                 if(!monthlyGet){
                     this.userList[socket.userId]._score += parseInt(currConfig.monthlyGetGold);
-                    this.userList[socket.userId].monthlyGetGold = 1;
+                    this.userList[socket.userId].monthlyGet = 1;
                     socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
                 }else{
                     socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
@@ -605,8 +543,8 @@ var GameInfo = function () {
         // 查询能领取多少金币
         this.vipGetGoldDetail = function (socket) {
             const vipLevel = this.userList[socket.userId].vip_level;
-            const dailyGet = this.userList[socket.userId].dailyGetGold;
-            const monthlyGet = this.userList[socket.userId].monthlyGetGold;
+            const dailyGet = this.userList[socket.userId].dailyGet;
+            const monthlyGet = this.userList[socket.userId].monthlyGet;
             const currConfig = updateConfig.getVipConfig().find(item => item.level === vipLevel);
 
             const result ={
@@ -617,13 +555,6 @@ var GameInfo = function () {
                 monthlyGet: monthlyGet
             }
             socket.emit('vipGetGoldDetailResult', result);
-        };
-
-        //保存所有用户
-        this.saveAll = function () {
-            dao.saveAll(this.userList, function (Result) {
-
-            })
         };
 
         //用户是否在线
@@ -638,6 +569,332 @@ var GameInfo = function () {
                 return 0;
             }
         };
+
+        // 查询用户签到详情页
+        this.searchUserSignInDetail = function (socket) {
+            const config = updateConfig.getSignInConfig();
+
+            // 查询当前用户签到第几天了
+            dao.searchUserSignIn(socket.userId, res =>{
+                let result = {};
+                if(res){
+                    // 获取当前日期
+                    const consecutiveDays = res.consecutive_days;
+
+                    const currentDate = new Date();
+                    const currentDateString = currentDate.toISOString().split('T')[0];
+
+                    const lastSignInDate = res.last_sign_in_date.toISOString().split('T')[0];
+
+                    let currSignInFlag = 0;
+                    if(currentDateString === lastSignInDate){
+                        currSignInFlag = 1;
+                    }
+                    // 当日已签到
+                    const signInConfig = config.map(item =>{
+                        let signInFlag = 0;
+                        if(consecutiveDays >= item.id ){
+                            signInFlag = 1;
+                        }
+                        return {
+                            id: item.id,
+                            award: item.award,
+                            valRatio: item.valRatio,
+                            signInFlag: signInFlag,
+                        }
+                    });
+                    result = {
+                        code:1,
+                        data: {
+                            currSignInFlag: currSignInFlag, signInConfig,
+                        }
+                    }
+                    socket.emit('getSignInDetailResult', result);
+                }else{
+                    let currSignInFlag = 0;
+                    // 当日未签到
+                    const signInConfig = config.map(item =>{
+                        let signInFlag = 0;
+                        return {
+                            id: item.id,
+                            award: item.award,
+                            valRatio: item.valRatio,
+                            signInFlag: signInFlag
+                        }
+                    });
+                    // 没签到过
+                    result = {
+                        code:1,
+                        data: {
+                            currSignInFlag: currSignInFlag, signInConfig
+                        }
+                    }
+                    socket.emit('getSignInDetailResult', result);
+                }
+
+            });
+
+
+        }
+
+        // 查询用户签到信息
+        this.signIn = function (socket) {
+            const userId = socket.userId;
+
+           dao.userSignIn(socket.userId, res =>{
+               if(res.rcode){
+                   const consecutiveDays = res.rcode;
+                   const signInConfig = updateConfig.getSignInConfig().find(item => item.id = consecutiveDays);
+                   if(signInConfig.award){
+                       const level = this.userList[userId].vip_level;
+                       const currVipConfig = updateConfig.getVipConfig().find(item => item.level === level);
+
+                       for(let i = 0; i < signInConfig.award.length; i++){
+                            if(signInConfig.award[0].type === 0){
+                                const addScore = parseInt(signInConfig.award[0].val * currVipConfig.dailySignScoreAddRate / 100);
+                                // 发放金币
+                                const currScore = this.userList[userId]._score;
+                                this.userList[userId]._score += addScore;
+                                console.log('每日签到前金币', currScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate , '每日签到后金币', this.userList[userId]._score)
+                            }else if(signInConfig.award[0].type === 1){
+                                // 发放钻石
+                            }
+                       }
+                   }
+                   socket.emit('signInResult', { code : 1 , msg : '签到成功'});
+               }else{
+                   socket.emit('signInResult', { code : 0 , msg : '重复签到'});
+               }
+           });
+        }
+
+        // 获取大厅幸运币详情页
+        this.getHallLuckyPageDetail = function (socket, activityJackpot) {
+            // 获取幸运币配置
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+            const turntableJackpot = this.getTurntableJackpot(activityJackpot);
+            const luckGlodJackpot = this.getLuckGlodJackpot(activityJackpot);
+
+            const resTime = new Date().getTime() - this.userList[socket.userId].luckyRushStartTime;
+            const luckyRushResTime = resTime > 0 ? resTime : 0;
+
+            const ret = {
+                turntableJackpot: turntableJackpot, // 转盘活动奖池
+                luckGlodJackpot: luckGlodJackpot, // 幸运金币活动奖池
+                luckyRushTime: luckyCoinConfig.luckyRushTime, // 幸运金币刷新时间（分钟）
+                luckyRushResTime: luckyRushResTime, // 幸运金币领取剩余时间(秒)
+                luckyRushStartTime: this.userList[socket.userId].luckyRushStartTime, // 幸运金币刷新开始时间
+                luckyCoinGetStatus: 0, // 幸运金币是否可领取
+                luckyCoinTask: luckyCoinConfig.luckyCoinTask, // 每日任务数量
+                doLuckyCoinTask: this.userList[socket.userId].doLuckyCoinTask, // 完成任务数量
+                luckyCoinGetLimit: luckyCoinConfig.luckyCoinGetLimit, // 完成幸运币获取限制个数
+                luckyCoin: this.userList[socket.userId].luckyCoin // 当前用户幸运币个数
+            }
+
+            socket.emit('hallLuckyPageDetailResult', {code:1, data: ret});
+        }
+
+        // 获取幸运币活动配置
+        this.getLuckyCoinDetail = function (socket, activityJackpot, val) {
+            try {
+                const userId = socket.userId;
+                // 获取幸运币配置
+                const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+                const turntableJackpot = this.getTurntableJackpot(activityJackpot);
+                // 获取基础倍数
+                const baseMul = Number(this.getBaseMul(userId, activityJackpot, null).toFixed(2));
+                // 获取转盘图案
+                const iconInfos = Config.iconInfos.map(str => parseInt(str, 10));
+
+                let ret = {};
+                if(val){
+                    // 付费转盘
+                     ret = {
+                        baseMul: baseMul,
+                        turntableJackpot: turntableJackpot,
+                        iconInfos: iconInfos,  // 获取转盘的格子
+                        turntableBuyMulPrice: luckyCoinConfig.turntableBuyMulPrice,
+                    }
+                }else{
+                    // 免费转盘
+                    ret = {
+                        baseMul: baseMul,
+                        turntableJackpot: turntableJackpot,
+                        iconInfos: iconInfos
+                    }
+                }
+                socket.emit('luckyCoinDetailResult', {code: 1, data: ret});
+            }catch (e){
+                log.err(e);
+                socket.emit('luckyCoinDetailResult', {code: 0, msg: "获取倍数失败"});
+            }
+        }
+
+
+        // 转盘购买
+        this.mulBuy = function (mul, callback) {
+            // 获取幸运币配置
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+            const buyMulPriceItem = luckyCoinConfig.turntableBuyMulPrice.find(item => item.mul === mul);
+            if(!buyMulPriceItem){
+                console.log("没有此倍率的配置")
+                callback(0);
+                return;
+            }
+            // 价格
+            const price = buyMulPriceItem.price;
+            // 货币类型
+            const currencyType = buyMulPriceItem.currencyType;
+            // 扣款
+
+
+            callback(1);
+        }
+
+        // 转动转盘
+        this.turntable = function (socket, luckyCoinAmount, activityJackpot) {
+            const userId = socket.userId;
+
+            // 每5个幸运币玩一把，倍数就是翻倍
+            const betMul = luckyCoinAmount / 5;
+            if(!Config.coinConfig.includes(betMul)){
+                socket.emit('turntableResult', {code:0, msg:"没有对应的倍率"});
+                return;
+            }
+
+            const cards = Config.cards;
+            const weight_two_array = Config.weight_two_array;
+            const col_count = Config.col_count;
+            const line_count = Config.line_count;
+            const iconTypeBind = Config.icon_type_bind;
+            const cardsNumber = 1;
+            let iconBindSwitch = iconTypeBind ? 1 : 0;
+
+
+            const dictAnalyseResult = {
+                nWinLines: 0,  //  中奖的下标
+                betMul: betMul, // 下注倍数
+                win: 0,  // 中奖总额
+                baseMul: 0, // 基础倍数
+                iconMul: 0,  // 图案倍数
+                turntableGameAddRate: 0, // VIP加成
+                activityJackpot: 0, // 活动奖池
+                turntableJackpot: 0, // 转盘奖池
+                turntableMaxMul: 0, // 转盘最大倍数
+                maxTurntableGameAddRate: 0, // 转盘VIP最大加成
+                maxBuyMul: 0, // 转盘最大购买倍数
+                nBetTime: Number(new Date()) // 下注时间
+            };
+
+
+
+            // 转盘奖池
+            const turntableJackpot = this.getTurntableJackpot(activityJackpot);
+            let nHandCards = [];
+            let win = 0;
+            while(true){
+                // 生成图案
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, -1, iconBindSwitch , iconTypeBind, 0);
+
+                let winIndex = nHandCards[0];
+                dictAnalyseResult["nWinLines"] = winIndex;
+                // 基础倍数*转盘倍数*VIP加成*购买倍数
+                win = this.getWin(userId, activityJackpot, betMul, winIndex, dictAnalyseResult);
+                dictAnalyseResult["win"] = win;
+
+                // 获得奖励不能大于转盘总奖池
+                if (!iconTypeBind && turntableJackpot < win) {
+                    continue;
+                }
+                break;
+            }
+            // 扣减总奖池
+            redis_laba_win_pool.redis_win_pool_decrby(win).then( turntableJackpot =>{
+                console.log("剩余奖池", turntableJackpot)
+                this.userList[userId].winscore(win);
+                socket.emit('turntableResult', {code:1, data: dictAnalyseResult});
+            });
+        }
+
+        // 获取赢的金币
+        this.getWin = function (userId, activityJackpot, betMul, winIndex, dictAnalyseResult) {
+            // 获取基础倍数
+            const baseMul = this.getBaseMul(userId, activityJackpot, dictAnalyseResult);
+
+            const turntableGameAddRate = this.getTurntableGameAddRate(userId);
+            // 奖金币 = 基础倍数 * 中奖倍数 * VIP转盘加成 * 下注倍数
+            const win = baseMul * Config.icon_mul[0][winIndex] * turntableGameAddRate * betMul;
+
+            dictAnalyseResult["baseMul"] = baseMul;
+            dictAnalyseResult["iconMul"] = Config.icon_mul[0][winIndex];
+            dictAnalyseResult["turntableGameAddRate"] = turntableGameAddRate;
+
+            console.log('转盘获得金币:'+ win +'免费转盘基础倍数:', baseMul, '赢倍数:', Config.icon_mul[0][winIndex], '转盘加成:', turntableGameAddRate, '下注倍数:', betMul)
+            return win;
+        }
+
+
+        /**
+         *
+         * @returns {number}
+         */
+        this.getBaseMul = function (userId, activityJackpot, dictAnalyseResult) {
+            // 获取VIP最大加成
+            const maxTurntableGameAddRate = this.getMaxTurntableGameAddRate();
+
+            const turntableJackpot = this.getTurntableJackpot(activityJackpot);
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+
+            const maxItem = luckyCoinConfig.turntableBuyMulPrice.reduce((max, current) => (current.mul > max.mul ? current : max), luckyCoinConfig.turntableBuyMulPrice[0]);
+            const maxBuyMul =  maxItem.mul;
+            const turntableMaxMul = Math.max(...Config.icon_mul[0]);
+
+            if(dictAnalyseResult){
+                dictAnalyseResult['activityJackpot'] = activityJackpot;
+                dictAnalyseResult['turntableJackpot'] = turntableJackpot;
+                dictAnalyseResult['turntableMaxMul'] = turntableMaxMul;
+                dictAnalyseResult['maxTurntableGameAddRate'] = maxTurntableGameAddRate;
+                dictAnalyseResult['maxBuyMul'] = maxBuyMul;
+            }
+            console.log('计算转盘基础倍数 活动奖池:'+ activityJackpot + '转盘奖池:', turntableJackpot, '转盘最大倍数:', turntableMaxMul, 'VIP最大加成:', maxTurntableGameAddRate, '购买倍数最大值:', maxBuyMul)
+            // 计算转盘奖池基础倍数(向下取整) = 当前奖池/转盘最大倍数/VIP加成/购买倍数最大值
+            return Math.floor(turntableJackpot / turntableMaxMul / maxTurntableGameAddRate / maxBuyMul);
+        }
+        
+        this.getTurntableGameAddRate = function (userId) {
+            // 获取VIP转盘加成
+            const vipLevel = this.userList[userId].vip_level;
+            const turntableGameAddRate = updateConfig.getVipConfig().find(item => item.level === vipLevel).turntableGameAddRate;
+
+            return turntableGameAddRate ? (turntableGameAddRate / 100) : 1;
+        }
+
+        this.getMaxTurntableGameAddRate = function () {
+            // 获取VIP转盘最大加成
+            const maxItem = updateConfig.getVipConfig().reduce((max, current) => (current.turntableGameAddRate > max.turntableGameAddRate ? current : max), updateConfig.getVipConfig()[0]);
+            const maxTurntableGameAddRate = maxItem.turntableGameAddRate;
+            return maxTurntableGameAddRate ? (maxTurntableGameAddRate / 100) : 1;
+        }
+
+        // 获取转盘奖池
+        this.getTurntableJackpot = function (activityJackpot) {
+            // 获取活动奖励配置
+            const aJackpotConfig= updateConfig.getActivityJackpotConfig();
+            const totalRatio = aJackpotConfig.freeRatio.totalRatio;
+            const turntableRatio = aJackpotConfig.freeRatio.turntableRatio;
+            // 转盘游戏总奖池
+            return parseInt(activityJackpot * (totalRatio / 100) * (turntableRatio / 100));
+        }
+
+        // 获取幸运金奖池
+        this.getLuckGlodJackpot = function (activityJackpot) {
+            // 获取活动奖励配置
+            const aJackpotConfig= updateConfig.getActivityJackpotConfig();
+            const totalRatio = aJackpotConfig.freeRatio.totalRatio;
+            const turntableRatio = aJackpotConfig.freeRatio.luckyGoldRatio;
+            // 转盘游戏总奖池
+            return parseInt(activityJackpot * (totalRatio / 100) * (turntableRatio / 100));
+        }
 
 
         //获得用户当前分数
@@ -835,7 +1092,7 @@ var GameInfo = function () {
 
         };
 
-        this.updateLogin = function (gameInfo) {
+        this.updateLogin = function () {
 
             for (i = 0; i < this._loginList.length; i++) {
                 if (this.userList[this._loginList[i].id]) {
@@ -858,10 +1115,10 @@ var GameInfo = function () {
                             }
                         }
                     } else {
-                        log.info(this._loginList[i].id + "用户只在登录服务器被强制下线");
                         //先判断socket 是否有真的连接
                         if (this.userList[this._loginList[i].id]._socket.connected) {
                             if (this._loginList[i].state == 1) {
+                                log.info(this._loginList[i].id + "用户只在登录服务器被强制下线");
                                 this.userList[this._loginList[i].id]._socket.disconnect();
                                 this._loginList[i].state = 2;
                             }
@@ -1323,14 +1580,13 @@ var GameInfo = function () {
         //修改头像
         this.updateHeadUrl = function (_socket, _info) {
             if (!this.userList[_socket.userId]) {
-                log.err("更新用户ID,用户" + _userId + "不存在");
-                _socket.emit('updateHeadUrlResult', {Result: 1, msg: "ID不存在"});
+                _socket.emit('updateHeadUrlResult', {code: 0, msg: "ID不存在"});
                 return;
             }
 
             //头像
             if (_info.url == "") {
-                _socket.emit('updateHeadUrlResult', {Result: 2, msg: "头像不能为空"});
+                _socket.emit('updateHeadUrlResult', {code: 0, msg: "头像不能为空"});
                 return;
             }
             var self = this;
@@ -1338,15 +1594,14 @@ var GameInfo = function () {
             dao.updateHeadUrl(_socket.userId, _info.url, function (result, head_url) {
                 if (self.userList[_socket.userId]) {
                     if (result) {
-                        //log.info("发送" + _socket.userId + "检测ID");
                         self.userList[_socket.userId]._headimgurl = _info.url;
                         self.userList[_socket.userId]._socket.emit("updateHeadUrlResult", {
-                            Result: 0,
+                            code: 1,
                             msg: "修改成功",
                             url: _info.url
                         });
                     } else {
-                        self.userList[_socket.userId]._socket.emit("updateHeadUrlResult", {Result: 3, msg: "修改失败"});
+                        self.userList[_socket.userId]._socket.emit("updateHeadUrlResult", {code: 0, msg: "修改失败"});
                     }
                 }
             });
@@ -1546,50 +1801,6 @@ var GameInfo = function () {
             });
         };
 
-        //发送绑定手机验证码
-        this.sendbindPhoneNo = function (_socket, _info) {
-            //_info.phoneNo
-            var phone = String(_info.phoneNo);
-
-            //
-            if (!_info.phoneNo || phone.length != 11) {
-                _socket.emit('sendbindPhoneNoResult', {Result: 0, msg: "发送失败,手机号码错误"});
-                return;
-            }
-
-            var info = {
-                phone: phone,
-                userId: _socket.userId
-            };
-
-            var self = this;
-            //需要验证,这个号码是否已经绑定了
-            //如果已经有手机号码了,不能再绑定
-            dao.phoneCheck(info, function (ResultCode) {
-                if (ResultCode) {
-                    var info = {
-                        Type: 'A2',
-                        Account: String(_socket.userId),
-                        PhoneNo: String(_info.phoneNo),
-                        Key: '89b5b987124d2ec3'
-                    }
-
-                    //self.userList[_socket.userId].setPhoneNo(info.PhoneNo);
-                    info.checkNo = String(self.userList[_socket.userId].newCheckNo());
-                    self.checkNo[_socket.userId] = {phoneNo: info.PhoneNo, checkNo: info.checkNo};
-                    Post.postbindPhone(info, function (rusult) {
-                        if (rusult) {
-                            _socket.emit('sendbindPhoneNoResult', {Result: 1, msg: "发送成功"});
-                        } else {
-                            _socket.emit('sendbindPhoneNoResult', {Result: 0, msg: "发送失败"});
-                        }
-                    });
-                } else {
-                    _socket.emit('sendbindPhoneNoResult', {Result: 0, msg: "此手机号码已绑定!"});
-                }
-            })
-
-        };
 
 
         // 发送邮箱验证码
@@ -1677,59 +1888,7 @@ var GameInfo = function () {
             });
         }
 
-        //绑定手机
-        this.bindPhone = function (_socket, _info) {
 
-            if (!this.checkNo[_socket.userId]) {
-                _socket.emit('bindPhoneResult', {Result: 0, msg: "未获取验证码"});
-                return;
-            }
-
-            if (_info.phoneNo != this.checkNo[_socket.userId].phoneNo) {
-                _socket.emit('bindPhoneResult', {Result: 0, msg: "手机号码错误"});
-                return;
-            }
-
-
-            //this.checkNo[_socket.userId] = {phoneNo:info.PhoneNo,checkNo:info.checkNo};
-            if (_info.checkNo == "" || _info.checkNo != this.checkNo[_socket.userId].checkNo) {
-                _socket.emit('bindPhoneResult', {Result: 0, msg: "验证码错误"});
-                return;
-            }
-
-            var password = String(_info.password);
-            var pass = String(_info.password);
-            if (!password || password.length < 6) {
-                _socket.emit('bindPhoneResult', {Result: 0, msg: "密码位数不对或密码为空"});
-                return;
-            }
-
-
-            var key_login = "89b5b9871@@@24d2ec3@*&^sexx$%^slxxx";
-            var content = password + key_login;
-            var md5_sign = crypto.createHash('md5');
-            md5_sign.update(content);
-
-            password = md5_sign.digest('hex');
-
-            this.userList[_socket.userId].cleanCheckNo();
-
-            var info = {phoneNo: _info.phoneNo, Id: _socket.userId, password: password, pass: pass};
-            this.userList[_socket.userId].setPhoneNo(this.checkNo[_socket.userId].phoneNo);
-
-
-            delete this.checkNo[_socket.userId];
-
-            //数据库更新电话号码
-            dao.SetPhoneNo(info, function (ResultCode) {
-                if (ResultCode) {
-                    _socket.emit('bindPhoneResult', {Result: 1, msg: "绑定成功"});
-                } else {
-                    _socket.emit('bindPhoneResult', {Result: -1, msg: "无法写入数据库"});
-                }
-            });
-
-        }
 
 
 
@@ -1926,10 +2085,14 @@ var GameInfo = function () {
             this.gameRank[_info.serverId] = _info;
         };
 
-        // 保存成功登录后离线的用户信息
-        this.saveUser = function () {
+        this.batchUpdateAccount = function () {
+            this.batchUpdateOnLineAccount();
+            this.batchUpdateOffLineAccount();
+        }
+
+        this.batchUpdateOffLineAccount = function () {
             const self = this;
-            const saveList = [];
+            let saveList = [];
             // 离线的用户
             for (const k in this.tempuserList) {
                 // 登录成功标识
@@ -1939,17 +2102,38 @@ var GameInfo = function () {
                 }
             }
             if (saveList.length < 1) {
-               return;
+                return;
             }
-            // 保存用户数据
-            dao.saveUser(saveList, function (result) {
-                for (let i = 0; i < result.length; ++i) {
-                    log.info("成功保存离线用户信息" + result[i]._userId + " socre:" + result[i]._score + " diamond:" + result[i]._diamond + " bankScore:" + result[i].bankScore );
-                    delete self.userList[result[i]._userId];
-                    --self.onlinePlayerCount;
+            dao.batchUpdateAccount(saveList, function (result) {
+                if(result){
+                    for (let i = 0; i < result.length; ++i) {
+                        log.info("成功保存离线用户信息" + result[i].id + " socre:" + result[i].score + " diamond:" + result[i].diamond + " bankScore:" + result[i].bankScore + " housecard:" + result[i].housecard+ " is_vip:" + result[i].is_vip+ " vip_score:" + result[i].vip_score+ " firstRecharge:" + result[i].firstRecharge);
+                        saveList = [];
+                    }
                 }
             });
-        };
+        }
+
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            // 离线的用户
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+
+            if (saveList.length < 1) {
+                return;
+            }
+
+            dao.batchUpdateAccount(saveList, function (result) {
+                if(result){
+                    for (let i = 0; i < result.length; ++i) {
+                        log.info("成功保存在线用户信息");
+                        saveList = [];
+                    }
+                }
+            });
+        }
 
         //金币排行
         this.getCoinRank = function (_socket) {
@@ -2322,6 +2506,16 @@ var GameInfo = function () {
                 }
             });
         };
+        // 锁住银行
+        this.lockBank = function (userId) {
+            this.userList[userId].bankLock = 1;
+        }
+
+        // 银行是否锁住
+        this.isBankLock = function (userId) {
+            return this.userList[userId].bankLock;
+        }
+
         //修改用户银行密码
         this.updateUserBankPwd = function (socket, _info) {
             if (!this.userList[socket.userId]) {
@@ -2351,40 +2545,13 @@ var GameInfo = function () {
         this.setUserBankPwd = function (socket, data) {
             dao.updateBankPwdById(data.pwd1, socket.userId, (result) => {
                 if(result){
-                    socket.emit('setUserBankPwdResult', {code: 1, msg: "设置成功"});
+                    this.userList[socket.userId].bankPwd = data.pwd1;
+                    socket.emit('setBankPwdResult', {code: 1, msg: "设置成功"});
                 }else{
-                    socket.emit('setUserBankPwdResult', {code: 0, msg: "设置失败"});
+                    socket.emit('setBankPwdResult', {code: 0, msg: "设置失败"});
                 }
             });
         }
-
-
-
-        //修改用户银行金币
-        this.updateBankScore = function (socket, _info) {
-            let newBscore = this.userList[socket.userId].bankScore + _info.saveCoin;
-            dao.updateBankScoreById(newBscore, socket.userId, (result) => {
-                console.log("更新银行分数结果" + result);
-                this.userList[socket.userId].bankScore = this.userList[socket.userId].bankScore + _info.saveCoin;
-                socket.emit('updateBankScoreResult', {
-                    bankScore: this.userList[socket.userId].bankScore,
-                    ResultCode: 1
-                });
-            });
-            let userInfo = {
-                sendUserId: socket.userId,
-                sendCoin: -_info.saveCoin,
-                change_type: 99999,
-                diamond: 0
-            };
-            if (_info.saveCoin > 0) {
-                this.GameBalanceSub(userInfo, (result) => {
-                    console.log(result);
-                });
-            } else {
-                this.GameBalance(userInfo);
-            }
-        };
 
 
         this.sendCoinServer = function (_info, callback) {
@@ -2652,6 +2819,9 @@ var GameInfo = function () {
             this.userList[socket.userId].bankScore = this.userList[socket.userId].bankScore - bankScore;
             this.userList[socket.userId]._score =  this.userList[socket.userId]._score + parseInt(gold);
 
+            // 记录入库
+
+
             const result = {
                 bankScore: this.userList[socket.userId].bankScore,
                 gold: this.userList[socket.userId]._score
@@ -2694,7 +2864,7 @@ var GameInfo = function () {
             }
 
             const addBankScore = gold;
-            this.userList[socket.userId]._score =   this.userList[socket.userId]._score - parseInt(gold);
+            this.userList[socket.userId]._score =  this.userList[socket.userId]._score - parseInt(gold);
             this.userList[socket.userId].bankScore =  this.userList[socket.userId].bankScore + addBankScore;
 
             const result = {
@@ -2746,11 +2916,11 @@ var GameInfo = function () {
                             bankScore: this.userList[socket.userId].bankScore,
                             gold: this.userList[socket.userId]._score
                         }
-                        socket.emit('bankTransferOtherBankResult', {code:1,  msg: result });
-                        return;
+                        socket.emit('bankTransferOtherBankResult', {code:1,  data: result });
                     }
+                }else{
+                    socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
                 }
-                socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
             });
         }
 
@@ -2771,14 +2941,15 @@ var GameInfo = function () {
 
         // 查询银行转入记录
         this.searchBankTransferIntoRecord = function (socket) {
-            dao.searchBankTransferIntoRecord(socket.userId, (res) => {
+            dao.searchBankTransferIntoRecord(socket.userId, (res, rows) => {
                 let data = []
                 if(res){
-                    res.forEach(item =>{
+                    rows.forEach(item =>{
                         const row = {
                             id: item.id,
                             nickname: item.nickname,
                             headimgurl: item.headimgurl,
+                            userId: item.from_userid,
                             bankScore: item.transfer_bank_score
                         }
                         data.push(row);
@@ -2797,6 +2968,7 @@ var GameInfo = function () {
                         const row = {
                             id: item.id,
                             nickname: item.nickname,
+                            userId: item.to_userid,
                             headimgurl: item.headimgurl,
                             bankScore: item.transfer_bank_score
                         }

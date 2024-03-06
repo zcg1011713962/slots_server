@@ -8,10 +8,10 @@ const LABA = require("./../../util/laba");
 const Config = require("../config/read_config").getInstand;
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const log = require("../../CClass/class/loginfo").getInstand;
-const http_bc = require("./../../util/http_broadcast");
 const {get_redis_win_pool} = require("../../util/redis_laba_win_pool");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
+const CacheUtil = require("../../util/cache_util");
 
 var GameInfo = function () {
 
@@ -79,16 +79,8 @@ var GameInfo = function () {
 
                 // 推送奖池给玩家
                 if (second % 20 === 0) {
-                    get_redis_win_pool().then(jackpot =>{
-                        jackpot = jackpot > 0 ? jackpot : 0;
-                        let result = {
-                            ResultCode: 1,
-                            nGamblingWinPool: jackpot,
-                        };
-                        for (let item in self.userList) {
-                            self.userList[item]._socket.emit("pushGamblingWinPool", result);
-                        }
-                    });
+                    // 奖池推送
+                    CacheUtil.pushGameJackpot(self.userList);
                 }
             });
         };

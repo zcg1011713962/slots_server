@@ -4,15 +4,15 @@ const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("./../config/gameConfig");
-const urlencode = require('urlencode');
-const http_bc = require("./../../util/http_broadcast");
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const LABA = require("../../util/laba");
 const {getInstand: log} = require("../../CClass/class/loginfo");
 const Config = require('../config/read_config').getInstand;
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
-
+const CacheUtil = require('../../util/cache_util');
+const redis_laba_win_pool = require("../../util/redis_laba_win_pool");
+const laba_config = require("../../util/config/laba_config");
 
 //读取文件包
 
@@ -89,19 +89,9 @@ var GameInfo = function () {
                     });
                     //console.log("推送在线人数");
                 }
-                //推送奖池给玩家
+                // 推送jackpot给玩家
                 if (second % 20 == 0) {
-                    let GamblingBalanceLevelBigWin = self.A.getGamblingBalanceLevelBigWin();
-                    let nGamblingWinPool = GamblingBalanceLevelBigWin.nGamblingWinPool;
-                    nGamblingWinPool = nGamblingWinPool > 0 ? nGamblingWinPool : 0;
-                    let result = {
-                        ResultCode: 1,
-                        nGamblingWinPool: nGamblingWinPool
-                    };
-
-                    for (let item in self.userList) {
-                        self.userList[item]._socket.emit("pushGamblingWinPool", result);
-                    }
+                    CacheUtil.pushGameJackpot(self.userList);
                 }
 
             });

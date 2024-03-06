@@ -17,6 +17,8 @@ class RedisUtil {
             this.delAsync = promisify(this.client.del).bind(this.client);
             this.expireAsync = promisify(this.client.expire).bind(this.client);
             this.keysAsync = promisify(this.client.keys).bind(this.client);
+            this.incrAsync = promisify(this.client.incrby).bind(this.client);
+            this.incrbyfloatAsync = promisify(this.client.incrbyfloat).bind(this.client);
             // Handle errors
             this.client.on('error', (err) => {
                 console.error(`Redis error: ${err}`);
@@ -46,6 +48,26 @@ class RedisUtil {
 
     async expire(key, value) {
         return this.expireAsync(key, value);
+    }
+
+    async incrementInt(key, amount) {
+        return this.incrAsync(key, amount);
+    }
+
+    // 整形数据累减
+    async decrementInt(key, amount) {
+        const val = -amount;
+        return this.incrAsync(key, val);
+    }
+
+    async incrementByFloat(key, amount) {
+        return this.incrbyfloatAsync(key, amount);
+    }
+
+    // 浮点类型数据累减
+    async decrementFloat(key, amount) {
+        const val = -amount;
+        return this.incrbyfloatAsync(key, val);
     }
 
     async disconnect() {

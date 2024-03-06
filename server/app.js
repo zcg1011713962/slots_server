@@ -19,6 +19,8 @@ const gameInfo = require("./class/game").getInstand;
 const ServerInfo = require('./config/ServerInfo').getInstand;
 const ErrorCode = require('../util/ErrorCode');
 const CacheUtil = require('../util/cache_util');
+const redis_laba_win_pool = require("../util/redis_laba_win_pool");
+const laba_config = require("../util/config/laba_config");
 
 
 
@@ -238,11 +240,11 @@ io.on('connection', function (socket) {
                     if(code !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                         socket.emit('loginResult', {code: code, msg: msg});
                     }else{
-                        databaseCheck(user, socket);
+                        initUserInfo(user, socket);
                     }
                 });
             }else{
-                databaseCheck(user, socket);
+                initUserInfo(user, socket);
             }
         } catch (e) {
             socket.emit("loginResult", {code: ErrorCode.LOGIN_ERROR.code, msg: ErrorCode.LOGIN_ERROR.msg});
@@ -250,7 +252,7 @@ io.on('connection', function (socket) {
         }
     })
     
-    function databaseCheck(user, socket) {
+    function initUserInfo(user, socket) {
         dao.login(user, socket, (code, msg, data)=> {
             if(ErrorCode.LOGIN_SUCCESS.code === code){
                 if (!data) {
@@ -258,7 +260,7 @@ io.on('connection', function (socket) {
                     return;
                 }
                 //数据库有此用户
-                if (gameInfo.IsPlayerOnline(data.Id)) {
+               /* if (gameInfo.IsPlayerOnline(data.Id)) {
                     //在线
                     log.info("用户在线,进入等待离线列队");
                     user.id = data.Id;
@@ -268,13 +270,15 @@ io.on('connection', function (socket) {
                     //加入登录列队
                     gameInfo.addLoginList(user);
                 } else {
-                    // 登录成功
-                    gameInfo.addUser(data, socket, function (result) {
-                        if (result === 1) {   //断线从连
-                            gameInfo.lineOutSet({userId: user.id})
-                        }
-                    });
-                }
+
+                }*/
+
+                // 登录成功
+                gameInfo.addUser(data, socket, function (result) {
+                    if (result === 1) {   //断线从连
+                        gameInfo.lineOutSet({userId: user.id})
+                    }
+                });
             }else{
                 log.warn('登陆失败' + msg);
                 socket.emit('loginResult', {code: code, msg: msg});
@@ -329,7 +333,7 @@ io.on('connection', function (socket) {
         }
         log.info("用户断开连接:" + socket.userId);
         // 如果用户还存在的话，删除
-        var userInfo = {userId: socket.userId, nolog: true};
+        const userInfo = {userId: socket.userId, nolog: true};
         gameInfo.deleteUser(userInfo);
     });
 
@@ -338,7 +342,6 @@ io.on('connection', function (socket) {
         log.info("userDisconnect:");
         log.info(_userInfo);
         if (_userInfo.ResultCode) {
-
             gameInfo.setCleanGameIdByUserId(_userInfo);
             gameInfo.deleteUser(_userInfo);
         } else {
@@ -380,6 +383,7 @@ io.on('connection', function (socket) {
     // 购买商品
     socket.on("Shopping", function (data) {
         try {
+            if(!data) throw new Error();
             const d = JSON.parse(data);
             if (gameInfo.IsPlayerOnline(socket.userId)) {
                 gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
@@ -397,25 +401,7 @@ io.on('connection', function (socket) {
         try {
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
-                const user = gameInfo.getUser(userId);
-                const userInfo = {
-                    account: user._account,
-                    id: user._userId,
-                    nickname: user._nickname,
-                    score: user._score,
-                    sign: user._sign,
-                    proplist: user._proList,
-                    headimgurl: user._headimgurl,
-                    diamond: user._diamond,
-                    phoneNo: user._phoneNo,
-                    official: user._official,
-                    isVip: user.is_vip,
-                    totalRecharge: user.totalRecharge,
-                    vip_level: user.vip_level,
-                    vip_score: user.vip_score,
-                    firstRecharge: user.firstRecharge
-                };
-                log.info('getUserInfo' + userInfo)
+                const userInfo = gameInfo.loginUserInfo(userId);
                 socket.emit('UserInfoResult', {code: 1, data: userInfo});
             }else{
                 log.info('getUserInfo用户不在线')
@@ -452,6 +438,7 @@ io.on('connection', function (socket) {
     // VIP领取金币
     socket.on("vipGetGold", function (data) {
         try {
+            if(!data) throw new Error();
             log.info('vipGetGold' + data);
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             if (gameInfo.IsPlayerOnline(socket.userId)) {
@@ -469,6 +456,11 @@ io.on('connection', function (socket) {
         try {
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('getBankScoreResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 gameInfo.getBankScore(socket);
             }
         }catch (e) {
@@ -480,9 +472,15 @@ io.on('connection', function (socket) {
     // 筹码存储-银行取出金币
     socket.on('bankIntoHallGold', function (data) {
         try {
+            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('bankIntoHallGoldResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 gameInfo.bankIntoHallGold(socket, d.gold);
             }
         }catch (e) {
@@ -493,9 +491,15 @@ io.on('connection', function (socket) {
     // 筹码存储-金币转入银行
     socket.on('hallGoldIntoBank', function (data) {
         try {
+            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('bankIntoHallGoldResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 gameInfo.hallGoldIntoBank(socket, d.gold);
             }
         }catch (e) {
@@ -506,9 +510,15 @@ io.on('connection', function (socket) {
     // 银行转账
     socket.on('bankTransferOtherBank', function (data) {
         try {
+            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('bankTransferOtherBankResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 gameInfo.bankTransferOtherBank(socket, d.giveUserId, d.bankScore);
             }
         }catch (e) {
@@ -544,6 +554,7 @@ io.on('connection', function (socket) {
     // 设置银行密码
     socket.on('setBankPwd', function (data) {
         try {
+            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             const userId = socket.userId;
             if(d.pwd1.toString().length !== 6){
@@ -551,6 +562,11 @@ io.on('connection', function (socket) {
                 return;
             }
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('setBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 if (d.pwd2 === d.pwd1) {
                     gameInfo.getUserBankPwd(socket.userId, (pwd) => {
                         if(pwd){
@@ -571,15 +587,21 @@ io.on('connection', function (socket) {
     //修改银行密码
     socket.on('updateBankPwd', function (data) {
         try {
+            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if(gameInfo.isBankLock(userId)){
+                    socket.emit('updateBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
+                }
                 if(d.pwd.toString().length !== 6){
                     socket.emit('updateBankPwdResult', {code: 0, msg: "密码长度非法"});
                     return;
                 }
                 gameInfo.getUserBankPwd(socket.userId, (pwd) => {
-                    if (parseInt(pwd) !== d.pwd) {
+                    if (parseInt(pwd) !== parseInt(d.pwd)) {
                         socket.emit('updateBankPwdResult', {code: 0, msg: "原始密码错误"});
                     } else {
                         gameInfo.updateUserBankPwd(socket, d);
@@ -593,28 +615,136 @@ io.on('connection', function (socket) {
 
     // 校验银行密码
     socket.on('checkBankPwd', function (data) {
-        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.searchBankPwdErrorCount(userId).then(count =>{
-                if(count === undefined || count < 5){
-                    gameInfo.getUserBankPwd(socket.userId, (pwd) => {
-                        if(pwd === d.pwd){
-                            socket.emit('checkBankPwdResult', {code: 1, msg: "校验成功"});
-                        }else{
-                            CacheUtil.addBankPwdErrorCount(userId);
-                            socket.emit('checkBankPwdResult', {code: 0, msg: "校验失败"});
-                        }
-                    });
-                }else if(count >= 5){
-                    //
-                    socket.emit('checkBankPwdResult', {code: 0, msg: "密码输入错误5次冻结账号存取功能"});
+        try {
+            if(!data) throw new Error();
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                // 银行是否被锁
+                if (gameInfo.isBankLock(userId)) {
+                    socket.emit('checkBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                    return;
                 }
-            })
-        }else{
-            socket.emit('checkBankPwdResult', {code:0, msg:"用户不在线"});
+                // 错误次数判断
+                CacheUtil.searchBankPwdErrorCount(userId).then(count => {
+                    if (count === undefined || count < 5) {
+                        // 密码校验
+                        gameInfo.getUserBankPwd(socket.userId, (pwd) => {
+                            if (pwd === d.pwd) {
+                                socket.emit('checkBankPwdResult', {code: 1, msg: "校验成功"});
+                            } else {
+                                CacheUtil.addBankPwdErrorCount(userId);
+                                socket.emit('checkBankPwdResult', {code: 0, msg: "校验失败"});
+                            }
+                        });
+                    } else if (count >= 5) {
+                        // 锁住银行卡
+                        gameInfo.lockBank(userId);
+                        socket.emit('checkBankPwdResult', {code: 0, msg: "密码输入错误5次冻结账号存取功能"});
+                    }
+                })
+            } else {
+                socket.emit('checkBankPwdResult', {code: 0, msg: "用户不在线"});
+            }
+        }catch (e){
+            socket.emit('checkBankPwdResult', {code:0,msg:"参数有误"});
         }
     });
+
+
+    // 查询签到详情页
+    socket.on("getSignInDetail", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.searchUserSignInDetail(socket);
+        }else{
+            socket.emit('getSignInDetailResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+    // 签到
+    socket.on("signIn", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.signIn(socket);
+        }else{
+            socket.emit('signInResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+    // 获取每个玩家大厅幸运币详情页
+    socket.on("hallLuckyPageDetail", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                // 活动奖池
+                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                gameInfo.getHallLuckyPageDetail(socket, activityJackpot);
+            });
+        }else{
+            socket.emit('hallLuckyPageDetailResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+    // 获取转盘详情页
+    socket.on("luckyCoinDetail", function (data) {
+        try{
+            if(!data) throw new Error();
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                    // 活动奖池
+                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                    gameInfo.getLuckyCoinDetail(socket, activityJackpot, d.val);
+                });
+            }else{
+                socket.emit('luckyCoinDetailResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('luckyCoinDetailResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+
+    // 大厅转盘游戏
+    socket.on("turntable", function (data) {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            // 免费转盘
+            if(!data){
+                // 免费幸运币数量
+                const luckyCoinAmount = 5;
+                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                    // 活动奖池
+                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                    gameInfo.turntable(socket, luckyCoinAmount, activityJackpot);
+                });
+            }else{
+                try{
+                    const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+                    // 购买加倍转盘
+                    if(!d.mul) throw new Error();
+                    // 扣款成功
+                    gameInfo.mulBuy(d.mul, res =>{
+                        if(res){
+                            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                                const luckyCoinAmount = d.mul * 5;
+                                // 活动奖池
+                                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                                gameInfo.turntable(socket, luckyCoinAmount, activityJackpot);
+                            });
+                        }
+                    });
+                }catch (e) {
+                    socket.emit('turntableResult', {code:0,msg:"参数有误"});
+                }
+            }
+        }else{
+            socket.emit('turntableResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
 
 
     // 大厅获取游戏奖池
@@ -827,7 +957,7 @@ io.on('connection', function (socket) {
     //修改头像
     socket.on("updateHeadUrl", function (_info) {
         try {
-            var data = JSON.parse(_info);
+            const data = JSON.parse(_info);
             _info = data;
         } catch (e) {
             log.warn('updateHeadUrl-json');
@@ -890,34 +1020,6 @@ io.on('connection', function (socket) {
     });
 
 
-
-    //发验证码
-    socket.on("sendbindPhoneNo", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendbindPhoneNo-json');
-        }
-
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.sendbindPhoneNo(socket, _info);
-        }
-    });
-
-
-    //绑定手机
-    socket.on("bindPhone", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('bindPhone-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.bindPhone(socket, _info);
-        }
-    });
 
 
     //获得每天任务奖品
@@ -1145,42 +1247,6 @@ io.on('connection', function (socket) {
 
 
 
-    //修改银行分数
-    socket.on('updateBankScore', function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('updateBankScore-json');
-        }
-        if (!socket.userId) {
-            return;
-        }
-        //判断存取
-        if (_info.saveCoin > 0) {
-            if (gameInfo.userList[socket.userId].getScore() < _info.saveCoin) {
-                socket.emit('updateBankScoreResult', {ResultCode: 0, msg: "金币不足"});
-                return;
-            }
-            gameInfo.updateBankScore(socket, _info);
-        } else {
-            //密码判断
-            gameInfo.getUserBankPwd(socket.userId, (pwd) => {
-                if (pwd != _info.pwd) {
-                    socket.emit('updateBankScoreResult', {Result: 0, msg: "银行密码错误"});
-                    return;
-                } else {
-                    if (gameInfo.userList[socket.userId].bankScore < -_info.saveCoin) {
-                        socket.emit('updateBankScoreResult', {ResultCode: 0, msg: "银行余额不足"});
-                        return;
-                    }
-                    gameInfo.updateBankScore(socket, _info);
-                }
-            });
-        }
-    });
-
-
     //查询游戏分数2
     socket.on('getCoinLog', function (_info) {
         try {
@@ -1218,9 +1284,8 @@ const period = 1000;
 setInterval(function () {
     //更新登录
     gameInfo.updateLogin();
-    //保存用户
-    gameInfo.saveUser();
-
+    // 批量更新用户信息
+    gameInfo.batchUpdateAccount();
     // 保存log
     gameInfo.score_changeLog();
     gameInfo.diamond_changeLog();

@@ -94,7 +94,7 @@ const readIniFile = function () {
     if (conf) {
         return {getInstand: conf};
     } else {
-        conf = new Config("blue_diamond_config.ini");
+        conf = new Config("turntable.ini");
         return {getInstand: conf};
     }
 

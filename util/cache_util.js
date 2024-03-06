@@ -42,3 +42,25 @@ exports.getGameJackpot  = function getGameJackpot(socket){
     });
 }
 
+exports.pushGameJackpot  = function pushGameJackpot(userList){
+    if(userList){
+        // 奖池推送
+        redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+            for (const item in userList) {
+                // 游戏奖池
+                let gameJackpot = jackpot ? jackpot * laba_config.game_jackpot_ratio : 0;
+                const ret = {
+                    gameJackpot: gameJackpot.toFixed(2),
+                    grand_jackpot: (gameJackpot * laba_config.grand_jackpot_ratio).toFixed(2),
+                    major_jackpot: (gameJackpot * laba_config.major_jackpot_ratio).toFixed(2),
+                    minor_jackpot: (gameJackpot * laba_config.minor_jackpot_ratio).toFixed(2),
+                    mini_jackpot: (gameJackpot * laba_config.mini_jackpot_ratio).toFixed(2),
+                }
+                userList[item]._socket.emit("pushGamblingWinPool", ret);
+            }
+        });
+    }
+}
+
+
+

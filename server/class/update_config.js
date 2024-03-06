@@ -54,6 +54,40 @@ var update_config = function(){
 				})
 			},60000);
 
+
+			fs.readFile('./config/sign_in_config.json','utf-8',function(err,data){
+				self.signInConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/sign_in_config.json','utf-8',function(err,data){
+					self.signInConfig = data.toString().trim();
+				})
+			},60000);
+
+			fs.readFile('./config/activity_jackpot_config.json','utf-8',function(err,data){
+				self.activityJackpotConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/activity_jackpot_config.json','utf-8',function(err,data){
+					self.activityJackpotConfig = data.toString().trim();
+				})
+			},60000);
+
+
+			fs.readFile('./config/lucky_coin_config.json','utf-8',function(err,data){
+				self.luckyCoinConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/lucky_coin_config.json','utf-8',function(err,data){
+					self.luckyCoinConfig = data.toString().trim();
+				})
+			},60000);
+
+
+
 		};
 
 
@@ -89,7 +123,34 @@ var update_config = function(){
 				return JSON.parse(this.bankTransferConfig);
 			}
 			catch(e){
-				log.err('getShopConfig');
+				log.err('getBankTransferConfig');
+			}
+		}
+
+		this.getSignInConfig = function(){
+			try{
+				return JSON.parse(this.signInConfig);
+			}
+			catch(e){
+				log.err('getSignInConfig');
+			}
+		}
+
+		this.getActivityJackpotConfig = function(){
+			try{
+				return JSON.parse(this.activityJackpotConfig);
+			}
+			catch(e){
+				log.err('getActivityJackpotConfig');
+			}
+		}
+
+		this.getLuckyCoinConfig = function(){
+			try{
+				return JSON.parse(this.luckyCoinConfig);
+			}
+			catch(e){
+				log.err('getActivityJackpotConfig');
 			}
 		}
 

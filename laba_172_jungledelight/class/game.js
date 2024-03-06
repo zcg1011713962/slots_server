@@ -4,13 +4,13 @@ var arithmetic = require("./arithmetic");
 var sever = require("./sever");
 var schedule = require("node-schedule");
 var gameConfig = require("./../config/gameConfig");
-var http_bc = require("./../../util/http_broadcast");
 var redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
 const {getInstand: log} = require("../../CClass/class/loginfo");
 const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
+const CacheUtil = require("../../util/cache_util");
 //读取文件包
 
 
@@ -89,17 +89,7 @@ var GameInfo = function () {
 
                 //推送奖池给玩家
                 if (second % 20 === 0) {
-                    let GamblingBalanceLevelBigWin = self.A.getGamblingBalanceLevelBigWin();
-                    let nGamblingWinPool = GamblingBalanceLevelBigWin.nGamblingWinPool;
-                    nGamblingWinPool = nGamblingWinPool > 0 ? nGamblingWinPool : 0;
-                    let result = {
-                        ResultCode: 1,
-                        nGamblingWinPool: nGamblingWinPool + self.ranScore
-                    };
-
-                    for (let item in self.userList) {
-                        self.userList[item]._socket.emit("pushGamblingWinPool", result);
-                    }
+                    CacheUtil.pushGameJackpot(self.userList);
                 }
             });
         };
