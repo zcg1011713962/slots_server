@@ -732,15 +732,15 @@ io.on('connection', function (socket) {
                         return;
                     }
                     // 扣幸运币
-                    luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - luckyCoin;
-                    log.info('用户' + userId + '转盘扣幸运币' + luckyCoin + '剩余幸运币' + luckyDetail.luckyCoin);
+                    luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
+                    log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
                     CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
                         if(ret){
                             // 免费幸运币数量
                             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
                                 // 活动奖池
                                 const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, turntableCoin, activityJackpot, gameMode);
+                                gameInfo.turntable(socket, 1, activityJackpot);
                             });
                             return;
                         }
@@ -756,10 +756,9 @@ io.on('connection', function (socket) {
                     gameInfo.mulBuy(d.mul, res =>{
                         if(res){
                             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                                const luckyCoinAmount = d.mul * 5;
                                 // 活动奖池
                                 const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, luckyCoinAmount, activityJackpot, gameMode);
+                                gameInfo.turntable(socket, d.mul, activityJackpot);
                             });
                         }
                     });

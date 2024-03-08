@@ -838,11 +838,8 @@ var GameInfo = function () {
         }
 
         // 转动转盘
-        this.turntable = function (socket, luckyCoinAmount, activityJackpot) {
+        this.turntable = function (socket, betMul, activityJackpot) {
             const userId = socket.userId;
-
-            // 每5个幸运币玩一把，倍数就是翻倍
-            const betMul = luckyCoinAmount / 5;
             if(!Config.coinConfig.includes(betMul)){
                 socket.emit('turntableResult', {code:0, msg:"没有对应的倍率"});
                 return;
@@ -871,6 +868,7 @@ var GameInfo = function () {
                 maxBuyMul: 0, // 转盘最大购买倍数
                 nBetTime: Number(new Date()) // 下注时间
             };
+
 
 
 
