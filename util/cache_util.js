@@ -2,8 +2,11 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const laba_config = require('../util/config/laba_config');
 
-const bankPwdErrorTimes= 'bankPwdErrorTimes';
 
+
+const bankPwdErrorTimes= 'bankPwdErrorTimes';
+const everydayLuckyCoin= 'everydayLuckyCoin';
+const userPlayGameCount= 'userPlayGameCount';
 
 // 增加银行输入密码错误次数
 exports.addBankPwdErrorCount = function (userId) {
@@ -63,4 +66,78 @@ exports.pushGameJackpot  = function pushGameJackpot(userList){
 }
 
 
+// 设置每个用户的幸运配置
+exports.activityLuckyConfig  = function activityLuckyConfig(userId, luckyCoinConfig){
+    RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
+        if(!ret){
+            // 没进入过每日活动的用户默认配置
+            const startTime =  new Date().getTime();
+            const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
+            const ret = {
+                luckyCoin: 0,  // 活动幸运币数量
+                doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
+                luckyCoinTask: luckyCoinConfig.luckyCoinTask,
+                luckyRushStartTime: startTime,
+                luckyRushEndTime: endTime,
+                luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
+                luckyCoinTaskGetStatus: 0 // 任务领取状态0不可领取 1可领取
+            }
+            RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret));
+        }
+    });
+}
+
+// 更新用户幸运活动配置
+exports.updateActivityLuckyConfig  = function updateActivityLuckyConfig(userId, data){
+    // 更新用户配置
+    return RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(data));
+}
+
+
+// 获取每个用户的幸运配置
+exports.getActivityLuckyDetailByUserId  = function getActivityLuckyDetailByUserId(userId, callback){
+    RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
+        if(ret){
+            const luckyDetail = JSON.parse(ret);
+            callback(luckyDetail);
+        }else {
+            callback(null);
+        }
+    });
+}
+
+// 获取所有用户的幸运配置
+exports.getActivityLuckyDetail  = function getActivityLuckyDetail(callback){
+    RedisUtil.hgetall(everydayLuckyCoin).then(ret =>{
+        if(ret){
+            callback(ret);
+        }else {
+            callback(null);
+        }
+    });
+}
+
+
+// 增加玩家玩游戏次数
+exports.addPlayGameCount  = function addPlayGameCount(userId){
+    RedisUtil.hget(userPlayGameCount, userId).then(count =>{
+        count = count ? count + 1 : 1;
+        RedisUtil.hmset(userPlayGameCount, userId, count);
+        // 幸运活动增加玩游戏次数
+        RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
+            const d = JSON.parse(ret);
+            const doLuckyCoinTask = d.doLuckyCoinTask;
+            d.doLuckyCoinTask = parseInt(doLuckyCoinTask) + 1;
+            if(Number(doLuckyCoinTask) < Number(d.luckyCoinTask)){
+                RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
+            }
+        });
+    });
+}
+
+
+// 获取玩家玩游戏次数
+exports.getPlayGameCount  = function getPlayGameCount(userId){
+    return RedisUtil.hget(userPlayGameCount, userId);
+}
 

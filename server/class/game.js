@@ -17,10 +17,11 @@ const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
 const gameConfig = require('../config/gameConfig');
 const StringUtil = require('../../util/string_util');
-const Config = require("../config/activity/read_turntable_config").getInstand;
+const Config = require("../config/read_turntable_config").getInstand;
 const LABA = require("../../util/laba");
 const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
+const gameEnum = require("../config/gameEnum");
 
 
 
@@ -175,15 +176,12 @@ var GameInfo = function () {
                 function (result, callback) {//读取重要数据
                     dao.getScore(userInfo.Id, function (Result, rows) {
                         if (Result) {
-                            self.userList[userInfo.Id]._diamond = rows.diamond;
-                            self.userList[userInfo.Id]._score = rows.score;
                             result.Obj.score = rows.score;
                             result.Obj.diamond = rows.diamond;
                             log.info("获取积分:" + result);
                             callback(null, result);
                         }
                     })
-
                 },
                 function (result, callback) {
                     log.info(userInfo.Id + "添加金币");
@@ -256,10 +254,11 @@ var GameInfo = function () {
                     callback(null);
                 }
             ], function (err, result) {
+                const userId = userInfo.Id;
 
-                log.info(userInfo.Id + "登录金币" + self.userList[userInfo.Id]._score);
-                log.info(userInfo.Id + "登录钻石" + self.userList[userInfo.Id]._diamond);
-                self.userList[userInfo.Id].loginEnd = true;
+                if(self.userList[userId]){
+                    self.userList[userId].loginEnd = true;
+                }
                 if (err) {
                     console.log(err);
                     console.log(result);
@@ -267,9 +266,8 @@ var GameInfo = function () {
                 } else {
                     socket.emit('ServerListResult', {GameInfo: ServerInfo.getServerAll()});
                     //发送是否在房间信息
-                    const linemsg = self.getLineOutMsg(userInfo.Id);
-                    console.log("linemsg--------------------------------------")
-                    console.log(linemsg);
+                    const linemsg = self.getLineOutMsg(userId);
+
                     if (linemsg.Result && linemsg.tableId != -1 && linemsg.seatId != -1) {
                         socket.emit('lineOutMsg', {
                             gameId: linemsg.gameId,
@@ -281,6 +279,9 @@ var GameInfo = function () {
                     }
                     socket.emit('noticeMsg', self.server_log_list);
                     console.log("大厅在线人数:", self.onlinePlayerCount);
+
+                    // 每日转盘活动
+                    CacheUtil.activityLuckyConfig(userId, updateConfig.getLuckyCoinConfig());
                     callback_a(1);
                 }
             });
@@ -453,45 +454,72 @@ var GameInfo = function () {
 
                 // 需要充值的金额 折扣价
                 const amount = parseFloat(shopItem['target_price']) * count;
-                // 增加金币 原价
+                // 原价
                 const price = parseFloat(shopItem['source_price']) * count;
-                // 充值得到的金币
-                let sourceScore = parseFloat(price * gameConfig.score_amount_ratio);
-                // 暂时测试用
+
+                // 暂时测试用 默认充值成功
+                let addVipScore = Number(price * gameConfig.recharge_vip_socre_percentage / 100);
                 this.Recharge(userId, amount, c =>{
                     if(c){
                         console.log('测试用: 购买商品给用户充值成功', amount);
                     }
                 });
-                // 获取VIP等级额外加积分
-                let addScore = 0;
+
+                let sourceVal = 0;
+                let addVal = 0;
+                let totalVal = 0;
+
+                // 获取VIP配置
                 const vip_level = this.userList[userId].vip_level;
                 const config = this.getVipConfigByLevel(vip_level);
-                let score = sourceScore;
-                if(config){
+
+                // 购买金币
+                if(0 === shopItem.type){
+                    // 充值得到的金币
+                    let sourceScore = parseFloat(price * gameConfig.score_amount_ratio);
+
+                    // 获取VIP等级额外加金币
                     const shopScoreAddRate = config.shopScoreAddRate ? config.shopScoreAddRate : 0;
-                    addScore = parseFloat((sourceScore *  (shopScoreAddRate/ 100)).toFixed(2));
-                    score = score + addScore;
+                    const addScore = parseFloat((sourceScore *  ((shopScoreAddRate - 100)/ 100)).toFixed(2));
+                    const score = sourceScore + addScore;
+
+                    sourceVal = sourceScore;
+                    addVal = addScore;
+                    totalVal = score;
+                }else if(1 === shopItem.type){
+                    sourceVal = price;
+                    addVal = 0;
+                    totalVal = sourceVal;
                 }
 
-                // 扣款成功
-                this.reduce_bx_balance(userId, amount, c =>{
-                    if(c){
-                        // VIP加成
-                        this.addUserscore(userId, score);
-                        log.info('扣款'+ amount + '购买成功 额外加成积分' + addScore + '用户增加金币' + score);
+
+                // 扣款
+                this.reduce_bx_balance(userId, amount, ret =>{
+                    if(ret){
                         // 是否购买了首充礼包
                         if(shopItem.group === 1 && !this.userList[userId].firstRecharge){
                             // 更新为已购买首充礼包
                             this.userList[userId].firstRecharge = 1;
                         }
+
+                        if(0 === shopItem.type) {
+                            // 账户增加金币
+                            this.addUserscore(userId, totalVal);
+                            log.info('扣款'+ amount + '购买成功 额外加成金币' + addVal + '用户获得金币' + totalVal);
+                        }else if(1 === shopItem.type){
+                            // 账户增加钻石
+                            this.adddiamond(userId, totalVal);
+                        }
+
                         const result = {
+                            vipLevel: this.userList[userId].vip_level,
+                            addVipScore: addVipScore,
                             firstRecharge: this.userList[userId].firstRecharge,
-                            sourceScore: sourceScore,
-                            addScore: addScore,
-                            score: score,
-                            shopScoreAddRate: config.shopScoreAddRate,
-                            vipLevel: this.userList[userId].vip_level
+                            goodsType: shopItem.type,
+                            sourceVal: sourceVal,
+                            addVal: addVal,
+                            totalVal: totalVal,
+                            shopScoreAddRate: config.shopScoreAddRate
                         }
                         socket.emit('ShoppingResult', {code:1,msg:"购买成功", data: result});
                     }else{
@@ -521,7 +549,9 @@ var GameInfo = function () {
                 if(!dailyGet){
                     this.userList[socket.userId]._score += parseInt(currConfig.dailyGetGold);
                     this.userList[socket.userId].dailyGet = 1;
-                    socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
+                    socket.emit('vipGetGoldResult', {code:1,data: {
+                        type : 0
+                    }});
                 }else{
                     socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
                 }
@@ -530,7 +560,9 @@ var GameInfo = function () {
                 if(!monthlyGet){
                     this.userList[socket.userId]._score += parseInt(currConfig.monthlyGetGold);
                     this.userList[socket.userId].monthlyGet = 1;
-                    socket.emit('vipGetGoldResult', {code:1,msg:"领取成功"});
+                    socket.emit('vipGetGoldResult', {code:1,data:{
+                        type : 0
+                    }});
                 }else{
                     socket.emit('vipGetGoldResult', {code:0,msg:"不要重复领取"});
                 }
@@ -671,27 +703,81 @@ var GameInfo = function () {
         // 获取大厅幸运币详情页
         this.getHallLuckyPageDetail = function (socket, activityJackpot) {
             // 获取幸运币配置
-            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
             const turntableJackpot = this.getTurntableJackpot(activityJackpot);
             const luckGlodJackpot = this.getLuckGlodJackpot(activityJackpot);
 
-            const resTime = new Date().getTime() - this.userList[socket.userId].luckyRushStartTime;
-            const luckyRushResTime = resTime > 0 ? resTime : 0;
+            const now = new Date().getTime();
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+            CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
+                if(ret){
+                    const luckyCoin = ret.luckyCoin;
+                    const luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                    const doLuckyCoinTask = ret.doLuckyCoinTask;
+                    const luckyRushStartTime = ret.luckyRushStartTime;
+                    const luckyRushEndTime = ret.luckyRushEndTime;
+                    const luckyCoinTaskStatus = ret.luckyCoinTaskGetStatus;
+                    const data = {
+                        turntableJackpot: turntableJackpot, // 转盘活动奖池
+                        luckGlodJackpot: luckGlodJackpot, // 幸运金币活动奖池
+                        luckyRushStartTime: luckyRushStartTime, // 幸运金币刷新开始时间
+                        luckyRushEndTime: luckyRushEndTime, // 幸运金币刷新结束时间
+                        currTime: now, // 幸运金币刷新结束时间
+                        luckyCoinGetStatus: luckyCoinGetStatus, // 幸运金币是否可领取
+                        luckyCoinTask: luckyCoinConfig.luckyCoinTask, // 每日任务数量
+                        doLuckyCoinTask: doLuckyCoinTask, // 完成任务数量
+                        luckyCoinTaskStatus: luckyCoinTaskStatus, // 任务是否可以领币 0可领 1不可领
+                        luckyCoin: luckyCoin // 当前用户幸运币个数
+                    }
+                    // console.log('hallLuckyPageDetailResult' + data, 'flag:',  now > data.luckyRushEndTime);
+                    socket.emit('hallLuckyPageDetailResult', {code:1, data: data});
+                }
 
-            const ret = {
-                turntableJackpot: turntableJackpot, // 转盘活动奖池
-                luckGlodJackpot: luckGlodJackpot, // 幸运金币活动奖池
-                luckyRushTime: luckyCoinConfig.luckyRushTime, // 幸运金币刷新时间（分钟）
-                luckyRushResTime: luckyRushResTime, // 幸运金币领取剩余时间(秒)
-                luckyRushStartTime: this.userList[socket.userId].luckyRushStartTime, // 幸运金币刷新开始时间
-                luckyCoinGetStatus: 0, // 幸运金币是否可领取
-                luckyCoinTask: luckyCoinConfig.luckyCoinTask, // 每日任务数量
-                doLuckyCoinTask: this.userList[socket.userId].doLuckyCoinTask, // 完成任务数量
-                luckyCoinGetLimit: luckyCoinConfig.luckyCoinGetLimit, // 完成幸运币获取限制个数
-                luckyCoin: this.userList[socket.userId].luckyCoin // 当前用户幸运币个数
-            }
+            });
+        }
+        
+        // 领取幸运币
+        this.getLuckyCoin = function (socket, type) {
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+            CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
+                if(ret){
+                    const luckyCoin = ret.luckyCoin;
+                    const luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                    const luckyCoinTaskGetStatus = ret.luckyCoinTaskGetStatus;
+                    if(luckyCoin === luckyCoinConfig.luckyCoinGetLimit){
+                        socket.emit('getLuckyCoinResult', {code:0, msg: "领取上限"});
+                        return;
+                    }
+                    if(!luckyCoinGetStatus && !luckyCoinTaskGetStatus){
+                        log.info('不可领取幸运币,用户:'+  socket.userId  +'间隔领取状态' + luckyCoinGetStatus + '完成任务状态' +luckyCoinTaskGetStatus);
+                        socket.emit('getLuckyCoinResult', {code:0, msg: "不可领取状态"});
+                        return;
+                    }
+                    const now = new Date().getTime();
+                    const luckyRushTimeMs = luckyCoinConfig.luckyRushTime * 60 * 1000;
+                    // 更新状态
+                    if(type === 0){
+                        // 每隔一段时间领取幸运币
+                        ret.luckyCoinGetStatus = 0;
+                        // 更新领取时间
+                        ret.luckyRushStartTime = now;
+                        ret.luckyRushEndTime = now + luckyRushTimeMs;
+                    }else if(type === 1){
+                        // 做完任务领取幸运币
+                        ret.luckyCoinTaskGetStatus = 0;
+                        // 任务可以重做
+                        ret.doLuckyCoinTask = 0;
+                    }
+                    // 领取币+1
+                    ret.luckyCoin = luckyCoin + 1;
 
-            socket.emit('hallLuckyPageDetailResult', {code:1, data: ret});
+                    log.info('幸运币领取成功，用户:'+ socket.userId + '类型' + type + '币数量' + ret.luckyCoin);
+                    CacheUtil.updateActivityLuckyConfig(socket.userId, ret).then( result =>{
+                        if(result){
+                            socket.emit('getLuckyCoinResult', {code:1, msg: "成功"});
+                        }
+                    });
+                }
+            });
         }
 
         // 获取幸运币活动配置
@@ -971,36 +1057,9 @@ var GameInfo = function () {
         }
 
         //给在线的用户加钻石
-        this.adddiamond = function (_userId, score, callback) {
-
-            if (!_userId) {					//传输ID错误
-                console.log("加分,未登录")
-                return 0;
-            }
-            if (!this.userList[_userId]) {	//未找到用户
-                console.log("加分,未登录")
-                return 0
-            } else {
-                //console.log(ServerInfo)
-                var gameScoket = ServerInfo.getScoket(this.userList[_userId].getGameId())
-                //console.log("1111");
-                var self = this;
-                gameScoket.emit('adddiamond', {userid: _userId, adddiamond: score})
-                gameScoket.on('adddiamondResult', function (msg) {
-                    //console.log(msg);
-                    if (msg.Result) {
-                        //可以成功加减分
-                        var diamond_before = self.userList[_userId].getDiamond();
-                        self.userList[_userId].adddiamond(score)
-                        callback(1, diamond_before);
-                    } else {
-                        callback(0)
-                    }
-                    gameScoket.removeAllListeners('adddiamondResult');
-                })
-            }
-
-        };
+        this.adddiamond = function (_userId, diamond, callback) {
+            this.userList[_userId]._diamond += diamond;
+        }
 
 
         //进入游戏
@@ -1066,6 +1125,16 @@ var GameInfo = function () {
             user.AutoOutCount = 0;
             this._loginList.push(user);
         };
+        
+        this.existGameDel = function (userId) {
+            const gameId = this.userList[userId].getGameId();
+            if (gameId) {
+                // 在大厅的用户，不应该在游戏内 断开游戏连接
+                const gameScoket = ServerInfo.getScoket(gameId);
+                log.info('在大厅的用户，不应该在游戏内 断开游戏连接userId', + userId + 'gameId' + gameId);
+                if(gameScoket) gameScoket.emit('disconnectUser', {userId: userId});
+            }
+        }
 
 
         this.getLoginState = function (useraccount, state) {
@@ -1092,67 +1161,7 @@ var GameInfo = function () {
 
         };
 
-        this.updateLogin = function () {
 
-            for (i = 0; i < this._loginList.length; i++) {
-                if (this.userList[this._loginList[i].id]) {
-                    //存在,让他下线
-                    if (this.userList[this._loginList[i].id].getGameId()) {
-                        //1.游戏状态
-                        //先让游戏下线,然后再新开一个用户
-                        if (this._loginList[i].state != 4) {
-                            log.info(this._loginList[i].id + "当前用户在线" + this.userList[this._loginList[i].id].getGameId() + "被强制下线");
-                            var gameScoket = ServerInfo.getScoket(this.userList[this._loginList[i].id].getGameId())
-                            this.userList[this._loginList[i].id]._socket.disconnect();
-                            if(gameScoket) gameScoket.emit('disconnectUser', {userId: this._loginList[i].id});
-
-                            this._loginList[i].state = 4;
-                        } else {
-                            log.info("等待游戏服务器过来删除" + this._loginList[i].id);
-                            ++this._loginList[i].AutoOutCount;
-                            if (this._loginList[i].AutoOutCount > 100) {
-                                delete this.userList[this._loginList[i].id];
-                            }
-                        }
-                    } else {
-                        //先判断socket 是否有真的连接
-                        if (this.userList[this._loginList[i].id]._socket.connected) {
-                            if (this._loginList[i].state == 1) {
-                                log.info(this._loginList[i].id + "用户只在登录服务器被强制下线");
-                                this.userList[this._loginList[i].id]._socket.disconnect();
-                                this._loginList[i].state = 2;
-                            }
-                        } else if (!this.userList[this._loginList[i].id].deleteFlag) {
-                            delete this.userList[this._loginList[i].id];
-                            //--this.onlinePlayerCount;
-                            //console.log("离线!同时在线:" + this.onlinePlayerCount + "人")
-                        }
-                    }
-                } else {
-                    //完全不在线了,再让他登录一下
-                    log.info(this._loginList[i].id + "完全下线了");
-                    const self = this;
-                    this._loginList[i].state = 3;
-                    const socket = this._loginList[i].socket;
-                    const userId = this._loginList[i];
-                    dao.login(userId, socket, (code, msg, data) => {
-                        if (ErrorCode.LOGIN_SUCCESS.code === code) {
-                            if (self.getLoginState(data.Account, 3)) {
-                                //如果状态为3,才添加
-                                self.deleteLoginList(data.Account);
-                                self.addUser(data, data.socket, function (rusult) {
-                                    log.info("完成添加")
-                                });
-                            } else {
-                                console.log("状态不为3,又重新登录了")
-                            }
-                        }else{
-                            socket.emit('loginResult', {code: code, msg: msg});
-                        }
-                    });
-                }
-            }
-        };
 
 
         //赠送金币
@@ -2085,6 +2094,35 @@ var GameInfo = function () {
             this.gameRank[_info.serverId] = _info;
         };
 
+
+        this.refreshLuckCoinActivity = function () {
+            const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+            const now = new Date().getTime();
+            const luckyRushTimeMs = luckyCoinConfig.luckyRushTime * 60 * 1000;
+
+
+            CacheUtil.getActivityLuckyDetail(ret =>{
+                if(ret){
+                    for(const key in ret){
+                        const luckyItem = JSON.parse(ret[key]);
+                        // 可领取状态 未领取
+                        if(now >= luckyItem.luckyRushEndTime && luckyItem.luckyCoinGetStatus === 0){
+                            luckyItem.luckyCoinGetStatus = 1;
+                            luckyItem.luckyRushStartTime = now;
+                            luckyItem.luckyRushEndTime = now + luckyRushTimeMs;
+                        }
+
+                        const doLuckyCoinTask = luckyItem.doLuckyCoinTask;
+                        if(doLuckyCoinTask > 0 && doLuckyCoinTask >= luckyCoinConfig.luckyCoinTask){
+                            luckyItem.luckyCoinTaskGetStatus = 1;
+                        }
+                        CacheUtil.updateActivityLuckyConfig(key, luckyItem);
+                    }
+                }
+            })
+        }
+
+        // 更新账户信息
         this.batchUpdateAccount = function () {
             this.batchUpdateOnLineAccount();
             this.batchUpdateOffLineAccount();
@@ -2104,10 +2142,10 @@ var GameInfo = function () {
             if (saveList.length < 1) {
                 return;
             }
-            dao.batchUpdateAccount(saveList, function (result) {
-                if(result){
-                    for (let i = 0; i < result.length; ++i) {
-                        log.info("成功保存离线用户信息" + result[i].id + " socre:" + result[i].score + " diamond:" + result[i].diamond + " bankScore:" + result[i].bankScore + " housecard:" + result[i].housecard+ " is_vip:" + result[i].is_vip+ " vip_score:" + result[i].vip_score+ " firstRecharge:" + result[i].firstRecharge);
+            dao.batchUpdateAccount(saveList, function (users) {
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        log.info("成功保存离线用户信息" + users[i].id + " socre:" + users[i].score + " diamond:" + users[i].diamond + " bankScore:" + users[i].bankScore + " housecard:" + users[i].housecard+ " is_vip:" + users[i].is_vip+ " vip_score:" + users[i].vip_score+ " firstRecharge:" + users[i].firstRecharge);
                         saveList = [];
                     }
                 }
@@ -2125,13 +2163,13 @@ var GameInfo = function () {
                 return;
             }
 
-            dao.batchUpdateAccount(saveList, function (result) {
-                if(result){
-                    for (let i = 0; i < result.length; ++i) {
-                        log.info("成功保存在线用户信息");
-                        saveList = [];
-                    }
+            dao.batchUpdateAccount(saveList, function (users) {
+                if(users){
+                    /*for (let i = 0; i < users.length; ++i) {
+                        log.info("成功保存在线用户信息" + users[i].id);
+                    }*/
                 }
+                saveList = [];
             });
         }
 
@@ -2255,86 +2293,8 @@ var GameInfo = function () {
             dao.insert_mark(list);
         };
 
-        //报名
-        this.ApplyMatch = function (_userId, roomid, _socket) {
-
-            if (!this.userList[_userId]) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "用户不存在"});
-                return;
-            }
-
-
-            if (!this.gameRank[roomid]) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "比赛roomid不存在"});
-                return;
-            }
-
-            if (this.isMaintain()) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "维护模式,禁止报名!"});
-                return;
-            }
-
-            if (this.gameRank[roomid]) {
-                //console.log(this.gameRank[roomid]);
-                for (var i = 0; i < this.gameRank[roomid].rank.length; i++) {
-                    if (this.gameRank[roomid].rank[i].id == _userId) {
-                        _socket.emit("applyMatchResult", {ResultCode: 2, msg: "已经报名了"})
-                        return;
-                    }
-                }
-            }
-
-            //当前房间的报名的费用
-            if (this.userList[_userId].getScore() < 100) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "金币不足"})
-                return;
-            }
-
-            //比赛时间低于30秒禁止报名
-            if (!this.gameRank[roomid].MatchLogin) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "比赛时间低于30秒禁止报名"})
-                return;
-            }
-
-            if (!this.gameRank[roomid].ApplyFlag) {
-                _socket.emit("applyMatchResult", {ResultCode: 0, msg: "现在不是比赛时间"})
-                return;
-            }
-
-            //用户是否已经报名
-
-            //报名成功
-            var userInfo = {};
-            userInfo.matchId = this.gameRank[roomid].randIdx;
-            userInfo.userId = _userId;
-            userInfo.score = 100;
-            userInfo.lastTime = new Date();
-            userInfo.roomType = roomid;
-            userInfo._nickname = this.userList[_userId]._nickname;
-            var self = this;
-            dao.matchRandKing(userInfo, function (ResultCode) {
-                self.userList[_userId]._score -= 100;
-                //通知游戏服务器
-                var gamesocket = ServerInfo.getScoket(roomid);
-                gamesocket.emit("applyMatchResult", userInfo);
-                _socket.emit("applyMatchResult", {ResultCode: 1, msg: "报名成功"})
-
-            })
-
-        };
 
         this.sendMsg = function (_userId, _info, io) {
-            //喇叭数量是否够
-            // if (!this.userList[_userId]._proList[2]){
-            // 	this.userList[_userId]._socket.emit('sendMsgResult',{Result:0,msg:"道具数量不足"});
-            // 	return;
-            // }
-
-            // //扣除喇叭
-            // this.userList[_userId]._proList[2] -= 1;
-            // var info = {userId:_userId,propId:2,propCount:-1}
-            // dao.updateProp(info,function(result){});
-
 
             io.sockets.emit('sendMsg', {nickname: this.userList[_userId]._nickname, msg: _info.msg});
 
@@ -2714,6 +2674,7 @@ var GameInfo = function () {
                                 const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
                                 // 计算VIP等级
                                 const vipLevel = this.getVipLevelByScore(vScore);
+
                                 // 更新VIP积分
                                 this.userList[userId].vip_score = vScore;
                                 this.updateVipScore(userId, vScore);
@@ -2863,8 +2824,8 @@ var GameInfo = function () {
                 return;
             }
 
-            const addBankScore = gold;
-            this.userList[socket.userId]._score =  this.userList[socket.userId]._score - parseInt(gold);
+            const addBankScore = Number(gold);
+            this.userList[socket.userId]._score =  this.userList[socket.userId]._score - Number(gold);
             this.userList[socket.userId].bankScore =  this.userList[socket.userId].bankScore + addBankScore;
 
             const result = {
@@ -2950,7 +2911,8 @@ var GameInfo = function () {
                             nickname: item.nickname,
                             headimgurl: item.headimgurl,
                             userId: item.from_userid,
-                            bankScore: item.transfer_bank_score
+                            bankScore: item.transfer_bank_score,
+                            transferTime: item.transfer_time
                         }
                         data.push(row);
                     })
@@ -2970,7 +2932,8 @@ var GameInfo = function () {
                             nickname: item.nickname,
                             userId: item.to_userid,
                             headimgurl: item.headimgurl,
-                            bankScore: item.transfer_bank_score
+                            bankScore: item.transfer_bank_score,
+                            transferTime: item.transfer_time
                         }
                         data.push(row);
                     })
@@ -3168,8 +3131,6 @@ var GameInfo = function () {
                 // dao.saveLineOut(_info.userId)
                 console.log(this.lineOutList[_info.userId]);
             } else {
-                //移除
-                // dao.deleteLineOut(_info.userId)
                 delete this.lineOutList[_info.userId];
             }
         };

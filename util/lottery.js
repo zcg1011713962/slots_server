@@ -2,6 +2,7 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require("./redis_laba_win_pool");
 const laba_config = require("./config/laba_config");
 const log = require("../CClass/class/loginfo").getInstand;
+const CacheUtil =  require("../util/cache_util");
 
 exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
@@ -19,6 +20,9 @@ exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo
                 if (result.code < 1) {
                     socket.emit('lotteryResult', {ResultCode: result.code});
                 } else {
+                    // 增加用户玩游戏次数
+                    CacheUtil.addPlayGameCount(socket.userId);
+                    // 摇奖成功
                     socket.emit('lotteryResult', {
                         ResultCode: result.code,
                         ResultData: {

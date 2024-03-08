@@ -243,20 +243,22 @@ var GameInfo = function () {
                 if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
-
-                // RTP控制
-                if(this.lotteryCount > target_rtp_start_position) {
-                    // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
-                    source_rtp = ((this.totalBackBet / this.totalBet) * 100) > 100 ? 100 : ((this.totalBackBet / this.totalBet) * 100).toFixed(2);
-                    // 当前RTP大于目标RTP 而且 摇的结果是赢的
-                    if (source_rtp > expectRTP && fin_value > 0) {
-                        log.info('需要让用户输 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:'+ fin_value)
-                        continue;
-                    }
-                    // 当前RTP小于目标RTP 而且 摇的结果是输的
-                    if (source_rtp < expectRTP && fin_value < 1) {
-                        log.info('需要让用户赢 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:' + fin_value)
-                        continue;
+                // 开了配牌器也不走RTP控制
+                if(!iconTypeBind){
+                    // RTP控制
+                    if(this.lotteryCount > target_rtp_start_position) {
+                        // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
+                        source_rtp = ((this.totalBackBet / this.totalBet) * 100) > 100 ? 100 : ((this.totalBackBet / this.totalBet) * 100).toFixed(2);
+                        // 当前RTP大于目标RTP 而且 摇的结果是赢的
+                        if (source_rtp > expectRTP && fin_value > 0) {
+                            log.info('需要让用户输 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:'+ fin_value)
+                            continue;
+                        }
+                        // 当前RTP小于目标RTP 而且 摇的结果是输的
+                        if (source_rtp < expectRTP && fin_value < 1) {
+                            log.info('需要让用户赢 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:' + fin_value)
+                            continue;
+                        }
                     }
                 }
                 break;
@@ -385,7 +387,6 @@ var GameInfo = function () {
             }
             if (saveListTemp.length > 0) {
                 this._Csocket.emit("score_changeLog", saveListTemp);
-                //gameDao.score_changeLog(saveListTemp);
             }
         };
         // 摇奖日志
@@ -700,7 +701,7 @@ var GameInfo = function () {
         //清楚断线用户信息
         this.cleanLineOut = function () {
             //清理登录服务器
-            console.log(this.lineOutList);
+            console.log('清理登录服务器' + this.lineOutList);
             for (var Item in this.lineOutList) {
                 Item = parseInt(Item);
                 var tableid = this.lineOutList[Item].tableId;

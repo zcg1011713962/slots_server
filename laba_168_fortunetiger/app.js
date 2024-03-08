@@ -212,6 +212,7 @@ io.on('connection', function (socket) {
                     gameId: gameConfig.serverId,
                     nolog: true
                 };
+                log.info('用户离开游戏,移除用户'+ socket.userId)
                 Csocket.emit("userDisconnect", result);
                 socket.userId = null;
             } else {

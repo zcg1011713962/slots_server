@@ -38,9 +38,8 @@ User = function(_userInfo,_socket){
 	this.dailyGet = 0;        // 是否领取了每日金币
 	this.monthlyGet = 0;      // 是否领取了每月金币
 	this.AddDate = 0;         // 账户创建时间(时间戳毫秒)
-	this.luckyCoin = 0;       // 活动幸运币数量
-	this.doLuckyCoinTask = 0; // 幸运活动每日完成的任务数量
-	this.luckyRushStartTime = new Date().getTime();
+	this.playGameTime = 0;		  // 用户玩的游戏总局数
+
 
 	this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.Id;

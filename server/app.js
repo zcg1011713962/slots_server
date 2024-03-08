@@ -21,7 +21,7 @@ const ErrorCode = require('../util/ErrorCode');
 const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const laba_config = require("../util/config/laba_config");
-
+const updateConfig = require('./class/update_config').getInstand;
 
 
 //版本密钥和版本号
@@ -259,20 +259,10 @@ io.on('connection', function (socket) {
                     socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                     return;
                 }
-                //数据库有此用户
-               /* if (gameInfo.IsPlayerOnline(data.Id)) {
-                    //在线
-                    log.info("用户在线,进入等待离线列队");
-                    user.id = data.Id;
-                    user.socket = socket;
-                    user.userName = data.Account;
-                    user.headimgurl = data.headimgurl;
-                    //加入登录列队
-                    gameInfo.addLoginList(user);
-                } else {
-
-                }*/
-
+                if (gameInfo.IsPlayerOnline(data.Id)) {
+                    // 返回大厅的用户  不允许在游戏里，断开游戏
+                    gameInfo.existGameDel(data.Id);
+                }
                 // 登录成功
                 gameInfo.addUser(data, socket, function (result) {
                     if (result === 1) {   //断线从连
@@ -330,8 +320,10 @@ io.on('connection', function (socket) {
 
         if (socket.serverGameid) {
             log.info("游戏服务器 -" + ServerInfo.getServerNameById(socket.serverGameid) + "- 已经断开连接");
+        }else{
+            log.info("用户断开连接:" + socket.userId);
         }
-        log.info("用户断开连接:" + socket.userId);
+
         // 如果用户还存在的话，删除
         const userInfo = {userId: socket.userId, nolog: true};
         gameInfo.deleteUser(userInfo);
@@ -339,8 +331,7 @@ io.on('connection', function (socket) {
 
     // 有用户离开
     socket.on('userDisconnect', function (_userInfo) {
-        log.info("userDisconnect:");
-        log.info(_userInfo);
+        log.info("userDisconnect");
         if (_userInfo.ResultCode) {
             gameInfo.setCleanGameIdByUserId(_userInfo);
             gameInfo.deleteUser(_userInfo);
@@ -686,6 +677,23 @@ io.on('connection', function (socket) {
         }
     });
 
+    // 领取幸运币
+    socket.on("getLuckyCoin", function (data) {
+        try{
+            if(!data) throw new Error();
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.getLuckyCoin(socket, d.type);
+            }else{
+                socket.emit('getLuckyCoinResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('luckyCoinDetailResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+
     // 获取转盘详情页
     socket.on("luckyCoinDetail", function (data) {
         try{
@@ -711,16 +719,35 @@ io.on('connection', function (socket) {
     socket.on("turntable", function (data) {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            // 免费转盘
-            if(!data){
-                // 免费幸运币数量
-                const luckyCoinAmount = 5;
-                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                    // 活动奖池
-                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                    gameInfo.turntable(socket, luckyCoinAmount, activityJackpot);
+            const gameMode = data ? 1 : 0; // 0 免费游戏 1收费游戏
+
+            if(gameMode === 0){
+                // 免费模式扣除幸运币
+                CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
+                    const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
+                    const turntableCoin = luckyCoinConfig.turntableCoin;
+                    const luckyCoin = luckyDetail.luckyCoin;
+                    if(luckyCoin < turntableCoin){
+                        socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
+                        return;
+                    }
+                    // 扣幸运币
+                    luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - luckyCoin;
+                    log.info('用户' + userId + '转盘扣幸运币' + luckyCoin + '剩余幸运币' + luckyDetail.luckyCoin);
+                    CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
+                        if(ret){
+                            // 免费幸运币数量
+                            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                                // 活动奖池
+                                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                                gameInfo.turntable(socket, turntableCoin, activityJackpot, gameMode);
+                            });
+                            return;
+                        }
+                        socket.emit('turntableResult', {code:0, msg:"扣币失败"});
+                    })
                 });
-            }else{
+            }else if(gameMode === 1){
                 try{
                     const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
                     // 购买加倍转盘
@@ -732,7 +759,7 @@ io.on('connection', function (socket) {
                                 const luckyCoinAmount = d.mul * 5;
                                 // 活动奖池
                                 const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, luckyCoinAmount, activityJackpot);
+                                gameInfo.turntable(socket, luckyCoinAmount, activityJackpot, gameMode);
                             });
                         }
                     });
@@ -1282,8 +1309,9 @@ var server = http.listen(app.get('port'), function () {
 
 const period = 1000;
 setInterval(function () {
-    //更新登录
-    gameInfo.updateLogin();
+    // 幸运币活动刷新
+    gameInfo.refreshLuckCoinActivity();
+
     // 批量更新用户信息
     gameInfo.batchUpdateAccount();
     // 保存log

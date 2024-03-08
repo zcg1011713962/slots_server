@@ -507,7 +507,7 @@ exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
             if (err) {
                 console.log("batchUpdateAccount");
                 console.log(err);
-                callback([]);
+                callback(null);
             } else {
                 callback(users);
             }

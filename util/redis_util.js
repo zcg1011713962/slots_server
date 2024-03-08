@@ -14,6 +14,9 @@ class RedisUtil {
             // Promisify Redis functions
             this.getAsync = promisify(this.client.get).bind(this.client);
             this.setAsync = promisify(this.client.set).bind(this.client);
+            this.hgetAsync = promisify(this.client.hget).bind(this.client);
+            this.hgetallAsync = promisify(this.client.hgetall).bind(this.client);
+            this.hmsetAsync = promisify(this.client.hmset).bind(this.client);
             this.delAsync = promisify(this.client.del).bind(this.client);
             this.expireAsync = promisify(this.client.expire).bind(this.client);
             this.keysAsync = promisify(this.client.keys).bind(this.client);
@@ -36,6 +39,18 @@ class RedisUtil {
 
     async get(key) {
         return this.getAsync(key);
+    }
+
+    async hget(key, k) {
+        return this.hgetAsync(key, k);
+    }
+
+    async hmset(key, k, v) {
+        return this.hmsetAsync(key, k , v);
+    }
+
+    async hgetall(key) {
+        return this.hgetallAsync(key);
     }
 
     async del(key) {

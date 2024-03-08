@@ -1,5 +1,5 @@
-var fs = require('fs');
-var log = require("../../CClass/class/loginfo").getInstand;
+const fs = require('fs');
+const log = require("../../CClass/class/loginfo").getInstand;
 
 var update_config = function(){
 
@@ -12,76 +12,76 @@ var update_config = function(){
 			//更新配置
 			const self = this;
 
-			fs.readFile('./config/notice_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/notice_config.json','utf-8',function(err,data){
 			    self.noticeConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/notice_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/notice_config.json','utf-8',function(err,data){
 					self.noticeConfig = data.toString().trim();
 				})
 			},60000);
 
 
-			fs.readFile('./config/vip_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/vip_config.json','utf-8',function(err,data){
 				self.vipConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/vip_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/vip_config.json','utf-8',function(err,data){
 					self.vipConfig = data.toString().trim();
 				})
 			},60000);
 
 
-			fs.readFile('./config/shop_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/shop_config.json','utf-8',function(err,data){
 				self.shopConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/shop_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/shop_config.json','utf-8',function(err,data){
 					self.shopConfig = data.toString().trim();
 				})
 			},60000);
 
-			fs.readFile('./config/bank_transfer.json','utf-8',function(err,data){
+			fs.readFile('./config/json/bank_transfer.json','utf-8',function(err,data){
 				self.bankTransferConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/bank_transfer.json','utf-8',function(err,data){
+				fs.readFile('./config/json/bank_transfer.json','utf-8',function(err,data){
 					self.bankTransferConfig = data.toString().trim();
 				})
 			},60000);
 
 
-			fs.readFile('./config/sign_in_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/sign_in_config.json','utf-8',function(err,data){
 				self.signInConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/sign_in_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/sign_in_config.json','utf-8',function(err,data){
 					self.signInConfig = data.toString().trim();
 				})
 			},60000);
 
-			fs.readFile('./config/activity_jackpot_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/activity_jackpot_config.json','utf-8',function(err,data){
 				self.activityJackpotConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/activity_jackpot_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/activity_jackpot_config.json','utf-8',function(err,data){
 					self.activityJackpotConfig = data.toString().trim();
 				})
 			},60000);
 
 
-			fs.readFile('./config/lucky_coin_config.json','utf-8',function(err,data){
+			fs.readFile('./config/json/lucky_coin_config.json','utf-8',function(err,data){
 				self.luckyCoinConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/lucky_coin_config.json','utf-8',function(err,data){
+				fs.readFile('./config/json/lucky_coin_config.json','utf-8',function(err,data){
 					self.luckyCoinConfig = data.toString().trim();
 				})
 			},60000);
