@@ -21,6 +21,7 @@ const ErrorCode = require('../util/ErrorCode');
 const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const laba_config = require("../util/config/laba_config");
+const TypeEnum = require("../util/enum/type");
 const updateConfig = require('./class/update_config').getInstand;
 
 
@@ -352,7 +353,24 @@ io.on('connection', function (socket) {
 
     // 发送跑马灯
     socket.on("sendNotifyMsg", function () {
-        gameInfo.sendNotifyMsg();
+        // 发送跑马灯
+        const noticeMsg = {
+            type: TypeEnum.notifyType.normal,
+            content_id: "c2000",
+            txt: "跑马灯......................................信息"
+        }
+        gameInfo.sendNotifyMsg(socket.userId, noticeMsg);
+    });
+
+    // 发送全服跑马灯
+    socket.on("sendAllNotifyMsg", function () {
+        // 发送跑马灯
+        const noticeMsg = {
+            type: TypeEnum.notifyType.normal,
+            content_id: "c2000",
+            txt: "全服跑马灯......................................信息"
+        }
+        gameInfo.sendAllNotifyMsg(noticeMsg);
     });
 
     // 注册
@@ -786,7 +804,6 @@ io.on('connection', function (socket) {
     });
 
 
-
     // 查看邮件
     socket.on("getEmail", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
@@ -798,6 +815,27 @@ io.on('connection', function (socket) {
     socket.on("setEmailRead", function (data) {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.setEmailRead(socket, data);
+        }
+    });
+
+    // 邮件一键已读
+    socket.on("setEmailAllRead", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.setEmailAllRead(socket);
+        }
+    });
+
+    // 删除指定邮件
+    socket.on("delEmailById", function (data) {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.delEmailById(socket, data.id);
+        }
+    });
+
+    // 邮件一键删除
+    socket.on("emailAllDel", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.emailAllDel(socket);
         }
     });
 

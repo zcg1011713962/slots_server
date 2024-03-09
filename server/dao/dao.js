@@ -873,7 +873,7 @@ exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateVipLevel");
+                console.log("修改vip等级");
                 console.log(err);
                 callback(0);
             } else {
@@ -2081,7 +2081,7 @@ exports.updateCoinLogState = function updateCoinLogState(state, id, callback) {
 };
 // 保存邮件记录
 exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
-    const sql = "INSERT INTO email (title, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO email (title_id, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     var values = [];
     values.push(title);
@@ -2090,6 +2090,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
     values.push(from_userid);
     values.push(content_id);
     values.push(otherId);
+    values.push(goods_type);
 
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -2104,7 +2105,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
 };
 //查询邮件记录
 exports.selectEmail = function selectEmail(userid, callback) {
-    const sql = "select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname,b.transfer_bank_score val  from email e left join log_bank_transfer b on e.otherId = b.id left join newuseraccounts n on e.from_userid = n.Id where e.to_userid =?";
+    const sql = "select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.transfer_bank_score val  from email e left join log_bank_transfer b on e.otherId = b.id left join newuseraccounts n on e.from_userid = n.Id where e.to_userid =?";
     let values = [];
     values.push(userid);
     pool.getConnection(function (err, connection) {
@@ -2150,6 +2151,77 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
 
     });
 };
+
+// 设置邮件为已读
+exports.setEmailisAlllReadByUserId = function setEmailisAlllReadByUserId(userId, callback) {
+    const sql = "update email set isRead = 1 where to_userid = ?";
+    let values = [];
+
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("设置用户全部邮件为已读");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+
+        });
+        values = [];
+    });
+};
+
+// 删除指定邮件
+exports.delEmailById = function delEmailById(id, callback) {
+    const sql = "delete from email where id = ?";
+    let values = [];
+    values.push(id);
+
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("删除指定邮件");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+
+        });
+        values = [];
+    });
+};
+
+// 删除全部已读邮件
+exports.delEmailisAlllReadByUserId = function delEmailisAlllReadByUserId(userId, callback) {
+    const sql = "delete from email  where isRead = 1 and to_userid = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("删除全部已读");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+
+        });
+        values = [];
+    });
+};
+
 //查询系统邮件记录
 exports.selectSystemEmail = function selectSystemEmail(callback) {
     const sql = "select * from email  where type = 999";

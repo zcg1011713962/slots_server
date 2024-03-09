@@ -21,10 +21,9 @@ const Config = require("../config/read_turntable_config").getInstand;
 const LABA = require("../../util/laba");
 const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
-const gameEnum = require("../../util/enum/type");
 const LanguageItem = require("../../util/enum/language");
-const EmailType = require("../../util/enum/type");
-const GoodsType = require("../../util/enum/type");
+const TypeEnum = require("../../util/enum/type");
+
 
 
 var GameInfo = function () {
@@ -449,7 +448,7 @@ var GameInfo = function () {
                     return;
                 }
                 // 已经首充不用
-                if(this.userList[userId].firstRecharge === 1 && shopItem.group === 1){
+                if(this.userList[userId].firstRecharge === 1 && shopItem.group === TypeEnum.ShopGroupType.rechargeGift){
                     socket.emit('ShoppingResult', {code:0,msg:"已经购买过首充礼包"});
                     return;
                 }
@@ -476,7 +475,7 @@ var GameInfo = function () {
                 const config = this.getVipConfigByLevel(vip_level);
 
                 // 购买金币
-                if(0 === shopItem.type){
+                if(TypeEnum.GoodsType.gold === shopItem.type){
                     // 充值得到的金币
                     let sourceScore = parseFloat(price * gameConfig.score_amount_ratio);
 
@@ -488,7 +487,7 @@ var GameInfo = function () {
                     sourceVal = sourceScore;
                     addVal = addScore;
                     totalVal = score;
-                }else if(1 === shopItem.type){
+                }else if(TypeEnum.GoodsType.diamond === shopItem.type){
                     sourceVal = price;
                     addVal = 0;
                     totalVal = sourceVal;
@@ -499,16 +498,16 @@ var GameInfo = function () {
                 this.reduce_bx_balance(userId, amount, ret =>{
                     if(ret){
                         // 是否购买了首充礼包
-                        if(shopItem.group === 1 && !this.userList[userId].firstRecharge){
+                        if(shopItem.group === TypeEnum.ShopGroupType.rechargeGift && !this.userList[userId].firstRecharge){
                             // 更新为已购买首充礼包
                             this.userList[userId].firstRecharge = 1;
                         }
 
-                        if(0 === shopItem.type) {
+                        if(TypeEnum.GoodsType.gold === shopItem.type) {
                             // 账户增加金币
                             this.addUserscore(userId, totalVal);
                             log.info('扣款'+ amount + '购买成功 额外加成金币' + addVal + '用户获得金币' + totalVal);
-                        }else if(1 === shopItem.type){
+                        }else if(TypeEnum.GoodsType.diamond === shopItem.type){
                             // 账户增加钻石
                             this.adddiamond(userId, totalVal);
                         }
@@ -1152,7 +1151,18 @@ var GameInfo = function () {
             }
 
         };
+        // 查询邮件
         this.getEmail = function (_socket) {
+            this.searchEmail(_socket.userId, newList =>{
+                if (newList.length > 0) {
+                    _socket.emit('getEmailResult', {code: 1, data: newList});
+                } else {
+                    _socket.emit('getEmailResult', {code: 0, msg: "未查到新邮件"});
+                }
+            });
+        };
+        // 查询邮件
+        this.searchEmail = function (userId, callback) {
             // 先查系统邮件，再查个人邮件
             let newList = [];
             dao.selectSystemEmail((code, res) => {
@@ -1161,28 +1171,80 @@ var GameInfo = function () {
                         newList.push(res[i]);
                     }
                 }
-                dao.selectEmail(_socket.userId, (code, res) => {
+                dao.selectEmail(userId, (code, res) => {
                     if (code) {
                         for (let i = 0; i < res.length; i++) {
                             newList.push(res[i]);
                         }
                     }
-                    if (newList.length > 0) {
-                        _socket.emit('getEmailResult', {code: 1, data: newList});
-                    } else {
-                        _socket.emit('getEmailResult', {code: 0, msg: "未查到新邮件"});
-                    }
+                    callback(newList);
                 });
             });
-        };
-
+        }
+        // 设置邮件已读
         this.setEmailRead = function (_socket, _info) {
-            dao.setEmailisRead(_info.id, (code, res) => {
+            dao.setEmailisRead(_info.id, (code) => {
                 if (code) {
-                    _socket.emit('setEmailReadResult', {code: 1, data: res});
+                    // 返回已读后邮件
+                    this.searchEmail(_socket.userId, newList =>{
+                        if (newList.length > 0) {
+                            _socket.emit('setEmailReadResult', {code: 1, data: newList});
+                        }else{
+                            _socket.emit('setEmailReadResult', {code: 1, data: []});
+                        }
+                    });
                 }
             });
         };
+
+        // 全部已读
+        this.setEmailAllRead = function (_socket) {
+            dao.setEmailisAlllReadByUserId(_socket.userId, (code) => {
+                if (code) {
+                    // 返回所有邮件
+                    this.searchEmail(_socket.userId, newList =>{
+                        if (newList.length > 0) {
+                            _socket.emit('setEmailAllReadResult', {code: 1, data: newList});
+                        }else{
+                            _socket.emit('setEmailAllReadResult', {code: 1, data: []});
+                        }
+                    });
+                }
+            });
+        };
+
+        // 删除指定邮件
+        this.delEmailById = function (_socket, id) {
+            dao.delEmailById(id, (code) => {
+                if (code) {
+                    // 返回所有邮件
+                    this.searchEmail(_socket.userId, newList =>{
+                        if (newList.length > 0) {
+                            _socket.emit('delEmailByIdResult', {code: 1, data: newList});
+                        }else{
+                            _socket.emit('delEmailByIdResult', {code: 1, data: []});
+                        }
+                    });
+                }
+            });
+        };
+
+        // 邮件已读全部删除
+        this.emailAllDel = function (_socket) {
+            dao.delEmailisAlllReadByUserId(_socket.userId, (code) => {
+                if (code) {
+                    // 返回所有邮件
+                    this.searchEmail(_socket.userId, newList =>{
+                        if (newList.length > 0) {
+                            _socket.emit('emailAllDelResult', {code: 1, data: newList});
+                        }else{
+                            _socket.emit('emailAllDelResult', {code: 1, data: []});
+                        }
+                    });
+                }
+            });
+        };
+
         //领取邮件金币
         this.lqCoin_email = function (_socket, _info) {
             let state = _info.state;
@@ -2030,12 +2092,15 @@ var GameInfo = function () {
         };
 
         // 全服跑马灯通知
-        this.sendNotifyMsg = function () {
+        this.sendAllNotifyMsg = function (noticeMsg) {
             for (const item in this.userList) {
-                this.userList[item]._socket.emit('noticeMsg', '跑马灯通知.................................................................跑马灯通知');
+                this.userList[item]._socket.emit('noticeMsg', noticeMsg);
             }
         }
-
+        // 跑马灯通知
+        this.sendNotifyMsg = function (userId, noticeMsg) {
+            this.userList[userId]._socket.emit('noticeMsg', noticeMsg);
+        }
 
 
         this.score_changeLog = function () {
@@ -2483,12 +2548,7 @@ var GameInfo = function () {
                                 this.updateVipScore(userId, vScore);
 
                                 // VIP升级
-                                if (vipLevel > housecard) {
-                                    this.userList[userId].vip_level = vipLevel;
-                                    this.userList[userId].is_vip = 1;
-                                    // 更新VIP等级
-                                    this.updateVipLevel(userId, vipLevel, housecard);
-                                }
+                                this.vipUpgrade(userId, vipLevel, housecard);
 
                                 // 修改累计充值
                                 this.updateTotalCharge(userId, data.totalRecharge, amount);
@@ -2507,20 +2567,32 @@ var GameInfo = function () {
         }
 
         // VIP升级
-        this.updateVipLevel = function (userId, vipLevel, housecard) {
-
+        this.vipUpgrade = function (userId, vipLevel, housecard) {
+            // VIP升级
+            if (vipLevel > housecard) {
+                this.userList[userId].vip_level = vipLevel;
+                this.userList[userId].is_vip = 1;
+                // 更新VIP等级
+                this.updateVipLevel(userId, vipLevel, callback =>{
+                    if(callback){
+                        const noticeMsg = {
+                            type: TypeEnum.notifyType.vipUpgrade,
+                            currVipLevel: vipLevel,
+                            oldVipLevel: housecard,
+                            userId: userId,
+                            nickName: this.userList[userId]._nickname,
+                        }
+                        // 发送VIP升级通知
+                        this.sendAllNotifyMsg(noticeMsg);
+                    }
+                });
+            }
 
         }
 
         // 更新VIP等级
-        this.updateVipLevel = function (userId, vipLevel, housecard) {
-            dao.updateVipLevel(userId, vipLevel, (res) => {
-                if(!res){
-                    log.warn('dao.updateVipLevel' + res);
-                }else{
-                    log.info('充值成功，原等级:' + housecard + '现等级:' + vipLevel);
-                }
-            });
+        this.updateVipLevel = function (userId, vipLevel, callback) {
+            dao.updateVipLevel(userId, vipLevel, callback);
         }
 
         // 通过VIP积分获取VIP等级
@@ -2678,15 +2750,15 @@ var GameInfo = function () {
             dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
                 if(row){
                     if(row.rcode > 0){
-                        // 保存邮件
-                        dao.saveEmail(LanguageItem.bank_transfer_title, EmailType.inform, giveUserId, socket.userId, LanguageItem.bank_transfer_content, row.logTransferId, GoodsType.bankScore);
-
                         // 赠送账户减少银行积分
                         this.userList[socket.userId].bankScore -= bankScore;
                         // 如果被赠送用户在线
                         if(this.userList[giveUserId]){
                             this.userList[giveUserId].bankScore += bankScore;
                         }
+                        // 消息通知
+                        this.transferMsgNotify(giveUserId, socket.userId, row.logTransferId);
+
                         const result = {
                             bankScore: this.userList[socket.userId].bankScore,
                             gold: this.userList[socket.userId]._score
@@ -2697,6 +2769,21 @@ var GameInfo = function () {
                     socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
                 }
             });
+        }
+
+        // 转账消息通知
+        this.transferMsgNotify = function (giveUserId, userId, logTransferId) {
+            const noticeMsg = {
+                type: TypeEnum.notifyType.bankTransfer,
+                formUserId: userId,
+                toUserId: giveUserId,
+                formUserNickName: this.userList[userId]._nickname,
+                contentId: logTransferId
+            }
+            // 跑马灯通知
+            this.sendNotifyMsg(userId, noticeMsg);
+            // 邮件通知
+            dao.saveEmail(LanguageItem.bank_transfer_title, TypeEnum.EmailType.inform, giveUserId, userId, LanguageItem.bank_transfer_content, logTransferId, TypeEnum.GoodsType.gold);
         }
 
         // 通过VIP等级获取VIP配置表

@@ -19,6 +19,24 @@ const EmailType = {
 };
 
 
-module.exports = GoodsType;
-module.exports = CurrencyType;
-module.exports = EmailType;
+const ShopGroupType = {
+    normal: 0, // 正常商品
+    rechargeGift: 1 // 首充礼包商品
+};
+
+
+const notifyType = {
+    normal: 0, // 普通消息
+    vipUpgrade: 1, // VIP升级
+    bankTransfer: 2 // 银行转账
+};
+
+
+
+module.exports = {
+    GoodsType,
+    CurrencyType,
+    EmailType,
+    ShopGroupType,
+    notifyType
+};
