@@ -87,7 +87,6 @@ var update_config = function(){
 			},60000);
 
 
-
 		};
 
 

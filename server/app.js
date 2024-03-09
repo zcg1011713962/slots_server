@@ -350,6 +350,11 @@ io.on('connection', function (socket) {
         }
     });
 
+    // 发送跑马灯
+    socket.on("sendNotifyMsg", function () {
+        gameInfo.sendNotifyMsg();
+    });
+
     // 注册
     socket.on("register", function (_info) {
         try {
@@ -772,7 +777,6 @@ io.on('connection', function (socket) {
     });
 
 
-
     // 大厅获取游戏奖池
     socket.on('gameJackpot', function () {
         const userId = socket.userId;
@@ -781,6 +785,23 @@ io.on('connection', function (socket) {
         }
     });
 
+
+
+    // 查看邮件
+    socket.on("getEmail", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.getEmail(socket);
+        }
+    });
+
+    //设置邮件已读
+    socket.on("setEmailRead", function (data) {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.setEmailRead(socket, data);
+        }
+    });
+
+
     // 游戏结算
     socket.on('GameBalance', function (_Info) {
         if (_Info.signCode == serverSign) {
@@ -788,14 +809,6 @@ io.on('connection', function (socket) {
         }
     });
 
-    //游戏结算(俱乐部扣房卡用)
-    socket.on('GameUpdateDiamond', function (_Info) {
-        log.info("扣除房卡");
-        log.info(_Info);
-        if (_Info.signCode == serverSign) {
-            gameInfo.GameUpdateDiamond(_Info);
-        }
-    });
 
     //牌局断线
     socket.on('lineOut', function (_Info) {
@@ -813,79 +826,6 @@ io.on('connection', function (socket) {
         }
     });
 
-
-    //赠送游戏币给他人
-    socket.on("sendCoin", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendCoinjson');
-        }
-
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.sendCoin(socket, _info);
-        }
-    });
-    //赠送游戏币给他人账号形式
-    socket.on("sendCoin2", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendCoinjson');
-        }
-
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.selectUserIdAndSendCoin(socket, _info);
-        }
-    });
-
-    //查询游戏币记录
-    socket.on("selectCoinLog", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.selectCoinLog(socket);
-        }
-    });
-
-    socket.on("selectgetCoinLog", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.selectgetCoinLog(socket);
-        }
-    });
-
-    //修改游戏币记录状态
-    socket.on("updateCoinLogState", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendCoinjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.updateCoinLogState(socket, _info);
-        }
-    });
-
-    //获取邮件
-    socket.on("getEmail", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getEmail(socket);
-        }
-    });
-
-    //设置邮件已读
-    socket.on("setEmailRead", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendCoinjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.setEmailRead(socket, _info);
-        }
-    });
 
     //领取邮件金币
     socket.on("lqCoin_email", function (_info) {

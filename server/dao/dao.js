@@ -2079,20 +2079,19 @@ exports.updateCoinLogState = function updateCoinLogState(state, id, callback) {
 
     });
 };
-//保存邮件记录
-exports.saveEmail = function saveEmail(info) {
-    var sql = "INSERT INTO email(isread,title,type,otherId,userid,sendid) VALUES(?,?,?,?,?,?)";
-    var values = [];
+// 保存邮件记录
+exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
+    const sql = "INSERT INTO email (title, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    values.push(info.isread);
-    values.push(info.title);
-    values.push(info.type);
-    values.push(info.otherId);
-    values.push(info.userid);
-    values.push(info.sendid);
+    var values = [];
+    values.push(title);
+    values.push(type);
+    values.push(to_userid);
+    values.push(from_userid);
+    values.push(content_id);
+    values.push(otherId);
 
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
@@ -2100,24 +2099,20 @@ exports.saveEmail = function saveEmail(info) {
                 console.log(err);
             }
         });
-
         values = [];
-
     });
 };
 //查询邮件记录
 exports.selectEmail = function selectEmail(userid, callback) {
-    var sql = "select email.*,sendcoinlog.nickname,sendcoinlog.getcoinuserid,sendcoinlog.sendcoin,sendcoinlog.state from email left join sendcoinlog on email.otherId = sendcoinlog.id where email.userid = ?";
-    var values = [];
-
+    const sql = "select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname,b.transfer_bank_score val  from email e left join log_bank_transfer b on e.otherId = b.id left join newuseraccounts n on e.from_userid = n.Id where e.to_userid =?";
+    let values = [];
     values.push(userid);
-
     pool.getConnection(function (err, connection) {
 
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("selectEmail");
+                console.log("查询邮件");
                 console.log(err);
             } else {
                 if (rows[0]) {
@@ -2127,15 +2122,13 @@ exports.selectEmail = function selectEmail(userid, callback) {
                 }
             }
         });
-
         values = [];
-
     });
 };
 //设置邮件为已读
 exports.setEmailisRead = function setEmailisRead(id, callback) {
-    var sql = "update email set isread = 1 where id = ?";
-    var values = [];
+    const sql = "update email set isRead = 1 where id = ?";
+    let values = [];
 
     values.push(id);
 
@@ -2144,7 +2137,7 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("setEmailisRead");
+                console.log("设置邮件为已读");
                 console.log(err);
                 callback(0);
             } else {
@@ -2159,15 +2152,15 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
 };
 //查询系统邮件记录
 exports.selectSystemEmail = function selectSystemEmail(callback) {
-    var sql = "select * from email  where type = 999";
-    var values = [];
+    const sql = "select * from email  where type = 999";
+    let values = [];
 
     pool.getConnection(function (err, connection) {
 
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("selectEmail");
+                console.log("查询系统邮件记录");
                 console.log(err);
             } else {
                 if (rows[0]) {
@@ -2177,11 +2170,10 @@ exports.selectSystemEmail = function selectSystemEmail(callback) {
                 }
             }
         });
-
         values = [];
-
     });
 };
+
 //保存转卡记录
 exports.saveCardRecord = function saveCardRecord(info) {
     var sql = "INSERT INTO sendcardlog(userid,targetId,coin,cardNum) VALUES(?,?,?,?)";

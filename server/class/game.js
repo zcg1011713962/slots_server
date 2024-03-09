@@ -21,8 +21,10 @@ const Config = require("../config/read_turntable_config").getInstand;
 const LABA = require("../../util/laba");
 const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
-const gameEnum = require("../config/gameEnum");
-
+const gameEnum = require("../../util/enum/type");
+const LanguageItem = require("../../util/enum/language");
+const EmailType = require("../../util/enum/type");
+const GoodsType = require("../../util/enum/type");
 
 
 var GameInfo = function () {
@@ -1115,15 +1117,7 @@ var GameInfo = function () {
 
         };
 
-        this.addLoginList = function (user) {
-            //已经存在删掉前面的push后面的
-            //列队状态1.排队,2.离线中,3.登录中，5.完成登录
-            this.deleteLoginList(user.userName)
-            user.state = 1;
-            user.AutoOutCount = 0;
-            this._loginList.push(user);
-        };
-        
+        // 在大厅的用户，不应该在游戏内 断开游戏连接
         this.existGameDel = function (userId) {
             const gameId = this.userList[userId].getGameId();
             if (gameId) {
@@ -1135,205 +1129,8 @@ var GameInfo = function () {
         }
 
 
-        this.getLoginState = function (useraccount, state) {
-            for (var i = 0; i < this._loginList.length; i++) {
-                if (this._loginList[i].userName == useraccount && this._loginList[i].state == state) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        this.deleteLoginList = function (useraccount) {
-            var idx = -1;
-            for (var i = 0; i < this._loginList.length; i++) {
-                if (this._loginList[i].userName == useraccount) {
-                    idx = i;
-                    break;
-                }
-            }
-
-            if (idx != -1) {
-                this._loginList.splice(idx, 1)
-            }
-
-        };
 
 
-
-
-        //赠送金币
-        this.sendCoin = function (_socket, _info) {
-            //被赠送id
-            //金额
-            if (_socket.userId == _info.sendUserId) {
-                _socket.emit('sendCoinResult', {Result: 0, msg: "不能自己赠送自己"});
-                return;
-            }
-
-            if (_info.sendUserId <= 0) {
-                _socket.emit('sendCoinResult', {Result: 0, msg: "赠送ID不能小于0"});
-                return;
-            }
-
-            if (_info.sendCoin < 1000) {
-                _socket.emit('sendCoinResult', {Result: 0, msg: "赠送金币不能小于1000"});
-                return;
-            }
-
-
-            // var userItem = this.getUser(_info.sendUserId);
-            // if (userItem && userItem.getGameId()){
-            // 	_socket.emit('sendCoinResult',{Result:0,msg:"对方在游戏中,赠送失败!"});
-            // 	return;
-            // }
-
-            var myNowScore = this.userList[_socket.userId].getScore();
-
-            if (!this.userList[_socket.userId]) {
-                _socket.emit('sendCoinResult', {Result: 0, msg: "用户错误,请重新登录"});
-                return;
-            }
-
-
-            // if (!this.userList[_socket.userId]._phoneNo) {
-            //     _socket.emit('sendCoinResult', {Result: 0, msg: "未绑定手机,不允许赠送"});
-            //     return;
-            // }
-
-            if (this.userList[_socket.userId].getScore() - _info.sendCoin < 1000) {
-                _socket.emit('sendCoinResult', {Result: 0, msg: "赠送失败,剩余金币不能低于1000"});
-                return;
-            }
-
-            //获取昵称
-            dao.checkNickName(_info.sendUserId, (result, nickName) => {
-                if (result) {
-                    if (this.userList[_socket.userId].addgold(-_info.sendCoin)) {
-                        log.info(_socket.userId + "赠送前,金币:" + myNowScore);
-                        log.info(_socket.userId + "赠送金币:" + _info.sendCoin);
-                        var info = {
-                            userId: _info.sendUserId,
-                            winPropId: 0,
-                            winPropCount: 0,
-                            winScore: _info.sendCoin,
-                            type: 1,
-                            sendCoinUserId: _socket.userId,
-                            nickName: this.userList[_socket.userId]._nickname
-                        };
-                        this.sendEmail(info);
-
-                        //给自己做钱的记录
-                        var score_change = parseInt(_info.sendCoin);
-                        var NowScore = this.userList[_socket.userId].getScore();
-                        var userInfo = {
-                            userid: _socket.userId,
-                            score_before: myNowScore,
-                            score_change: -score_change,
-                            score_current: NowScore,
-                            change_type: 3,
-                            isOnline: true
-                        };
-                        this.score_changeLogList.push(userInfo);
-                        log.info(_socket.userId + "赠送后:" + NowScore);
-                        //获取昵称
-                        _socket.emit('sendCoinResult', {Result: 1, score: -_info.sendCoin, msg: "赠送成功"});
-                        userInfo = {
-                            userid: _socket.userId,
-                            getcoinuserid: _info.sendUserId,
-                            sendcoin: score_change,
-                            nickname: nickName,
-                            commission: 0,
-                            state: 0
-                        };
-                        dao.sendcoinlog(userInfo, (code, insertId) => {
-                            let emailInfo = {
-                                isread: 0,
-                                title: "转账送礼",
-                                type: 1,
-                                otherId: insertId,
-                                userid: _info.sendUserId,
-                                sendid: _socket.userId,
-                            };
-                            dao.saveEmail(emailInfo);
-                        });
-                    } else {
-                        //减分失败
-                        _socket.emit('sendCoinResult', {Result: 0, msg: "赠送失败,金钱不足"});
-                    }
-                } else {
-                    _socket.emit('sendCoinResult', {Result: 0, msg: "未找到该用户"});
-                }
-            });
-
-        };
-        //查询金币记录
-        this.selectUserIdAndSendCoin = function (_socket, _info) {
-            dao.getUserId(_info.sendUserName, (code, id) => {
-                if (code) {
-                    _info.sendUserId = parseInt(id);
-                    this.sendCoin(_socket, _info);
-                } else {
-                    _socket.emit('sendCoinResult', {Result: 0, msg: "未找到该用户"});
-                }
-            });
-        };
-
-        //查询金币记录
-        this.selectCoinLog = function (_socket) {
-            dao.selectcoinlog(_socket.userId, (code, res) => {
-                if (code) {
-                    _socket.emit('selectCoinLogResult', {Result: 1, data: res});
-                } else {
-                    console.log("selectCoinLog失败");
-                    // _socket.emit('selectCoinLogResult', {Result: 0, msg: "查询失败"});
-                }
-            });
-        };
-        //查询收取金币记录
-        this.selectgetCoinLog = function (_socket) {
-            dao.selectgetcoinlog(_socket.userId, (code, res) => {
-                if (code) {
-                    _socket.emit('selectgetcoinlogResult', {Result: 1, data: res});
-                } else {
-                    console.log("selectCoinLog失败");
-                    // _socket.emit('selectCoinLogResult', {Result: 0, msg: "查询失败"});
-                }
-            });
-        };
-
-        this.updateCoinLogState = function (_socket, _info) {
-            let state = _info.state;
-            let id = _info.id;
-            let coin = _info.coin;
-
-            dao.updateCoinLogState(state, id, (code) => {
-                if (code) {
-                    //发还金币
-                    let sendInfo = {
-                        sendUserId: _socket.userId,
-                        sendCoin: coin,
-                        change_type: 11,
-                        diamond: 0
-                    };
-                    this.GameBalance(sendInfo);
-                    //发送邮件
-                    let emailInfo = {
-                        isread: 0,
-                        title: "礼物撤回",
-                        type: 0,
-                        otherId: id,
-                        userid: _socket.userId,
-                        sendid: 0,
-                    };
-                    dao.saveEmail(emailInfo);
-
-                    _socket.emit('updateCoinLogStateResult', {Result: 1, data: {state: state, id: id}});
-                } else {
-                    console.log("updateCoinLogState失败");
-                }
-            });
-        };
         //新邮件推送
         this.haveNewEmail = function (data) {
             //如果用户在线并且在大厅
@@ -1356,7 +1153,7 @@ var GameInfo = function () {
 
         };
         this.getEmail = function (_socket) {
-            //先查系统邮件，再查个人邮件
+            // 先查系统邮件，再查个人邮件
             let newList = [];
             dao.selectSystemEmail((code, res) => {
                 if (code) {
@@ -1371,9 +1168,9 @@ var GameInfo = function () {
                         }
                     }
                     if (newList.length > 0) {
-                        _socket.emit('getEmailResult', {Result: 1, data: newList});
+                        _socket.emit('getEmailResult', {code: 1, data: newList});
                     } else {
-                        _socket.emit('getEmailResult', {Result: 0, msg: "未查到新邮件"});
+                        _socket.emit('getEmailResult', {code: 0, msg: "未查到新邮件"});
                     }
                 });
             });
@@ -1382,7 +1179,7 @@ var GameInfo = function () {
         this.setEmailRead = function (_socket, _info) {
             dao.setEmailisRead(_info.id, (code, res) => {
                 if (code) {
-                    _socket.emit('setEmailReadResult', {Result: 1, data: res});
+                    _socket.emit('setEmailReadResult', {code: 1, data: res});
                 }
             });
         };
@@ -2215,8 +2012,7 @@ var GameInfo = function () {
         };
 
 
-
-        //每日登录奖励
+        // 每日登录奖励
         this.getEveryLogin = function (_socket) {
             redis_dao.updateEveryLogin(_socket.userId, 2, (res) => {
                 if (res) {
@@ -2232,6 +2028,15 @@ var GameInfo = function () {
                 }
             });
         };
+
+        // 全服跑马灯通知
+        this.sendNotifyMsg = function () {
+            for (const item in this.userList) {
+                this.userList[item]._socket.emit('noticeMsg', '跑马灯通知.................................................................跑马灯通知');
+            }
+        }
+
+
 
         this.score_changeLog = function () {
             var self = this;
@@ -2684,6 +2489,7 @@ var GameInfo = function () {
                                     // 更新VIP等级
                                     this.updateVipLevel(userId, vipLevel, housecard);
                                 }
+
                                 // 修改累计充值
                                 this.updateTotalCharge(userId, data.totalRecharge, amount);
                                 callback(1);
@@ -2700,6 +2506,12 @@ var GameInfo = function () {
             });
         }
 
+        // VIP升级
+        this.updateVipLevel = function (userId, vipLevel, housecard) {
+
+
+        }
+
         // 更新VIP等级
         this.updateVipLevel = function (userId, vipLevel, housecard) {
             dao.updateVipLevel(userId, vipLevel, (res) => {
@@ -2710,6 +2522,7 @@ var GameInfo = function () {
                 }
             });
         }
+
         // 通过VIP积分获取VIP等级
         this.getVipLevelByScore = function (vScore) {
             const vipConfig = updateConfig.getVipConfig();
@@ -2862,9 +2675,12 @@ var GameInfo = function () {
             }
 
 
-            dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, callback =>{
-                if(callback){
-                    if(callback.rcode > 0){
+            dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
+                if(row){
+                    if(row.rcode > 0){
+                        // 保存邮件
+                        dao.saveEmail(LanguageItem.bank_transfer_title, EmailType.inform, giveUserId, socket.userId, LanguageItem.bank_transfer_content, row.logTransferId, GoodsType.bankScore);
+
                         // 赠送账户减少银行积分
                         this.userList[socket.userId].bankScore -= bankScore;
                         // 如果被赠送用户在线

@@ -968,7 +968,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`skip-grants user`@`skip-grants host` PROCEDURE `BatchUpdateAccount`(IN user_data JSON)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `BatchUpdateAccount`(IN user_data JSON)
 BEGIN
 	-- 声明变量
     DECLARE user_count INT;
@@ -1105,7 +1105,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 ALTER DATABASE `gameaccount` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `creatAccount` */;
-ALTER DATABASE `gameaccount` CHARACTER SET utf8 COLLATE utf8_general_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1115,7 +1114,7 @@ ALTER DATABASE `gameaccount` CHARACTER SET utf8 COLLATE utf8_general_ci ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`skip-grants user`@`skip-grants host` PROCEDURE `creatAccount`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `creatAccount`()
 BEGIN
     DECLARE counter INT DEFAULT 1;
     DECLARE maxCounter INT DEFAULT 100; -- 你要插入的用户数量
@@ -1140,7 +1139,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `gameaccount` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `createRecharge` */;
 ALTER DATABASE `gameaccount` CHARACTER SET utf8 COLLATE utf8_general_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1502,7 +1500,7 @@ ALTER DATABASE `gameaccount` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`skip-grants user`@`skip-grants host` PROCEDURE `SignIn`(IN _userId int(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SignIn`(IN _userId int(11))
 BEGIN
 	SET @days = 0;
 	SET @date = 0;
@@ -1670,4 +1668,4 @@ ALTER DATABASE `gameaccount` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-08 18:13:04
+-- Dump completed on 2024-03-08 19:32:39
