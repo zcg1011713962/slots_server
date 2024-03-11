@@ -4,7 +4,7 @@ const mysql_config = require("../../util/config/mysql_config");
 const ErrorCode = require('../../util/ErrorCode');
 const RedisUtil = require('../../util/redis_util');
 
-var pool = mysql.createPool({
+const pool = mysql.createPool({
     connectionLimit: 10000,
     host: mysql_config.host,
     user: mysql_config.user,
@@ -166,6 +166,30 @@ exports.emailSearch = function emailSearch(email, callback){
                     callback(0);
                 } else {
                     callback(1);
+                }
+            }
+        })
+    });
+}
+
+// 邮箱绑定
+exports.emailBind = function emailBind(userId , email, callback){
+    const sql = 'update newuseraccounts set email = ? where id = ?';
+    let values = [];
+    values.push(email)
+    values.push(userId)
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('绑定邮箱', err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
                 }
             }
         })
@@ -747,7 +771,6 @@ exports.checkNickName2 = function checkNickName2(userName, callback) {
 };
 
 //修改昵称
-
 exports.updateNickName = function updateNickName(userId, nickname, callback) {
     var sql = 'update newuseraccounts set nickname=? where Id=?';
     var values = [];
@@ -759,14 +782,14 @@ exports.updateNickName = function updateNickName(userId, nickname, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateNickName");
+                console.log("修改昵称");
                 console.log(err);
                 callback(0);
             } else {
-                if (rows.length == 0) {
-                    callback(0);
-                } else {
+                if (rows) {
                     callback(1);
+                } else {
+                    callback(0);
                 }
             }
         });

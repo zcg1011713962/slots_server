@@ -1746,3 +1746,36 @@
 2024-03-08T18:06:47.171 [INFO ] default - 用户离开游戏,移除用户21341
 2024-03-09T14:12:19.353 [INFO ] default - 拉霸_268_fortunetiger服务器启动
 2024-03-09T14:12:19.361 [INFO ] default - start at port:15168
+2024-03-11T11:33:21.615 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":0,"userid":21311,"msg":"用户不存在"}
+2024-03-11T11:33:24.332 [INFO ] default - 找不到用户
+2024-03-11T11:33:24.333 [INFO ] default - 摇奖结果{"code":-1}
+2024-03-11T14:18:03.316 [INFO ] default - 拉霸_268_fortunetiger服务器启动
+2024-03-11T14:18:03.324 [INFO ] default - start at port:15168
+2024-03-11T14:40:07.027 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":1,"userInfo":{"_userId":21311,"_account":"abc2024030716145202","_score":11218796,"_nickname":"USER4376403","LoginCount":1,"propList":{},"_headimgurl":6,"_Robot":0,"_diamond":10,"is_vip":1,"vip_score":700}}
+2024-03-11T14:40:08.328 [INFO ] default - 当前用户积分:11218796
+2024-03-11T14:40:08.329 [INFO ] default - 添加库存:38当前库存-13683506
+2024-03-11T14:40:08.330 [INFO ] default - 添加奖池:2
+2024-03-11T14:40:08.330 [INFO ] default - 配牌器开关:true牌:0,6,6,2,6,6,0,6,6
+2024-03-11T14:40:08.331 [INFO ] default - 减少库存:1600库存-13683506
+2024-03-11T14:40:08.331 [INFO ] default - 减少奖池:0
+2024-03-11T14:40:08.333 [INFO ] default - 图案排列结果
+2024-03-11T14:40:08.333 [INFO ] default - [ 0, 6, 6 ]
+2024-03-11T14:40:08.333 [INFO ] default - [ 2, 6, 6 ]
+2024-03-11T14:40:08.334 [INFO ] default - [ 0, 6, 6 ]
+2024-03-11T14:40:08.334 [INFO ] default - 下注:40赢:1600jackpot:0expectRTP:80
+2024-03-11T14:40:08.335 [INFO ] default - 摇奖结果{"code":1,"userscore":11220356,"winscore":1600,"viewarray":{"code":2,"nHandCards":[1,7,7,3,7,7,1,7,7],"nWinLines":[0,1,2,3,4],"nWinLinesDetail":[[3,4,5],[0,1,2],[6,7,8],[0,4,8],[6,4,2]],"nWinDetail":[640,240,240,240,240],"nBet":40,"win":1600,"nWinCards":[true,true,true,true,true,true,true,true,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":200,"nWinCardsDetail":[[2,6,6],[0,6,6],[0,6,6],[0,6,6],[0,6,6]],"nBetTime":1710139208328,"isAllWin":true,"is_free":false,"user_score":11220356},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-03-11T14:40:22.422 [INFO ] default - 用户离开游戏,移除用户21311
+2024-03-11T14:40:38.794 [INFO ] default - 登录fortunetiger服务器回应:{"ResultCode":1,"userInfo":{"_userId":21311,"_account":"abc2024030716145202","_score":11218796,"_nickname":"USER4376403","LoginCount":1,"propList":{},"_headimgurl":6,"_Robot":0,"_diamond":10,"is_vip":1,"vip_score":700}}
+2024-03-11T14:40:42.446 [INFO ] default - 当前用户积分:11218796
+2024-03-11T14:40:42.447 [INFO ] default - 添加库存:38当前库存-13685068
+2024-03-11T14:40:42.448 [INFO ] default - 添加奖池:2
+2024-03-11T14:40:42.448 [INFO ] default - 配牌器开关:true牌:0,6,6,2,6,6,0,6,6
+2024-03-11T14:40:42.449 [INFO ] default - 减少库存:1600库存-13685068
+2024-03-11T14:40:42.449 [INFO ] default - 减少奖池:0
+2024-03-11T14:40:42.451 [INFO ] default - 图案排列结果
+2024-03-11T14:40:42.451 [INFO ] default - [ 0, 6, 6 ]
+2024-03-11T14:40:42.452 [INFO ] default - [ 2, 6, 6 ]
+2024-03-11T14:40:42.452 [INFO ] default - [ 0, 6, 6 ]
+2024-03-11T14:40:42.452 [INFO ] default - 下注:40赢:1600jackpot:0expectRTP:80
+2024-03-11T14:40:42.452 [INFO ] default - 摇奖结果{"code":1,"userscore":11220356,"winscore":1600,"viewarray":{"code":2,"nHandCards":[1,7,7,3,7,7,1,7,7],"nWinLines":[0,1,2,3,4],"nWinLinesDetail":[[3,4,5],[0,1,2],[6,7,8],[0,4,8],[6,4,2]],"nWinDetail":[640,240,240,240,240],"nBet":40,"win":1600,"nWinCards":[true,true,true,true,true,true,true,true,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"getBigWin":{"bFlag":false},"nMultiple":200,"nWinCardsDetail":[[2,6,6],[0,6,6],[0,6,6],[0,6,6],[0,6,6]],"nBetTime":1710139242446,"isAllWin":true,"is_free":false,"user_score":11220356},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-03-11T14:49:00.526 [INFO ] default - 用户离开游戏,移除用户21311

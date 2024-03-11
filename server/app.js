@@ -351,6 +351,20 @@ io.on('connection', function (socket) {
         }
     });
 
+    // 绑定邮箱
+    socket.on("bindEmail", function (data) {
+        try {
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.email || !d.code){
+                throw new Error("参数不合法");
+            }
+            gameInfo.bindEmail(socket, d.email, d.code);
+        } catch (e) {
+            socket.emit('bindEmailResult', {code: 0, msg: "绑定失败"});
+            log.err('bindEmailResult',  e);
+        }
+    });
+
     // 发送跑马灯
     socket.on("sendNotifyMsg", function () {
         // 发送跑马灯
@@ -376,14 +390,13 @@ io.on('connection', function (socket) {
     // 注册
     socket.on("register", function (_info) {
         try {
-            log.info(_info);
             const parm = StringUtil.isJson(_info) ? JSON.parse(_info) : _info;
             if(parm.type === 0){
                 // 注册
                 gameInfo.register(socket, parm.email, parm.code);
             }
         } catch (e) {
-            log.err('sendEmailCode',  e);
+            log.err('注册',  e);
         }
     });
 
@@ -408,6 +421,23 @@ io.on('connection', function (socket) {
             socket.emit('ShoppingResult', {code:0,msg:"参数有误"});
         }
     });
+
+    // 兑换礼品
+    socket.on("exchangeGift", function (data) {
+        try {
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.cdkey) throw new Error('参数错误');
+            if (gameInfo.IsPlayerOnline(socket.userId)) {
+                gameInfo.exchangeGift(socket, d.cdkey);
+            }else{
+                socket.emit('exchangeGiftResult', {code:0,msg:"用户不在线"});
+            }
+        }catch (e) {
+            log.err('exchangeGift' + e.message)
+            socket.emit('exchangeGiftResult', {code:0,msg:"参数有误"});
+        }
+    });
+
 
 
     // 获取用户信息
@@ -919,7 +949,6 @@ io.on('connection', function (socket) {
 
     //检测
     socket.on("checkNickName", function (_info) {
-
         try {
             var data = JSON.parse(_info);
             _info = data;
@@ -946,15 +975,15 @@ io.on('connection', function (socket) {
     });
 
     //修改昵称
-    socket.on("updateNickName", function (_info) {
+    socket.on("updateNickName", function (data) {
         try {
-            var data = JSON.parse(_info);
-            _info = data;
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d) throw new Error('参数错误');
+            if (gameInfo.IsPlayerOnline(socket.userId)) {
+                gameInfo.updateNickName(socket, d);
+            }
         } catch (e) {
-            log.warn('updateNickName-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.updateNickName(socket, _info);
+            log.err('updateNickName' + e);
         }
     });
 
@@ -1053,12 +1082,7 @@ io.on('connection', function (socket) {
     });
 
 
-    //获得每日登录奖励
-    socket.on("getEveryLogin", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getEveryLogin(socket);
-        }
-    });
+
 
     //游戏服务器的排行
     socket.on("setServerRank", function (_info) {

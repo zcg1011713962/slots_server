@@ -1,17 +1,16 @@
-var User = require("./User");
-var dao = require("./../dao/dao");
-var redis_dao = require("./../dao/redis_dao");
-var crypto = require('crypto');
-var ServerInfo = require('./../config/ServerInfo').getInstand;
-var activityConfig = require('./../config/activityConfig');
-var schedule = require("node-schedule");
-var log = require("../../CClass/class/loginfo").getInstand;
-var async = require('async');
-var updateConfig = require('./update_config').getInstand;
-var RobotConfig = require('./../config/RobotConfig');
-var ml_api = require('./ml_api');
-var redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
-var redis_send_and_listen = require("./../../util/redis_send_and_listen");
+const User = require("./User");
+const dao = require("./../dao/dao");
+const ymDao = require("./../dao/ym_dao");
+const crypto = require('crypto');
+const ServerInfo = require('./../config/ServerInfo').getInstand;
+const activityConfig = require('./../config/activityConfig');
+const schedule = require("node-schedule");
+const log = require("../../CClass/class/loginfo").getInstand;
+const async = require('async');
+const updateConfig = require('./update_config').getInstand;
+const RobotConfig = require('./../config/RobotConfig');
+const redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
+const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const SendEmail = require('../../util/email_send_code');
 const RedisUtil = require('../../util/redis_util');
 const ErrorCode = require('../../util/ErrorCode');
@@ -19,10 +18,10 @@ const gameConfig = require('../config/gameConfig');
 const StringUtil = require('../../util/string_util');
 const Config = require("../config/read_turntable_config").getInstand;
 const LABA = require("../../util/laba");
-const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
 const LanguageItem = require("../../util/enum/language");
 const TypeEnum = require("../../util/enum/type");
+const {GoodsType} = require("../../util/enum/type");
 
 
 
@@ -396,27 +395,27 @@ var GameInfo = function () {
         this.loginUserInfo = function (userId) {
             const user = this.userList[userId];
             return {
-                account: user._account,
-                id: user._userId,
-                nickname: user._nickname,
-                score: user._score,
+                account: user._account,  // 用户名
+                id: user._userId,       // 用户ID
+                nickname: user._nickname, // 昵称
+                score: user._score,  // 用户金币数量
                 sign: user._sign,
                 proplist: user._proList,
-                headimgurl: user._headimgurl,
-                diamond: user._diamond,
-                phoneNo: user._phoneNo,
+                headimgurl: user._headimgurl, // 头像ID
+                diamond: user._diamond, // 钻石数量
+                phoneNo: user._phoneNo, // 手机号
                 official: user._official,
-                isVip: user.is_vip,
-                totalRecharge: user.totalRecharge,
-                vip_level: user.vip_level,
-                vip_score: user.vip_score,
-                dailyGet: user.dailyGet,
-                monthlyGet: user.monthlyGet,
-                firstRecharge: user.firstRecharge,
-                bankScore: user.bankScore,
-                bankLock: user.bankLock,
-                addDate: user.addDate,
-                existBankPwd: user.bankPwd ? 1 : 0
+                isVip: user.is_vip,  // 是否VIP
+                totalRecharge: user.totalRecharge, // 总充值
+                vip_level: user.vip_level, // VIP等级
+                vip_score: user.vip_score, // VIP点数
+                dailyGet: user.dailyGet,   // 是否领取了每日金币
+                monthlyGet: user.monthlyGet, // 是否领取了每月金币
+                firstRecharge: user.firstRecharge, // 是否购买首充礼包
+                bankScore: user.bankScore, // 银行积分，也就是银行里的金币
+                bankLock: user.bankLock,  // 银行是否被锁定
+                addDate: user.addDate, // 注册时间
+                existBankPwd: user.bankPwd ? 1 : 0 // 是否设置了银行密码
             };
         }
 
@@ -532,6 +531,36 @@ var GameInfo = function () {
                 socket.emit('ShoppingResult', {code:0,msg:"购买失败"});
             }
         };
+        
+        // 兑换礼物
+        this.exchangeGift = function (socket, cdkey) {
+            const userId = socket.userId;
+            // 是否存在
+            ymDao.cdKeySearch(cdkey, row =>{
+                if(row){
+                    if(row.status === 1){
+                        socket.emit('exchangeGiftResult', {code:0,msg:"已使用过的兑换卷"});
+                        return;
+                    }
+                    // 更新兑换卷状态=已使用
+                    ymDao.cdKeyGet(cdkey, r =>{
+                        if(r){
+                            const result = {
+                                vipLevel: this.userList[userId].vip_level,
+                                goodsType: [TypeEnum.GoodsType.gold, TypeEnum.GoodsType.diamond],
+                                sourceVal: [10000, 10]
+                            }
+                            socket.emit('exchangeGiftResult', {code:1, msg:"兑换成功", data: result});
+                        }else{
+                            socket.emit('exchangeGiftResult', {code:0,msg:"兑换失败"});
+                        }
+                    });
+                }else{
+                    socket.emit('exchangeGiftResult', {code:0,msg:"不存在的兑换卷"});
+                }
+            })
+
+        }
 
         // VIP领取金币
         this.vipGetGold = function (socket, type) {
@@ -1417,28 +1446,24 @@ var GameInfo = function () {
         };
 
         //修改昵称
-        this.updateNickName = function (_socket, _info) {
-            if (!this.userList[_socket.userId]) {
-                log.err("更新用户ID,用户" + _userId + "不存在");
-                _socket.emit('updateNickNameResult', {Result: 1, msg: "ID不存在"});
+        this.updateNickName = function (socket, _info) {
+            const userId  = socket.userId;
+            if (!this.userList[userId]) {
+                log.err("更新用户ID,用户" + userId + "不存在");
+                socket.emit('updateNickNameResult', {code: 0, msg: "ID不存在"});
                 return;
             }
 
-            //金额
             if (_info.newNickName == "") {
-                _socket.emit('updateNickNameResult', {Result: 2, msg: "昵称不能为空"});
+                socket.emit('updateNickNameResult', {code: 0, msg: "昵称不能为空"});
                 return;
             }
-            var self = this;
 
-            dao.updateNickName(_socket.userId, _info.newNickName, function (result, nickName) {
-                if (self.userList[_socket.userId]) {
-                    if (result) {
-                        //log.info("发送" + _socket.userId + "检测ID");
-                        self.userList[_socket.userId]._socket.emit("updateNickNameResult", {Result: 0, msg: "修改成功"});
-                    } else {
-                        self.userList[_socket.userId]._socket.emit("updateNickNameResult", {Result: 3, msg: "修改失败"});
-                    }
+            dao.updateNickName(userId, _info.newNickName, function (result, nickName) {
+                if (result) {
+                    socket.emit("updateNickNameResult", {code: 1, msg: "修改成功"});
+                } else {
+                    socket.emit("updateNickNameResult", {code: 0, msg: "修改失败"});
                 }
             });
         }
@@ -1676,33 +1701,58 @@ var GameInfo = function () {
                 _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_INPUT_ERROR.code, msg: ErrorCode.EMAIL_INPUT_ERROR.msg});
                 return;
             }
-            const verificationCode = 666666;
-            //const verificationCode = SendEmail(toEmail,  callback =>{
-                const expireKey = 'send_email_code_expire_' + toEmail;
-                // 是否过期存储
-                RedisUtil.set(expireKey, verificationCode).then(ret1 =>{
-                    const key = 'send_email_code_' + toEmail;
-                    //RedisUtil.expire(key, 240).then(ret2 =>{
-                        //if(ret1 && ret2){
-                            // 存储验证码
-                            RedisUtil.set(key, verificationCode).then(result =>{
-                                //RedisUtil.expire(key, 180).then(r =>{
-                                    //if(result && r){
-                                        log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
-                                        _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_SUCCESS.code, msg: ErrorCode.EMAIL_CODE_SEND_SUCCESS.msg});
-                                    //}else{
-                                    //    log.err('邮箱验证码发送失败' + toEmail);
-                                    //    _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-                                    //}
-                                //});
-                            });
-                        //}else{
-                            _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-                        //}
-                    //});
+
+            const verificationCode = SendEmail(toEmail,  callback =>{
+                CacheUtil.cacheEmailExpireCode(verificationCode, toEmail, ret =>{
+                    if(ret){
+                        // 存储验证码
+                        CacheUtil.cacheEmailCode(verificationCode, toEmail, flag =>{
+                            if(flag){
+                                log.info('邮箱验证码发送成功' + toEmail + 'code:' + verificationCode);
+                                _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_SUCCESS.code, msg: ErrorCode.EMAIL_CODE_SEND_SUCCESS.msg});
+                            }else{
+                                log.err('邮箱验证码发送失败' + toEmail);
+                                _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
+                            }
+                        });
+                    }else{
+                        _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
+                    }
                 });
-            //});
+            });
         };
+
+        // 绑定邮箱验证码
+        this.bindEmail = function (socket, email, code) {
+            // 邮箱地址校验
+            if (!emailValidator(email)) {
+                socket.emit('bindEmailResult', {code: 0, msg: ErrorCode.EMAIL_INPUT_ERROR.msg});
+                return;
+            }
+            // 判断邮箱是否绑定
+            dao.emailSearch(email, exits =>{
+                if(exits){
+                    log.info('邮箱已绑定' + socket.userId + 'email:' + email);
+                    socket.emit('bindEmailResult', {code: 0, msg: '邮箱已绑定'});
+                }else{
+                    // 验证码校验
+                    this.verifyEmailCode(email, code, (c, msg) =>{
+                        if(c === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
+                            // 绑定邮箱
+                            dao.emailBind(socket.userId, email, ret =>{
+                                if(ret){
+                                    socket.emit('bindEmailResult', {code: 1, msg: "绑定成功"});
+                                }else{
+                                    socket.emit('bindEmailResult', {code: 0, msg: '绑定失败'});
+                                }
+                            });
+                        }else{
+                            socket.emit('bindEmailResult', {code: 0, msg: msg});
+                        }
+                    });
+                }
+            });
+        }
 
         // 校验验证码
         this.register = function (_socket, email, code) {
@@ -2071,24 +2121,6 @@ var GameInfo = function () {
             }catch (e) {
                 _socket.emit("getShoppingResult", {code: 0, msg: "获取商城列表错误"});
             }
-        };
-
-
-        // 每日登录奖励
-        this.getEveryLogin = function (_socket) {
-            redis_dao.updateEveryLogin(_socket.userId, 2, (res) => {
-                if (res) {
-                    let userItem = this.userList[_socket.userId];
-
-                    userItem.addgold(activityConfig.everyCoin[res.num - 1]);
-                    userItem._socket.emit('sendCoinResult', {
-                        Result: 1,
-                        score: activityConfig.everyCoin[res.num - 1],
-                        msg: "领取成功"
-                    });
-                    _socket.emit("getEveryLoginResult", {ResultCode: 1, result: res});
-                }
-            });
         };
 
         // 全服跑马灯通知
@@ -3174,201 +3206,7 @@ var GameInfo = function () {
         };
 
 
-        this.scoreOut = function (_socket, _info) {
-            if (!this.userList[_socket.userId]) {
-                log.info("用户不在线,无法操作");
-                _socket.emit('scoreOutResult', {ResultCode: 1, msg: "用户不在线,无法操作"});
-                return false;
-            }
 
-            if (_info.score < 5000) {
-                log.info("兑奖数量出错!");
-                _socket.emit('scoreOutResult', {ResultCode: 2, msg: "最少兑奖50"});
-                return false;
-            }
-
-            if (_info.score % 100 != 0) {
-                log.info("兑换金额必须是100的倍数");
-                _socket.emit('scoreOutResult', {ResultCode: 7, msg: "兑换金额必须是100的倍数"});
-                return false;
-            }
-
-            var score = this.userList[_socket.userId].getScore();
-
-
-            if (score - _info.score < 800) {
-                log.info("至少保留10!");
-                _socket.emit('scoreOutResult', {ResultCode: 5, msg: "至少保留8"});
-                return false;
-            }
-
-            if (!(_info.type == 0 || _info.type == 1)) {
-                log.err("兑换类型不对!");
-                _socket.emit('scoreOutResult', {ResultCode: 6, msg: "兑换类型不对!"});
-                return false;
-            }
-
-            var cardId = -1;
-            var cardInfo = null;
-
-
-            if (_info.type == 0) {
-                if (!this.userList[_socket.userId]._zhifubao) {
-                    log.info("请先绑定支付宝!");
-                    _socket.emit('scoreOutResult', {ResultCode: 3, msg: "请先绑定支付宝"});
-                    return false;
-                }
-
-                var myDate = new Date();
-                var out_trade_no = String(myDate.getFullYear()) + String(myDate.getMonth() + 1) + String(myDate.getDate()) + String(myDate.getTime()) + String(this.todayId);
-                if (this.todayId > 10000) {
-                    this.todayId = 0;
-                }
-
-                this.todayId++;
-
-                var userInfo = {sendUserId: _socket.userId, sendCoin: -_info.score, change_type: 2};
-                var self = this;
-                this.GameBalanceSub(userInfo, function (_sendStr) {
-                    var data = JSON.parse(_sendStr);
-                    if (!data.status) {
-                        //记录订单
-                        //保存兑换记录
-                        _socket.emit('scoreOutResult', {ResultCode: 0, msg: "兑奖成功"});
-
-                        var socreOut_userInfo = {
-                            sendUserId: _socket.userId,
-                            sendCoin: _info.score,
-                            cardType: _info.type,
-                            cardId: cardId,
-                            out_trade_no: out_trade_no,
-                            zfb_account: self.userList[_socket.userId]._zhifubao,
-                            zfb_name: self.userList[_socket.userId]._zhifubaoName,
-                            tax: 0
-                        };
-                        if (_info.score <= 10000) {
-                            socreOut_userInfo.tax = 300;
-                        } else {
-                            socreOut_userInfo.tax = _info.score * 0.02;
-                        }
-
-                        socreOut_userInfo.coin = ((_info.score - socreOut_userInfo.tax) / 100).toFixed(2);
-
-                        dao.socreOut(socreOut_userInfo, function (result) {
-                            if (result) {
-                                //立即到账
-                                // var info = {out_biz_no:out_trade_no,payee_account:self.userList[_socket.userId]._zhifubao,amount:(_info.score / 100).toFixed(2),payee_real_name:self.userList[_socket.userId]._zhifubaoName,Key:'89b5b987124d2ec3'};
-                                // Post.postExchangeCoin(info,function(post_result){
-                                // 	if (post_result){
-                                // 		self.updateScoreOut(out_trade_no,function(result){
-                                // 			switch(result){
-                                // 				case 0:
-                                // 					log.info("兑奖更新成功");
-                                // 				break;
-                                // 				case 1:
-                                // 					log.err("兑奖更新失败,找不到订单");
-                                // 				break;
-                                // 			}
-                                // 		});
-                                // 	}else{
-                                // 		//告知玩家,支付宝帐号有错误，并退款
-                                // 		var info = {userId:_socket.userId,msg:'你的支付宝有误,确认后重新绑定后,再试!'}
-                                // 		self.sendMsgToUserBySystem(info);
-                                // 		userInfo.sendCoin = userInfo.sendCoin * -1;
-                                // 		self.GameBalance(userInfo);
-                                // 	}
-                                // });
-                            } else {
-                                log.err("创建兑换订单出错");
-                            }
-
-                        });
-                        //发送
-
-                    }
-                });
-
-            } else if (_info.type == 1) {
-                var flag = false;
-                console.log(this.userList[_socket.userId]._cardList)
-                for (var i = 0; i < this.userList[_socket.userId]._cardList.length; ++i) {
-                    console.log(this.userList[_socket.userId]._cardList[i].cardId)
-                    console.log(_info.cardId)
-                    if (this.userList[_socket.userId]._cardList[i].cardId == _info.cardId) {
-                        flag = true;
-                        cardInfo = this.userList[_socket.userId]._cardList[i];
-                        break;
-                    }
-                }
-
-                if (!flag) {
-                    log.err("兑换卡ID不对!");
-                    _socket.emit('scoreOutResult', {ResultCode: 7, msg: "兑换卡ID不对!"});
-                    return false;
-                }
-                cardId = _info.cardId;
-
-
-                if (cardInfo) {
-                    var bank = ['ICBC', 'BOC', 'ABC', 'CCB', 'BOCOM', 'CMB', 'PSBC', 'CEB', 'CMBC', 'CITIC', 'CIB', 'HXB'];
-                    var withdrawalInfo = {
-                        username: this.userList[_socket.userId]._account,
-                        fullname: cardInfo.name,
-                        baCode: bank[cardInfo.bankType - 1],
-                        amount: _info.score,
-                        baNo: cardInfo.account,
-                        ip: _info.ip
-                    }
-                    var self = this;
-
-                    ml_api.withdrawal(withdrawalInfo, function (result) {
-                        if (result) {
-                            var myDate = new Date();
-                            var out_trade_no = String(myDate.getFullYear()) + String(myDate.getMonth() + 1) + String(myDate.getDate()) + String(myDate.getTime()) + self.todayId;
-                            if (self.todayId > 10000) {
-                                self.todayId = 0;
-                            }
-
-                            self.todayId++;
-
-                            var userInfo = {
-                                sendUserId: _socket.userId,
-                                sendCoin: -_info.score,
-                                change_type: 2,
-                                cardType: _info.type,
-                                cardId: cardId,
-                                out_trade_no: out_trade_no
-                            };
-                            self.GameBalanceSub(userInfo, function (_sendStr) {
-                                var data = JSON.parse(_sendStr);
-                                if (!data.status) {
-                                    //记录订单
-                                    //保存兑换记录
-                                    dao.socreOut(userInfo, function () {
-                                    });
-                                    data.msg = "兑奖成功";
-                                }
-                                _socket.emit('scoreOutResult', {ResultCode: data.status, msg: data.msg});
-                                //callback(_sendStr);
-                            });
-                        } else {
-                            _socket.emit('scoreOutResult', {ResultCode: 1, msg: "接口失败"});
-                        }
-
-                    })
-                }
-            }
-
-            //console.log(cardInfo)
-
-
-            //未完成
-            // dao.checkScoreByLog(_socket.userId,score,function(result){
-            // 	info.warn('金币有异常,让管理员详细查看数据确认。')
-            // })
-
-
-        };
 
         this.updateScoreOut = function (out_trade_no, flag, remark, callback) {
             var self = this;

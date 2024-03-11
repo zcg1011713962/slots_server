@@ -1,12 +1,19 @@
 const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const laba_config = require('../util/config/laba_config');
+const {getInstand: log} = require("../CClass/class/loginfo");
+const ErrorCode = require("./ErrorCode");
 
 
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
 const userPlayGameCount= 'userPlayGameCount';
+
+const sendEmailExpireKey = 'send_email_code_expire_';
+const sendEmailKey = 'send_email_code_';
+
+
 
 // 增加银行输入密码错误次数
 exports.addBankPwdErrorCount = function (userId) {
@@ -140,4 +147,37 @@ exports.addPlayGameCount  = function addPlayGameCount(userId){
 exports.getPlayGameCount  = function getPlayGameCount(userId){
     return RedisUtil.hget(userPlayGameCount, userId);
 }
+
+// 邮箱验证码-存储过期key
+exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, toEmail, callback){
+    try {
+        RedisUtil.set(sendEmailExpireKey + toEmail, verificationCode).then(ret1 =>{
+            RedisUtil.expire(sendEmailExpireKey + toEmail, 480).then(ret2 =>{
+                if(ret1 && ret2){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            });
+        });
+    }catch (e){
+        log.err(e);
+        callback(0);
+    }
+}
+// 邮箱验证码-存储
+exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, callback){
+    // 邮箱验证码设置
+    RedisUtil.set(sendEmailExpireKey + toEmail, verificationCode).then(ret1 =>{
+        RedisUtil.expire(sendEmailKey + toEmail, 240).then(ret2 =>{
+            if(ret1 && ret2){
+                callback(1);
+            }else{
+                callback(0);
+            }
+        });
+    });
+}
+
+
 

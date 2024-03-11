@@ -10,14 +10,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// 生成六位数的随机验证码
-const verificationCode = randomstring.generate({
-    length: 6,
-    charset: 'numeric'
-});
-
 
 const sendVerificationCode = (recipientEmail, callback) => {
+    // 生成六位数的随机验证码
+    const verificationCode = randomstring.generate({
+        length: 6,
+        charset: 'numeric'
+    });
     // 设置邮件内容
     const mailOptions = {
         from: 'zhengchungaung66@gmail.com', // 发送者的邮箱地址
