@@ -246,6 +246,10 @@ var GameInfo = function () {
                                         console.log('登录结果', result);
                                         socket.emit('loginResult', result);
                                         ++self.onlinePlayerCount;
+
+                                        setTimeout(() => {
+                                            socket.emit('noticeMsg', self.server_log_list);
+                                        }, 1000);
                                     }
                                 });
                             });
@@ -277,9 +281,7 @@ var GameInfo = function () {
                             tableKey: linemsg.tableKey
                         });
                     }
-                    socket.emit('noticeMsg', self.server_log_list);
                     console.log("大厅在线人数:", self.onlinePlayerCount);
-
                     // 每日转盘活动
                     CacheUtil.activityLuckyConfig(userId, updateConfig.getLuckyCoinConfig());
                     callback_a(1);
@@ -415,7 +417,8 @@ var GameInfo = function () {
                 bankScore: user.bankScore, // 银行积分，也就是银行里的金币
                 bankLock: user.bankLock,  // 银行是否被锁定
                 addDate: user.addDate, // 注册时间
-                existBankPwd: user.bankPwd ? 1 : 0 // 是否设置了银行密码
+                existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
+                email: user._email ? user._email : '' // 邮箱
             };
         }
 
@@ -543,7 +546,7 @@ var GameInfo = function () {
                         return;
                     }
                     // 更新兑换卷状态=已使用
-                    ymDao.cdKeyGet(cdkey, r =>{
+                    ymDao.cdKeyGet(userId, cdkey, r =>{
                         if(r){
                             const result = {
                                 vipLevel: this.userList[userId].vip_level,
@@ -1701,10 +1704,11 @@ var GameInfo = function () {
                 _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_INPUT_ERROR.code, msg: ErrorCode.EMAIL_INPUT_ERROR.msg});
                 return;
             }
-
-            const verificationCode = SendEmail(toEmail,  callback =>{
-                CacheUtil.cacheEmailExpireCode(verificationCode, toEmail, ret =>{
-                    if(ret){
+            //
+            const verificationCode = 666666;
+            //const verificationCode = SendEmail(toEmail,  callback =>{
+                //CacheUtil.cacheEmailExpireCode(verificationCode, toEmail, ret =>{
+                    //if(ret){
                         // 存储验证码
                         CacheUtil.cacheEmailCode(verificationCode, toEmail, flag =>{
                             if(flag){
@@ -1715,11 +1719,11 @@ var GameInfo = function () {
                                 _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
                             }
                         });
-                    }else{
+                    //}else{
                         _socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-                    }
-                });
-            });
+                    //}
+                //});
+            //});
         };
 
         // 绑定邮箱验证码
@@ -1741,7 +1745,11 @@ var GameInfo = function () {
                             // 绑定邮箱
                             dao.emailBind(socket.userId, email, ret =>{
                                 if(ret){
-                                    socket.emit('bindEmailResult', {code: 1, msg: "绑定成功"});
+                                    const result = {
+                                        goodsType: [TypeEnum.GoodsType.diamond],
+                                        sourceVal: [30]
+                                    }
+                                    socket.emit('bindEmailResult', {code: 1, msg: "绑定成功", data: result});
                                 }else{
                                     socket.emit('bindEmailResult', {code: 0, msg: '绑定失败'});
                                 }

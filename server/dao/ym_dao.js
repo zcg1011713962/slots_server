@@ -40,9 +40,10 @@ exports.cdKeySearch = function cdKeySearch(cdKeyNum, callback){
 
 
 // 兑换卷领取
-exports.cdKeyGet = function cdKeyGet(cdKeyNum, callback){
-    const sql = 'update ym_manage.cdkey set status = 1, use_time = ? where `number` = ? ';
+exports.cdKeyGet = function cdKeyGet(userId ,cdKeyNum, callback){
+    const sql = 'update ym_manage.cdkey set status = 1, use_id = ?, use_time = ? where `number` = ? ';
     const values = []
+    values.push(userId);
     values.push(new Date());
     values.push(cdKeyNum);
 

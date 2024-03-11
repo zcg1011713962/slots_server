@@ -168,7 +168,7 @@ exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, 
 // 邮箱验证码-存储
 exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, callback){
     // 邮箱验证码设置
-    RedisUtil.set(sendEmailExpireKey + toEmail, verificationCode).then(ret1 =>{
+    RedisUtil.set(sendEmailKey + toEmail, verificationCode).then(ret1 =>{
         RedisUtil.expire(sendEmailKey + toEmail, 240).then(ret2 =>{
             if(ret1 && ret2){
                 callback(1);

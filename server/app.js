@@ -368,22 +368,26 @@ io.on('connection', function (socket) {
     // 发送跑马灯
     socket.on("sendNotifyMsg", function () {
         // 发送跑马灯
-        const noticeMsg = {
+        const noticeMsg = [{
             type: TypeEnum.notifyType.normal,
             content_id: "c2000",
-            txt: "跑马灯......................................信息"
-        }
+            extend:{
+
+            }
+        }]
         gameInfo.sendNotifyMsg(socket.userId, noticeMsg);
     });
 
     // 发送全服跑马灯
     socket.on("sendAllNotifyMsg", function () {
         // 发送跑马灯
-        const noticeMsg = {
+        const noticeMsg = [{
             type: TypeEnum.notifyType.normal,
             content_id: "c2000",
-            txt: "全服跑马灯......................................信息"
-        }
+            extend:{
+
+            }
+        }]
         gameInfo.sendAllNotifyMsg(noticeMsg);
     });
 

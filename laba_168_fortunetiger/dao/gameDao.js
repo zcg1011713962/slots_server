@@ -1,9 +1,9 @@
-var mysql = require('mysql');
-var async = require('async');
-var gameConfig = require("./../config/gameConfig");
-var mysql_config = require("./../../util/config/mysql_config");
+const mysql = require('mysql');
+const async = require('async');
+const gameConfig = require("./../config/gameConfig");
+const mysql_config = require("./../../util/config/mysql_config");
 
-var pool = mysql.createPool({
+const pool = mysql.createPool({
     connectionLimit: 10000,
     host: mysql_config.host,
     user: mysql_config.user,

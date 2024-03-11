@@ -11,7 +11,7 @@ const pool = mysql.createPool({
     password: mysql_config.password,
     port: mysql_config.port,
     database: 'gameaccount',
-    charset: "utf8mb4",
+    charset: "utf8mb4"
 });
 
 
@@ -31,8 +31,13 @@ exports.login = function login(user, socket, callback) {
         // 用户密码登录
         pwdLogin(user, socket, callback);
     }else if(user.uid){
-        // google登录或注册
-        googleLogin(user, socket, callback);
+        // 带了邮箱，如果绑定过直接给原用户增加google登录方式
+        if(user.email){
+
+        }else{
+            // google登录或注册
+            googleLogin(user, socket, callback);
+        }
     }else if(user.email && user.code){
         // 邮箱登录
         emailLogin(user, socket, callback);
