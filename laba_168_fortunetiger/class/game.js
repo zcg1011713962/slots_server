@@ -239,26 +239,29 @@ var GameInfo = function () {
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
                 fin_value = win + winJackpot;
-                // 普通奖励不能大于库存，除非是开了配牌器
-                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+
+
+                // 开了配牌器
+                if(iconTypeBind && iconTypeBind.length > 0){
+                    break;
+                }
+                // 库存上限控制
+                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
-                // 开了配牌器也不走RTP控制
-                if(!iconTypeBind){
-                    // RTP控制
-                    if(this.lotteryCount > target_rtp_start_position) {
-                        // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
-                        source_rtp = ((this.totalBackBet / this.totalBet) * 100) > 100 ? 100 : ((this.totalBackBet / this.totalBet) * 100).toFixed(2);
-                        // 当前RTP大于目标RTP 而且 摇的结果是赢的
-                        if (source_rtp > expectRTP && fin_value > 0) {
-                            log.info('需要让用户输 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:'+ fin_value)
-                            continue;
-                        }
-                        // 当前RTP小于目标RTP 而且 摇的结果是输的
-                        if (source_rtp < expectRTP && fin_value < 1) {
-                            log.info('需要让用户赢 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:' + fin_value)
-                            continue;
-                        }
+                // RTP控制
+                if(this.lotteryCount > target_rtp_start_position) {
+                    // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
+                    source_rtp = ((this.totalBackBet / this.totalBet) * 100) > 100 ? 100 : ((this.totalBackBet / this.totalBet) * 100).toFixed(2);
+                    // 当前RTP大于目标RTP 而且 摇的结果是赢的
+                    if (source_rtp > expectRTP && fin_value > 0) {
+                        log.info('需要让用户输 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:'+ fin_value)
+                        continue;
+                    }
+                    // 当前RTP小于目标RTP 而且 摇的结果是输的
+                    if (source_rtp < expectRTP && fin_value < 1) {
+                        log.info('需要让用户赢 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:' + fin_value)
+                        continue;
                     }
                 }
                 break;

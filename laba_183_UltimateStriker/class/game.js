@@ -576,8 +576,12 @@ var GameInfo = function () {
                         break;
                     }
                 }
-                // 普通奖励不能大于库存，除非是开了配牌器
-                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                // 开了配牌器
+                if(iconTypeBind && iconTypeBind.length > 0){
+                    break;
+                }
+                // 库存上限控制
+                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break

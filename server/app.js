@@ -13,7 +13,6 @@ const dao = require('./dao/dao');
 const log = require("../CClass/class/loginfo").getInstand;
 const consolidate = require('consolidate');
 const statics = require('express-static');
-const sms = require("./class/sms.js");
 const StringUtil = require("../util/string_util");
 const gameInfo = require("./class/game").getInstand;
 const ServerInfo = require('./config/ServerInfo').getInstand;
@@ -29,7 +28,7 @@ const updateConfig = require('./class/update_config').getInstand;
 const version = "ymymymymym12121212qwertyuiop5656_";
 const num = "2.0";
 
-app.use(statics('./static/'));
+/*app.use(statics('./static/'));*/
 
 //跨域问题
 app.all('*', function (req, res, next) {
@@ -127,43 +126,6 @@ app.post('/checkVersion', function (req, res) {
 });
 
 
-
-//获取验证码
-app.post('/getSmsCode', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('getSmsCode-json');
-    }
-    sms.send_shansuma(req.body.phone);
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({code: 1}));
-    response.end();
-});
-//校验验证码
-app.post('/checkSmsCode', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('checkSmsCode-json');
-    }
-    let isCodeRight = sms.verify(req.body.phone, req.body.code); // 返回true/false
-    let code = 0;
-    if (isCodeRight) {
-        code = 1;
-    }
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({code: code}));
-    response.end();
-});
 
 app.get('/bindCards', function (req, response) {
     try {

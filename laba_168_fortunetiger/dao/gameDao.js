@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const async = require('async');
 const gameConfig = require("./../config/gameConfig");
 const mysql_config = require("./../../util/config/mysql_config");

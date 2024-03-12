@@ -246,10 +246,16 @@ var GameInfo = function () {
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
                 fin_value = win + winJackpot;
-                // 普通奖励不能大于库存，除非是开了配牌器
-                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+
+                // 开了配牌器
+                if(iconTypeBind && iconTypeBind.length > 0){
+                    break;
+                }
+                // 库存上限控制
+                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
+
                 // RTP控制
                 if(this.lotteryCount > target_rtp_start_position) {
                     // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走

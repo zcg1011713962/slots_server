@@ -8,7 +8,7 @@ class RedisUtil {
             const redisOptions = {
                 host: RedisConfig.RDS_IP,
                 port: RedisConfig.RDS_PORT, // 默认 Redis 端口号
-                password: RedisConfig.RDS_PWD, // 指定 Redis 密码
+                password: RedisConfig.RDS_PWD // 指定 Redis 密码
             };
             this.client = redis.createClient(redisOptions);
             // Promisify Redis functions

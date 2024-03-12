@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const log = require("../../CClass/class/loginfo").getInstand;
 const mysql_config = require("../../util/config/mysql_config");
 

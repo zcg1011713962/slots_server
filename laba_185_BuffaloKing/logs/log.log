@@ -191,3 +191,25 @@
 2024-02-21T17:38:41.076 [INFO ] default - [ 12, 0, 0, 0, 0, 1 ]
 2024-02-21T17:38:41.076 [INFO ] default - [ 1, 1, 1, 2, 2, 2 ]
 2024-02-21T17:38:41.076 [INFO ] default - 下注:400赢:40jackpot:0expectRTP:80
+2024-03-12T15:49:25.055 [INFO ] default - 添加库存:380当前库存380
+2024-03-12T15:49:25.059 [INFO ] default - 添加奖池:20
+2024-03-12T15:49:25.060 [ERROR] default - TypeError: Cannot read properties of undefined (reading 'length')
+    at weightedRandomCardType (D:\coding\slots_server\util\laba.js:385:33)
+    at getCard (D:\coding\slots_server\util\laba.js:363:25)
+    at module.exports.createHandCards (D:\coding\slots_server\util\laba.js:10:12)
+    at Game.lottery (D:\coding\slots_server\laba_185_BuffaloKing\class\game.js:236:35)
+    at D:\coding\slots_server\util\lottery.js:17:41
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-03-12T15:52:28.612 [INFO ] default - 用户离开游戏,移除用户21091
+2024-03-12T15:56:03.410 [INFO ] default - 添加库存:380当前库存760
+2024-03-12T15:56:03.412 [INFO ] default - 添加奖池:20
+2024-03-12T15:56:05.595 [INFO ] default - 减少库存:40库存760
+2024-03-12T15:56:05.596 [INFO ] default - 减少奖池:0
+2024-03-12T15:56:05.598 [INFO ] default - 图案排列结果
+2024-03-12T15:56:05.598 [INFO ] default - [ 4, 0, 0, 2, 1, 0 ]
+2024-03-12T15:56:05.599 [INFO ] default - [ 1, 3, 5, 2, 6, 4 ]
+2024-03-12T15:56:05.599 [INFO ] default - [ 5, 3, 0, 8, 2, 0 ]
+2024-03-12T15:56:05.599 [INFO ] default - [ 0, 5, 3, 0, 5, 6 ]
+2024-03-12T15:56:05.600 [INFO ] default - 下注:400赢:40jackpot:0expectRTP:80
+2024-03-12T15:56:05.600 [INFO ] default - 摇奖结果{"code":1,"userscore":50999640,"winscore":40,"viewarray":{"nHandCards":[5,1,1,3,2,1,2,4,6,3,7,5,6,4,1,9,3,1,1,6,4,1,6,7],"nAllWinLines":[{"win_num":20,"win_line":[false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,true,false,false]},{"win_num":20,"win_line":[false,true,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,true,false,false,true,false,false]}],"nWinLinesDetail":[[18,1,2,21],[18,1,14,21]],"win":40,"nWinCards":[false,true,true,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,true,false,false,true,false,false],"nBetTime":1710230165595,"getOpenBox":{"bFlag":false,"nWinOpenBox":0,"win":0},"getFreeTime":{"bFlag":false,"nFreeTime":0},"nBet":400,"is_free":false,"user_score":50999640},"winfreeCount":0,"freeCount":0,"score_pool":0}
+2024-03-12T15:56:17.433 [INFO ] default - 用户离开游戏,移除用户21091

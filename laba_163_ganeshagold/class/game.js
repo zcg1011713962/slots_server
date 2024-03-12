@@ -219,8 +219,12 @@ var GameInfo = function () {
                 dictAnalyseResult["nBet"] = nBetSum;
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
-                // 普通奖励不能大于库存
-                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                // 开了配牌器
+                if(iconTypeBind && iconTypeBind.length > 0){
+                    break;
+                }
+                // 库存上限控制
+                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break;

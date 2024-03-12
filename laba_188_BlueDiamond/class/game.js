@@ -96,31 +96,6 @@ var GameInfo = function () {
         this.tt = 0;
 
         this.lottery = function (userId, nBetSum, gameJackpot, redisIconTypeBind) {
-            const dictAnalyseResult = {
-                code: 2,
-                nHandCards: [],  //# 结果手牌
-                nWinLines: [],  //# 中奖的线数的检索
-                nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
-                nWinDetail: [],  //# 每条线中多少钱
-                nBet: nBetSum, // # 下注总额
-                win: 0,  //# 中奖总额
-                nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
-                getOpenBox: {
-                    bFlag: false,
-                    nWinOpenBox: 0
-                },
-                getFreeTime: {
-                    bFlag: false,
-                    nFreeTime: 0,
-                    nIndex: 0
-                },
-                getBigWin: {
-                    bFlag: false,
-                },
-                nMultiple: 0,
-                nWinCardsDetail: [],
-                nBetTime: Number(new Date())
-            };
 
             if (!userId) {					//传输ID错误
                 console.log("未传用户ID");
@@ -228,8 +203,35 @@ var GameInfo = function () {
             let winJackpot = 0;
             let fin_value = 0;
             let source_rtp = 0;
+            let dictAnalyseResult = {}
             // 生成图案，分析结果（结果不满意继续）
             while (true) {
+                dictAnalyseResult = {
+                    code: 2,
+                    nHandCards: [],  //# 结果手牌
+                    nWinLines: [],  //# 中奖的线数的检索
+                    nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
+                    nWinDetail: [],  //# 每条线中多少钱
+                    nBet: nBetSum, // # 下注总额
+                    win: 0,  //# 中奖总额
+                    nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
+                    getOpenBox: {
+                        bFlag: false,
+                        nWinOpenBox: 0
+                    },
+                    getFreeTime: {
+                        bFlag: false,
+                        nFreeTime: 0,
+                        nIndex: 0
+                    },
+                    getBigWin: {
+                        bFlag: false,
+                    },
+                    nMultiple: 0,
+                    nWinCardsDetail: [],
+                    nBetTime: Number(new Date())
+                };
+
                 if(jackpotCard){
                     // 分析jackpot
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
@@ -243,8 +245,13 @@ var GameInfo = function () {
                 win =  dictAnalyseResult["win"];
                 // 图案最终价值
                 fin_value = win + winJackpot;
-                // 普通奖励不能大于库存，除非是开了配牌器
-                if(!iconTypeBind && GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+
+                // 开了配牌器
+                if(iconTypeBind && iconTypeBind.length > 0){
+                    break;
+                }
+                // 库存上限控制
+                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
                     continue;
                 }
                 break;

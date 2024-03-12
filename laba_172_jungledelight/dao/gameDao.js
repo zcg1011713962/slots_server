@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+var mysql = require('mysql2');
 var async = require('async');
 var gameConfig = require("./../config/gameConfig");
 var mysql_config = require("./../../util/config/mysql_config");
