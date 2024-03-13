@@ -154,7 +154,7 @@ var GameInfo = function () {
                 //callback到最后
                 function (callback) {
                     dao.getPropByUserId(userInfo.Id, function (result, row) {
-                        log.info(userInfo.Id + "获取道具");
+                        log.info(userInfo.Id + "登录获取道具");
                         if (result) {
                             var proplist = {};
                             for (var i = 0; i < row.length; i++) {
@@ -169,7 +169,6 @@ var GameInfo = function () {
                         const loginUser= self.loginUserInfo(userInfo.Id);
 
                         result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser};
-                        log.info("登录成功:" + result);
                         callback(null, result);
                     })
                 },
@@ -178,13 +177,13 @@ var GameInfo = function () {
                         if (Result) {
                             result.Obj.score = rows.score;
                             result.Obj.diamond = rows.diamond;
-                            log.info("获取积分:" + result);
+                            log.info("登录获取金币:" + result);
                             callback(null, result);
                         }
                     })
                 },
                 function (result, callback) {
-                    log.info(userInfo.Id + "添加金币");
+                    log.info(userInfo.Id + "登录添加金币");
                     dao.LoginaddTempScore(userInfo.Id, function (Result, rows) {
                         if (Result) {
                             for (var i = 0; i < rows.length; ++i) {
@@ -208,7 +207,7 @@ var GameInfo = function () {
                     });
                 },
                 function (result, callback) {
-                    log.info(userInfo.Id + "添加钻石");
+                    log.info(userInfo.Id + "登录添加钻石");
                     dao.LoginaddTempDiamond(userInfo.Id, function (Result, rows) {
                         if (Result) {
                             for (var i = 0; i < rows.length; ++i) {
@@ -243,19 +242,16 @@ var GameInfo = function () {
                                     if(ret1 && ret2){
                                         result.Obj.token = token;
                                         result.win_pool = data;
-                                        console.log('登录结果', result);
                                         socket.emit('loginResult', result);
                                         ++self.onlinePlayerCount;
 
-                                        setTimeout(() => {
-                                            socket.emit('noticeMsg', self.server_log_list);
-                                        }, 1000);
+                                        log.info('登录结果' + JSON.stringify(result));
+                                        callback(null, result);
                                     }
                                 });
                             });
                         })
                     });
-                    callback(null);
                 }
             ], function (err, result) {
                 const userId = userInfo.Id;
@@ -281,14 +277,37 @@ var GameInfo = function () {
                             tableKey: linemsg.tableKey
                         });
                     }
-                    console.log("大厅在线人数:", self.onlinePlayerCount);
+                    log.info("大厅在线人数:"+ self.onlinePlayerCount);
                     // 每日转盘活动
                     CacheUtil.activityLuckyConfig(userId, updateConfig.getLuckyCoinConfig());
+                    // VIP进大厅
+                    const noticeConfig = updateConfig.getNoticeConfig();
+                    if(userInfo.housecard > noticeConfig.vipEnterHallNoticeLevel){
+                        //
+                        log.info("VIP进入大厅:" + userInfo.Id + "VIP等级:" + userInfo.housecard)
+                        self.vipEnterHall(userInfo);
+                    }
                     callback_a(1);
                 }
             });
 
         };
+        
+        this.vipEnterHall = function (userInfo) {
+            // 延时1秒发送跑马灯
+            setTimeout(() => {
+                const noticeMsg = [{
+                    type: TypeEnum.notifyType.vipEnterHall,
+                    content_id: "c2000",
+                    extend:{
+                        vipLevel: userInfo.housecard,
+                        nickName: userInfo.nickname,
+                        userId: userInfo.Id
+                    }
+                }]
+                this.sendAllNotifyMsg(noticeMsg)
+            }, 1000);
+        }
 
 
         //获得在线人数
@@ -396,6 +415,8 @@ var GameInfo = function () {
         // 获取用户登录返回信息
         this.loginUserInfo = function (userId) {
             const user = this.userList[userId];
+            const downloadExtConfig = updateConfig.getDownloadExtConfig();
+
             return {
                 account: user._account,  // 用户名
                 id: user._userId,       // 用户ID
@@ -418,7 +439,8 @@ var GameInfo = function () {
                 bankLock: user.bankLock,  // 银行是否被锁定
                 addDate: user.addDate, // 注册时间
                 existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
-                email: user._email ? user._email : '' // 邮箱
+                email: user._email ? user._email : '' , // 邮箱
+                ptLink: downloadExtConfig.download_url // 推广链接
             };
         }
 
@@ -1479,7 +1501,7 @@ var GameInfo = function () {
             }
 
             //头像
-            if (_info.url == "") {
+            if (_info.url === null || _info.url === undefined) {
                 _socket.emit('updateHeadUrlResult', {code: 0, msg: "头像不能为空"});
                 return;
             }
@@ -2615,13 +2637,16 @@ var GameInfo = function () {
                 // 更新VIP等级
                 this.updateVipLevel(userId, vipLevel, callback =>{
                     if(callback){
-                        const noticeMsg = {
+                        const noticeMsg = [{
                             type: TypeEnum.notifyType.vipUpgrade,
-                            currVipLevel: vipLevel,
-                            oldVipLevel: housecard,
-                            userId: userId,
-                            nickName: this.userList[userId]._nickname,
-                        }
+                            content_id: "c2001",
+                            extend:{
+                                currVipLevel: vipLevel,
+                                oldVipLevel: housecard,
+                                userId: userId,
+                                nickName: this.userList[userId]._nickname
+                            }
+                        }]
                         // 发送VIP升级通知
                         this.sendAllNotifyMsg(noticeMsg);
                     }
@@ -2666,28 +2691,7 @@ var GameInfo = function () {
 
         // 银行取出金币到大厅
         this.bankIntoHallGold = function (socket, gold) {
-            const bankTransferConfig = updateConfig.getBankTransferConfig();
-            // 最低取出
-            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
-            // 转账等级
-            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
-            // 提现倍率
-          /*  const withdraw_proportion = bankTransferConfig.withdraw_proportion;*/
-            if(!gold_transfer_min || !transfer_vipLv){
-                return;
-            }
 
-            // 金币最低转账
-            if(gold < gold_transfer_min){
-                socket.emit('bankIntoHallGoldResult', {code:0, msg: "失败!最低转出" + gold_transfer_min });
-                return;
-            }
-            const vipLevel = this.userList[socket.userId].vip_level;
-            // 判断VIP是否达到转账要求
-            if(vipLevel < transfer_vipLv){
-                socket.emit('bankIntoHallGoldResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
-                return;
-            }
             const bankScore = gold;
             if(!bankScore || isNaN(bankScore) || bankScore < 0){
                 socket.emit('bankIntoHallGoldResult', {code:0, msg: "参数有误" });
@@ -2715,27 +2719,6 @@ var GameInfo = function () {
 
         // 银行转入金币
         this.hallGoldIntoBank = function (socket, gold) {
-            const bankTransferConfig = updateConfig.getBankTransferConfig();
-            // 最低取出
-            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
-            // 转账等级
-            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
-            // 提现倍率
-            /*const withdraw_proportion = bankTransferConfig.withdraw_proportion;*/
-            if(!gold_transfer_min || !transfer_vipLv){
-                return;
-            }
-            // 金币最低转账
-            if(gold < gold_transfer_min){
-                socket.emit('hallGoldIntoBankResult', {code:0, msg: "失败!最低存入" + gold_transfer_min });
-                return;
-            }
-            const vipLevel = this.userList[socket.userId].vip_level;
-            // 判断VIP是否达到转账要求
-            if(vipLevel < transfer_vipLv){
-                socket.emit('hallGoldIntoBankResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
-                return;
-            }
             if(!gold || isNaN(gold) || gold < 0){
                 socket.emit('hallGoldIntoBankResult', {code:0, msg: "参数有误" });
                 return;
@@ -2760,66 +2743,80 @@ var GameInfo = function () {
 
         // 转账
         this.bankTransferOtherBank = function (socket, giveUserId ,bankScore) {
-            const bankTransferConfig = updateConfig.getBankTransferConfig();
-            // 最低取出
-            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
-            // 转账等级
-            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
-            if(!gold_transfer_min || !transfer_vipLv){
-                return;
-            }
-            // 金币最低转账
-            if(bankScore < gold_transfer_min){
-                socket.emit('bankTransferOtherBankResult', {code:0, msg: "失败!最低存入" + gold_transfer_min });
-                return;
-            }
-            const vipLevel = this.userList[socket.userId].vip_level;
-            // 判断VIP是否达到转账要求
-            if(vipLevel < transfer_vipLv){
-                socket.emit('bankTransferOtherBankResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
-                return;
-            }
-            // 账户余额不足
-            const currBankScore = this.userList[socket.userId].bankScore;
-            if(currBankScore < bankScore){
-                socket.emit('bankTransferOtherBankResult', {code:0, msg: "账户余额不足" });
-                return;
-            }
 
-
-            dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
-                if(row){
-                    if(row.rcode > 0){
-                        // 赠送账户减少银行积分
-                        this.userList[socket.userId].bankScore -= bankScore;
-                        // 如果被赠送用户在线
-                        if(this.userList[giveUserId]){
-                            this.userList[giveUserId].bankScore += bankScore;
-                        }
-                        // 消息通知
-                        this.transferMsgNotify(giveUserId, socket.userId, row.logTransferId);
-
-                        const result = {
-                            bankScore: this.userList[socket.userId].bankScore,
-                            gold: this.userList[socket.userId]._score
-                        }
-                        socket.emit('bankTransferOtherBankResult', {code:1,  data: result });
-                    }
-                }else{
-                    socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
+            CacheUtil.getTransferKey(socket.userId).then(exit =>{
+                if(exit){
+                    socket.emit('bankTransferOtherBankResult', {code:0, msg: "不允许频繁操作"});
+                   return;
                 }
+                CacheUtil.setTransferKey(socket.userId, ret =>{
+                    if(ret){
+                        const bankTransferConfig = updateConfig.getBankTransferConfig();
+                        // 最低取出
+                        const gold_transfer_min = bankTransferConfig.gold_transfer_min;
+                        // 转账等级
+                        const transfer_vipLv = bankTransferConfig.transfer_vipLv;
+                        if(!gold_transfer_min || !transfer_vipLv){
+                            return;
+                        }
+                        // 金币最低转账
+                        if(bankScore < gold_transfer_min){
+                            socket.emit('bankTransferOtherBankResult', {code:0, msg: "失败!最低存入" + gold_transfer_min });
+                            return;
+                        }
+                        const vipLevel = this.userList[socket.userId].vip_level;
+                        // 判断VIP是否达到转账要求
+                        if(vipLevel < transfer_vipLv){
+                            socket.emit('bankTransferOtherBankResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
+                            return;
+                        }
+                        // 账户余额不足
+                        const currBankScore = this.userList[socket.userId].bankScore;
+                        if(currBankScore < bankScore){
+                            socket.emit('bankTransferOtherBankResult', {code:0, msg: "账户余额不足" });
+                            return;
+                        }
+
+
+                        dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
+                            if(row){
+                                if(row.rcode > 0){
+                                    // 赠送账户减少银行积分
+                                    this.userList[socket.userId].bankScore -= bankScore;
+                                    // 如果被赠送用户在线
+                                    if(this.userList[giveUserId]){
+                                        this.userList[giveUserId].bankScore += bankScore;
+                                    }
+                                    CacheUtil.delTransferKey(socket.userId);
+                                    // 消息通知
+                                    this.transferMsgNotify(giveUserId, socket.userId, row.logTransferId);
+
+                                    const result = {
+                                        bankScore: this.userList[socket.userId].bankScore,
+                                        gold: this.userList[socket.userId]._score
+                                    }
+                                    socket.emit('bankTransferOtherBankResult', {code:1,  data: result });
+                                }
+                            }else{
+                                socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
+                            }
+                        });
+                    }
+                })
             });
         }
 
         // 转账消息通知
         this.transferMsgNotify = function (giveUserId, userId, logTransferId) {
-            const noticeMsg = {
+            const noticeMsg = [{
                 type: TypeEnum.notifyType.bankTransfer,
-                formUserId: userId,
-                toUserId: giveUserId,
-                formUserNickName: this.userList[userId]._nickname,
-                contentId: logTransferId
-            }
+                content_id: "c2002",
+                extend:{
+                    formUserId: userId,
+                    toUserId: giveUserId,
+                    formUserNickName: this.userList[userId]._nickname
+                }
+            }]
             // 跑马灯通知
             this.sendNotifyMsg(userId, noticeMsg);
             // 邮件通知

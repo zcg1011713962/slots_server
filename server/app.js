@@ -28,7 +28,7 @@ const updateConfig = require('./class/update_config').getInstand;
 const version = "ymymymymym12121212qwertyuiop5656_";
 const num = "2.0";
 
-/*app.use(statics('./static/'));*/
+// app.use(statics('./static/'));
 
 //跨域问题
 app.all('*', function (req, res, next) {
@@ -956,7 +956,7 @@ io.on('connection', function (socket) {
     //修改头像
     socket.on("updateHeadUrl", function (_info) {
         try {
-            const data = JSON.parse(_info);
+            const data = StringUtil.isJson(_info) ? JSON.parse(_info) : _info ;
             _info = data;
         } catch (e) {
             log.warn('updateHeadUrl-json');

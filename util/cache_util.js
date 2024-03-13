@@ -12,7 +12,7 @@ const userPlayGameCount= 'userPlayGameCount';
 
 const sendEmailExpireKey = 'send_email_code_expire_';
 const sendEmailKey = 'send_email_code_';
-
+const transferCheckKey = 'transfer_check_';
 
 
 // 增加银行输入密码错误次数
@@ -128,7 +128,7 @@ exports.getActivityLuckyDetail  = function getActivityLuckyDetail(callback){
 // 增加玩家玩游戏次数
 exports.addPlayGameCount  = function addPlayGameCount(userId){
     RedisUtil.hget(userPlayGameCount, userId).then(count =>{
-        count = count ? count + 1 : 1;
+        count = count ? parseInt(count) + 1 : 1;
         RedisUtil.hmset(userPlayGameCount, userId, count);
         // 幸运活动增加玩游戏次数
         RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
@@ -180,4 +180,27 @@ exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, cal
 }
 
 
+// 转账防重复刷
+exports.setTransferKey  = function setTransferKey(userId, callback){
+    // 邮箱验证码设置
+    RedisUtil.set(transferCheckKey + userId, new Date().getTime()).then(ret1 =>{
+        RedisUtil.expire(transferCheckKey + userId, 3).then(ret2 =>{
+            if(ret1 && ret2){
+                callback(1);
+            }else{
+                callback(0);
+            }
+        });
+    });
+}
+
+exports.delTransferKey  = function getTransferKey(userId){
+    // 邮箱验证码设置
+    return RedisUtil.del(transferCheckKey + userId);
+}
+
+exports.getTransferKey  = function getTransferKey(userId){
+    // 邮箱验证码设置
+    return RedisUtil.get(transferCheckKey + userId);
+}
 

@@ -87,6 +87,17 @@ var update_config = function(){
 			},60000);
 
 
+			fs.readFile('./config/json/download_extension.json','utf-8',function(err,data){
+				self.downloadExtConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/json/download_extension.json','utf-8',function(err,data){
+					self.downloadExtConfig = data.toString().trim();
+				})
+			},60000);
+
+
 		};
 
 
@@ -153,6 +164,14 @@ var update_config = function(){
 			}
 		}
 
+		this.getDownloadExtConfig = function(){
+			try{
+				return JSON.parse(this.downloadExtConfig);
+			}
+			catch(e){
+				log.err('getDownloadExtConfig');
+			}
+		}
 
 		//运行初始化
 		this.init();
