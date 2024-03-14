@@ -247,6 +247,7 @@ var GameInfo = function () {
                 }
                 // 库存上限控制
                 if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                    console.log('库存上限控制');
                     continue;
                 }
                 break;

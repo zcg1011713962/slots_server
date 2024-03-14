@@ -31,13 +31,22 @@ exports.login = function login(user, socket, callback) {
         // 用户密码登录
         pwdLogin(user, socket, callback);
     }else if(user.uid){
-        // 带了邮箱，如果绑定过直接给原用户增加google登录方式
-        if(user.email){
-
-        }else{
-            // google登录或注册
-            googleLogin(user, socket, callback);
-        }
+        // google登录
+        googleLogin(user, socket, (code, msg, data) => {
+            if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
+                // 账户不存在 进行注册
+                this.registerByGoogle(user, socket, (c, m, d) =>{
+                    if(c === ErrorCode.LOGIN_SUCCESS.code){
+                        // 设置邀请码
+                        this.setInviteCode(d.Id);
+                    }else{
+                        callback(c, m, d);
+                    }
+                });
+            }else{
+                callback(code, msg, data);
+            }
+        });
     }else if(user.email && user.code){
         // 邮箱登录
         emailLogin(user, socket, callback);
@@ -56,11 +65,11 @@ function googleLogin(user, socket, callback){
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                log.err('uid login' + err);
+                log.err('googleLogin' + err);
                 callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
             } else {
                 if (rows[0].length === 0) {
-                    callback(ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code, ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.msg);
+                   callback(ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code, ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.msg);
                 } else {
                     if (rows[0][0].account_using === 0) {
                         callback(ErrorCode.LOGIN_ACCOUNT_NOT_USING.code, ErrorCode.LOGIN_ACCOUNT_NOT_USING.msg);
@@ -81,7 +90,7 @@ function pwdLogin(user, socket, callback){
         connection.query({sql: sql, values: [user.userName, user.sign]}, function (err, rows) {
             connection.release();
             if (err) {
-                log.err('pwd login', err);
+                log.err('账户密码登录', err);
                 callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.msg);
             } else {
                 if (rows[0].length === 0) {
@@ -202,7 +211,7 @@ exports.emailBind = function emailBind(userId , email, callback){
 }
 
 // 邮箱注册
-exports.registerByEmail = function registerByEmail(socket, email){
+exports.registerByEmail = function registerByEmail(socket, email, callback){
     // email登录
     const sql = 'CALL RegisterByEmail(?)';
 
@@ -211,82 +220,67 @@ exports.registerByEmail = function registerByEmail(socket, email){
             connection.release();
             if (err) {
                 log.err('register Email' + err);
-                socket.emit('registerResult', {Result: ErrorCode.REGISTER_ERROR.code, msg: ErrorCode.REGISTER_ERROR.msg});
+                callback(0);
             } else {
-                log.info('邮箱注册成功' + email);
-                socket.emit('registerResult', {Result: ErrorCode.REGISTER_SUCCESS.code, msg: ErrorCode.REGISTER_SUCCESS.msg});
+                callback(rows);
             }
         })
     });
 }
 
-//用户注册
-exports.CreateUser = function CreateUser(userInfo, callback) {
-    var sql = 'call createUser(?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    var values = [];
-
-    values.push(userInfo.accountname);
-    values.push(userInfo.pwd);
-    values.push(userInfo.nickname);
-    values.push(userInfo.goldnum);
-    values.push(userInfo.p);
-    if (!userInfo.phoneNo) {
-        userInfo.phoneNo = "";
-    }
-    values.push(userInfo.phoneNo);
-    if (!userInfo.email) {
-        userInfo.email = "";
-    }
-    values.push(userInfo.email);
-    if (!userInfo.sex) {
-        userInfo.sex = -1;
-    }
-    values.push(userInfo.sex);
-
-    if (!userInfo.city) {
-        userInfo.city = "";
-    }
-    values.push(userInfo.city);
-    if (!userInfo.province) {
-        userInfo.province = "";
-    }
-    values.push(userInfo.province);
-    if (!userInfo.country) {
-        userInfo.country = "";
-    }
-    values.push(userInfo.country);
-    if (!userInfo.headimgurl) {
-        userInfo.headimgurl = "";
-    }
-    values.push(userInfo.headimgurl);
-    if (!userInfo.language) {
-        userInfo.language = "";
-    }
-    values.push(userInfo.language);
-
-    //console.log(userInfo.pwd)
-    //console.log(user.password)
+// google注册
+exports.registerByGoogle = function registerByGoogle(user, socket, callback){
+    // google登录
+    const sql = 'CALL RegisterByGoogle(?,?,?)';
+    let values = [];
+    values.push(user.uid);
+    values.push(user.displayName);
+    values.push(user.email);
 
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("CreateUser");
-                console.log(err);
+                log.err('google注册' + err);
                 callback(0);
             } else {
-                callback(1);
+                if (rows[0].length === 0) {
+                    callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.code);
+                } else {
+                    rows[0][0].socket = socket;
+                    rows[0][0].gameId = user.gameId;
+                    callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
+                }
+            }
+            values = [];
+        })
+    });
+}
+
+
+// 设置邀请码
+exports.saveInviteCode = function saveInviteCode(userId, inviteCode){
+    // email登录
+    const sql = 'update userinfo set invite_code = ? where userId = ?';
+    const values = [];
+    values.push(inviteCode);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('保存邀请码' + err);
+            } else {
+                console.log('保存邀请码成功' , userId, '码:' ,inviteCode);
             }
         })
-
-        values = [];
-
     });
 }
 
 
 // 游客注册
-exports.weixinCreateUser = function CreateUser(userInfo, callback) {
+exports.RegisterByGuest = function RegisterByGuest(userInfo, callback) {
     const sql = 'call RegisterByGuest(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
     let values = [];
 
@@ -356,9 +350,9 @@ exports.weixinCreateUser = function CreateUser(userInfo, callback) {
                 callback(0);
             } else {
                 if (rows[0] && rows[0][0]) {
-                    callback(1, rows[0][0].rcode, rows[0]);
+                    callback(1, rows[0][0]);
                 } else {
-                    callback(1);
+                    callback(0);
                 }
             }
         });
@@ -396,29 +390,24 @@ exports.SetPassword = function SetPassword(userInfo, callback) {
     });
 };
 
-//修改密码
-exports.SetAccountState = function SetAccountState(userInfo, callback) {
-    var sql = 'UPDATE newuseraccounts SET account_using=? WHERE Account=?';
-    var values = [];
-    values.push(userInfo.state);
-    values.push(userInfo.accountname);
+// 注销账号
+exports.logoutAccount = function logoutAccount(userId, callback) {
+    const sql = 'UPDATE newuseraccounts SET account_using=0 WHERE Id=?';
+    let values = [];
+    values.push(userId);
 
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("SetAccountState");
+                console.log("注销账号");
                 console.log(err);
                 callback(0);
             } else {
                 callback(1);
             }
         });
-
-
         values = [];
-
     });
 };
 
@@ -515,15 +504,16 @@ exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
     const users = userList.map(user =>{
         return {
             id : user._userId,
-            score : user._score,
-            diamond : user._diamond,
-            bankScore : user.bankScore,
+            score : user._score ? user._score : 0,
+            diamond : user._diamond ? user._diamond : 0,
+            bankScore : user.bankScore ? user.bankScore : 0,
             bankLock : user.bankLock,
             housecard : user.vip_level,
             is_vip : user.is_vip,
             vip_score : user.vip_score,
             luckyCoin : user.luckyCoin,
-            firstRecharge : user.firstRecharge
+            firstRecharge : user.firstRecharge,
+            loginCount: user.LoginCount
         }
     });
 
@@ -1143,6 +1133,55 @@ exports.userSignIn = function userSignIn(userId, callback) {
         values = [];
     });
 }
+
+
+
+// 转正
+exports.changleOfficial = function changleOfficial(userId, callback) {
+    const sql = 'update newuseraccounts set official = 1 where Id = ?';
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("转正");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 是否存在邀请码
+exports.existInviteCode = function existInviteCode(inviteCode, callback){
+    const sql = 'select userId,invite_code from userinfo u where invite_code = ?';
+    const values = []
+    values.push(inviteCode);
+
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('是否存在邀请码'+ err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
+}
+
+
 
 //添加银行卡
 exports.addBank = function addBank(userId, account, name, bankType, callback) {
@@ -2551,19 +2590,31 @@ exports.getScore = function getScore(_userId, callback) {
     });
 }
 
-//增加分数
-exports.addScore = function addScore(_userId, score) {
+//增加金币
+exports.addAccountScore = function addAccountScore(_userId, score, callback) {
+    if(isNaN(score)){
+        log.err('增加金币参数错误' + _userId + '参数' + score);
+        callback(0)
+        return;
+    }
     const sql = "update userinfo_imp set score = score + ? where userId = ?";
     let values = [];
     values.push(score);
     values.push(_userId);
 
     pool.getConnection(function (err, connection) {
-        connection.query({sql: sql, values: values}, function (err) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("addScore");
+                console.log("增加金币");
                 console.log(err);
+                callback(0);
+            }else{
+                if(rows){
+                    callback(1);
+                }else {
+                    callback(0);
+                }
             }
         })
         values = [];
@@ -2864,5 +2915,33 @@ exports.getDiamondRank = function getDiamondRank(callback) {
 
         values = [];
 
+    });
+};
+
+
+
+// 查询邀请码
+exports.searchInvitedCode = function searchInvitedCode(userId, callback) {
+    const sql = 'select invite_code  from userinfo u where u.userId = ?';
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询邀请码");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
     });
 };

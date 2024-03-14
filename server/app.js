@@ -3,11 +3,10 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 let withdrawal_api = require('./class/withdrawal_api');
 const bodyParser = require('body-parser');
-const weixin = require('./class/weixin');
+const guessLoginApi = require('./class/login_api');
 const Robotname = require('./config/RobotName');
 const crypto = require('crypto');
 const gm_api = require('./class/gm_api');
-const ml_api = require('./class/ml_api');
 const tw_api = require('./class/tw_api');
 const dao = require('./dao/dao');
 const log = require("../CClass/class/loginfo").getInstand;
@@ -48,16 +47,6 @@ app.set('view engine', 'html');
 app.use(bodyParser());
 
 
-// 充值接口
-app.get('/recharge', function (req, res) {
-    gameInfo.Recharge(req.query.userId, req.query.amount,function ( callback) {
-        if(callback){
-            res.send("recharge success");
-        }else{
-            res.send("recharge failed");
-        }
-    });
-});
 
 
 app.get('/outCoin', function (req, res) {
@@ -89,20 +78,7 @@ app.post('/gmManage', function (req, res) {
 // 游客登录
 app.get('/weixinLogin', function (req, res) {
     //外部接口
-    weixin(req, function (act, sendStr) {
-        if (act == 1) {
-            res.send(sendStr);
-        } else if (act == 2) {
-            res.redirect(sendStr);
-        }
-
-    });
-});
-
-
-app.get('/ml_api', function (req, res) {
-    //外部接口
-    ml_api.get(req, function (act, sendStr) {
+    guessLoginApi(req, gameInfo, function (act, sendStr) {
         if (act == 1) {
             res.send(sendStr);
         } else if (act == 2) {
@@ -110,6 +86,7 @@ app.get('/ml_api', function (req, res) {
         }
     });
 });
+
 
 
 //版本验证
@@ -411,8 +388,23 @@ io.on('connection', function (socket) {
         try {
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
-                const userInfo = gameInfo.loginUserInfo(userId);
-                socket.emit('UserInfoResult', {code: 1, data: userInfo});
+                CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
+                    let luckObject = {
+                        luckyCoin: 0,
+                        luckyRushStartTime: 0,
+                        luckyRushEndTime: 0,
+                        luckyCoinGetStatus: 0
+                    }
+                    if(ret){
+                        luckObject.luckyCoin = ret.luckyCoin;
+                        luckObject.luckyRushStartTime = ret.luckyRushStartTime;
+                        luckObject.luckyRushEndTime = ret.luckyRushEndTime;
+                        luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                    }
+                    const userInfo = gameInfo.loginUserInfo(userId, luckObject);
+                    socket.emit('UserInfoResult', {code: 1, data: userInfo});
+                });
+
             }else{
                 log.info('getUserInfo用户不在线')
                 socket.emit('UserInfoResult', {code:0,msg:"用户不在线"});
@@ -836,6 +828,132 @@ io.on('connection', function (socket) {
     });
 
 
+    // 新用户绑定邀请码
+    socket.on("bindInviteCode", function (data) {
+        try{
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.inviteCode) throw new Error('参数错误');
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.bindInviteCode(socket, d.inviteCode);
+            }else{
+                socket.emit('bindInviteCodeResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('bindInviteCodeResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+
+    // 查询绑定推广码
+    socket.on("searchInvitedCode", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.searchInvitedCode(socket);
+        }else{
+            socket.emit('searchInvitedCodeResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 查询我的推广信息
+    socket.on("searchInvitedDetail", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.searchInvitedDetail(socket);
+        }else{
+            socket.emit('searchInvitedDetailResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+    // 推广-团队-查询返点记录
+    socket.on("searchAgentRebateRecord", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.searchAgentRebateRecord(socket);
+        }else{
+            socket.emit('searchAgentRebateRecordResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 我的推广-领取返点
+    socket.on("getRebate", function () {
+        console.log('getRebate', socket.userId)
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.getRebate(socket);
+        }else{
+            socket.emit('getRebateResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 推广-记录-领取记录
+    socket.on("getRebateRecord", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.searchAgentGetRebateRecord(socket);
+        }else{
+            socket.emit('getRebateRecordResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 设置-注销账号
+    socket.on("logoutAccount", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.logoutAccount(socket);
+        }else{
+            socket.emit('logoutAccountResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 设置-联系客服-查询客服信息
+    socket.on("customerServiceInfo", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.customerServiceInfo(socket);
+        }else{
+            socket.emit('customerServiceInfoResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 设置-建议反馈
+    socket.on("feedback", function (data) {
+        try{
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.txt) throw new Error('参数错误');
+            if(d.txt.length > 100){
+                socket.emit('feedbackResult', {code:0, msg:"长度限制100字"});
+                return;
+            }
+
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.feedback(socket, d.txt);
+            }else{
+                socket.emit('feedbackResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('feedbackResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+
+    // 设置-联系我们-问题回答
+    socket.on("contactUs", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.contactUs(socket);
+        }else{
+            socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
     // 游戏结算
     socket.on('GameBalance', function (_Info) {
         if (_Info.signCode == serverSign) {
@@ -979,18 +1097,6 @@ io.on('connection', function (socket) {
         }
     });
 
-    //转正
-    socket.on("changeOfficial", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('changeOfficial-json');
-        }
-        if (gameInfo.checkData(socket, _info)) {
-            gameInfo.changeOfficial(socket, _info);
-        }
-    });
 
     //银行卡
     socket.on("BankInfo", function (_info) {
@@ -1214,31 +1320,6 @@ io.on('connection', function (socket) {
         gameInfo.getUserCoin(socket, _info);
     });
 
-    //领取新手卡
-    socket.on('newPlayerExchange', function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('newPlayerExchange-json');
-        }
-        if (!socket.userId) {
-            return;
-        }
-        let sendData = {
-            userId: socket.userId,
-            code: _info.key
-        };
-        ml_api.cdKey(sendData, (res) => {
-            console.log(res);
-            if (res.code == 1) {
-                socket.emit('newPlayerExchangeResult', {Result: 1, msg: "兑换成功"});
-            } else {
-                socket.emit('newPlayerExchangeResult', {Result: 0, msg: res.msg});
-            }
-        });
-    });
-
 
 
     //查询游戏分数2
@@ -1274,11 +1355,10 @@ var server = http.listen(app.get('port'), function () {
 });
 
 
-const period = 1000;
+const period = 2000;
 setInterval(function () {
     // 幸运币活动刷新
     gameInfo.refreshLuckCoinActivity();
-
     // 批量更新用户信息
     gameInfo.batchUpdateAccount();
     // 保存log

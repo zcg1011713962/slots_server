@@ -38,7 +38,8 @@ User = function(_userInfo,_socket){
 	this.dailyGet = 0;        // 是否领取了每日金币
 	this.monthlyGet = 0;      // 是否领取了每月金币
 	this.AddDate = 0;         // 账户创建时间(时间戳毫秒)
-	this.playGameTime = 0;		  // 用户玩的游戏总局数
+	this.inviteCode = 0;	  // 邀请码
+	this.luckyCoin = 0; // 幸运币数量
 
 
 	this.init = function(_userInfo,_socket){
@@ -49,7 +50,7 @@ User = function(_userInfo,_socket){
 		this._socket = _socket;
 		this._islogin = true;
 		this.freeCount = _userInfo.freeCount;
-		this.LoginCount = _userInfo.LoginCount + 1;
+		this.LoginCount = _userInfo.login_count + 1;
 		this.LotteryCount = _userInfo.LotteryCount;
 		this._sign = _userInfo.sign;
 		//socket绑定用户id
@@ -69,7 +70,7 @@ User = function(_userInfo,_socket){
 		this._country = _userInfo.country;
 		this._headimgurl = _userInfo.headimgurl;
 		this._Robot = _userInfo.Robot;
-		this._official = _userInfo.official;
+		this._official = _userInfo.email ? 1 : _userInfo.official;
 		this._p = _userInfo.p;
 		this.bankPwd = _userInfo.bankPwd;
 		this.bankScore = _userInfo.bankScore;
@@ -77,6 +78,7 @@ User = function(_userInfo,_socket){
 		this.addDate = new Date(_userInfo.AddDate).getTime();
 		this.bankLock = _userInfo.bankLock;
 		this.luckyCoin = _userInfo.luckyCoin;
+		this.inviteCode = _userInfo.invite_code;
 
 	};
 

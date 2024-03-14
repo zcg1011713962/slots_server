@@ -97,33 +97,6 @@ var GameInfo = function () {
         this.tt = 0;
 
         this.lottery = function (userId, nBetSum, gameJackpot, redisIconTypeBind) {
-            // 分析手牌结果
-            const dictAnalyseResult = {
-                code: 2,
-                nHandCards: [],  //# 结果手牌
-                nWinLines: [],  //# 中奖的线数的检索
-                nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
-                nWinDetail: [],  //# 每条线中多少钱
-                nBet: nBetSum, // # 下注总额
-                win: 0,  //# 中奖总额
-                nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
-                getOpenBox: {
-                    bFlag: false,
-                    nWinOpenBox: 0
-                },
-                getFreeTime: {
-                    bFlag: false,
-                    nFreeTime: 0,
-                    nIndex: 0
-                },
-                getBigWin: {
-                    bFlag: false,
-                },
-                nMultiple: 0,
-                nWinCardsDetail: [],
-                nBetTime: Number(new Date())
-            };
-
             // 下注非法
             if (nBetSum %  Config.nGameLines.length !== 0) {
                 log.info("非法下注");
@@ -233,8 +206,36 @@ var GameInfo = function () {
             let winJackpot = 0;
             let fin_value = 0;
             let source_rtp = 0;
+            let dictAnalyseResult = {};
             // 生成图案，分析结果（结果不满意继续）
             while(true){
+                // 分析手牌结果
+                dictAnalyseResult = {
+                    code: 2,
+                    nHandCards: [],  //# 结果手牌
+                    nWinLines: [],  //# 中奖的线数的检索
+                    nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
+                    nWinDetail: [],  //# 每条线中多少钱
+                    nBet: nBetSum, // # 下注总额
+                    win: 0,  //# 中奖总额
+                    nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
+                    getOpenBox: {
+                        bFlag: false,
+                        nWinOpenBox: 0
+                    },
+                    getFreeTime: {
+                        bFlag: false,
+                        nFreeTime: 0,
+                        nIndex: 0
+                    },
+                    getBigWin: {
+                        bFlag: false,
+                    },
+                    nMultiple: 0,
+                    nWinCardsDetail: [],
+                    nBetTime: Number(new Date())
+                };
+
                 if(jackpotCard){
                     // 分析jackpot
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
@@ -255,6 +256,7 @@ var GameInfo = function () {
                 }
                 // 库存上限控制
                 if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                    log.info('库存上限控制');
                     continue;
                 }
 

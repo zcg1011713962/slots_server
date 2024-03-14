@@ -44,12 +44,12 @@ var update_config = function(){
 				})
 			},60000);
 
-			fs.readFile('./config/json/bank_transfer.json','utf-8',function(err,data){
+			fs.readFile('./config/json/bank_transfer_config.json','utf-8',function(err,data){
 				self.bankTransferConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/json/bank_transfer.json','utf-8',function(err,data){
+				fs.readFile('./config/json/bank_transfer_config.json','utf-8',function(err,data){
 					self.bankTransferConfig = data.toString().trim();
 				})
 			},60000);
@@ -87,16 +87,48 @@ var update_config = function(){
 			},60000);
 
 
-			fs.readFile('./config/json/download_extension.json','utf-8',function(err,data){
+			fs.readFile('./config/json/invite_download_config.json','utf-8',function(err,data){
 				self.downloadExtConfig = data.toString().trim();
 			})
 
 			setInterval(function(){
-				fs.readFile('./config/json/download_extension.json','utf-8',function(err,data){
+				fs.readFile('./config/json/invite_download_config.json','utf-8',function(err,data){
 					self.downloadExtConfig = data.toString().trim();
 				})
 			},60000);
 
+
+			fs.readFile('./config/json/customer_service_config.json','utf-8',function(err,data){
+				self.customerServiceConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/json/customer_service_config.json','utf-8',function(err,data){
+					self.customerServiceConfig = data.toString().trim();
+				})
+			},60000);
+
+
+			fs.readFile('./config/json/newhand_protect.json','utf-8',function(err,data){
+				self.newhandProtectConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/json/newhand_protect.json','utf-8',function(err,data){
+					self.newhandProtectConfig = data.toString().trim();
+				})
+			},60000);
+
+
+			fs.readFile('./config/json/black_white_list_config.json','utf-8',function(err,data){
+				self.blackWhiteListConfig = data.toString().trim();
+			})
+
+			setInterval(function(){
+				fs.readFile('./config/json/black_white_list_config.json','utf-8',function(err,data){
+					self.blackWhiteListConfig = data.toString().trim();
+				})
+			},60000);
 
 		};
 
@@ -172,6 +204,34 @@ var update_config = function(){
 				log.err('getDownloadExtConfig');
 			}
 		}
+
+		this.getCustomerServiceConfig = function(){
+			try{
+				return JSON.parse(this.customerServiceConfig);
+			}
+			catch(e){
+				log.err('getCustomerServiceConfig');
+			}
+		}
+
+		this.getNewhandProtectConfig = function(){
+			try{
+				return JSON.parse(this.newhandProtectConfig);
+			}
+			catch(e){
+				log.err('getNewhandProtectConfig');
+			}
+		}
+
+		this.getBlackWhiteListConfig = function(){
+			try{
+				return JSON.parse(this.blackWhiteListConfig);
+			}
+			catch(e){
+				log.err('getBlackWhiteListConfig');
+			}
+		}
+
 
 		//运行初始化
 		this.init();

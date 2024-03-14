@@ -30,7 +30,7 @@ function makeDate(date) {
 
 var key = "42dfcb34fb02d8cd";
 
-
+/*
 var api = function(req,callback){
 	var sendStr = '0';
 
@@ -312,7 +312,7 @@ var api = function(req,callback){
 			})
 		}
 	}
-}
+}*/
 
 
 
