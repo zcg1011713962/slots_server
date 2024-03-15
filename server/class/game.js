@@ -1078,23 +1078,41 @@ var GameInfo = function () {
                     // 绑定
                     ymDao.bindIniteCode(row.userId , socket.userId, c =>{
                         if(c){
-                            // 给邀请人增加人头数
-
-
+                            console.log('绑定邀请码成功,邀请人', row.userId, '被邀请人', socket.userId)
                             // 给双方送金币
                             const downloadExtConfig = updateConfig.getDownloadExtConfig();
                             // 送的数量
                             const onceMaxAgentReward = downloadExtConfig.reward_agent_once.find(item => item.type === TypeEnum.GoodsType.gold).reward;
                             const onceMaxInviteeReward = downloadExtConfig.reward_invitee_once.find(item => item.type === TypeEnum.GoodsType.gold).reward;
-                            // 给被邀请人送金币
-                            this.userList[socket.userId]._score += onceMaxInviteeReward ? parseInt(onceMaxInviteeReward) : 0;
-                            // 给邀请人送金币
-                            dao.addAccountScore(row.userId, onceMaxAgentReward ? parseInt(onceMaxAgentReward) : 0, ret =>{
+                            const inviteeRewardGold = onceMaxInviteeReward ? parseInt(onceMaxInviteeReward) : 0;
+                            const agentRewardGold = onceMaxAgentReward ? parseInt(onceMaxAgentReward) : 0;
+
+                            // 给邀请人增加人头数
+                            this.addInvitedNumber(row.userId, agentRewardGold, ret =>{
                                 if(ret){
-                                    console.log('绑定成功给邀请人', row.userId, '送金币', onceMaxAgentReward)
+                                    // 给被邀请人送金币
+                                    this.userList[socket.userId]._score += inviteeRewardGold;
+                                    // 给邀请人送金币
+                                    dao.addAccountScore(row.userId, agentRewardGold , ret =>{
+                                        if(ret){
+                                            console.log('绑定成功给邀请人', row.userId, '送金币', onceMaxAgentReward)
+                                            // 返点记录（已领取）
+                                            ymDao.agentRebateRecord(row.userId, socket.userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.success)
+                                        }else{
+                                            // 返点记录（未完成）
+                                            ymDao.agentRebateRecord(row.userId, socket.userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.failed)
+                                        }
+                                    });
+                                    socket.emit('bindInviteCodeResult', {code:1, msg:"绑定成功"});
+                                }else{
+                                    // 这里失败了解绑  不做事务处理
+                                    ymDao.removeBindIniteCode(row.userId , socket.userId, ret =>{
+                                        if(!ret){
+                                            log.err('给代理增加人头失败,解绑失败代理（邀请人）'+ row.userId  + '被邀请人' + socket.userId);
+                                        }
+                                    });
                                 }
                             });
-                            socket.emit('bindInviteCodeResult', {code:1, msg:"绑定成功"});
                         }else{
                             socket.emit('bindInviteCodeResult', {code:0, msg:"重复绑定"});
                         }
@@ -1104,8 +1122,28 @@ var GameInfo = function () {
         }
 
         // 增加绑定人头数
-        this.searchInvitedCode = function (socket) {
-
+        this.addInvitedNumber = function (userId, gold, callback) {
+            ymDao.searchCurrDayInvite(userId, ret =>{
+                if(ret){
+                    // 推广奖励表 增加邀请人数 累计奖励
+                    ymDao.addInviteSends(userId, gold, r =>{
+                        if(r){
+                            callback(1)
+                        }else{
+                            callback(0)
+                        }
+                    })
+                }else{
+                    // 推广奖励表 新增奖励记录
+                    ymDao.insertInviteSends(userId, gold, r=>{
+                        if(r){
+                            callback(1)
+                        }else{
+                            callback(0)
+                        }
+                    });
+                }
+            })
 
         }
 
@@ -1129,47 +1167,26 @@ var GameInfo = function () {
 
 
         this.searchInvitedDetail = function (socket) {
-            const userId = socket.userId;
-            ymDao.searchInviteDetail(userId, row =>{
+            const result = {
+                totalRebate: 0, // 总收入
+                todayRebate: 0, // 今日佣金
+                yestRebate: 0,  // 昨日佣金
+                totalNum: 0, // 团队人数
+                todayNum: 0, // 今日新增人数
+                yestNum: 0, // 昨日新增人数
+                waitGetRebate: 0 // 待领取佣金
+            }
+            ymDao.inviteDetail(socket.userId, row =>{
                 if(row){
-                    const totalNum = row.totalNum; // 总人数
-                    const totalGold = row.totalGold; // 总金币
-                    ymDao.searchTodayInviteDetail(userId , todayRow =>{
-                        let todayNum = 0;
-                        let todayGold = 0;
-                        if(todayRow){
-                            todayNum = todayRow.totalNum; // 今日人数
-                            todayGold = todayRow.totalGold; // 今日金币
-                        }
-                        ymDao.searchTodayInviteDetail(userId , yestRow =>{
-                            let yestNum = 0;
-                            let yestGold = 0;
-                            if(yestRow){
-                                yestNum = yestRow.totalNum; // 昨日人数
-                                yestGold = yestRow.totalGold; // 最日金币
-                            }
-                            const result ={
-                                totalNum: totalNum, // 总人数
-                                totalGold: totalGold, // 总金币
-                                todayNum: todayNum, // 今日人数
-                                todayGold: todayGold, // 今日金币
-                                yestNum: yestNum, // 昨日人数
-                                yestGold: yestGold  // 最日金币
-                            }
-                            socket.emit('searchInvitedDetailResult', {code:1, data: result});
-                        })
-                    })
-                }else{
-                    const result ={
-                        totalNum: 0, // 总人数
-                        totalGold: 0, // 总金币
-                        todayNum: 0, // 今日人数
-                        todayGold: 0, // 今日金币
-                        yestNum: 0, // 昨日人数
-                        yestGold: 0  // 昨日金币
-                    }
-                    socket.emit('searchInvitedDetailResult', {code:1, data: result});
+                    result.totalRebate = row.totalRebate;
+                    result.todayRebate = row.todayRebate;
+                    result.yestRebate = row.yestRebate;
+                    result.totalNum = row.totalNum;
+                    result.todayNum = row.todayNum;
+                    result.yestNum = row.yestNum;
+                    result.waitGetRebate = row.waitGetRebate;
                 }
+                socket.emit('searchInvitedDetailResult', {code:1, data: result});
             })
         }
 
@@ -1190,9 +1207,9 @@ var GameInfo = function () {
                 if(row){
                     const ids = row.map(item => item.id);
                     let goldSum = row.reduce((accumulator, item) => {
-                        return accumulator + item.gold;
+                        return accumulator + item.rebate_glod;
                     }, 0);
-                    ymDao.agentGetRebateById(ids, r =>{
+                    ymDao.agentUpdateRebateById(ids, TypeEnum.AgentRebateStatus.success,r =>{
                         if(r){
                             dao.addAccountScore(socket.userId, goldSum, c =>{
                                 if(c){
@@ -2107,53 +2124,7 @@ var GameInfo = function () {
         }
 
 
-        //每日活动
-        this.getdaySendPrize = function (_userId, callback) {
 
-            if (!this.userList[_userId]) {
-                callback(0);
-                return;
-            }
-            var self = this;
-            dao.getdaySendPrize(_userId, function (result, rows) {
-                var resultBack = {};
-                var values = [];
-                //console.log(rows.length)
-                if (result) {
-                    //console.log(rows)
-                    for (var i = 0; i < rows.length; i++) {
-                        resultBack.nowday = rows[i].nowday;
-                        if (rows[i].day) {
-                            if (!rows[i].mark) {
-                                values.push({
-                                    id: rows[i].id,
-                                    day: rows[i].day,
-                                    mark: rows[i].mark
-                                });
-                            }
-                            if (rows[i].day == resultBack.nowday) {
-                                resultBack.getcoin = -1;
-                            }
-
-                        } else {
-                            resultBack.getcoin = rows[i].getCoin;
-                        }
-                    }
-                }
-                if (self.userList[_userId]) {
-                    self.userList[_userId]._dayprize = values;
-                }
-                resultBack.list = values;
-                if (!resultBack.nowday) {
-                    resultBack.nowday = 1;
-                }
-                if (!resultBack.getcoin) {
-                    resultBack.getcoin = 0;
-                }
-                //console.log(resultBack);
-                callback(resultBack);
-            })
-        }
 
         //领奖
         this.getPrize = function (_socket, _info) {
@@ -2949,9 +2920,9 @@ var GameInfo = function () {
                     // 金币增加比例
                     const addRatio = downloadExtConfig.reward_agent / 100;
                     const rebateGlod = parseInt(gameConfig.score_amount_ratio * amount * addRatio);
-                    // 生成记录（待领取）
+                    // 返点记录（待领取）
                     log.info(userId + '充值类型'+ currencyType + '货币数量' + currencyVal +'代理人'+ inviteUid +'获得奖励'+ rebateGlod);
-                    ymDao.agentRebateRecord(inviteUid, userId, currencyType, currencyVal, rebateGlod)
+                    ymDao.agentRebateRecord(inviteUid, userId, currencyType, currencyVal, rebateGlod, TypeEnum.AgentRebateType.recharge, TypeEnum.AgentRebateStatus.unissued)
                 }
             })
         }

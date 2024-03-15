@@ -32,12 +32,23 @@ const notifyType = {
     vipEnterHall: 3 // VIP进大厅
 };
 
+const AgentRebateType = {
+    bindInviteCode: 0, // 绑定邀请码
+    recharge: 1 // 充值
+};
 
+const AgentRebateStatus = {
+    unissued: 0, // 待发放
+    success: 1, // 发放成功
+    failed: 2 // 发放失败
+};
 
 module.exports = {
     GoodsType,
     CurrencyType,
     EmailType,
     ShopGroupType,
-    notifyType
+    notifyType,
+    AgentRebateType,
+    AgentRebateStatus
 };
