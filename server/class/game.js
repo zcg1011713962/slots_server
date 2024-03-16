@@ -303,6 +303,11 @@ var GameInfo = function () {
                         log.info("VIP进入大厅:" + userInfo.Id + "VIP等级:" + userInfo.housecard)
                         self.vipEnterHall(userInfo);
                     }
+                    const newHandConfig = updateConfig.getNewhandProtectConfig();
+                    // 新用户弹窗送金币
+                    if(self.userList[userId].loginCount === 1){
+                        socket.emit('newHandGive', {type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]});
+                    }
                     callback_a(1);
                 }
             });
