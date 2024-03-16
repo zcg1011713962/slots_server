@@ -10,12 +10,17 @@ exports.doLottery  = function doLottery(socket, nBetSum, jackpot_ratio, gameInfo
         const icon_type_bind_redis_key = "icon_type_bind_key" + gameInfo.serverId;
         RedisUtil.get(icon_type_bind_redis_key).then(function (key) {
             try {
-                const redisIconTypeBind = key ? JSON.parse(key) : null;
+                let redisIconTypeBind = null;
+                try {
+                    redisIconTypeBind = key ? JSON.parse(key) : null;
+                }catch (e){
+                    log.warn('检查配牌器' +  gameInfo.serverId)
+                }
                 // 游戏奖池
                 let gameJackpot = jackpot ? jackpot * laba_config.game_jackpot_ratio : 0;
                 // 摇奖
                 const result = gameInfo.lottery(socket.userId, nBetSum, gameJackpot, redisIconTypeBind);
-                log.info('摇奖结果' + JSON.stringify(result));
+                log.info('摇奖结果' + socket.userId + JSON.stringify(result));
 
                 if (result.code < 1) {
                     socket.emit('lotteryResult', {ResultCode: result.code});

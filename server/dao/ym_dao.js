@@ -233,7 +233,7 @@ exports.searchInviteSend = function searchInviteSend(userId, callback){
 
 // 代理返点记录
 exports.agentRebateRecord = function agentRebateRecord(invite_uid ,invitee_uid, currencyType, currencyVal ,rebateGlod, type, status, callback){
-    const sql = 'INSERT INTO agent_rebat (invite_uid, invitee_uid, currency_type, currency_val,rebate_glod, created_at, `type`, `status`) VALUES( ?, ?, ?, ?,?,?,?,?)';
+    const sql = 'INSERT INTO agent_rebate (invite_uid, invitee_uid, currency_type, currency_val,rebate_glod, created_at, `type`, `status`) VALUES( ?, ?, ?, ?,?,?,?,?)';
     const values = []
     values.push(invite_uid);
     values.push(invitee_uid);
@@ -247,19 +247,19 @@ exports.agentRebateRecord = function agentRebateRecord(invite_uid ,invitee_uid, 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
-            callback(0);
+            callback(0)
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
                 log.err('新增代理返点记录'+ err);
-                callback(0);
+                callback(0)
             } else {
-                if (rows) {
-                    callback(rows);
-                } else {
-                    callback(0);
+                if(rows){
+                    callback(rows)
+                }else{
+                    callback(0)
                 }
             }
         })

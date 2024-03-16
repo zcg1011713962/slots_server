@@ -79,7 +79,6 @@ User = function(_userInfo,_socket){
 		this.bankLock = _userInfo.bankLock;
 		this.luckyCoin = _userInfo.luckyCoin;
 		this.inviteCode = _userInfo.invite_code;
-
 	};
 
 

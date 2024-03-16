@@ -3,6 +3,7 @@ const log = require("../../CClass/class/loginfo").getInstand;
 const mysql_config = require("../../util/config/mysql_config");
 const ErrorCode = require('../../util/ErrorCode');
 const RedisUtil = require('../../util/redis_util');
+const StringUtil = require("../../util/string_util");
 
 const pool = mysql.createPool({
     connectionLimit: 10000,
@@ -34,8 +35,14 @@ exports.login = function login(user, socket, callback) {
         // google登录
         googleLogin(user, socket, (code, msg, data) => {
             if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
+                // 生成账户密码
+                const time = StringUtil.generateTime();
+                const account = StringUtil.generateAccount('ABC', time);
+                const king = StringUtil.generateKing();
+                const nickname = StringUtil.generateNickName(time);
+                const pwd = StringUtil.pwdEncrypt(account, king);
                 // 账户不存在 进行注册
-                this.registerByGoogle(user, socket, (c, m, d) =>{
+                this.registerByGoogle(user, socket, account, pwd, nickname, king, (c, m, d) =>{
                     if(c === ErrorCode.LOGIN_SUCCESS.code){
                         // 设置邀请码
                         this.setInviteCode(d.Id);
@@ -241,9 +248,15 @@ exports.emailBind = function emailBind(userId , email, callback){
 }
 
 // 邮箱注册
-exports.registerByEmail = function registerByEmail(socket, email, callback){
+exports.registerByEmail = function registerByEmail(socket, email, account, pwd, nickname, king,  callback){
     // email登录
-    const sql = 'CALL RegisterByEmail(?)';
+    const sql = 'CALL RegisterByEmail(?,?,?,?,?)';
+    let values = [];
+    values.push(email)
+    values.push(account)
+    values.push(pwd)
+    values.push(nickname)
+    values.push(king)
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -251,26 +264,37 @@ exports.registerByEmail = function registerByEmail(socket, email, callback){
             callback(0);
             return;
         }
-        connection.query({sql: sql, values: email}, function (err, rows) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
                 log.err('register Email' + err);
                 callback(0);
             } else {
-                callback(rows);
+                if(rows && rows.length > 0){
+                    callback(rows[0][0]);
+                }else{
+                    callback(0);
+                }
             }
         })
+        values = [];
     });
 }
 
 // google注册
-exports.registerByGoogle = function registerByGoogle(user, socket, callback){
+exports.registerByGoogle = function registerByGoogle(user, socket, account, pwd, nickname,king, callback){
+    if(user.displayName &&  user.displayName.length < 50){
+        nickname = user.displayName;
+    }
     // google登录
-    const sql = 'CALL RegisterByGoogle(?,?,?)';
+    const sql = 'CALL RegisterByGoogle(?,?,?,?,?,?)';
     let values = [];
     values.push(user.uid);
-    values.push(user.displayName);
     values.push(user.email);
+    values.push(account);
+    values.push(pwd);
+    values.push(nickname);
+    values.push(king);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -321,6 +345,7 @@ exports.saveInviteCode = function saveInviteCode(userId, inviteCode){
         })
     });
 }
+
 
 
 // 游客注册
@@ -2183,6 +2208,66 @@ exports.updateCoinLogState = function updateCoinLogState(state, id, callback) {
         values = [];
     });
 };
+
+exports.searchAccountByDeviceCode = function (deviceCode, callback) {
+    const sql = "select Account,p  from newuseraccounts n where device_code = ?";
+    let values = [];
+    values.push(deviceCode);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("searchAccountByDeviceCode");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0][0]);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
+    const sql = "update newuseraccounts set device_code = ? where Account = ?";
+    let values = [];
+    values.push(deviceCode);
+    values.push(account);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("updateAccountByDeviceCode");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
 // 保存邮件记录
 exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
     const sql = "INSERT INTO email (title_id, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -2211,11 +2296,14 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
         values = [];
     });
 };
-//查询邮件记录
-exports.selectEmail = function selectEmail(userid, callback) {
-    const sql = "select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.transfer_bank_score val  from email e left join log_bank_transfer b on e.otherId = b.id left join newuseraccounts n on e.from_userid = n.Id where e.to_userid =?";
+
+//查询转账邮件记录
+exports.selectEmail = function selectEmail(types, userId, callback) {
+    const sql = "call GetEmail(?,?)";
     let values = [];
-    values.push(userid);
+    values.push(types);
+    values.push(userId);
+
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
@@ -2225,11 +2313,11 @@ exports.selectEmail = function selectEmail(userid, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询邮件");
+                console.log("查询转账邮件记录");
                 console.log(err);
             } else {
-                if (rows[0]) {
-                    callback(1, rows);
+                if (rows && rows.length > 0) {
+                    callback(1, rows[0]);
                 } else {
                     callback(0);
                 }
@@ -2238,6 +2326,38 @@ exports.selectEmail = function selectEmail(userid, callback) {
         values = [];
     });
 };
+
+
+// 查询邮件类型
+exports.selectEmailTypes = function selectEmailTypes(userId, callback) {
+    const sql = "select `type` from email where to_userid = ? ";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询邮件类型");
+                console.log(err);
+            } else {
+                if (rows && rows.length > 0) {
+                    const types = rows.map(obj => obj.type).join(',');
+                    callback(1, types);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
 //设置邮件为已读
 exports.setEmailisRead = function setEmailisRead(id, callback) {
     const sql = "update email set isRead = 1 where id = ?";

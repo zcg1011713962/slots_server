@@ -74,22 +74,27 @@ exports.pushGameJackpot  = function pushGameJackpot(userList){
 
 
 // 设置每个用户的幸运配置
-exports.activityLuckyConfig  = function activityLuckyConfig(userId, luckyCoinConfig){
+exports.activityLuckyConfig  = function activityLuckyConfig(userId, luckyCoinConfig, callback){
     RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
         if(!ret){
             // 没进入过每日活动的用户默认配置
             const startTime =  new Date().getTime();
             const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
             const ret = {
-                luckyCoin: 0,  // 活动幸运币数量
+                luckyCoin: luckyCoinConfig.luckyCoin,  // 活动幸运币数量
                 doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
                 luckyCoinTask: luckyCoinConfig.luckyCoinTask,
                 luckyRushStartTime: startTime,
                 luckyRushEndTime: endTime,
                 luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
-                luckyCoinTaskGetStatus: 0 // 任务领取状态0不可领取 1可领取
+                luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
+                pushStatus: 1 // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
             }
-            RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret));
+            RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret)).then(r =>{
+                callback(1)
+            });
+        }else{
+            callback(1)
         }
     });
 }
@@ -127,19 +132,25 @@ exports.getActivityLuckyDetail  = function getActivityLuckyDetail(callback){
 
 // 增加玩家玩游戏次数
 exports.addPlayGameCount  = function addPlayGameCount(userId){
-    RedisUtil.hget(userPlayGameCount, userId).then(count =>{
-        count = count ? parseInt(count) + 1 : 1;
-        RedisUtil.hmset(userPlayGameCount, userId, count);
-        // 幸运活动增加玩游戏次数
-        RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
-            const d = JSON.parse(ret);
-            const doLuckyCoinTask = d.doLuckyCoinTask;
-            d.doLuckyCoinTask = parseInt(doLuckyCoinTask) + 1;
-            if(Number(doLuckyCoinTask) < Number(d.luckyCoinTask)){
-                RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
-            }
+    try{
+        RedisUtil.hget(userPlayGameCount, userId).then(count =>{
+            count = count ? parseInt(count) + 1 : 1;
+            RedisUtil.hmset(userPlayGameCount, userId, count);
+            // 幸运活动增加玩游戏次数
+            RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
+                const d = JSON.parse(ret);
+                if(d && d.doLuckyCoinTask){
+                    const doLuckyCoinTask = d.doLuckyCoinTask;
+                    d.doLuckyCoinTask = parseInt(doLuckyCoinTask) + 1;
+                    if(Number(doLuckyCoinTask) < Number(d.luckyCoinTask)){
+                        RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
+                    }
+                }
+            });
         });
-    });
+    }catch (e){
+        log.err('addPlayGameCount' + e)
+    }
 }
 
 

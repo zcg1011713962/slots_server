@@ -55,8 +55,6 @@ var GameInfo = function () {
             this.diamond_changeLogList = [];
 
             this.lineOutList = {};
-
-            this.server_log_list = [];
             var self = this;
             dao.selectServerLog(function (Result, rows) {
                 if (Result) {
@@ -166,23 +164,28 @@ var GameInfo = function () {
                         // 用户信息
                         self.userList[userInfo.Id] = new User(userInfo, socket);
 
-                        // 构建返回的用户信息
-                        CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
-                            let luckObject = {
-                                luckyCoin: 0,
-                                luckyRushStartTime: 0,
-                                luckyRushEndTime: 0,
-                                luckyCoinGetStatus: 0
-                            }
+                        // 每日转盘活动
+                        CacheUtil.activityLuckyConfig(userInfo.Id, updateConfig.getLuckyCoinConfig(), ret =>{
                             if(ret){
-                                luckObject.luckyCoin = ret.luckyCoin;
-                                luckObject.luckyRushStartTime = ret.luckyRushStartTime;
-                                luckObject.luckyRushEndTime = ret.luckyRushEndTime;
-                                luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                                // 构建返回的用户信息
+                                CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
+                                    let luckObject = {
+                                        luckyCoin: 0,
+                                        luckyRushStartTime: 0,
+                                        luckyRushEndTime: 0,
+                                        luckyCoinGetStatus: 0
+                                    }
+                                    if(ret){
+                                        luckObject.luckyCoin = ret.luckyCoin;
+                                        luckObject.luckyRushStartTime = ret.luckyRushStartTime;
+                                        luckObject.luckyRushEndTime = ret.luckyRushEndTime;
+                                        luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                                    }
+                                    const loginUser= self.loginUserInfo(userInfo.Id, luckObject);
+                                    result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser};
+                                    callback(null, result);
+                                });
                             }
-                            const loginUser= self.loginUserInfo(userInfo.Id, luckObject);
-                            result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser};
-                            callback(null, result);
                         });
                     })
                 },
@@ -292,8 +295,7 @@ var GameInfo = function () {
                         });
                     }
                     log.info("大厅在线人数:"+ self.onlinePlayerCount);
-                    // 每日转盘活动
-                    CacheUtil.activityLuckyConfig(userId, updateConfig.getLuckyCoinConfig());
+
                     // VIP进大厅
                     const noticeConfig = updateConfig.getNoticeConfig();
                     if(userInfo.housecard > noticeConfig.vipEnterHallNoticeLevel){
@@ -461,7 +463,8 @@ var GameInfo = function () {
                 luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
                 luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
                 luckyCoin: luckObject.luckyCoin ,// 幸运金币数量
-                luckyCoinGetStatus: luckObject.luckyCoinGetStatus // 幸运金币可领取状态
+                luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
+                p: user._p // king
             };
         }
 
@@ -847,6 +850,7 @@ var GameInfo = function () {
                     }
                     // 领取币+1
                     ret.luckyCoin = luckyCoin + 1;
+                    ret.pushStatus = 1; // 可推送状态
 
                     log.info('幸运币领取成功，用户:'+ socket.userId + '类型' + type + '币数量' + ret.luckyCoin);
                     CacheUtil.updateActivityLuckyConfig(socket.userId, ret).then( result =>{
@@ -1075,11 +1079,12 @@ var GameInfo = function () {
                     // 自己的邀请码
                     socket.emit('bindInviteCodeResult', {code:0, msg:"自己的邀请码"});
                 }else{
+                    const agentUserId = row.userId;
                     // 绑定
-                    ymDao.bindIniteCode(row.userId , socket.userId, c =>{
+                    ymDao.bindIniteCode(agentUserId , socket.userId, c =>{
                         if(c){
-                            console.log('绑定邀请码成功,邀请人', row.userId, '被邀请人', socket.userId)
-                            // 给双方送金币
+                            log.info(socket.userId + '成功绑定邀请码,代理人' + agentUserId)
+
                             const downloadExtConfig = updateConfig.getDownloadExtConfig();
                             // 送的数量
                             const onceMaxAgentReward = downloadExtConfig.reward_agent_once.find(item => item.type === TypeEnum.GoodsType.gold).reward;
@@ -1087,30 +1092,28 @@ var GameInfo = function () {
                             const inviteeRewardGold = onceMaxInviteeReward ? parseInt(onceMaxInviteeReward) : 0;
                             const agentRewardGold = onceMaxAgentReward ? parseInt(onceMaxAgentReward) : 0;
 
-                            // 给邀请人增加人头数
-                            this.addInvitedNumber(row.userId, agentRewardGold, ret =>{
+                            // 给代理人增加人头数
+                            this.addInvitedNumber(agentUserId, agentRewardGold, ret =>{
                                 if(ret){
-                                    // 给被邀请人送金币
+                                    // 给绑定用户立即送金币
                                     this.userList[socket.userId]._score += inviteeRewardGold;
-                                    // 给邀请人送金币
-                                    dao.addAccountScore(row.userId, agentRewardGold , ret =>{
-                                        if(ret){
-                                            console.log('绑定成功给邀请人', row.userId, '送金币', onceMaxAgentReward)
-                                            // 返点记录（已领取）
-                                            ymDao.agentRebateRecord(row.userId, socket.userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.success)
-                                        }else{
-                                            // 返点记录（未完成）
-                                            ymDao.agentRebateRecord(row.userId, socket.userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.failed)
+                                    log.info('代理' + agentUserId + '邀请用户' + socket.userId + '送给用户金币' + inviteeRewardGold)
+                                    // 返点记录（代理人金币未领取）
+                                    ymDao.agentRebateRecord(agentUserId, socket.userId, -1, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.unissued, row =>{
+                                        if(row){
+                                            // 发邮件通知代理人
+                                            this.saveEmail(LanguageItem.new_hand_bind_title, TypeEnum.EmailType.agent_bind_inform, agentUserId, 0, LanguageItem.new_hand_bind_content, row.insertId, TypeEnum.GoodsType.gold)
                                         }
-                                    });
+                                    })
                                     socket.emit('bindInviteCodeResult', {code:1, msg:"绑定成功"});
                                 }else{
                                     // 这里失败了解绑  不做事务处理
-                                    ymDao.removeBindIniteCode(row.userId , socket.userId, ret =>{
+                                    ymDao.removeBindIniteCode(agentUserId , socket.userId, ret =>{
                                         if(!ret){
-                                            log.err('给代理增加人头失败,解绑失败代理（邀请人）'+ row.userId  + '被邀请人' + socket.userId);
+                                            log.err('给代理增加人头失败,解绑失败代理（邀请人）'+ agentUserId + '被邀请人' + socket.userId);
                                         }
                                     });
+                                    socket.emit('bindInviteCodeResult', {code:0, msg:"绑定失败"});
                                 }
                             });
                         }else{
@@ -1166,7 +1169,7 @@ var GameInfo = function () {
         }
 
 
-        this.searchInvitedDetail = function (socket) {
+        this.searchInvitedDetail = function (userId, callback) {
             const result = {
                 totalRebate: 0, // 总收入
                 todayRebate: 0, // 今日佣金
@@ -1176,7 +1179,7 @@ var GameInfo = function () {
                 yestNum: 0, // 昨日新增人数
                 waitGetRebate: 0 // 待领取佣金
             }
-            ymDao.inviteDetail(socket.userId, row =>{
+            ymDao.inviteDetail(userId, row =>{
                 if(row){
                     result.totalRebate = row.totalRebate;
                     result.todayRebate = row.todayRebate;
@@ -1186,7 +1189,7 @@ var GameInfo = function () {
                     result.yestNum = row.yestNum;
                     result.waitGetRebate = row.waitGetRebate;
                 }
-                socket.emit('searchInvitedDetailResult', {code:1, data: result});
+                callback(result);
             })
         }
 
@@ -1203,20 +1206,25 @@ var GameInfo = function () {
 
         // 领取返点
         this.getRebate = function (socket) {
+            // 查询未领取的返点
             ymDao.searchInviteSend(socket.userId, row =>{
                 if(row){
                     const ids = row.map(item => item.id);
                     let goldSum = row.reduce((accumulator, item) => {
                         return accumulator + item.rebate_glod;
                     }, 0);
+                    // 领取返点
                     ymDao.agentUpdateRebateById(ids, TypeEnum.AgentRebateStatus.success,r =>{
                         if(r){
+                            // 增加金币
                             dao.addAccountScore(socket.userId, goldSum, c =>{
                                 if(c){
                                     // 记录领取返点记录
                                     ymDao.agentGetRebateRecord(socket.userId, goldSum, ret =>{
                                         if(ret){
-                                            socket.emit('getRebateResult', {code:1, msg:"领取成功"});
+                                            this.searchInvitedDetail(socket.userId, result =>{
+                                                socket.emit('getRebateResult', {code:1, data:  result ,msg:"领取成功"});
+                                            });
                                         }
                                     })
                                 }
@@ -1478,22 +1486,21 @@ var GameInfo = function () {
         };
         // 查询邮件
         this.searchEmail = function (userId, callback) {
-            // 先查系统邮件，再查个人邮件
-            let newList = [];
-            dao.selectSystemEmail((code, res) => {
-                if (code) {
-                    for (let i = 0; i < res.length; i++) {
-                        newList.push(res[i]);
-                    }
-                }
-                dao.selectEmail(userId, (code, res) => {
-                    if (code) {
-                        for (let i = 0; i < res.length; i++) {
-                            newList.push(res[i]);
+            let emails = [];
+            dao.selectEmailTypes(userId, (code, types) =>{
+                if(code){
+                    // 查询邮件
+                    dao.selectEmail(types, userId, (code, res) => {
+                        if (code) {
+                            for (let i = 0; i < res.length; i++) {
+                                emails.push(res[i]);
+                            }
                         }
-                    }
-                    callback(newList);
-                });
+                        callback(emails);
+                    });
+                }else{
+                    callback(emails);
+                }
             });
         }
         // 设置邮件已读
@@ -1582,6 +1589,18 @@ var GameInfo = function () {
                 }
             });
         };
+
+
+        // 查询账户信息
+        this.searchAccountByDeviceCode = function (deviceCode, callback) {
+            dao.searchAccountByDeviceCode(deviceCode, callback);
+        }
+
+        // 更新账户信息
+        this.updateAccountByDeviceCode = function (deviceCode, account,  callback) {
+            dao.updateAccountByDeviceCode(deviceCode, account, callback);
+        }
+
         //使用点卡
         this.useEXcard = function (_socket, _info) {
             if (this.sendCardList[_socket.userId] && (this.sendCardList[_socket.userId] + _info.cardNum) > 2) {
@@ -2072,15 +2091,21 @@ var GameInfo = function () {
                             _socket.emit('registerResult', {code: ErrorCode.ACCOUNT_REGISTERED_ERROR.code, msg: ErrorCode.ACCOUNT_REGISTERED_ERROR.msg});
                             return;
                         }
+                        // 生成账户密码
+                        const time = StringUtil.generateTime();
+                        const account = StringUtil.generateAccount('ABC', time);
+                        const king = StringUtil.generateKing();
+                        const nickname = StringUtil.generateNickName(time);
+                        const pwd = StringUtil.pwdEncrypt(account, king);
                         // 通过邮箱注册
-                        dao.registerByEmail(_socket, email, row =>{
+                        dao.registerByEmail(_socket, email, account, pwd, nickname, king, row =>{
                             if(row){
                                 log.info('邮箱注册成功' + email);
-                                _socket.emit('registerResult', {Result: ErrorCode.REGISTER_SUCCESS.code, msg: ErrorCode.REGISTER_SUCCESS.msg});
+                                _socket.emit('registerResult', {code: ErrorCode.REGISTER_SUCCESS.code, msg: ErrorCode.REGISTER_SUCCESS.msg});
                                 // 设置邀请码
                                 this.setInviteCode(row.Id);
                             }else{
-                                _socket.emit('registerResult', {Result: ErrorCode.REGISTER_ERROR.code, msg: ErrorCode.REGISTER_ERROR.msg});
+                                _socket.emit('registerResult', {code: ErrorCode.REGISTER_ERROR.code, msg: ErrorCode.REGISTER_ERROR.msg});
                             }
                         });
                     });
@@ -2118,12 +2143,14 @@ var GameInfo = function () {
 
         // 设置邀请码
         this.setInviteCode = function (userId){
-            console.log('设置邀请码', userId)
-            const inviteCode = HashCodeUtil.generateInviteCode(userId);
-            dao.saveInviteCode(userId, inviteCode);
+            try {
+                console.log('设置邀请码', userId)
+                const inviteCode = HashCodeUtil.generateInviteCode(userId);
+                dao.saveInviteCode(userId, inviteCode);
+            }catch (e){
+                log.err(e)
+            }
         }
-
-
 
 
         //领奖
@@ -2277,34 +2304,51 @@ var GameInfo = function () {
             const now = new Date().getTime();
             const luckyRushTimeMs = luckyCoinConfig.luckyRushTime * 60 * 1000;
 
-
             CacheUtil.getActivityLuckyDetail(ret =>{
                 if(ret){
-                    for(const userIdKey in ret){
-                        const luckyItem = JSON.parse(ret[userIdKey]);
-                        // 可领取状态 未领取
-                        if(now >= luckyItem.luckyRushEndTime && luckyItem.luckyCoinGetStatus === 0){
-                            // 置为可领取
-                            luckyItem.luckyCoinGetStatus = 1;
-                            luckyItem.luckyRushStartTime = now;
-                            luckyItem.luckyRushEndTime = now + luckyRushTimeMs;
-                            // 在线玩家推送幸运币可领取状态
-                            if(this.userList[userIdKey]){
-                                log.info('在线玩家推送幸运币可领取状态' + userIdKey)
-                                this.userList[userIdKey]._socket.emit('luckyCoinGetStatus', {code: 1, data: {luckyCoinGetStatus : 1}});
-                            }
-                        }
+                    try {
+                        for (const userIdKey in ret) {
+                            const luckyItem = JSON.parse(ret[userIdKey]);
+                            let update = false;
 
-                        const doLuckyCoinTask = luckyItem.doLuckyCoinTask;
-                        if(doLuckyCoinTask > 0 && doLuckyCoinTask >= luckyCoinConfig.luckyCoinTask){
-                            luckyItem.luckyCoinTaskGetStatus = 1;
-                            // 在线玩家推送幸运币可领取状态
-                            if(this.userList[userIdKey]){
-                                log.info('在线玩家推送幸运币可领取状态' + userIdKey)
-                                this.userList[userIdKey]._socket.emit('luckyCoinGetStatus', {code: 1, data: {luckyCoinGetStatus : 1}});
+                            // 可领取状态 未领取
+                            if (now >= luckyItem.luckyRushEndTime && luckyItem.luckyCoinGetStatus === 0) {
+                                // 置为可领取
+                                luckyItem.luckyCoinGetStatus = 1;
+                                luckyItem.luckyRushStartTime = now;
+                                luckyItem.luckyRushEndTime = now + luckyRushTimeMs;
+                                // 在线玩家推送幸运币可领取状态
+                                if (this.userList[userIdKey] && luckyItem.pushStatus === 1) {
+                                    log.info('在线玩家推送幸运币可领取状态' + userIdKey)
+                                    luckyItem.pushStatus = 0;
+                                    this.userList[userIdKey]._socket.emit('luckyCoinGetStatus', {
+                                        code: 1,
+                                        data: {luckyCoinGetStatus: 1}
+                                    });
+                                }
+                                update = true;
+                            }
+
+                            const doLuckyCoinTask = luckyItem.doLuckyCoinTask;
+                            if (doLuckyCoinTask > 0 && doLuckyCoinTask >= luckyCoinConfig.luckyCoinTask) {
+                                luckyItem.luckyCoinTaskGetStatus = 1;
+                                // 在线玩家推送幸运币可领取状态
+                                if (this.userList[userIdKey] && luckyItem.pushStatus === 1) {
+                                    log.info('在线玩家推送幸运币可领取状态' + userIdKey)
+                                    luckyItem.pushStatus = 0;
+                                    this.userList[userIdKey]._socket.emit('luckyCoinGetStatus', {
+                                        code: 1,
+                                        data: {luckyCoinGetStatus: 1}
+                                    });
+                                }
+                                update = true;
+                            }
+                            if (update) {
+                                CacheUtil.updateActivityLuckyConfig(userIdKey, luckyItem);
                             }
                         }
-                        CacheUtil.updateActivityLuckyConfig(userIdKey, luckyItem);
+                    }catch (e){
+                        log.err(e)
                     }
                 }
             })
@@ -2919,10 +2963,10 @@ var GameInfo = function () {
                     const downloadExtConfig = updateConfig.getDownloadExtConfig();
                     // 金币增加比例
                     const addRatio = downloadExtConfig.reward_agent / 100;
-                    const rebateGlod = parseInt(gameConfig.score_amount_ratio * amount * addRatio);
+                    const rebateGlod = parseInt(gameConfig.score_amount_ratio * currencyVal * addRatio);
                     // 返点记录（待领取）
                     log.info(userId + '充值类型'+ currencyType + '货币数量' + currencyVal +'代理人'+ inviteUid +'获得奖励'+ rebateGlod);
-                    ymDao.agentRebateRecord(inviteUid, userId, currencyType, currencyVal, rebateGlod, TypeEnum.AgentRebateType.recharge, TypeEnum.AgentRebateStatus.unissued)
+                    ymDao.agentRebateRecord(inviteUid, userId, currencyType, currencyVal, rebateGlod, TypeEnum.AgentRebateType.recharge, TypeEnum.AgentRebateStatus.unissued, r =>{})
                 }
             })
         }
@@ -3091,8 +3135,14 @@ var GameInfo = function () {
             }]
             // 跑马灯通知
             this.sendNotifyMsg(userId, noticeMsg);
-            // 邮件通知
-            dao.saveEmail(LanguageItem.bank_transfer_title, TypeEnum.EmailType.inform, giveUserId, userId, LanguageItem.bank_transfer_content, logTransferId, TypeEnum.GoodsType.gold);
+            // 邮件通知 logTransferId(转账记录ID)
+            this.saveEmail(LanguageItem.bank_transfer_title, TypeEnum.EmailType.transfer_inform, giveUserId, userId, LanguageItem.bank_transfer_content, logTransferId, TypeEnum.GoodsType.gold)
+        }
+
+
+        // 邮件通知
+        this.saveEmail = function (title, type, to_userid, from_userid, content_id, otherId, goods_type) {
+            dao.saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type);
         }
 
         // 通过VIP等级获取VIP配置表

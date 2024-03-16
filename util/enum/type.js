@@ -14,8 +14,8 @@ const CurrencyType = {
 
 
 const EmailType = {
-    inform: 0,    // 通知
-    award: 1 // 奖励
+    transfer_inform: 0,    // 转账通知
+    agent_bind_inform: 1 // 新手绑定通知
 };
 
 

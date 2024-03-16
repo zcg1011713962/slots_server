@@ -3,7 +3,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 let withdrawal_api = require('./class/withdrawal_api');
 const bodyParser = require('body-parser');
-const guessLoginApi = require('./class/login_api');
+const registerByGuestApi = require('./class/login_api');
 const Robotname = require('./config/RobotName');
 const crypto = require('crypto');
 const gm_api = require('./class/gm_api');
@@ -75,10 +75,10 @@ app.post('/gmManage', function (req, res) {
     });
 });
 
-// 游客登录
-app.get('/weixinLogin', function (req, res) {
+// 游客注册
+app.get('/registerByGuest', function (req, res) {
     //外部接口
-    guessLoginApi(req, gameInfo, function (act, sendStr) {
+    registerByGuestApi(req, gameInfo, function (act, sendStr) {
         if (act == 1) {
             res.send(sendStr);
         } else if (act == 2) {
@@ -115,6 +115,22 @@ app.get('/bindCards', function (req, response) {
         response.send('fail');
     }
     response.end();
+});
+
+// 根据设备码获取用户名信息
+app.get('/devcodesearch', function (req, res) {
+    //验证版本
+    const deviceCode = req.query.deviceCode;
+    if(!deviceCode || deviceCode.length < 1){
+        return;
+    }
+    gameInfo.searchAccountByDeviceCode(deviceCode, row =>{
+        if (row) {
+            res.send({code: 1, data: row});
+        }else{
+            res.send({code: 1, data: {}});
+        }
+    });
 });
 
 
@@ -164,14 +180,7 @@ io.on('connection', function (socket) {
             }
             // 账户密码登录
             if(user.userName && user.password){
-                const key_login = "89b5b987124d2ec3";
-                let content = user.userName + user.password + key_login;
-                if(user.userName && user.userName.includes("user_")){
-                    content = key_login;
-                }
-                const md5_sign = crypto.createHash('md5');
-                md5_sign.update(content);
-                user.password = md5_sign.digest('hex');
+                user.password = StringUtil.pwdEncrypt(user.userName, user.password);
                 user.sign = user.password;
             }
             // 邮箱登录
@@ -860,7 +869,9 @@ io.on('connection', function (socket) {
     socket.on("searchInvitedDetail", function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.searchInvitedDetail(socket);
+            gameInfo.searchInvitedDetail(userId, result =>{
+                socket.emit('searchInvitedDetailResult', {code:1, data: result});
+            });
         }else{
             socket.emit('searchInvitedDetailResult', {code:0, msg:"用户不在线"});
         }
@@ -952,6 +963,52 @@ io.on('connection', function (socket) {
         }else{
             socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
         }
+    });
+
+
+
+    // 设置-联系我们-问题回答
+    socket.on("contactUs", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.contactUs(socket);
+        }else{
+            socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 保存设备码
+    socket.on("devcodesave", function (data) {
+        try{
+            const a = {"deviceCode": "", "account": ""}
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.deviceCode || !d.account) throw new Error('参数错误');
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.updateAccountByDeviceCode(d.deviceCode, d.account , row =>{
+                    if (row) {
+                        socket.emit('devcodesaveResult', {code:1, msg: "成功"});
+                    }else{
+                        socket.emit('devcodesaveResult', {code:0, msg: "失败"});
+                    }
+                });
+            }else{
+                socket.emit('devcodesaveResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('devcodesaveResult', {code:0,msg:"参数有误"});
+        }
+    });
+
+    // 存储设备码
+    app.get('/devcodesave', function (req, res) {
+        const account = req.query.account;
+        const deviceCode = req.query.deviceCode;
+        if(!account || account.length < 1 || !deviceCode || deviceCode.length < 1){
+            return;
+        }
+
     });
 
     // 游戏结算
