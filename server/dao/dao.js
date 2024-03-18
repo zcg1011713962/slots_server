@@ -2268,6 +2268,38 @@ exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
     });
 }
 
+
+// 更新新手指引步数
+exports.updateGuideStep = function (userId, step, callback) {
+    const sql = "update newuseraccounts set step = ? where Id = ?";
+    let values = [];
+    values.push(step);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("更新新手指引步数");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
 // 保存邮件记录
 exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
     const sql = "INSERT INTO email (title_id, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";

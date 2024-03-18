@@ -112,9 +112,7 @@ gameInfo.setIo(io, Csocket);
 
 io.on('connection', function (socket) {
 
-    //console.log(socket + 'connected');
     socket.emit('connected', 'connect game server');
-
 
     //客户登录游戏
     socket.on('LoginGame', function (GameInfo) {
@@ -124,8 +122,6 @@ io.on('connection', function (socket) {
         } catch (e) {
             log.warn('LoginGame-json');
         }
-        //console.log("test1.进入房间")
-        //console.log(GameInfo)
         if (!GameInfo) {
             console.log("登录游戏,参数不正确!");
             return;

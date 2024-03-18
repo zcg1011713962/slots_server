@@ -40,6 +40,8 @@ User = function(_userInfo,_socket){
 	this.AddDate = 0;         // 账户创建时间(时间戳毫秒)
 	this.inviteCode = 0;	  // 邀请码
 	this.luckyCoin = 0; // 幸运币数量
+	this.step = 0; // 新手指引步数
+	this.newHandGive = 0; // 新手领取礼包
 
 
 	this.init = function(_userInfo,_socket){
@@ -79,6 +81,8 @@ User = function(_userInfo,_socket){
 		this.bankLock = _userInfo.bankLock;
 		this.luckyCoin = _userInfo.luckyCoin;
 		this.inviteCode = _userInfo.invite_code;
+		this.step = _userInfo.step;
+		this.newHandGive = _userInfo.newHandGive;
 	};
 
 

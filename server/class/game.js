@@ -294,7 +294,7 @@ var GameInfo = function () {
                             tableKey: linemsg.tableKey
                         });
                     }
-                    log.info("大厅在线人数:"+ self.onlinePlayerCount);
+                    log.info("大厅在线人数:"+ self.getOnlinePlayerCount());
 
                     // VIP进大厅
                     const noticeConfig = updateConfig.getNoticeConfig();
@@ -302,11 +302,6 @@ var GameInfo = function () {
                         //
                         log.info("VIP进入大厅:" + userInfo.Id + "VIP等级:" + userInfo.housecard)
                         self.vipEnterHall(userInfo);
-                    }
-                    const newHandConfig = updateConfig.getNewhandProtectConfig();
-                    // 新用户弹窗送金币
-                    if(self.userList[userId].loginCount === 1){
-                        socket.emit('newHandGive', {type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]});
                     }
                     callback_a(1);
                 }
@@ -437,7 +432,6 @@ var GameInfo = function () {
         this.loginUserInfo = function (userId, luckObject) {
             const user = this.userList[userId];
             const downloadExtConfig = updateConfig.getDownloadExtConfig();
-
             return {
                 account: user._account,  // 用户名
                 id: user._userId,       // 用户ID
@@ -469,7 +463,8 @@ var GameInfo = function () {
                 luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
                 luckyCoin: luckObject.luckyCoin ,// 幸运金币数量
                 luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
-                p: user._p // king
+                p: user._p, // king
+                step :  user.step // 新手指引步数
             };
         }
 
@@ -1604,6 +1599,17 @@ var GameInfo = function () {
         // 更新账户信息
         this.updateAccountByDeviceCode = function (deviceCode, account,  callback) {
             dao.updateAccountByDeviceCode(deviceCode, account, callback);
+        }
+
+        // 保存新手步数
+        this.saveGuideStep = function (socket, step) {
+            dao.updateGuideStep(socket.userId, step, row =>{
+                if(row){
+                    socket.emit('saveGuideStepResult', {code:1, msg:"保存成功"});
+                }else{
+                    socket.emit('saveGuideStepResult', {code:0, msg:"保存失败"});
+                }
+            });
         }
 
         //使用点卡

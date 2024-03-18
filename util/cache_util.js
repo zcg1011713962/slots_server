@@ -81,7 +81,7 @@ exports.activityLuckyConfig  = function activityLuckyConfig(userId, luckyCoinCon
             const startTime =  new Date().getTime();
             const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
             const ret = {
-                luckyCoin: luckyCoinConfig.luckyCoin,  // 活动幸运币数量
+                luckyCoin: luckyCoinConfig.turntableCoin,  // 活动幸运币数量
                 doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
                 luckyCoinTask: luckyCoinConfig.luckyCoinTask,
                 luckyRushStartTime: startTime,

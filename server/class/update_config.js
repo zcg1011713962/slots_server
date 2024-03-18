@@ -1,5 +1,6 @@
 const fs = require('fs');
 const log = require("../../CClass/class/loginfo").getInstand;
+const RedisUtil = require('../../util/redis_util')
 
 var update_config = function(){
 
@@ -16,131 +17,68 @@ var update_config = function(){
 			    self.noticeConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/notice_config.json','utf-8',function(err,data){
-					self.noticeConfig = data.toString().trim();
-				})
-			},60000);
-
-
 			fs.readFile('./config/json/vip_config.json','utf-8',function(err,data){
 				self.vipConfig = data.toString().trim();
 			})
-
-			setInterval(function(){
-				fs.readFile('./config/json/vip_config.json','utf-8',function(err,data){
-					self.vipConfig = data.toString().trim();
-				})
-			},60000);
 
 
 			fs.readFile('./config/json/shop_config.json','utf-8',function(err,data){
 				self.shopConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/shop_config.json','utf-8',function(err,data){
-					self.shopConfig = data.toString().trim();
-				})
-			},60000);
-
 			fs.readFile('./config/json/bank_transfer_config.json','utf-8',function(err,data){
 				self.bankTransferConfig = data.toString().trim();
 			})
-
-			setInterval(function(){
-				fs.readFile('./config/json/bank_transfer_config.json','utf-8',function(err,data){
-					self.bankTransferConfig = data.toString().trim();
-				})
-			},60000);
-
 
 			fs.readFile('./config/json/sign_in_config.json','utf-8',function(err,data){
 				self.signInConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/sign_in_config.json','utf-8',function(err,data){
-					self.signInConfig = data.toString().trim();
-				})
-			},60000);
 
 			fs.readFile('./config/json/activity_jackpot_config.json','utf-8',function(err,data){
 				self.activityJackpotConfig = data.toString().trim();
 			})
-
-			setInterval(function(){
-				fs.readFile('./config/json/activity_jackpot_config.json','utf-8',function(err,data){
-					self.activityJackpotConfig = data.toString().trim();
-				})
-			},60000);
 
 
 			fs.readFile('./config/json/lucky_coin_config.json','utf-8',function(err,data){
 				self.luckyCoinConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/lucky_coin_config.json','utf-8',function(err,data){
-					self.luckyCoinConfig = data.toString().trim();
-				})
-			},60000);
-
 
 			fs.readFile('./config/json/invite_download_config.json','utf-8',function(err,data){
 				self.downloadExtConfig = data.toString().trim();
 			})
-
-			setInterval(function(){
-				fs.readFile('./config/json/invite_download_config.json','utf-8',function(err,data){
-					self.downloadExtConfig = data.toString().trim();
-				})
-			},60000);
 
 
 			fs.readFile('./config/json/customer_service_config.json','utf-8',function(err,data){
 				self.customerServiceConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/customer_service_config.json','utf-8',function(err,data){
-					self.customerServiceConfig = data.toString().trim();
-				})
-			},60000);
 
-
-			fs.readFile('./config/json/newhand_protect.json','utf-8',function(err,data){
+			fs.readFile('./config/json/newhand_protect_config.json','utf-8',function(err,data){
 				self.newhandProtectConfig = data.toString().trim();
 			})
-
-			setInterval(function(){
-				fs.readFile('./config/json/newhand_protect.json','utf-8',function(err,data){
-					self.newhandProtectConfig = data.toString().trim();
-				})
-			},60000);
 
 
 			fs.readFile('./config/json/black_white_list_config.json','utf-8',function(err,data){
 				self.blackWhiteListConfig = data.toString().trim();
 			})
 
-			setInterval(function(){
-				fs.readFile('./config/json/black_white_list_config.json','utf-8',function(err,data){
-					self.blackWhiteListConfig = data.toString().trim();
-				})
-			},60000);
 
 		};
 
 
 		this.getNoticeConfig = function(){
 		    try{
+				RedisUtil.hget('gameConfig', 'notice_config');
 				return JSON.parse(this.noticeConfig);
 		    }
 		    catch(e){
 		      log.err('getNoticeConfig');
 		    }
 		}
+
+
 		this.getVipConfig = function(){
 			try{
 				return JSON.parse(this.vipConfig);

@@ -23,6 +23,7 @@ const TypeEnum = require("../util/enum/type");
 const updateConfig = require('./class/update_config').getInstand;
 
 
+
 //版本密钥和版本号
 const version = "ymymymymym12121212qwertyuiop5656_";
 const num = "2.0";
@@ -261,7 +262,6 @@ io.on('connection', function (socket) {
             delete gameInfo.gm_socket[socket.gm_id]
             return;
         }
-
         //有人离线
         if (!socket.userId) {
             return
@@ -981,7 +981,6 @@ io.on('connection', function (socket) {
     // 保存设备码
     socket.on("devcodesave", function (data) {
         try{
-            const a = {"deviceCode": "", "account": ""}
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             if(!d || !d.deviceCode || !d.account) throw new Error('参数错误');
             const userId = socket.userId;
@@ -1001,15 +1000,39 @@ io.on('connection', function (socket) {
         }
     });
 
-    // 存储设备码
-    app.get('/devcodesave', function (req, res) {
-        const account = req.query.account;
-        const deviceCode = req.query.deviceCode;
-        if(!account || account.length < 1 || !deviceCode || deviceCode.length < 1){
-            return;
+    // 保存新手指引步数
+    socket.on("saveGuideStep", function (data) {
+        try{
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.step ) throw new Error('参数错误');
+            const userId = socket.userId;
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.saveGuideStep(socket, d.step);
+            }else{
+                socket.emit('saveGuideStepResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('saveGuideStepResult', {code:0,msg:"参数有误"});
         }
-
     });
+
+
+    // 新用户弹窗送金币
+    socket.on('newHandGive', function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            const newHandConfig = updateConfig.getNewhandProtectConfig();
+            if(gameInfo.userList[userId].newHandGive === 0){
+                gameInfo.userList[userId].newHandGive = 1;
+                socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
+            }
+        }else{
+            socket.emit('newHandGiveResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+
 
     // 游戏结算
     socket.on('GameBalance', function (_Info) {
