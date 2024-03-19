@@ -11,8 +11,7 @@ const  Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
 const CacheUtil = require("../util/cache_util");
-const StringUtil = require("../util/string_util");
-
+const SocketUtil = require("../util/socket_util");
 
 var Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -110,8 +109,11 @@ Csocket.on('bindCards', function (cards) {
 
 
 gameInfo.setIo(io, Csocket);
+
+
 io.on('connection', function (socket) {
     socket.emit('connected', 'connect game server');
+    SocketUtil.clientToHall(socket, Csocket);
 
     //客户登录游戏
     socket.on('LoginGame', function (GameInfo) {
@@ -194,19 +196,6 @@ io.on('connection', function (socket) {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
             CacheUtil.getGameJackpot(socket);
-        }
-    });
-
-    // 转发到大厅
-    socket.on('clientToHall', function (data) {
-        try {
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if (!d || !d.protocol) throw new Error('参数错误');
-            // 转发到大厅
-            Csocket.userId = socket.userId;
-            Csocket.emit(d.protocol, data);
-        }catch (e){
-            socket.emit('clientToHallResult',  {code:0,msg:"参数有误"})
         }
     });
 

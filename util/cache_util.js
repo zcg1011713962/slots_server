@@ -2,17 +2,130 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const laba_config = require('../util/config/laba_config');
 const {getInstand: log} = require("../CClass/class/loginfo");
-const ErrorCode = require("./ErrorCode");
-
-
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
 const userPlayGameCount= 'userPlayGameCount';
+const sendEmailExpireKey = 'sendEmailCodeExpire';
+const sendEmailKey = 'sendEmailCode';
+const transferCheckKey = 'transferCheck';
 
-const sendEmailExpireKey = 'send_email_code_expire_';
-const sendEmailKey = 'send_email_code_';
-const transferCheckKey = 'transfer_check_';
+
+const hallConfig = {
+    hallConfigKey: 'hallConfig',
+    notice_config: 'notice_config',
+    vip_config: 'vip_config',
+    activity_jackpot_config: 'activity_jackpot_config',
+    black_white_list_config: 'black_white_list_config',
+    bank_transfer_config: 'bank_transfer_config',
+    shop_config: 'shop_config',
+    lucky_coin_config: 'lucky_coin_config',
+    sign_in_config: 'sign_in_config',
+    customer_service_config: 'customer_service_config',
+    invite_download_config: 'invite_download_config',
+    newhand_protect_config: 'newhand_protect_config'
+}
+
+
+exports.getNoticeConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.notice_config).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getNoticeConfig');
+    }
+}
+
+
+exports.getVipConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.vip_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getVipConfig');
+    }
+}
+
+exports.getShopConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.shop_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getShopConfig');
+    }
+}
+
+
+exports.getBankTransferConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.bank_transfer_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getBankTransferConfig');
+    }
+}
+
+exports.getSignInConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.sign_in_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getSignInConfig');
+    }
+}
+
+exports.getActivityJackpotConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.activity_jackpot_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getActivityJackpotConfig');
+    }
+}
+
+exports.getLuckyCoinConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.lucky_coin_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getLuckyCoinConfig');
+    }
+}
+
+exports.getDownloadExtConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.invite_download_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getDownloadExtConfig');
+    }
+}
+
+exports.getCustomerServiceConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.customer_service_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getCustomerServiceConfig');
+    }
+}
+
+exports.getNewhandProtectConfig  = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.newhand_protect_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getNewhandProtectConfig');
+    }
+}
+
+exports.getBlackWhiteListConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.black_white_list_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getBlackWhiteListConfig');
+    }
+}
 
 
 // 增加银行输入密码错误次数
@@ -74,28 +187,30 @@ exports.pushGameJackpot  = function pushGameJackpot(userList){
 
 
 // 设置每个用户的幸运配置
-exports.activityLuckyConfig  = function activityLuckyConfig(userId, luckyCoinConfig, callback){
-    RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
-        if(!ret){
-            // 没进入过每日活动的用户默认配置
-            const startTime =  new Date().getTime();
-            const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
-            const ret = {
-                luckyCoin: luckyCoinConfig.turntableCoin,  // 活动幸运币数量
-                doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
-                luckyCoinTask: luckyCoinConfig.luckyCoinTask,
-                luckyRushStartTime: startTime,
-                luckyRushEndTime: endTime,
-                luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
-                luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
-                pushStatus: 1 // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
-            }
-            RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret)).then(r =>{
+exports.activityLuckyConfig  = function activityLuckyConfig(userId, callback){
+    this.getLuckyCoinConfig().then(luckyCoinConfig =>{
+        RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
+            if(!ret){
+                // 没进入过每日活动的用户默认配置
+                const startTime =  new Date().getTime();
+                const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
+                const ret = {
+                    luckyCoin: luckyCoinConfig.turntableCoin,  // 活动幸运币数量
+                    doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
+                    luckyCoinTask: luckyCoinConfig.luckyCoinTask,
+                    luckyRushStartTime: startTime,
+                    luckyRushEndTime: endTime,
+                    luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
+                    luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
+                    pushStatus: 1 // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
+                }
+                RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret)).then(r =>{
+                    callback(1)
+                });
+            }else{
                 callback(1)
-            });
-        }else{
-            callback(1)
-        }
+            }
+        });
     });
 }
 

@@ -20,7 +20,6 @@ const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const laba_config = require("../util/config/laba_config");
 const TypeEnum = require("../util/enum/type");
-const updateConfig = require('./class/update_config').getInstand;
 
 
 
@@ -410,8 +409,9 @@ io.on('connection', function (socket) {
                         luckObject.luckyRushEndTime = ret.luckyRushEndTime;
                         luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
                     }
-                    const userInfo = gameInfo.loginUserInfo(userId, luckObject);
-                    socket.emit('UserInfoResult', {code: 1, data: userInfo});
+                    gameInfo.loginUserInfo(userId, luckObject, userInfo=>{
+                        socket.emit('UserInfoResult', {code: 1, data: userInfo});
+                    });
                 });
 
             }else{
@@ -428,8 +428,9 @@ io.on('connection', function (socket) {
         try {
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
-                const config = gameInfo.getVipConfig();
-                socket.emit('getVipConfigResult', {code:1, msg: config});
+                CacheUtil.getVipConfig().then(config =>{
+                    socket.emit('getVipConfigResult', {code:1, msg: config});
+                });
             }
         }catch (e) {
             socket.emit('getVipConfigResult', {code:0, msg:"用户不在线"});
@@ -744,28 +745,30 @@ io.on('connection', function (socket) {
             if(gameMode === 0){
                 // 免费模式扣除幸运币
                 CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
-                    const luckyCoinConfig = updateConfig.getLuckyCoinConfig();
-                    const turntableCoin = luckyCoinConfig.turntableCoin;
-                    const luckyCoin = luckyDetail.luckyCoin;
-                    if(luckyCoin < turntableCoin){
-                        socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
-                        return;
-                    }
-                    // 扣幸运币
-                    luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
-                    log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
-                    CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
-                        if(ret){
-                            // 免费幸运币数量
-                            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                                // 活动奖池
-                                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, 1, activityJackpot);
-                            });
+                    CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
+
+                        const turntableCoin = luckyCoinConfig.turntableCoin;
+                        const luckyCoin = luckyDetail.luckyCoin;
+                        if(luckyCoin < turntableCoin){
+                            socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
                             return;
                         }
-                        socket.emit('turntableResult', {code:0, msg:"扣币失败"});
-                    })
+                        // 扣幸运币
+                        luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
+                        log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
+                        CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
+                            if(ret){
+                                // 免费幸运币数量
+                                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                                    // 活动奖池
+                                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                                    gameInfo.turntable(socket, 1, activityJackpot);
+                                });
+                                return;
+                            }
+                            socket.emit('turntableResult', {code:0, msg:"扣币失败"});
+                        })
+                    });
                 });
             }else if(gameMode === 1){
                 try{
@@ -1021,11 +1024,12 @@ io.on('connection', function (socket) {
     socket.on('newHandGive', function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            const newHandConfig = updateConfig.getNewhandProtectConfig();
-            if(gameInfo.userList[userId].newHandGive === 0){
-                gameInfo.userList[userId].newHandGive = 1;
-                socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
-            }
+            CacheUtil.getNewhandProtectConfig().then(newHandConfig =>{
+                if(gameInfo.userList[userId].newHandGive === 0){
+                    gameInfo.userList[userId].newHandGive = 1;
+                    socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
+                }
+            });
         }else{
             socket.emit('newHandGiveResult', {code:0, msg:"用户不在线"});
         }

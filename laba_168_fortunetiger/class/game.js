@@ -199,6 +199,7 @@ var GameInfo = function () {
             let fin_value = 0;
             let source_rtp = 0;
             let dictAnalyseResult = {};
+            let lotteryCount = 0;
             // 生成图案，分析结果（结果不满意继续）
             while(true){
                 // 分析手牌结果
@@ -242,12 +243,15 @@ var GameInfo = function () {
                 fin_value = win + winJackpot;
 
 
-                // 开了配牌器
-                if(iconTypeBind && iconTypeBind.length > 0){
+                // 开了配牌器或者未能赢
+                if((iconTypeBind && iconTypeBind.length > 0) || win === 0){
                     break;
                 }
                 // 库存上限控制
                 if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                    if(++lotteryCount > 30){
+                        return {code: -1};
+                    }
                     log.info('库存上限控制');
                     continue;
                 }
