@@ -769,35 +769,40 @@ var GameInfo = function () {
         }
 
         // 查询用户签到信息
-        this.signIn = function (socket) {
+        this.signIn = function (socket, callback) {
             const userId = socket.userId;
 
-           dao.userSignIn(socket.userId, res =>{
+           dao.userSignIn(socket.userId, (res, connection) =>{
                if(res.rcode){
-                   const consecutiveDays = res.rcode;
-                   CacheUtil.getSignInConfig().then(config =>{
-                       const signInConfig = config.find(item => item.id = consecutiveDays);
-                       if(signInConfig.award){
+                   try {
+                       const consecutiveDays = res.rcode;
+                       CacheUtil.getSignInConfig().then(config => {
+                           const signInConfig = config.find(item => item.id = consecutiveDays);
                            const level = this.userList[userId].vip_level;
-                           CacheUtil.getVipConfig().then(vipConfig =>{
-                               const currVipConfig =vipConfig.find(item => item.level === level);
-                               for(let i = 0; i < signInConfig.award.length; i++){
-                                   if(signInConfig.award[0].type === 0){
+                           CacheUtil.getVipConfig().then(vipConfig => {
+                               const currVipConfig = vipConfig.find(item => item.level === level);
+                               for (let i = 0; i < signInConfig.award.length; i++) {
+                                   if (signInConfig.award[i].type === 0) {
                                        const addScore = parseInt(signInConfig.award[0].val * currVipConfig.dailySignScoreAddRate / 100);
                                        // 发放金币
                                        const currScore = this.userList[userId]._score;
                                        this.userList[userId]._score += addScore;
-                                       console.log('每日签到前金币', currScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate , '每日签到后金币', this.userList[userId]._score)
-                                   }else if(signInConfig.award[0].type === 1){
+                                       console.log('签到天数', consecutiveDays , '每日签到前金币', currScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate, '每日签到后金币', this.userList[userId]._score)
+                                   } else if (signInConfig.award[i].type === 1) {
                                        // 发放钻石
                                    }
                                }
+                               // 提交签到事务
+                               connection.commit();
+                               callback(1)
                            })
-                       }
-                       socket.emit('signInResult', { code : 1 , msg : '签到成功'});
-                   })
+                       })
+                   }catch (e){
+                       // 回滚签到事务
+                       connection.rollback();
+                   }
                }else{
-                   socket.emit('signInResult', { code : 0 , msg : '重复签到'});
+                   callback(0)
                }
            });
         }
@@ -1044,10 +1049,6 @@ var GameInfo = function () {
         }
 
 
-        /**
-         *
-         * @returns {number}
-         */
         this.getBaseMul = function (userId, activityJackpot, dictAnalyseResult, callback) {
             try{
                 // 获取VIP最大加成
@@ -1067,10 +1068,10 @@ var GameInfo = function () {
                             }
                             // 计算转盘奖池基础倍数(向下取整) = 当前奖池/转盘最大倍数/VIP加成/购买倍数最大值
                             const val = turntableJackpot / turntableMaxMul / maxTurntableGameAddRate / maxBuyMul;
-                            console.log('计算转盘基础倍数 活动奖池:'+ activityJackpot + '转盘奖池:', turntableJackpot, '转盘最大倍数:', turntableMaxMul, 'VIP最大加成:', maxTurntableGameAddRate, '购买倍数最大值:', maxBuyMul, '未取向下取整前', val)
                             const mul = Math.floor(val * 100) / 100;
                             // 基础倍数
                             const baseMul = Number(mul.toFixed(2))
+                            console.log('计算转盘基础倍数 活动奖池:'+ activityJackpot + '转盘奖池:', turntableJackpot, '转盘最大倍数:', turntableMaxMul, 'VIP最大加成:', maxTurntableGameAddRate, '购买倍数最大值:', maxBuyMul, '未取向下取整前', val, '基础倍数', baseMul)
                             callback(baseMul);
                         });
                     });
@@ -1377,6 +1378,19 @@ var GameInfo = function () {
                     socket.emit('contactUsResult', {code:1, data:[]});
                 }
             })
+        }
+
+
+        // 设置语言
+        this.setLang = function (socket, language) {
+           dao.updateLang(socket.userId, language, ret =>{
+               if(ret){
+                   this.userList[socket.userId].language = language;
+                   socket.emit('langResult', {code:1, msg:"成功"});
+               }else{
+                   socket.emit('langResult', {code:0, msg:"失败"});
+               }
+           });
         }
 
 
@@ -2202,29 +2216,7 @@ var GameInfo = function () {
         }
 
         this.verifyEmailCode = function (email, code, callback) {
-            const expireKey = 'send_email_code_expire_' + email;
-            // 是否过期存储
-            RedisUtil.get(expireKey).then(expireCode => {
-                const key = 'send_email_code_' + email;
-                RedisUtil.get(key).then(verificationCode => {
-                    try {
-                        if (parseInt(verificationCode) === parseInt(code)) {
-                            log.info('校验验证码成功' + email + 'code:' + code);
-                            callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
-                        } else if (verificationCode && expireCode === code) {
-                            log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
-                            callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
-                        } else {
-                            log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                            callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
-                        }
-                    } catch (e) {
-                        log.err(e);
-                        log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                        callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
-                    }
-                });
-            });
+            CacheUtil.verifyEmailCode(code, email, callback);
         }
 
         // 设置邀请码
@@ -3147,68 +3139,57 @@ var GameInfo = function () {
         }
 
         // 转账
-        this.bankTransferOtherBank = function (socket, giveUserId ,bankScore) {
+        this.bankTransferOtherBank = function (socket, giveUserId ,bankScore, callback) {
 
-            CacheUtil.getTransferKey(socket.userId).then(exit =>{
-                if(exit){
-                    socket.emit('bankTransferOtherBankResult', {code:0, msg: "不允许频繁操作"});
-                   return;
+            CacheUtil.getBankTransferConfig().then(bankTransferConfig =>{
+                // 最低取出
+                const gold_transfer_min = bankTransferConfig.gold_transfer_min;
+                // 转账等级
+                const transfer_vipLv = bankTransferConfig.transfer_vipLv;
+                if(!gold_transfer_min || !transfer_vipLv){
+                    return;
                 }
-                CacheUtil.setTransferKey(socket.userId, ret =>{
-                    if(ret){
-                        CacheUtil.getBankTransferConfig().then(bankTransferConfig =>{
-                            // 最低取出
-                            const gold_transfer_min = bankTransferConfig.gold_transfer_min;
-                            // 转账等级
-                            const transfer_vipLv = bankTransferConfig.transfer_vipLv;
-                            if(!gold_transfer_min || !transfer_vipLv){
-                                return;
-                            }
-                            // 金币最低转账
-                            if(bankScore < gold_transfer_min){
-                                socket.emit('bankTransferOtherBankResult', {code:0, msg: "失败!最低存入" + gold_transfer_min });
-                                return;
-                            }
-                            const vipLevel = this.userList[socket.userId].vip_level;
-                            // 判断VIP是否达到转账要求
-                            if(vipLevel < transfer_vipLv){
-                                socket.emit('bankTransferOtherBankResult', {code:0, msg: "VIP等级不足!最低" + transfer_vipLv });
-                                return;
-                            }
-                            // 账户余额不足
-                            const currBankScore = this.userList[socket.userId].bankScore;
-                            if(currBankScore < bankScore){
-                                socket.emit('bankTransferOtherBankResult', {code:0, msg: "账户余额不足" });
-                                return;
-                            }
+                // 金币最低转账
+                if(bankScore < gold_transfer_min){
+                    callback(0, "失败!最低存入" + gold_transfer_min);
+                    return;
+                }
+                const vipLevel = this.userList[socket.userId].vip_level;
+                // 判断VIP是否达到转账要求
+                if(vipLevel < transfer_vipLv){
+                    callback(0, "失败!最低存入" + "VIP等级不足!最低" + transfer_vipLv );
+                    return;
+                }
+                // 账户余额不足
+                const currBankScore = this.userList[socket.userId].bankScore;
+                if(currBankScore < bankScore){
+                    callback(0, "账户余额不足");
+                    return;
+                }
 
 
-                            dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
-                                if(row){
-                                    if(row.rcode > 0){
-                                        // 赠送账户减少银行积分
-                                        this.userList[socket.userId].bankScore -= bankScore;
-                                        // 如果被赠送用户在线
-                                        if(this.userList[giveUserId]){
-                                            this.userList[giveUserId].bankScore += bankScore;
-                                        }
-                                        CacheUtil.delTransferKey(socket.userId);
-                                        // 消息通知
-                                        this.transferMsgNotify(giveUserId, socket.userId, row.logTransferId);
+                dao.BankTransfer(socket.userId, giveUserId, bankScore, 3, row =>{
+                    if(row){
+                        if(row.rcode > 0){
+                            // 赠送账户减少银行积分
+                            this.userList[socket.userId].bankScore -= bankScore;
+                            // 如果被赠送用户在线
+                            if(this.userList[giveUserId]){
+                                this.userList[giveUserId].bankScore += bankScore;
+                            }
+                            // 消息通知
+                            this.transferMsgNotify(giveUserId, socket.userId, row.logTransferId);
 
-                                        const result = {
-                                            bankScore: this.userList[socket.userId].bankScore,
-                                            gold: this.userList[socket.userId]._score
-                                        }
-                                        socket.emit('bankTransferOtherBankResult', {code:1,  data: result });
-                                    }
-                                }else{
-                                    socket.emit('bankTransferOtherBankResult', {code:0,  msg: '转账失败' });
-                                }
-                            });
-                        });
+                            const result = {
+                                bankScore: this.userList[socket.userId].bankScore,
+                                gold: this.userList[socket.userId]._score
+                            }
+                            callback(1, result);
+                        }
+                    }else{
+                        callback(0, "转账失败");
                     }
-                })
+                });
             });
         }
 

@@ -2,6 +2,7 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const laba_config = require('../util/config/laba_config');
 const {getInstand: log} = require("../CClass/class/loginfo");
+const ErrorCode = require("./ErrorCode");
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -306,27 +307,51 @@ exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, cal
 }
 
 
-// 转账防重复刷
-exports.setTransferKey  = function setTransferKey(userId, callback){
-    // 邮箱验证码设置
-    RedisUtil.set(transferCheckKey + userId, new Date().getTime()).then(ret1 =>{
-        RedisUtil.expire(transferCheckKey + userId, 3).then(ret2 =>{
-            if(ret1 && ret2){
-                callback(1);
-            }else{
-                callback(0);
+// 邮箱验证码-校验
+exports.verifyEmailCode  = function verifyEmailCode(code, email, callback){
+    // 是否过期存储
+    RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
+        RedisUtil.get(sendEmailKey + email).then(verificationCode => {
+            try {
+                if (parseInt(verificationCode) === parseInt(code)) {
+                    log.info('校验验证码成功' + email + 'code:' + code);
+                    callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
+                } else if (verificationCode && expireCode === code) {
+                    log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
+                    callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
+                } else {
+                    log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                    callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
+                }
+            } catch (e) {
+                log.err(e);
+                log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
             }
         });
     });
 }
 
-exports.delTransferKey  = function getTransferKey(userId){
-    // 邮箱验证码设置
-    return RedisUtil.del(transferCheckKey + userId);
+
+// 设置用户调用协议记录
+exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol, callback){
+    try {
+        const key = protocol + '_' + userId;
+        const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
+        if (setResult === 1) {
+            // 如果设置成功，则设置过期时间
+            await RedisUtil.expire(key, 30);
+        }
+        return setResult;
+    }catch (e){
+        log.err(e)
+    }
 }
 
-exports.getTransferKey  = function getTransferKey(userId){
-    // 邮箱验证码设置
-    return RedisUtil.get(transferCheckKey + userId);
+// 删除用户调用协议记录
+exports.delUserProtocol  = async function delUserProtocol(userId, protocol){
+    const key = protocol + '_' + userId;
+    await RedisUtil.del(key);
 }
+
 

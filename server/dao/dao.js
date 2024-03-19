@@ -388,7 +388,7 @@ exports.RegisterByGuest = function RegisterByGuest(userInfo, callback) {
     }
     values.push(userInfo.headimgurl);
     if (!userInfo.language) {
-        userInfo.language = "";
+        userInfo.language = 0;
     }
     values.push(userInfo.language);
     if (!userInfo.ChannelType) {
@@ -956,6 +956,39 @@ exports.updateTotalCharge = function updateTotalCharge(userId, num, callback) {
     });
 };
 
+
+
+// 修改语言
+exports.updateLang = function updateLang(userId, language, callback) {
+    const sql = 'update newuseraccounts set language= ? where Id=?';
+    let values = [];
+    values.push(language);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("修改语言");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
 //修改vip等级
 exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
     const sql = 'update newuseraccounts set housecard=?,is_vip =? where Id=?';
@@ -1238,17 +1271,26 @@ exports.userSignIn = function userSignIn(userId, callback) {
             callback(0);
             return;
         }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("userSignIn");
-                console.log(err);
+        // 开启事务
+        connection.beginTransaction(err =>{
+            if(err){
+                log.err('获取数据库连接失败' + err);
                 callback(0);
-            } else {
-                callback(rows[0][0]);
+                connection.release();
+                return;
             }
-        });
-        values = [];
+            connection.query({sql: sql, values: values}, function (err, rows) {
+                connection.release();
+                if (err) {
+                    console.log("userSignIn");
+                    console.log(err);
+                    callback(0);
+                } else {
+                    callback(rows[0][0], connection);
+                }
+                values = [];
+            });
+        })
     });
 }
 

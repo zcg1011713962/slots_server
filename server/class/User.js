@@ -22,6 +22,7 @@ User = function(_userInfo,_socket){
 	this._city = "";			//城市
 	this._province = "";		//省份
 	this._country = "";			//国家
+	this.language = 0;			// 语言
 	this._headimgurl = "";		//头像地址
 	this.bankPwd = "";			//银行密码
 	this.bankScore = 0;			//银行分数
@@ -83,6 +84,7 @@ User = function(_userInfo,_socket){
 		this.inviteCode = _userInfo.invite_code;
 		this.step = _userInfo.step;
 		this.newHandGive = _userInfo.newHandGive;
+		this.language = _userInfo.language;
 	};
 
 

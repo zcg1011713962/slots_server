@@ -1,3 +1,11 @@
+const LangType = {
+    Brazil: 0, // 巴西
+    Portugal: 1,    // 葡萄牙
+    China_Jian: 2, // 中国简体
+    China_Fan: 3, // 中国繁体
+    America: 4,    // 美国
+};
+
 const GoodsType = {
     gold: 0, // 金币
     diamond: 1, // 钻石
@@ -50,5 +58,6 @@ module.exports = {
     ShopGroupType,
     notifyType,
     AgentRebateType,
-    AgentRebateStatus
+    AgentRebateStatus,
+    LangType
 };

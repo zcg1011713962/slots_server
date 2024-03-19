@@ -138,7 +138,6 @@ var serverSign = "slel3@lsl334xx,deka";
 
 gameInfo.setIo(io);
 
-
 io.on('connection', function (socket) {
     log.info("socket comein........");
     socket.emit('connected', 'connect server');
@@ -520,7 +519,7 @@ io.on('connection', function (socket) {
     });
 
     // 银行转账
-    socket.on('bankTransferOtherBank', function (data) {
+    socket.on('bankTransferOtherBank', async function (data) {
         try {
             if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
@@ -531,7 +530,19 @@ io.on('connection', function (socket) {
                     socket.emit('bankTransferOtherBankResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
                     return;
                 }
-                gameInfo.bankTransferOtherBank(socket, d.giveUserId, d.bankScore);
+                const ret = await CacheUtil.recordUserProtocol(userId, "bankTransferOtherBank");
+                if(ret){
+                    gameInfo.bankTransferOtherBank(socket, d.giveUserId, d.bankScore, (code, result) =>{
+                        CacheUtil.delUserProtocol(userId, "bankTransferOtherBank")
+                        if(code){
+                            socket.emit('bankTransferOtherBankResult', {code:code,  data: result});
+                        }else{
+                            socket.emit('bankTransferOtherBankResult', {code:code,  msg: result});
+                        }
+                    });
+                }else{
+                    socket.emit('bankTransferOtherBankResult', {code:0, msg:"频繁访问"});
+                }
             }
         }catch (e) {
             socket.emit('bankTransferOtherBankResult', {code:0,msg:"参数有误"});
@@ -675,12 +686,24 @@ io.on('connection', function (socket) {
     });
 
     // 签到
-    socket.on("signIn", function () {
+    socket.on("signIn", async function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.signIn(socket);
-        }else{
-            socket.emit('signInResult', {code:0, msg:"用户不在线"});
+            const ret = await CacheUtil.recordUserProtocol(userId, "signIn");
+            if (ret) {
+                gameInfo.signIn(socket, ok => {
+                    CacheUtil.delUserProtocol(userId, "signIn")
+                    if (ok) {
+                        socket.emit('signInResult', {code: 1, msg: '签到成功'});
+                    } else {
+                        socket.emit('signInResult', {code: 0, msg: '重复签到'});
+                    }
+                });
+            } else {
+                socket.emit('signInResult', {code: 0, msg: "频繁访问"});
+            }
+        } else {
+            socket.emit('signInResult', {code: 0, msg: "用户不在线"});
         }
     });
 
@@ -977,6 +1000,27 @@ io.on('connection', function (socket) {
             gameInfo.contactUs(socket);
         }else{
             socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 设置-语言
+    socket.on("lang", function (data) {
+        try{
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || d.lang === undefined || d.lang == null) throw new Error('参数错误');
+            const userId = socket.userId;
+            if(!Object.values(TypeEnum.LangType).includes(d.lang)){
+                socket.emit('langResult', {code:0, msg:"不存在的语言"});
+                return;
+            }
+            if (gameInfo.IsPlayerOnline(userId)) {
+                gameInfo.setLang(socket, d.lang);
+            }else{
+                socket.emit('langResult', {code:0, msg:"用户不在线"});
+            }
+        }catch (e){
+            socket.emit('langResult', {code:0,msg:"参数有误"});
         }
     });
 

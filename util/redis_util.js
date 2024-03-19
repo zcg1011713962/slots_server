@@ -22,6 +22,8 @@ class RedisUtil {
             this.keysAsync = promisify(this.client.keys).bind(this.client);
             this.incrAsync = promisify(this.client.incrby).bind(this.client);
             this.incrbyfloatAsync = promisify(this.client.incrbyfloat).bind(this.client);
+            this.setnxAsync = promisify(this.client.setnx).bind(this.client);
+
             // Handle errors
             this.client.on('error', (err) => {
                 console.error(`Redis error: ${err}`);
@@ -85,9 +87,14 @@ class RedisUtil {
         return this.incrbyfloatAsync(key, val);
     }
 
+    async setNxAsync(key, value) {
+        return this.setnxAsync(key, value);
+    }
+
     async disconnect() {
         this.client.quit();
     }
+
 
 }
 
