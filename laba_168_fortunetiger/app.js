@@ -6,12 +6,9 @@ var Cio = require('socket.io-client');
 var log = require("./../CClass/class/loginfo").getInstand;
 var gameInfo = require('./class/game').getInstand;
 var gameConfig = require('./config/gameConfig');
-const globalVariableModule = require("../util/global_variable_module");
 const  Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
-const Config = require('./config/read_config').getInstand;
 const CacheUtil = require("../util/cache_util");
-const SocketUtil = require("../util/socket_util");
 
 var Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -82,10 +79,6 @@ Csocket.on('disconnectUser', function (msg) {
 });
 
 
-Csocket.on('applyMatchResult', function (_info) {
-    gameInfo.addRankUserList(_info);
-});
-
 
 Csocket.on('Setmaintain', function () {
     gameInfo.Setmaintain();
@@ -101,19 +94,12 @@ Csocket.on('updateGamblingGame', function (_info) {
     gameInfo.updateGamblingBalanceGold(_info);
 });
 
-// 获取游戏配置
-Csocket.on('bindCards', function (cards) {
-    log.info('配牌' + cards);
-    globalVariableModule.setGlobalVariable(cards);
-});
-
 
 gameInfo.setIo(io, Csocket);
 
 
 io.on('connection', function (socket) {
     socket.emit('connected', 'connect game server');
-    SocketUtil.clientToHall(socket, Csocket);
 
     //客户登录游戏
     socket.on('LoginGame', function (GameInfo) {
@@ -185,10 +171,8 @@ io.on('connection', function (socket) {
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
         const nBetSum = parseInt(data.nBetList[0]);
-        // 游戏奖池划分
-        const jackpot_ratio = Config.jackpot_ratio;
         // 执行摇奖
-        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        Lottery.doLottery(socket, nBetSum, gameInfo);
     });
 
     // 获取游戏奖池

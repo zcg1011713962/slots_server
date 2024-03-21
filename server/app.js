@@ -5,13 +5,10 @@ let withdrawal_api = require('./class/withdrawal_api');
 const bodyParser = require('body-parser');
 const registerByGuestApi = require('./class/login_api');
 const Robotname = require('./config/RobotName');
-const crypto = require('crypto');
 const gm_api = require('./class/gm_api');
-const tw_api = require('./class/tw_api');
 const dao = require('./dao/dao');
 const log = require("../CClass/class/loginfo").getInstand;
 const consolidate = require('consolidate');
-const statics = require('express-static');
 const StringUtil = require("../util/string_util");
 const gameInfo = require("./class/game").getInstand;
 const ServerInfo = require('./config/ServerInfo').getInstand;
@@ -20,14 +17,14 @@ const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const laba_config = require("../util/config/laba_config");
 const TypeEnum = require("../util/enum/type");
-
+// 触发定时任务
+const ScheduleJob = require("./class/schedule_job");
 
 
 //版本密钥和版本号
 const version = "ymymymymym12121212qwertyuiop5656_";
 const num = "2.0";
 
-// app.use(statics('./static/'));
 
 //跨域问题
 app.all('*', function (req, res, next) {
@@ -45,19 +42,6 @@ app.engine('html', consolidate.ejs);
 app.set('views', 'template');
 app.set('view engine', 'html');
 app.use(bodyParser());
-
-
-
-
-app.get('/outCoin', function (req, res) {
-    tw_api.outCoin(req.query, function (result) {
-        if (result) {
-            res.send("SUCCESS");
-        } else {
-            res.send("FAIL");
-        }
-    });
-});
 
 
 app.post('/gmManage', function (req, res) {
@@ -100,21 +84,6 @@ app.post('/checkVersion', function (req, res) {
         return;
     }
     res.send({code: 1, url: "http://yidali.youmegame.cn/tg/"});
-});
-
-
-
-app.get('/bindCards', function (req, response) {
-    try {
-        const data = req.query;
-        const sc = ServerInfo.getScoket(15168);
-        sc.emit('bindCards', data.cards);
-        response.send('success');
-    } catch (e) {
-        log.err('bindCards' + e);
-        response.send('fail');
-    }
-    response.end();
 });
 
 // 根据设备码获取用户名信息
@@ -188,11 +157,11 @@ io.on('connection', function (socket) {
                     if(code !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                         socket.emit('loginResult', {code: code, msg: msg});
                     }else{
-                        initUserInfo(user, socket);
+                        findUser(user, socket);
                     }
                 });
             }else{
-                initUserInfo(user, socket);
+                findUser(user, socket);
             }
         } catch (e) {
             socket.emit("loginResult", {code: ErrorCode.LOGIN_ERROR.code, msg: ErrorCode.LOGIN_ERROR.msg});
@@ -200,7 +169,7 @@ io.on('connection', function (socket) {
         }
     })
     
-    function initUserInfo(user, socket) {
+    function findUser(user, socket) {
         dao.login(user, socket, (code, msg, data)=> {
             if(ErrorCode.LOGIN_SUCCESS.code === code){
                 if (!data) {
@@ -287,13 +256,28 @@ io.on('connection', function (socket) {
         }
     });
 
+
+
+
+
+
     // 发送邮箱验证码
-    socket.on("sendEmailCode", function (toEmail) {
+    socket.on("sendEmailCode", async function (toEmail) {
+        if(!toEmail){
+            return;
+        }
+        const userId = socket.userId;
         try {
-            gameInfo.sendEmailCode(socket, toEmail);
+            const ret = await CacheUtil.recordUserProtocol(userId, "sendEmailCode");
+            if(ret){
+                gameInfo.sendEmailCode(socket, toEmail, (code, msg) =>{
+                    CacheUtil.delUserProtocol(userId, "sendEmailCode")
+                    socket.emit('sendEmailCodeResult', {code: code, msg: msg});
+                });
+            }
         } catch (e) {
-            socket.emit('sendEmailCodeResult', {code: ErrorCode.EMAIL_CODE_SEND_FAILED.code, msg: ErrorCode.EMAIL_CODE_SEND_FAILED.msg});
-            log.err('sendEmailCode',  e);
+            log.err('sendEmailCode' +  e);
+            socket.emit('sendEmailCodeResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
         }
     });
 
@@ -302,92 +286,102 @@ io.on('connection', function (socket) {
         try {
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
             if(!d || !d.email || !d.code){
-                throw new Error("参数不合法");
+                return;
             }
-            gameInfo.bindEmail(socket, d.email, d.code);
+            gameInfo.bindEmail(socket, d.email, d.code, (code, msg, data) =>{
+                if(code){
+                    socket.emit('bindEmailResult', {code: code, data: data});
+                }else{
+                    socket.emit('bindEmailResult', {code: code, msg: msg});
+                }
+            });
         } catch (e) {
-            socket.emit('bindEmailResult', {code: 0, msg: "绑定失败"});
-            log.err('bindEmailResult',  e);
+            log.err('bindEmailResult' + e);
+            socket.emit('bindEmailResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
         }
-    });
-
-    // 发送跑马灯
-    socket.on("sendNotifyMsg", function () {
-        // 发送跑马灯
-        const noticeMsg = [{
-            type: TypeEnum.notifyType.normal,
-            content_id: "c2000",
-            extend:{
-
-            }
-        }]
-        gameInfo.sendNotifyMsg(socket.userId, noticeMsg);
-    });
-
-    // 发送全服跑马灯
-    socket.on("sendAllNotifyMsg", function () {
-        // 发送跑马灯
-        const noticeMsg = [{
-            type: TypeEnum.notifyType.normal,
-            content_id: "c2000",
-            extend:{
-
-            }
-        }]
-        gameInfo.sendAllNotifyMsg(noticeMsg);
     });
 
     // 注册
-    socket.on("register", function (_info) {
+    socket.on("register", function (data) {
         try {
-            const parm = StringUtil.isJson(_info) ? JSON.parse(_info) : _info;
-            if(parm.type === 0){
-                // 注册
-                gameInfo.register(socket, parm.email, parm.code);
+            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.email || !d.code){
+                return;
+            }
+            if(d.type === 0){
+                gameInfo.registerByEmail(socket, d.email, d.code, (code, msg, data) =>{
+                    if(code){
+                        socket.emit('registerResult', {code: code, data: data});
+                    }else{
+                        socket.emit('registerResult', {code: code, msg: msg});
+                    }
+                });
             }
         } catch (e) {
-            log.err('注册',  e);
+            log.err('注册' +  e);
+            socket.emit('registerResult', {code: 0, msg: '注册失败'});
         }
     });
 
-    // 获得商城商品列表
+    // 商城商品列表
     socket.on("getShoppingList", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShoppingGoods(socket);
+            gameInfo.getShoppingGoods(socket, (code, msg, data) =>{
+                if(code){
+                    socket.emit("getShoppingResult", {code: code, data: data});
+                }else{
+                    socket.emit("getShoppingResult", {code: code, msg: msg});
+                }
+            });
+        }else {
+            socket.emit('getShoppingResult', {code:ErrorCode.USER_OFFLINE.code,msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
     // 购买商品
-    socket.on("Shopping", function (data) {
-        try {
-            if(!data) throw new Error();
-            const d = JSON.parse(data);
-            if (gameInfo.IsPlayerOnline(socket.userId)) {
-                gameInfo.Shopping(socket.userId, d.productId, d.count, socket);
-            }else{
-                socket.emit('ShoppingResult', {code:0,msg:"用户不在线"});
+    socket.on("Shopping", async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.productId === undefined || d.count === undefined) return;
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
+            if(ret){
+                gameInfo.Shopping(socket.userId, d.productId, d.count, socket, (code, msg, data) =>{
+                    CacheUtil.delUserProtocol(userId, "Shopping")
+                    if(code){
+                        socket.emit('ShoppingResult', {code:code,data: data});
+                    }else{
+                        socket.emit('ShoppingResult', {code:code,msg:msg});
+                    }
+                });
             }
-        }catch (e) {
-            socket.emit('ShoppingResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('ShoppingResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
 
     // 兑换礼品
-    socket.on("exchangeGift", function (data) {
-        try {
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!d || !d.cdkey) throw new Error('参数错误');
-            if (gameInfo.IsPlayerOnline(socket.userId)) {
-                gameInfo.exchangeGift(socket, d.cdkey);
-            }else{
-                socket.emit('exchangeGiftResult', {code:0,msg:"用户不在线"});
+    socket.on("exchangeGift", async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.cdkey === undefined || d.cdkey.length < 1) return;
+        const userId = socket.userId;
+
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, "exchangeGift")
+            if(ret){
+                gameInfo.exchangeGift(socket, d.cdkey, (code, msg, data) =>{
+                    CacheUtil.delUserProtocol(userId, "exchangeGift")
+                    if(code){
+                        socket.emit('exchangeGiftResult', {code:code,data:data});
+                    }else{
+                        socket.emit('exchangeGiftResult', {code:code,msg:msg});
+                    }
+                });
             }
-        }catch (e) {
-            log.err('exchangeGift' + e.message)
-            socket.emit('exchangeGiftResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('exchangeGiftResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
-
 
 
     // 获取用户信息
@@ -414,11 +408,10 @@ io.on('connection', function (socket) {
                 });
 
             }else{
-                log.info('getUserInfo用户不在线')
-                socket.emit('UserInfoResult', {code:0,msg:"用户不在线"});
+                socket.emit('UserInfoResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
             }
         }catch (e) {
-            socket.emit('UserInfoResult', {code:0,msg:"用户不在线"});
+            socket.emit('UserInfoResult', {code:ErrorCode.ERROR.code, msg:ErrorCode.ERROR.msg});
         }
     });
 
@@ -432,7 +425,7 @@ io.on('connection', function (socket) {
                 });
             }
         }catch (e) {
-            socket.emit('getVipConfigResult', {code:0, msg:"用户不在线"});
+            socket.emit('getVipConfigResult', {code:ErrorCode.ERROR.code, msg:ErrorCode.ERROR.msg});
         }
     });
 
@@ -442,23 +435,30 @@ io.on('connection', function (socket) {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.vipGetGoldDetail(socket);
         }else{
-            socket.emit('vipGetGoldDetailResult', {code:0,msg:"用户不在线"});
+            socket.emit('vipGetGoldDetailResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
 
     // VIP领取金币
-    socket.on("vipGetGold", function (data) {
-        try {
-            if(!data) throw new Error();
-            log.info('vipGetGold' + data);
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if (gameInfo.IsPlayerOnline(socket.userId)) {
-                gameInfo.vipGetGold(socket, d.type);
-            }else{
-                socket.emit('vipGetGoldResult', {code:0,msg:"用户不在线"});
+    socket.on("vipGetGold", async function (data) {
+        log.info('vipGetGold' + data);
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.type === undefined) return;
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, "vipGetGold")
+            if(ret){
+                gameInfo.vipGetGold(userId, d.type, (code, msg, data) =>{
+                    CacheUtil.delUserProtocol(userId, "vipGetGold")
+                    if(code){
+                        socket.emit('vipGetGoldResult', {code:code,data:data});
+                    }else{
+                        socket.emit('vipGetGoldResult', {code:code,msg:msg});
+                    }
+                })
             }
-        }catch (e) {
-            socket.emit('vipGetGoldResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('vipGetGoldResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -475,77 +475,86 @@ io.on('connection', function (socket) {
                 gameInfo.getBankScore(socket);
             }
         }catch (e) {
-            socket.emit('getBankScoreResult', {code:0, msg:"用户不在线"});
+            socket.emit('getBankScoreResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
 
 
     // 筹码存储-银行取出金币
-    socket.on('bankIntoHallGold', function (data) {
-        try {
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                // 银行是否被锁
-                if(gameInfo.isBankLock(userId)){
-                    socket.emit('bankIntoHallGoldResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
-                    return;
-                }
-                gameInfo.bankIntoHallGold(socket, d.gold);
+    socket.on('bankIntoHallGold', async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.gold === undefined || !d.gold) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            // 银行是否被锁
+            if(gameInfo.isBankLock(userId)){
+                socket.emit('bankIntoHallGoldResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                return;
             }
-        }catch (e) {
-            socket.emit('bankIntoHallGoldResult', {code:0,msg:"参数有误"});
+            const ret = await CacheUtil.recordUserProtocol(userId, 'bankIntoHallGold')
+            if(ret){
+                gameInfo.bankIntoHallGold(socket, d.gold, (code,msg,data) =>{
+                    CacheUtil.delUserProtocol(userId, "bankIntoHallGold")
+                    if(code){
+                        socket.emit('bankIntoHallGoldResult', {code:code,data: data});
+                    }else{
+                        socket.emit('bankIntoHallGoldResult', {code:code,msg: msg});
+                    }
+                });
+            }
         }
     });
 
     // 筹码存储-金币转入银行
-    socket.on('hallGoldIntoBank', function (data) {
-        try {
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                // 银行是否被锁
-                if(gameInfo.isBankLock(userId)){
-                    socket.emit('bankIntoHallGoldResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
-                    return;
-                }
-                gameInfo.hallGoldIntoBank(socket, d.gold);
+    socket.on('hallGoldIntoBank', async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.gold === undefined || !d.gold) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            // 银行是否被锁
+            if(gameInfo.isBankLock(userId)){
+                socket.emit('hallGoldIntoBankResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                return;
             }
-        }catch (e) {
-            socket.emit('bankIntoHallGoldResult', {code:0,msg:"参数有误"});
+            const ret = await CacheUtil.recordUserProtocol(userId, 'hallGoldIntoBank')
+            if(ret){
+                gameInfo.hallGoldIntoBank(socket, d.gold, (code, msg, data) =>{
+                    CacheUtil.delUserProtocol(userId, "hallGoldIntoBank")
+                    if(code){
+                        socket.emit('hallGoldIntoBankResult', {code:code,data: data});
+                    }else{
+                        socket.emit('hallGoldIntoBankResult', {code:code,msg: msg});
+                    }
+                });
+            }
         }
     });
 
     // 银行转账
     socket.on('bankTransferOtherBank', async function (data) {
-        try {
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                // 银行是否被锁
-                if(gameInfo.isBankLock(userId)){
-                    socket.emit('bankTransferOtherBankResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
-                    return;
-                }
-                const ret = await CacheUtil.recordUserProtocol(userId, "bankTransferOtherBank");
-                if(ret){
-                    gameInfo.bankTransferOtherBank(socket, d.giveUserId, d.bankScore, (code, result) =>{
-                        CacheUtil.delUserProtocol(userId, "bankTransferOtherBank")
-                        if(code){
-                            socket.emit('bankTransferOtherBankResult', {code:code,  data: result});
-                        }else{
-                            socket.emit('bankTransferOtherBankResult', {code:code,  msg: result});
-                        }
-                    });
-                }else{
-                    socket.emit('bankTransferOtherBankResult', {code:0, msg:"频繁访问"});
-                }
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || !d.giveUserId || !d.bankScore) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            // 银行是否被锁
+            if(gameInfo.isBankLock(userId)){
+                socket.emit('bankTransferOtherBankResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                return;
             }
-        }catch (e) {
-            socket.emit('bankTransferOtherBankResult', {code:0,msg:"参数有误"});
+            const ret = await CacheUtil.recordUserProtocol(userId, "bankTransferOtherBank");
+            if(ret){
+                gameInfo.bankTransferOtherBank(socket, d.giveUserId, d.bankScore, (code, msg, data) =>{
+                    CacheUtil.delUserProtocol(userId, "bankTransferOtherBank")
+                    if(code){
+                        socket.emit('bankTransferOtherBankResult', {code:code, data: data});
+                    }else{
+                        socket.emit('bankTransferOtherBankResult', {code:code, msg: msg});
+                    }
+                });
+            }
         }
     });
 
@@ -558,7 +567,7 @@ io.on('connection', function (socket) {
                 gameInfo.searchBankTransferIntoRecord(socket);
             }
         }catch (e) {
-            socket.emit('bankTransferIntoRecordResult', {code:0,msg:"参数有误"});
+            socket.emit('bankTransferIntoRecordResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
         }
     });
 
@@ -570,48 +579,46 @@ io.on('connection', function (socket) {
                 gameInfo.searchBankTransferOutRecord(socket);
             }
         }catch (e) {
-            socket.emit('bankTransferOutRecordResult', {code:0,msg:"参数有误"});
+            socket.emit('bankTransferOutRecordResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
         }
     });
 
     // 设置银行密码
     socket.on('setBankPwd', function (data) {
-        try {
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if(d.pwd1.toString().length !== 6){
-                socket.emit('setBankPwdResult', {code: 0, msg: "密码长度非法"});
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d.pwd1 || !d.pwd2) return;
+
+        const userId = socket.userId;
+        if(d.pwd1.toString().length !== 6){
+            socket.emit('setBankPwdResult', {code: 0, msg: "密码长度非法"});
+            return;
+        }
+        if (gameInfo.IsPlayerOnline(userId)) {
+            // 银行是否被锁
+            if(gameInfo.isBankLock(userId)){
+                socket.emit('setBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
                 return;
             }
-            if (gameInfo.IsPlayerOnline(userId)) {
-                // 银行是否被锁
-                if(gameInfo.isBankLock(userId)){
-                    socket.emit('setBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
-                    return;
-                }
-                if (d.pwd2 === d.pwd1) {
-                    gameInfo.getUserBankPwd(socket.userId, (pwd) => {
-                        if(pwd){
-                            socket.emit('setBankPwdResult', {code: 0, msg: "存在密码请修改密码"});
-                        }else{
-                            gameInfo.setUserBankPwd(socket, d);
-                        }
-                    });
-                } else {
-                    socket.emit('setBankPwdResult', {code: 0, msg: "两次密码不一致"});
-                }
+            if (d.pwd2 === d.pwd1) {
+                gameInfo.getUserBankPwd(socket.userId, (pwd) => {
+                    if(pwd){
+                        socket.emit('setBankPwdResult', {code: 0, msg: "存在密码请修改密码"});
+                    }else{
+                        gameInfo.setUserBankPwd(socket, d);
+                    }
+                });
+            } else {
+                socket.emit('setBankPwdResult', {code: 0, msg: "两次密码不一致"});
             }
-        }catch (e) {
-            socket.emit('setBankPwdResult', {code:0,msg:"参数有误"});
         }
     });
 
-    //修改银行密码
+    // 修改银行密码
     socket.on('updateBankPwd', function (data) {
         try {
-            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.pwd) return;
+
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
                 // 银行是否被锁
@@ -625,22 +632,23 @@ io.on('connection', function (socket) {
                 }
                 gameInfo.getUserBankPwd(socket.userId, (pwd) => {
                     if (parseInt(pwd) !== parseInt(d.pwd)) {
-                        socket.emit('updateBankPwdResult', {code: 0, msg: "原始密码错误"});
+                        socket.emit('updateBankPwdResult', {code: 0, msg: "原密码错误"});
                     } else {
                         gameInfo.updateUserBankPwd(socket, d);
                     }
                 });
             }
         }catch (e) {
-            socket.emit('updateBankPwdResult', {code:0,msg:"参数有误"});
+            socket.emit('updateBankPwdResult', {code:ErrorCode.ERROR.code, msg:ErrorCode.ERROR.msg});
         }
     });
 
     // 校验银行密码
     socket.on('checkBankPwd', function (data) {
         try {
-            if(!data) throw new Error();
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+            if(!d || !d.pwd) return;
+
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
                 // 银行是否被锁
@@ -654,7 +662,7 @@ io.on('connection', function (socket) {
                         // 密码校验
                         gameInfo.getUserBankPwd(socket.userId, (pwd) => {
                             if (pwd === d.pwd) {
-                                socket.emit('checkBankPwdResult', {code: 1, msg: "校验成功"});
+                                socket.emit('checkBankPwdResult', {code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
                             } else {
                                 CacheUtil.addBankPwdErrorCount(userId);
                                 socket.emit('checkBankPwdResult', {code: 0, msg: "校验失败"});
@@ -667,10 +675,10 @@ io.on('connection', function (socket) {
                     }
                 })
             } else {
-                socket.emit('checkBankPwdResult', {code: 0, msg: "用户不在线"});
+                socket.emit('checkBankPwdResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
             }
         }catch (e){
-            socket.emit('checkBankPwdResult', {code:0,msg:"参数有误"});
+            socket.emit('checkBankPwdResult', {code:ErrorCode.ERROR.code, msg:ErrorCode.ERROR.msg});
         }
     });
 
@@ -679,9 +687,15 @@ io.on('connection', function (socket) {
     socket.on("getSignInDetail", function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.searchUserSignInDetail(socket);
+            gameInfo.searchUserSignInDetail(socket, (code, msg, data) =>{
+                if(code){
+                    socket.emit('getSignInDetailResult', {code:code, data: data});
+                }else{
+                    socket.emit('getSignInDetailResult', {code:code, msg: msg});
+                }
+            });
         }else{
-            socket.emit('getSignInDetailResult', {code:0, msg:"用户不在线"});
+            socket.emit('getSignInDetailResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -690,20 +704,19 @@ io.on('connection', function (socket) {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, "signIn");
+            console.log('用户进行签到', userId, '-' , ret)
             if (ret) {
                 gameInfo.signIn(socket, ok => {
                     CacheUtil.delUserProtocol(userId, "signIn")
                     if (ok) {
-                        socket.emit('signInResult', {code: 1, msg: '签到成功'});
+                        socket.emit('signInResult', {code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
                     } else {
-                        socket.emit('signInResult', {code: 0, msg: '重复签到'});
+                        socket.emit('signInResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
                     }
                 });
-            } else {
-                socket.emit('signInResult', {code: 0, msg: "频繁访问"});
             }
         } else {
-            socket.emit('signInResult', {code: 0, msg: "用户不在线"});
+            socket.emit('signInResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -717,103 +730,118 @@ io.on('connection', function (socket) {
                 gameInfo.getHallLuckyPageDetail(socket, activityJackpot);
             });
         }else{
-            socket.emit('hallLuckyPageDetailResult', {code:0, msg:"用户不在线"});
+            socket.emit('hallLuckyPageDetailResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
     // 领取幸运币
-    socket.on("getLuckyCoin", function (data) {
-        try{
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                gameInfo.getLuckyCoin(socket, d.type);
-            }else{
-                socket.emit('getLuckyCoinResult', {code:0, msg:"用户不在线"});
+    socket.on("getLuckyCoin", async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.type === undefined) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, "getLuckyCoin");
+            if(ret){
+                gameInfo.getLuckyCoin(socket, d.type, (code, msg) =>{
+                    CacheUtil.delUserProtocol(userId, "getLuckyCoin")
+                    socket.emit('getLuckyCoinResult', {code:code, msg: msg});
+                });
             }
-        }catch (e){
-            socket.emit('luckyCoinDetailResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('getLuckyCoinResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
 
     // 获取转盘详情页
     socket.on("luckyCoinDetail", function (data) {
-        try{
-            if(!data) throw new Error();
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                    // 活动奖池
-                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                    gameInfo.getLuckyCoinDetail(socket, activityJackpot, d.val);
-                });
-            }else{
-                socket.emit('luckyCoinDetailResult', {code:0, msg:"用户不在线"});
-            }
-        }catch (e){
-            socket.emit('luckyCoinDetailResult', {code:0,msg:"参数有误"});
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.val === undefined) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                // 活动奖池
+                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                gameInfo.getLuckyCoinDetail(socket, activityJackpot, d.val);
+            });
+        }else{
+            socket.emit('luckyCoinDetailResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
 
     // 大厅转盘游戏
-    socket.on("turntable", function (data) {
+    socket.on("turntable", async function (data) {
+
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            const gameMode = data ? 1 : 0; // 0 免费游戏 1收费游戏
-
-            if(gameMode === 0){
-                // 免费模式扣除幸运币
-                CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
-                    CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
-
-                        const turntableCoin = luckyCoinConfig.turntableCoin;
-                        const luckyCoin = luckyDetail.luckyCoin;
-                        if(luckyCoin < turntableCoin){
-                            socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
-                            return;
-                        }
-                        // 扣幸运币
-                        luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
-                        log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
-                        CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
-                            if(ret){
-                                // 免费幸运币数量
-                                redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                                    // 活动奖池
-                                    const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                    gameInfo.turntable(socket, 1, activityJackpot);
-                                });
+            const ret = await CacheUtil.recordUserProtocol(userId, 'turntable')
+            if(ret){
+                const gameMode = data ? TypeEnum.TurntableGameMode.charge : TypeEnum.TurntableGameMode.free; // 0 免费游戏 1收费游戏
+                if(gameMode === TypeEnum.TurntableGameMode.free){
+                    // 免费模式扣除幸运币
+                    CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
+                        CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
+                            const turntableCoin = luckyCoinConfig.turntableCoin;
+                            const luckyCoin = luckyDetail.luckyCoin;
+                            if(luckyCoin < turntableCoin){
+                                socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
                                 return;
                             }
-                            socket.emit('turntableResult', {code:0, msg:"扣币失败"});
-                        })
+                            // 扣幸运币
+                            luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
+                            log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
+                            CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
+                                if(ret){
+                                    // 免费幸运币数量
+                                    redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
+                                        // 活动奖池
+                                        const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
+                                        gameInfo.turntable(socket, 1, activityJackpot, (code, msg, data) =>{
+                                            CacheUtil.delUserProtocol(userId, 'turntable')
+                                            if(code){
+                                                socket.emit('turntableResult', {code:code, data: data});
+                                            }else{
+                                                socket.emit('turntableResult', {code:code, msg: msg});
+                                            }
+                                        });
+
+                                    });
+                                    return;
+                                }
+                                socket.emit('turntableResult', {code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+                            })
+                        });
                     });
-                });
-            }else if(gameMode === 1){
-                try{
+                }else if(gameMode === TypeEnum.TurntableGameMode.charge){
                     const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
                     // 购买加倍转盘
-                    if(!d.mul) throw new Error();
+                    if(!d.mul) return;
                     // 扣款成功
                     gameInfo.mulBuy(d.mul, res =>{
                         if(res){
-                            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+                            redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
                                 // 活动奖池
                                 const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, d.mul, activityJackpot);
+                                gameInfo.turntable(socket, d.mul, activityJackpot,(code, msg, data) =>{
+                                    CacheUtil.delUserProtocol(userId, 'turntable')
+                                    if(code){
+                                        socket.emit('turntableResult', {code:code, data: data});
+                                    }else{
+                                        socket.emit('turntableResult', {code:code, msg: msg});
+                                    }
+                                });
                             });
+                        }else{
+                            socket.emit('turntableResult', {code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
                         }
                     });
-                }catch (e) {
-                    socket.emit('turntableResult', {code:0,msg:"参数有误"});
                 }
             }
         }else{
-            socket.emit('turntableResult', {code:0, msg:"用户不在线"});
+            socket.emit('turntableResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -863,19 +891,22 @@ io.on('connection', function (socket) {
     });
 
 
-    // 新用户绑定邀请码
-    socket.on("bindInviteCode", function (data) {
-        try{
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!d || !d.inviteCode) throw new Error('参数错误');
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                gameInfo.bindInviteCode(socket, d.inviteCode);
-            }else{
-                socket.emit('bindInviteCodeResult', {code:0, msg:"用户不在线"});
+    // 绑定邀请码
+    socket.on("bindInviteCode", async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || !d.inviteCode || d.inviteCode.length < 1) return;
+
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, 'bindInviteCode')
+            if(ret){
+                gameInfo.bindInviteCode(socket, d.inviteCode, (code, msg) =>{
+                    CacheUtil.delUserProtocol(userId, 'bindInviteCode')
+                    socket.emit('bindInviteCodeResult', {code:code, msg: msg});
+                });
             }
-        }catch (e){
-            socket.emit('bindInviteCodeResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('bindInviteCodeResult', {code:ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -915,13 +946,19 @@ io.on('connection', function (socket) {
 
 
     // 我的推广-领取返点
-    socket.on("getRebate", function () {
+    socket.on("getRebate", async function () {
         console.log('getRebate', socket.userId)
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.getRebate(socket);
+            const ret = await CacheUtil.recordUserProtocol(userId, 'getRebate')
+            if(ret){
+                gameInfo.getRebate(socket, (code, msg) =>{
+                    CacheUtil.delUserProtocol(userId, 'getRebate')
+                    socket.emit('getRebateResult', {code:code, msg: msg});
+                });
+            }
         }else{
-            socket.emit('getRebateResult', {code:0, msg:"用户不在线"});
+            socket.emit('getRebateResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
     });
 
@@ -960,10 +997,10 @@ io.on('connection', function (socket) {
 
 
     // 设置-建议反馈
-    socket.on("feedback", function (data) {
+    socket.on("feedback", async function (data) {
         try{
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!d || !d.txt) throw new Error('参数错误');
+            if(!d || d.txt === undefined || d.txt === '') return;
             if(d.txt.length > 100){
                 socket.emit('feedbackResult', {code:0, msg:"长度限制100字"});
                 return;
@@ -971,33 +1008,33 @@ io.on('connection', function (socket) {
 
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
-                gameInfo.feedback(socket, d.txt);
+                const ret = await CacheUtil.recordUserProtocol(userId, 'feedback')
+                if(ret){
+                    gameInfo.feedback(socket, d.txt, (code, msg) =>{
+                        CacheUtil.delUserProtocol(userId, 'feedback')
+                        socket.emit('feedbackResult', {code: code, msg: msg});
+                    });
+                }
             }else{
-                socket.emit('feedbackResult', {code:0, msg:"用户不在线"});
+                socket.emit('feedbackResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
             }
         }catch (e){
-            socket.emit('feedbackResult', {code:0,msg:"参数有误"});
+            socket.emit('feedbackResult', {code:ErrorCode.ERROR.code, msg:ErrorCode.ERROR.msg});
         }
     });
 
 
     // 设置-联系我们-问题回答
-    socket.on("contactUs", function () {
+    socket.on("contactUs", async function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.contactUs(socket);
-        }else{
-            socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
-        }
-    });
-
-
-
-    // 设置-联系我们-问题回答
-    socket.on("contactUs", function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.contactUs(socket);
+            const ret =  await CacheUtil.recordUserProtocol(userId, 'contactUs')
+            if(ret){
+                gameInfo.contactUs(socket, (code, data) =>{
+                    CacheUtil.delUserProtocol(userId, 'contactUs')
+                    socket.emit('contactUsResult', {code:code, data: data});
+                });
+            }
         }else{
             socket.emit('contactUsResult', {code:0, msg:"用户不在线"});
         }
@@ -1029,7 +1066,8 @@ io.on('connection', function (socket) {
     socket.on("devcodesave", function (data) {
         try{
             const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!d || !d.deviceCode || !d.account) throw new Error('参数错误');
+            if(!d || !d.deviceCode || !d.account) return;
+
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
                 gameInfo.updateAccountByDeviceCode(d.deviceCode, d.account , row =>{
@@ -1048,32 +1086,38 @@ io.on('connection', function (socket) {
     });
 
     // 保存新手指引步数
-    socket.on("saveGuideStep", function (data) {
-        try{
-            const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-            if(!d || !d.step ) throw new Error('参数错误');
-            const userId = socket.userId;
-            if (gameInfo.IsPlayerOnline(userId)) {
-                gameInfo.saveGuideStep(socket, d.step);
-            }else{
-                socket.emit('saveGuideStepResult', {code:0, msg:"用户不在线"});
+    socket.on("saveGuideStep", async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || d.step === '' || !d.step) return;
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            const ret = await CacheUtil.recordUserProtocol(userId, 'saveGuideStep')
+            if(ret){
+                gameInfo.saveGuideStep(socket, d.step, (code, msg) =>{
+                    CacheUtil.delUserProtocol(userId, 'saveGuideStep')
+                    socket.emit('saveGuideStepResult', {code:code, msg: msg});
+                });
             }
-        }catch (e){
-            socket.emit('saveGuideStepResult', {code:0,msg:"参数有误"});
+        }else{
+            socket.emit('saveGuideStepResult', {code:0, msg:"用户不在线"});
         }
     });
 
 
-    // 新用户弹窗送金币
-    socket.on('newHandGive', function () {
+    // 新用户送金币
+    socket.on('newHandGive', async function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.getNewhandProtectConfig().then(newHandConfig =>{
-                if(gameInfo.userList[userId].newHandGive === 0){
-                    gameInfo.userList[userId].newHandGive = 1;
-                    socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
-                }
-            });
+            const ret = await CacheUtil.recordUserProtocol(userId, 'newHandGive')
+            if(ret){
+                CacheUtil.getNewhandProtectConfig().then(newHandConfig =>{
+                    if(gameInfo.userList[userId].newHandGive === 0){
+                        gameInfo.userList[userId].newHandGive = 1;
+                        socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
+                    }
+                    CacheUtil.delUserProtocol(userId, 'newHandGive')
+                });
+            }
         }else{
             socket.emit('newHandGiveResult', {code:0, msg:"用户不在线"});
         }
@@ -1106,58 +1150,6 @@ io.on('connection', function (socket) {
         }
     });
 
-
-    //领取邮件金币
-    socket.on("lqCoin_email", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendCoinjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.lqCoin_email(socket, _info);
-        }
-    });
-
-    //使用点卡
-    socket.on("useEXcard", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('useEXcardjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.useEXcard(socket, _info);
-        }
-    });
-
-    //赠送点卡
-    socket.on("sendcard", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('sendcardjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.sendcard(socket, _info);
-        }
-    });
-
-    //查询点卡记录
-    socket.on("cardLog", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('cardLogjson');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.cardLog(socket, _info);
-        }
-    });
 
     //检测
     socket.on("checkNickName", function (_info) {
@@ -1253,21 +1245,6 @@ io.on('connection', function (socket) {
     });
 
 
-
-
-    //获得每天任务奖品
-    socket.on("getDayPrize", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('getDayPrize-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getDayPrize(socket, _info);
-        }
-    });
-
     //获得金币排行榜
     socket.on("getCoinRank", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
@@ -1280,8 +1257,6 @@ io.on('connection', function (socket) {
             gameInfo.getDiamondRank(socket);
         }
     });
-
-
 
 
     //游戏服务器的排行
@@ -1374,27 +1349,6 @@ io.on('connection', function (socket) {
         gameInfo.updateCharLog(socket, _info.idList);
     });
 
-    //兑奖
-    socket.on('scoreOut', function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('getMsgToUser-json');
-        }
-        _info.ip = socket.handshake.address;
-        log.info(_info);
-        if (_info.ip.split(':').length > 0) {
-            var ip = _info.ip.split(':')[3];
-            if (ip) {
-                _info.ip = ip;
-            } else {
-                // _info.ip = "116.196.93.26";
-            }
-            gameInfo.scoreOut(socket, _info);
-        }
-
-    });
 
     //发送聊天给GM
     socket.on('sendMsgToGM', function (_info) {
@@ -1460,6 +1414,7 @@ io.on('connection', function (socket) {
         }
         gameInfo.getCoinLog(socket, _info);
     });
+
     //用户申请提现
     socket.on("withdraw_apply", function (_info) {
         try {
@@ -1478,7 +1433,7 @@ io.on('connection', function (socket) {
 
 app.set('port', process.env.PORT || 13000);
 
-var server = http.listen(app.get('port'), function () {
+const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
 });
 

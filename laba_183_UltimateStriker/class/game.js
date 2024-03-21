@@ -136,6 +136,8 @@ var GameInfo = function () {
             const jackpotCardLowerLimit = Config.icon_jackpot_lower_limit;
             // jackpot图案
             const jackpotCard = Config.jackpot_card;
+            // 空白图案
+            const blankCard = -1;
             // 万能图案
             const nGameMagicCardIndex = Config.nGameMagicCard;
             // 游戏奖池比例
@@ -234,7 +236,7 @@ var GameInfo = function () {
                     winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
                 }
                 // 生成图案
-                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot);
+                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot, blankCard);
 
                 //添加
                 let col1 = [nHandCards[0], nHandCards[6], nHandCards[12], nHandCards[18], nHandCards[24], nHandCards[30]];

@@ -1,13 +1,13 @@
 const laba_config = require("./config/laba_config");
 const log = require("../CClass/class/loginfo").getInstand;
 
-module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_bind_switch, icon_type_bind, jp) {
-    if(icon_type_bind){
+module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_type_bind, winJackpot, blankCard) {
+    if(icon_type_bind && icon_type_bind.length > 0){
         // 如果开了配牌器
         log.info('配牌器开关:' + true + "牌:" + icon_type_bind);
         return icon_type_bind;
     }
-    return getCard(cards, cardsNumber, weight_two_array, col_count, line_count, jackpotCard, jp);
+    return getCard(cards, cardsNumber, weight_two_array, col_count, line_count, jackpotCard, winJackpot, blankCard);
 };
 
 module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpot_ratio, jackpot_level_money, jackpot_level_prob, bet_jackpot_level_bet, bet_jackpot_level_index, jackpot_pay_level) {
@@ -153,22 +153,24 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
                     dict = dict1
                 }
             }
-            // 中奖了
+            // jackpot图案某行中奖
+            if(jackpotCard === dict1["nColor"] || jackpotCard === dict2["nColor"]){
+                dictAnalyseResult["win"] += 0;
+                dictAnalyseResult["nMultiple"] +=0;
+                dictAnalyseResult["nWinDetail"].push(0);
+                dictAnalyseResult["getJackpot"] = {
+                    bFlag: true,
+                    bVal: jp
+                };
+            }
+
+            // 普通图案某行中奖
             if(nMultiple > 0){
                 // 设置中奖金额
-                if(jackpotCard === dict["nColor"]){
-                    dictAnalyseResult["win"] += 0;
-                    dictAnalyseResult["nMultiple"] +=0;
-                    dictAnalyseResult["nWinDetail"].push(0);
-                    dictAnalyseResult["getOpenBox"] = {
-                        bFlag: true,
-                        nWinOpenBox: jp
-                    };
-                }else{
-                    dictAnalyseResult["win"] += nMultiple * nBetList[nLineNum];
-                    dictAnalyseResult["nMultiple"] +=nMultiple;
-                    dictAnalyseResult["nWinDetail"].push(nMultiple * nBetList[nLineNum]);
-                }
+                dictAnalyseResult["win"] += nMultiple * nBetList[nLineNum];
+                dictAnalyseResult["nMultiple"] +=nMultiple;
+                dictAnalyseResult["nWinDetail"].push(nMultiple * nBetList[nLineNum]);
+
                 dictAnalyseResult["nWinLines"].push(nLineNum);
                 dictAnalyseResult["nWinLinesDetail"].push(dict["nCardsIndex"]);
                 dictAnalyseResult["nWinCardsDetail"].push(temp);
@@ -352,7 +354,7 @@ check_count = function (check_list, x) {
 };
 
 // 所有图案 图案数量
-function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line_count, jackpotCard, jp) {
+function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line_count, jackpotCard, winJackpot, blankCard) {
     const nHandCards = [];
 
     // 从左到右发指定数量手牌 这里剔除了jackpot牌
@@ -360,10 +362,10 @@ function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line
         // 计算每个图案，占一列的权重
         const col_num= i % col_count;
         const weights = weight_two_array[col_num];
-        nHandCards.push(weightedRandomCardType(cards, weights, jackpotCard));
+        nHandCards.push(weightedRandomCardType(cards, weights, jackpotCard, blankCard));
     }
     // 中了jackpot,把某行置为jackpot牌
-    if(jp > 0){
+    if(winJackpot > 0){
         const row = nGameHandCardsNumber / line_count;
         const num = Math.floor(Math.random() * row + 1);
         let index = num * line_count
@@ -378,16 +380,17 @@ function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line
 
 
 // 所有图案 图案权重数组
-function weightedRandomCardType(cards, weights, jackpotCard) {
-    // 移除jackpot卡 和对应权重
+function weightedRandomCardType(cards, weights, jackpotCard, blankCard) {
+    // 移除jackpot卡，移除空白卡 和对应权重
     let cs = [];
     let ws = [];
     for (let i = 0; i < weights.length; i++) {
-        if (jackpotCard !== cards[i]) {
+        if (jackpotCard !== cards[i] && blankCard !== cards[i]) {
             cs.push(cards[i]);
             ws.push(weights[i]);
         }
     }
+
     // 根据权重出
     const totalWeight = ws.reduce((sum, ws) => sum + ws, 0);
     const randomValue = Math.random() * totalWeight;

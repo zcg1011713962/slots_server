@@ -31,11 +31,10 @@ const sendVerificationCode = (recipientEmail, callback) => {
             callback(0)
             console.error('邮件发送失败:', error.message);
         } else {
-            callback(1)
+            callback(verificationCode)
             console.log('邮件已发送:', info.response);
         }
     });
-    return verificationCode;
 }
 
 module.exports = sendVerificationCode;

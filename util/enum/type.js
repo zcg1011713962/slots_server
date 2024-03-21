@@ -51,6 +51,19 @@ const AgentRebateStatus = {
     failed: 2 // 发放失败
 };
 
+
+const VipGetGoldType = {
+    dailyGet: 0, // 每日
+    monthlyGet: 1, // 每月
+};
+
+const TurntableGameMode = {
+    free: 0, // 免费
+    charge: 1, // 收费
+};
+
+
+
 module.exports = {
     GoodsType,
     CurrencyType,
@@ -59,5 +72,7 @@ module.exports = {
     notifyType,
     AgentRebateType,
     AgentRebateStatus,
-    LangType
+    LangType,
+    VipGetGoldType,
+    TurntableGameMode
 };

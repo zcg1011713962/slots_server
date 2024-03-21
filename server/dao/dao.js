@@ -1280,10 +1280,10 @@ exports.userSignIn = function userSignIn(userId, callback) {
                 return;
             }
             connection.query({sql: sql, values: values}, function (err, rows) {
-                connection.release();
                 if (err) {
                     console.log("userSignIn");
                     console.log(err);
+                    connection.release();
                     callback(0);
                 } else {
                     callback(rows[0][0], connection);

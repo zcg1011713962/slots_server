@@ -8,8 +8,26 @@ const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
 const userPlayGameCount= 'userPlayGameCount';
 const sendEmailExpireKey = 'sendEmailCodeExpire';
+const VIPDailyGetKey = 'VIPDailyGet';
+const VIPMonthlyGetKey = 'VIPMonthlyGet';
+
 const sendEmailKey = 'sendEmailCode';
-const transferCheckKey = 'transferCheck';
+
+const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
+const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
+const emailCodeLongExpireSecond = 800; // 过期校验过期时间
+
+const gameConfig = {
+    gameConfigKey: 'gameConfig',
+    base: 'base',
+    nGameLines: 'nGameLines',
+    iconInfos: 'iconInfos',
+    iconBind: 'iconBind'
+}
+
+const jackpotConfig = {
+    jackpotConfigKey: 'jackpotConfig'
+}
 
 
 const hallConfig = {
@@ -25,6 +43,24 @@ const hallConfig = {
     customer_service_config: 'customer_service_config',
     invite_download_config: 'invite_download_config',
     newhand_protect_config: 'newhand_protect_config'
+}
+
+
+exports.getGameConfig = async function(gameName, serverId){
+    try{
+        return RedisUtil.hget(gameConfig.gameConfigKey, gameName + serverId).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getGameConfig');
+    }
+}
+
+
+exports.getJackpotConfig = async function(){
+    try{
+        return RedisUtil.get(jackpotConfig.jackpotConfigKey).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getJackpotConfig');
+    }
 }
 
 
@@ -153,15 +189,24 @@ exports.searchBankPwdErrorCount = function (userId) {
 
 // 获取游戏奖池
 exports.getGameJackpot  = function getGameJackpot(socket){
+    const self = this;
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-        // 游戏奖池
-        let gameJackpot = jackpot ? jackpot * laba_config.game_jackpot_ratio : 0;
-        socket.emit('gameJackpotResult', {
-            gameJackpot: gameJackpot.toFixed(2),
-            grand_jackpot: (gameJackpot * laba_config.grand_jackpot_ratio).toFixed(2),
-            major_jackpot: (gameJackpot * laba_config.major_jackpot_ratio).toFixed(2),
-            minor_jackpot: (gameJackpot * laba_config.minor_jackpot_ratio).toFixed(2),
-            mini_jackpot: (gameJackpot * laba_config.mini_jackpot_ratio).toFixed(2),
+        self.getJackpotConfig().then(jackpotConfig =>{
+            // 游戏奖池
+            let gameJackpot = parseInt(jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0);
+            // 奖池划分比例
+            const game_jackpot_ratio = jackpotConfig.game_jackpot_ratio;
+            const grandJackpot =  Math.floor((gameJackpot * game_jackpot_ratio[0].ratio).toFixed(2));
+            const majorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[1].ratio).toFixed(2));
+            const minorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[2].ratio).toFixed(2));
+            const miniJackpot = Math.floor((gameJackpot * game_jackpot_ratio[3].ratio).toFixed(2));
+            socket.emit('gameJackpotResult', {
+                gameJackpot: gameJackpot.toFixed(2),
+                grand_jackpot: grandJackpot,
+                major_jackpot: majorJackpot,
+                minor_jackpot: minorJackpot,
+                mini_jackpot: miniJackpot,
+            });
         });
     });
 }
@@ -279,7 +324,7 @@ exports.getPlayGameCount  = function getPlayGameCount(userId){
 exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, toEmail, callback){
     try {
         RedisUtil.set(sendEmailExpireKey + toEmail, verificationCode).then(ret1 =>{
-            RedisUtil.expire(sendEmailExpireKey + toEmail, 480).then(ret2 =>{
+            RedisUtil.expire(sendEmailExpireKey + toEmail, emailCodeLongExpireSecond).then(ret2 =>{
                 if(ret1 && ret2){
                     callback(1);
                 }else{
@@ -296,7 +341,7 @@ exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, 
 exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, callback){
     // 邮箱验证码设置
     RedisUtil.set(sendEmailKey + toEmail, verificationCode).then(ret1 =>{
-        RedisUtil.expire(sendEmailKey + toEmail, 240).then(ret2 =>{
+        RedisUtil.expire(sendEmailKey + toEmail, emailCodeExpireSecond).then(ret2 =>{
             if(ret1 && ret2){
                 callback(1);
             }else{
@@ -317,16 +362,16 @@ exports.verifyEmailCode  = function verifyEmailCode(code, email, callback){
                     log.info('校验验证码成功' + email + 'code:' + code);
                     callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
                 } else if (verificationCode && expireCode === code) {
-                    log.info('校验验证码失败，过期的校验码' + email + 'code:' + code);
+                    log.info('过期的校验码' + email + 'code:' + code);
                     callback(ErrorCode.EMAIL_CODE_EXPIRED.code, ErrorCode.EMAIL_CODE_EXPIRED.msg);
                 } else {
-                    log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                    log.err('错误的验证码' + email + ' verificationCode:' + verificationCode + 'code:' + code);
                     callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
                 }
             } catch (e) {
                 log.err(e);
-                log.err('校验验证码失败' + email + ' verificationCode:' + verificationCode + 'code:' + code);
-                callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg);
+                log.err('错误的验证码' + email + ' verificationCode:' + verificationCode + 'code:' + code);
+                callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
             }
         });
     });
@@ -334,13 +379,14 @@ exports.verifyEmailCode  = function verifyEmailCode(code, email, callback){
 
 
 // 设置用户调用协议记录
-exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol, callback){
+exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol){
     try {
         const key = protocol + '_' + userId;
         const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
+        console.log('recordUserProtocol:' + key + 'setResult' + setResult)
         if (setResult === 1) {
             // 如果设置成功，则设置过期时间
-            await RedisUtil.expire(key, 30);
+            await RedisUtil.expire(key, userSocketProtocolExpireSecond);
         }
         return setResult;
     }catch (e){
@@ -351,7 +397,76 @@ exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol
 // 删除用户调用协议记录
 exports.delUserProtocol  = async function delUserProtocol(userId, protocol){
     const key = protocol + '_' + userId;
+    console.log('delUserProtocol:', key)
     await RedisUtil.del(key);
+}
+
+
+// VIP每日领取
+exports.VIPDailyGet  = function VIPDailyGet(userId, callback){
+    RedisUtil.hmset(VIPDailyGetKey, userId, new Date().getTime()).then(ok =>{
+        if(ok){
+            callback(1)
+        }else{
+            callback(0)
+        }
+    }).catch(e =>{
+        log.err(e)
+        callback(0)
+    })
+}
+// 是否领取了VIP每日金币
+exports.isVIPDailyGet  = function isVIPDailyGet(userId, callback){
+    RedisUtil.hget(VIPDailyGetKey, userId).then(ok =>{
+        if(ok){
+            callback(1)
+        }else{
+            callback(0)
+        }
+    }).catch(e =>{
+        log.err(e)
+        callback(0)
+    })
+}
+
+// 是否领取了VIP每月金币
+exports.isVIPMonthlyGet  = function isVIPMonthlyGet(userId, callback){
+    RedisUtil.hget(VIPMonthlyGetKey, userId).then(ok =>{
+        if(ok){
+            callback(1)
+        }else{
+            callback(0)
+        }
+    }).catch(e =>{
+        log.err(e)
+        callback(0)
+    })
+}
+
+// VIP每月领取
+exports.VIPMonthlyGet  = function VIPMonthlyGet(userId, callback){
+    RedisUtil.hmset(VIPMonthlyGetKey, userId, new Date().getTime()).then(ok =>{
+        if(ok){
+            callback(1)
+        }else{
+            callback(0)
+        }
+    }).catch(e =>{
+        log.err(e)
+        callback(0)
+    })
+}
+
+
+// 清理VIP每月领取
+exports.clearVIPMonthlyGetKey  = function clearVIPMonthlyGetKey(){
+    RedisUtil.del(VIPMonthlyGetKey)
+}
+
+
+// 清理VIP每日领取
+exports.clearVIPDailyGetKey  = function clearVIPDailyGetKey(){
+    RedisUtil.del(VIPDailyGetKey)
 }
 
 

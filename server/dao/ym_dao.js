@@ -89,18 +89,27 @@ exports.bindIniteCode = function bindIniteCode(invite_uid ,invitee_uid, callback
             callback(0);
             return;
         }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
+        connection.beginTransaction(err => {
             if (err) {
-                log.err('绑定邀请码'+ err);
+                log.err('获取数据库连接失败' + err);
                 callback(0);
-            } else {
-                if (rows) {
-                    callback(rows);
-                } else {
-                    callback(0);
-                }
+                connection.release();
+                return;
             }
+            connection.query({sql: sql, values: values}, function (err, rows) {
+                if (err) {
+                    log.err('绑定邀请码'+ err);
+                    connection.release();
+                    callback(0);
+                } else {
+                    if (rows) {
+                        callback(rows, connection);
+                    } else {
+                        connection.release();
+                        callback(0);
+                    }
+                }
+            })
         })
     });
 }
@@ -538,7 +547,7 @@ exports.searchCurrDayInvite = function searchCurrDayInvite(userId, callback){
 
 
 // 推广奖励表 新增奖励记录
-exports.insertInviteSends = function insertInviteSends(userId, gold, callback){
+exports.insertInviteSends = function insertInviteSends(userId, gold, connection, callback){
     const sql = 'INSERT INTO account_invite_sends(uid, gold, created_at, updated_at) VALUES(?, ?, ?, ?);';
     const values = []
     values.push(userId);
@@ -546,54 +555,39 @@ exports.insertInviteSends = function insertInviteSends(userId, gold, callback){
     values.push(new Date());
     values.push(new Date());
 
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
+    connection.query({sql: sql, values: values}, function (err, rows) {
+        if (err) {
+            log.err('推广奖励表 新增奖励记录'+ err);
             callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('推广奖励表 新增奖励记录'+ err);
-                callback(0);
+        } else {
+            if (rows) {
+                callback(1);
             } else {
-                if (rows) {
-                    callback(1);
-                } else {
-                    callback(0);
-                }
+                callback(0);
             }
-        })
-    });
+        }
+    })
 }
 
 
 // 推广奖励表 增加邀请人数 累计奖励
-exports.addInviteSends = function addInviteSends(userId, gold, callback){
+exports.addInviteSends = function addInviteSends(userId, gold, connection, callback){
     const sql = 'update account_invite_sends set `number` = `number` + 1, gold = gold + ? where uid = ?;';
     const values = []
     values.push(gold);
     values.push(userId);
 
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
+    connection.query({sql: sql, values: values}, function (err, rows) {
+        connection.release();
+        if (err) {
+            log.err('推广奖励表 新增奖励记录'+ err);
             callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('推广奖励表 新增奖励记录'+ err);
-                callback(0);
+        } else {
+            if (rows) {
+                callback(1);
             } else {
-                if (rows) {
-                    callback(1);
-                } else {
-                    callback(0);
-                }
+                callback(0);
             }
-        })
-    });
+        }
+    })
 }

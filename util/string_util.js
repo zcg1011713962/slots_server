@@ -1,5 +1,12 @@
 const crypto = require('crypto');
 
+
+exports.findElementCount  =function countOccurrences(arr, searchElement) {
+    return arr.reduce((acc, curr) => {
+        return curr === searchElement ? acc + 1 : acc;
+    }, 0);
+}
+
 exports.isJson  = function isJSON(str) {
     try {
         JSON.parse(str);

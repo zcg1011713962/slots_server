@@ -33,7 +33,8 @@ const readIniFile = function () {
         // 特殊图案
         this.nGameMagicCard = parseInt(config['图案信息'].icon_s_type_WILD);
         this.jackpot_card = parseInt(config['图案信息'].icon_s_type_jackpot);
-        this.free_card = config['图案信息'].icon_s_type_free ? JSON.parse(config['图案信息'].icon_s_type_free) : null;
+        this.free_card = config['图案信息'].icon_s_type_free ? JSON.parse(config['图案信息'].icon_s_type_free) : -1;
+        this.blank_card = config['图案信息'].icon_s_type_blank ? JSON.parse(config['图案信息'].icon_s_type_blank) : -1;
 
         // 免费次数
         this.free_times = JSON.parse(config['图案信息'].icon_free_times);
@@ -51,6 +52,9 @@ const readIniFile = function () {
         // 中奖配置
         this.line_win_lower_limit = parseInt(config['中奖配置'].line_win_lower_limit);
         this.icon_jackpot_lower_limit = parseInt(config['中奖配置'].icon_jackpot_lower_limit);
+
+
+
 
         // 奖池控制
         // 奖池分配比例

@@ -185,10 +185,8 @@ io.on('connection', function (socket) {
         const parms = JSON.parse(lottery);
         // 下注
         const nBetSum = Config.coinConfig[parms.bet];
-        // 游戏奖池划分
-        const jackpot_ratio = Config.jackpot_ratio;
         // 执行摇奖
-        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        Lottery.doLottery(socket, nBetSum, gameInfo);
     });
 
     //离线操作
