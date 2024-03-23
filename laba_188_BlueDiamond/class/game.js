@@ -10,8 +10,6 @@ const {getInstand: Config} = require("../config/read_config");
 const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
-const redis_laba_win_pool = require("../../util/redis_laba_win_pool");
-const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
 
 
@@ -29,6 +27,7 @@ var GameInfo = function () {
         };
 
         this.serverId = gameConfig.serverId;
+        this.gameName = gameConfig.gameName;
 
         //初始化游戏
         this.init = function () {

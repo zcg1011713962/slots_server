@@ -183,13 +183,6 @@ io.on('connection', function (socket) {
         Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
     });
 
-    // 获取游戏奖池
-    socket.on('gameJackpot', function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.getGameJackpot(socket);
-        }
-    });
 
     //离线操作
     socket.on('disconnect', function () {

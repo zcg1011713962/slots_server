@@ -1,5 +1,4 @@
-﻿var laba_config = require('../../util/config/laba_config');
-
+﻿
 gameConfig = {};
 gameConfig.gameId = 283;			//第几个游戏ID
 gameConfig.serverId = 15183;		//当前游戏的第几台服务器
@@ -53,7 +52,6 @@ gameConfig.GAME_COMBINATIONS_DIAMOND = [
 ];
 
 gameConfig.GAME_LINE_WIN_LOWER_LIMIT_CARD_NUMBER_DIAMOND = 3;
-gameConfig.GAME_LINE_DIRECTION_DIAMOND = laba_config.GAME_SLOT_LEFT_TO_RIGHT;
 gameConfig.GAME_LINE_RULE_DIAMOND = true;
 gameConfig.GAME_MULTIPLES_DIAMOND = [];
 //# 翻牌子对应颜色倍数

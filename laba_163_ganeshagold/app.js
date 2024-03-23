@@ -184,19 +184,10 @@ io.on('connection', function (socket) {
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
         const nBetSum = parseInt(data.nBetList[0]);
-        // 游戏奖池划分
-        const jackpot_ratio = Config.jackpot_ratio;
         // 执行摇奖
-        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        Lottery.doLottery(socket, nBetSum, gameInfo);
     });
 
-    // 获取游戏奖池
-    socket.on('gameJackpot', function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.getGameJackpot(socket);
-        }
-    });
 
     //离线操作
     socket.on('disconnect', function () {

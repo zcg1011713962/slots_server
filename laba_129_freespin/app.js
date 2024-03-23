@@ -172,14 +172,6 @@ io.on('connection', function (socket) {
         gameInfo.LoginfreeCount(socket.userId, socket);
     });
 
-    // 获取游戏奖池
-    socket.on('gameJackpot', function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.getGameJackpot(socket);
-        }
-    });
-
     // 摇奖
     socket.on('lottery', function (lottery) {
         const parms = JSON.parse(lottery);

@@ -1,6 +1,5 @@
 const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
-const laba_config = require('../util/config/laba_config');
 const {getInstand: log} = require("../CClass/class/loginfo");
 const ErrorCode = require("./ErrorCode");
 
@@ -115,7 +114,7 @@ exports.getActivityJackpotConfig = async function(){
         return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.activity_jackpot_config).then(config => JSON.parse(config))
     }
     catch(e){
-        log.err('getActivityJackpotConfig');
+        log.err('getJackpotConfig');
     }
 }
 
@@ -188,46 +187,39 @@ exports.searchBankPwdErrorCount = function (userId) {
 
 
 // 获取游戏奖池
-exports.getGameJackpot  = function getGameJackpot(socket){
+exports.getGameJackpot  = function getGameJackpot(callback){
     const self = this;
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
             // 游戏奖池
-            let gameJackpot = parseInt(jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0);
+            let gameJackpot = jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0;
             // 奖池划分比例
             const game_jackpot_ratio = jackpotConfig.game_jackpot_ratio;
-            const grandJackpot =  Math.floor((gameJackpot * game_jackpot_ratio[0].ratio).toFixed(2));
-            const majorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[1].ratio).toFixed(2));
-            const minorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[2].ratio).toFixed(2));
-            const miniJackpot = Math.floor((gameJackpot * game_jackpot_ratio[3].ratio).toFixed(2));
-            socket.emit('gameJackpotResult', {
-                gameJackpot: gameJackpot.toFixed(2),
-                grand_jackpot: grandJackpot,
-                major_jackpot: majorJackpot,
-                minor_jackpot: minorJackpot,
-                mini_jackpot: miniJackpot,
-            });
+            const grandJackpot =  Math.floor((gameJackpot * game_jackpot_ratio[0].ratio / 100).toFixed(2));
+            const majorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[1].ratio / 100).toFixed(2));
+            const minorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[2].ratio / 100).toFixed(2));
+            const miniJackpot = Math.floor((gameJackpot * game_jackpot_ratio[3].ratio / 100).toFixed(2));
+            const gJackpot= Math.floor(gameJackpot.toFixed(2));
+            callback(gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
         });
     });
 }
 
 exports.pushGameJackpot  = function pushGameJackpot(userList){
     if(userList){
-        // 奖池推送
-        redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-            for (const item in userList) {
-                // 游戏奖池
-                let gameJackpot = jackpot ? jackpot * laba_config.game_jackpot_ratio : 0;
-                const ret = {
-                    gameJackpot: gameJackpot.toFixed(2),
-                    grand_jackpot: (gameJackpot * laba_config.grand_jackpot_ratio).toFixed(2),
-                    major_jackpot: (gameJackpot * laba_config.major_jackpot_ratio).toFixed(2),
-                    minor_jackpot: (gameJackpot * laba_config.minor_jackpot_ratio).toFixed(2),
-                    mini_jackpot: (gameJackpot * laba_config.mini_jackpot_ratio).toFixed(2),
+        this.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
+            for (const userId in userList) {
+                const jackpot = {
+                    gameJackpot: gJackpot,
+                    grand_jackpot: grandJackpot,
+                    major_jackpot: majorJackpot,
+                    minor_jackpot: minorJackpot,
+                    mini_jackpot: miniJackpot,
                 }
-                userList[item]._socket.emit("pushGamblingWinPool", ret);
+                log.info('推送奖池数据' + userId + 'jackpot' + JSON.stringify(jackpot))
+                userList[userId]._socket.emit("pushGamblingWinPool", jackpot);
             }
-        });
+        })
     }
 }
 
@@ -470,3 +462,14 @@ exports.clearVIPDailyGetKey  = function clearVIPDailyGetKey(){
 }
 
 
+// 获取活动奖池
+exports.getActivityJackpot = function(callback){
+    const self = this;
+    redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+        self.getJackpotConfig().then(config =>{
+            const activityJackpot= jackpot ? jackpot * config.jackpot_ratio.activity / 100 : 0;
+            const val = Math.floor(activityJackpot.toFixed(2))
+            callback(val)
+        })
+    })
+}

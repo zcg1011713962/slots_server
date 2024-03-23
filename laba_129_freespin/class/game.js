@@ -128,46 +128,36 @@ var GameInfo = function () {
             let nHandCards = [];
             let win = 0;
             let dictAnalyseResult = {}
+            let fin_value = 0;
+            let lotteryCount = 0;
             // 得出结果
             while (true) {
                 dictAnalyseResult = analyse_result.initResult(config.nBetSum);
 
-                if(config.jackpotCard && config.jackpotCard > -1){
-                    // 分析jackpot
-                    winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb,config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel);
-                }
-                if(winJackpot > 0){
-                    // 中jackpot 直接返回jackpot图案就行
-                    nHandCards = [];
-                    nHandCards.push(config.jackpotCard);
-                    dictAnalyseResult["getJackpot"] = {
-                        bFlag: true,
-                        bVal: winJackpot
-                    };
-                }else{
-                    // 生成图案
-                    nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard , config.iconTypeBind, winJackpot, config.blankCard);
-                    let winIndex = nHandCards[0];
-                    dictAnalyseResult["nWinLines"] = winIndex;
-                    win = config.icon_mul[0][winIndex] * config.nBetSum;
-                    dictAnalyseResult["win"] = win;
+                // 分析jackpot
+                winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb,config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
 
-                    // 判断是否进入免费模式
-                    if (config.freeCards.includes(winIndex)) {
-                        dictAnalyseResult["getFreeTime"] = {
-                            "bFlag": true,
-                            "nFreeTime": config.freeTimes.get(winIndex),
-                            "nIndex": winIndex
-                        };
-                    }
-                }
+                // 生成图案
+                nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard , config.iconTypeBind, winJackpot, config.blankCard);
+
+                // 分析图案
+                LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCards, config.freeTimes, dictAnalyseResult);
+                dictAnalyseResult["nWinLines"] = nHandCards[0];
+
+                // 图案连线奖
+                win =  dictAnalyseResult["win"];
+                // 图案最终价值
+                fin_value = win + winJackpot;
                 // 开了配牌器
                 if(config.iconTypeBind && config.iconTypeBind.length > 0 || win === 0){
                     break;
                 }
                 // 库存上限控制
                 if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
-                    log.info('库存上限控制');
+                    log.info('库存上限控制', config.userId);
+                    if(++lotteryCount > 30){
+                        return {code: -1};
+                    }
                     continue;
                 }
                 break;

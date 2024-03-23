@@ -815,39 +815,41 @@ var GameInfo = function () {
         }
 
         // 获取大厅幸运币详情页
-        this.getHallLuckyPageDetail = function (socket, activityJackpot) {
-            // 获取幸运币配置
-            this.getTurntableJackpot(activityJackpot, turntableJackpot =>{
-                this.getLuckGlodJackpot(activityJackpot, luckGlodJackpot =>{
-                    const now = new Date().getTime();
-                    CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
-                        CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
-                            if(ret){
-                                const luckyCoin = ret.luckyCoin;
-                                const luckyCoinGetStatus = ret.luckyCoinGetStatus;
-                                const doLuckyCoinTask = ret.doLuckyCoinTask;
-                                const luckyRushStartTime = ret.luckyRushStartTime;
-                                const luckyRushEndTime = ret.luckyRushEndTime;
-                                const luckyCoinTaskStatus = ret.luckyCoinTaskGetStatus;
-                                const data = {
-                                    turntableJackpot: turntableJackpot, // 转盘活动奖池
-                                    luckGlodJackpot: luckGlodJackpot, // 幸运金币活动奖池
-                                    luckyRushStartTime: luckyRushStartTime, // 幸运金币刷新开始时间
-                                    luckyRushEndTime: luckyRushEndTime, // 幸运金币刷新结束时间
-                                    currTime: now, // 幸运金币刷新结束时间
-                                    luckyCoinGetStatus: luckyCoinGetStatus, // 幸运金币是否可领取
-                                    luckyCoinTask: luckyCoinConfig.luckyCoinTask, // 每日任务数量
-                                    doLuckyCoinTask: doLuckyCoinTask, // 完成任务数量
-                                    luckyCoinTaskStatus: luckyCoinTaskStatus, // 任务是否可以领币 0可领 1不可领
-                                    luckyCoin: luckyCoin // 当前用户幸运币个数
+        this.getHallLuckyPageDetail = function (socket) {
+            const self = this;
+            CacheUtil.getActivityJackpot(activityJackpot =>{
+                // 获取幸运币配置
+                self.getTurntableJackpot(activityJackpot, turntableJackpot =>{
+                    self.getLuckGlodJackpot(activityJackpot, luckGlodJackpot =>{
+                        const now = new Date().getTime();
+                        CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
+                            CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
+                                if(ret){
+                                    const luckyCoin = ret.luckyCoin;
+                                    const luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                                    const doLuckyCoinTask = ret.doLuckyCoinTask;
+                                    const luckyRushStartTime = ret.luckyRushStartTime;
+                                    const luckyRushEndTime = ret.luckyRushEndTime;
+                                    const luckyCoinTaskStatus = ret.luckyCoinTaskGetStatus;
+                                    const data = {
+                                        turntableJackpot: turntableJackpot, // 转盘活动奖池
+                                        luckGlodJackpot: luckGlodJackpot, // 幸运金币活动奖池
+                                        luckyRushStartTime: luckyRushStartTime, // 幸运金币刷新开始时间
+                                        luckyRushEndTime: luckyRushEndTime, // 幸运金币刷新结束时间
+                                        currTime: now, // 幸运金币刷新结束时间
+                                        luckyCoinGetStatus: luckyCoinGetStatus, // 幸运金币是否可领取
+                                        luckyCoinTask: luckyCoinConfig.luckyCoinTask, // 每日任务数量
+                                        doLuckyCoinTask: doLuckyCoinTask, // 完成任务数量
+                                        luckyCoinTaskStatus: luckyCoinTaskStatus, // 任务是否可以领币 0可领 1不可领
+                                        luckyCoin: luckyCoin // 当前用户幸运币个数
+                                    }
+                                    socket.emit('hallLuckyPageDetailResult', {code:1, data: data});
                                 }
-                                // console.log('hallLuckyPageDetailResult' + data, 'flag:',  now > data.luckyRushEndTime);
-                                socket.emit('hallLuckyPageDetailResult', {code:1, data: data});
-                            }
+                            });
                         });
                     });
                 });
-            });
+            })
         }
         
         // 领取幸运币
@@ -900,35 +902,39 @@ var GameInfo = function () {
         }
 
         // 获取幸运币活动配置
-        this.getLuckyCoinDetail = function (socket, activityJackpot, val) {
+        this.getLuckyCoinDetail = function (socket, val) {
+            const self = this;
             try {
                 const userId = socket.userId;
                 // 获取幸运币配置
                 CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
-                    this.getTurntableJackpot(activityJackpot, turntableJackpot =>{
-                        this.getBaseMul(userId, activityJackpot, null, baseMul =>{
-                            // 获取转盘图案
-                            const iconInfos = Config.iconInfos.map(str => parseInt(str, 10));
+                    CacheUtil.getActivityJackpot(activityJackpot =>{
 
-                            let ret = {};
-                            if(val){
-                                // 付费转盘
-                                ret = {
-                                    baseMul: baseMul,
-                                    turntableJackpot: turntableJackpot,
-                                    iconInfos: iconInfos,  // 获取转盘的格子
-                                    turntableBuyMulPrice: luckyCoinConfig.turntableBuyMulPrice,
+                        self.getTurntableJackpot(activityJackpot, turntableJackpot =>{
+                            self.getBaseMul(userId, activityJackpot, null, baseMul =>{
+                                // 获取转盘图案
+                                const iconInfos = Config.iconInfos.map(str => parseInt(str, 10));
+
+                                let ret = {};
+                                if(val){
+                                    // 付费转盘
+                                    ret = {
+                                        baseMul: baseMul,
+                                        turntableJackpot: turntableJackpot,
+                                        iconInfos: iconInfos,  // 获取转盘的格子
+                                        turntableBuyMulPrice: luckyCoinConfig.turntableBuyMulPrice,
+                                    }
+                                }else{
+                                    // 免费转盘
+                                    ret = {
+                                        baseMul: baseMul,
+                                        turntableJackpot: turntableJackpot,
+                                        iconInfos: iconInfos
+                                    }
                                 }
-                            }else{
-                                // 免费转盘
-                                ret = {
-                                    baseMul: baseMul,
-                                    turntableJackpot: turntableJackpot,
-                                    iconInfos: iconInfos
-                                }
-                            }
-                            socket.emit('luckyCoinDetailResult', {code: 1, data: ret});
-                        });
+                                socket.emit('luckyCoinDetailResult', {code: 1, data: ret});
+                            });
+                        })
                     })
                 });
             }catch (e){
@@ -1130,14 +1136,14 @@ var GameInfo = function () {
         this.getTurntableJackpot = function (activityJackpot, callback) {
             try {
                 // 获取活动奖励配置
-                CacheUtil.getActivityJackpotConfig().then(aJackpotConfig => {
-                    const totalRatio = aJackpotConfig.freeRatio.totalRatio;
-                    const turntableRatio = aJackpotConfig.freeRatio.turntableRatio;
+                CacheUtil.getActivityJackpotConfig().then(config =>{
+                    const totalRatio = config.freeRatio.totalRatio;
+                    const turntableRatio = config.freeRatio.turntableRatio;
                     // 转盘游戏总奖池
                     const turntableJackpot = parseInt(activityJackpot * (totalRatio / 100) * (turntableRatio / 100));
                     callback(turntableJackpot)
-                });
-            }catch (e){
+                })
+            } catch (e) {
                 log.err(e)
                 callback(0)
             }
@@ -1145,16 +1151,16 @@ var GameInfo = function () {
 
         // 获取幸运金奖池
         this.getLuckGlodJackpot = function (activityJackpot, callback) {
-            try{
+            try {
                 // 获取活动奖励配置
-                CacheUtil.getActivityJackpotConfig().then(aJackpotConfig =>{
-                    const totalRatio = aJackpotConfig.freeRatio.totalRatio;
-                    const turntableRatio = aJackpotConfig.freeRatio.luckyGoldRatio;
+                CacheUtil.getActivityJackpotConfig().then(config =>{
+                    const totalRatio = config.freeRatio.totalRatio;
+                    const turntableRatio = config.freeRatio.luckyGoldRatio;
                     // 转盘游戏总奖池
                     const luckGlodJackpot = parseInt(activityJackpot * (totalRatio / 100) * (turntableRatio / 100));
                     callback(luckGlodJackpot)
-                });
-            }catch (e){
+                })
+            } catch (e) {
                 log.err(e)
                 callback(0)
             }

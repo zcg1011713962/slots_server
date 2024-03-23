@@ -63,6 +63,13 @@ const TurntableGameMode = {
 };
 
 
+const GameType = {
+    laba_normal: 0, // 普通拉霸
+    laba_sequence: 1, // 数列型拉霸
+    laba_single: 2 // 特殊单线拉霸
+};
+
+
 
 module.exports = {
     GoodsType,
@@ -74,5 +81,6 @@ module.exports = {
     AgentRebateStatus,
     LangType,
     VipGetGoldType,
-    TurntableGameMode
+    TurntableGameMode,
+    GameType
 };

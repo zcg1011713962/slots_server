@@ -28,6 +28,7 @@ var GameInfo = function () {
         };
 
         this.serverId = gameConfig.serverId;
+        this.gameName = gameConfig.gameName;
 
         //初始化游戏
         this.init = function () {

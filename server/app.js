@@ -15,7 +15,6 @@ const ServerInfo = require('./config/ServerInfo').getInstand;
 const ErrorCode = require('../util/ErrorCode');
 const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
-const laba_config = require("../util/config/laba_config");
 const TypeEnum = require("../util/enum/type");
 // 触发定时任务
 const ScheduleJob = require("./class/schedule_job");
@@ -724,11 +723,7 @@ io.on('connection', function (socket) {
     socket.on("hallLuckyPageDetail", function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
-            redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-                // 活动奖池
-                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                gameInfo.getHallLuckyPageDetail(socket, activityJackpot);
-            });
+            gameInfo.getHallLuckyPageDetail(socket);
         }else{
             socket.emit('hallLuckyPageDetailResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
@@ -763,8 +758,7 @@ io.on('connection', function (socket) {
         if (gameInfo.IsPlayerOnline(userId)) {
             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
                 // 活动奖池
-                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                gameInfo.getLuckyCoinDetail(socket, activityJackpot, d.val);
+                gameInfo.getLuckyCoinDetail(socket, d.val);
             });
         }else{
             socket.emit('luckyCoinDetailResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
@@ -845,14 +839,6 @@ io.on('connection', function (socket) {
         }
     });
 
-
-    // 大厅获取游戏奖池
-    socket.on('gameJackpot', function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            CacheUtil.getGameJackpot(socket);
-        }
-    });
 
 
     // 查看邮件

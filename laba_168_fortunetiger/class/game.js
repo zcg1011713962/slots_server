@@ -25,6 +25,7 @@ var GameInfo = function () {
 
         this.serverId = gameConfig.serverId;
         this.gameName = gameConfig.gameName;
+        this.sendMessage_mul = gameConfig.sendMessage_mul;
 
         //初始化游戏
         this.init = function () {
@@ -136,18 +137,13 @@ var GameInfo = function () {
             while(true){
                 dictAnalyseResult = analyse_result.initResult(config.nBetSum);
 
-                if(config.jackpotCard && config.jackpotCard > -1){
-                    if(config.iconTypeBind && config.iconTypeBind.length > 0 && StringUtil.findElementCount(config.iconTypeBind, config.jackpotCard) > config.jackpotCardLowerLimit){
-                        winJackpot = parseInt(config.gameJackpot / 10);
-                    }else {
-                        // 分析jackpot
-                        winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel);
-                    }
-                }
+                // 分析jackpot
+                winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
+
                 // 生成图案
                 nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard, config.iconTypeBind, winJackpot, config.blankCard);
                 // 分析图案
-                LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCard, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, dictAnalyseResult);
+                LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCards, config.freeTimes, dictAnalyseResult);
 
                 // 图案连线奖
                 win =  dictAnalyseResult["win"];
@@ -160,10 +156,10 @@ var GameInfo = function () {
                 }
                 // 库存上限控制
                 if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
+                    log.info('库存上限控制', config.userId);
                     if(++lotteryCount > 30){
                         return {code: -1};
                     }
-                    log.info('库存上限控制');
                     continue;
                 }
                 // RTP控制

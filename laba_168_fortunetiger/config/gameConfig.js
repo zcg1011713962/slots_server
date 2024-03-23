@@ -1,5 +1,4 @@
-﻿require('../../util/config/laba_config');
-gameConfig = {};
+﻿gameConfig = {};
 gameConfig.gameId = 268;			//第几个游戏ID
 gameConfig.serverId = 15168;		//当前游戏的第几台服务器
 gameConfig.logflag = 15168;		//游戏记录表示
