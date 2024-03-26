@@ -52,8 +52,6 @@ exports.build  = function build(dictAnalyseResult, gameName, nHandCards, userId,
             dictAnalyseResult["nHandCards"].push(parseInt(nHandCards[i]) + 1)
         }
     }
-    console.log("库存", GamblingBalanceLevelBigWin.nGamblingBalanceGold);
-    console.log("用户赢金币", winscore);
 
     // 增加免费次数，增加金币
     user.winscore(winscore);

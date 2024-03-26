@@ -5,57 +5,128 @@ const analyse_result = require("./lottery_analyse_result");
 const LABA = require("./laba");
 const lottery_record = require("./lottery_record");
 const TypeEum = require('../util/enum/type');
+const StringUtil =  require("../util/string_util");
 
 exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
     let self = this;
+    const userId = socket.userId;
 
-    redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
-        CacheUtil.getJackpotConfig().then(jackpotConfig =>{
-            // 游戏奖池
-            let gameJackpot = parseInt(jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0);
+    self.newhandProtectControl(userId,  0, 0, (rebateRatio, newHandFlag, currUserGoldPool)=>{
+        log.info(userId + '用户下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool)
 
-            CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.serverId).then(gameConfig =>{
-                try {
-                    // 摇奖前参数获取
-                    const config = self.preLottery(socket.userId, nBetSum, gameJackpot, gameConfig, jackpotConfig)
-                    // 摇奖
-                    //const result = gameInfo.lottery(config);
-                    const result = self.Lottery(config, gameInfo);
+        redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+            CacheUtil.getJackpotConfig().then(jackpotConfig =>{
+                // 游戏奖池
+                let gameJackpot = parseInt(jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0);
+                CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.gameId).then(gameConfig =>{
+                    CacheUtil.getPlayGameWinscore(userId).then(historyWinScore =>{
+                        try {
+                            // 摇奖前参数获取
+                            const config = self.preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig, rebateRatio, currUserGoldPool, historyWinScore)
+                            // 摇奖
+                            const result = self.Lottery(config, gameInfo, newHandFlag);
 
-                    log.info('摇奖结果' + socket.userId + JSON.stringify(result));
+                            log.info('摇奖结果' + userId + JSON.stringify(result));
 
-                    if (result.code < 1) {
-                        socket.emit('lotteryResult', {ResultCode: result.code});
-                    } else {
-                        // 增加用户玩游戏次数
-                        CacheUtil.addPlayGameCount(socket.userId);
-                        // 摇奖成功
-                        socket.emit('lotteryResult', {
-                            ResultCode: result.code,
-                            ResultData: {
-                                userscore: result.userscore,
-                                winscore: result.winscore,
-                                viewarray: result.viewarray,
-                                winfreeCount: result.winfreeCount,
-                                freeCount: result.freeCount,
-                                score_pool: result.score_pool
+                            if (result.code < 1) {
+                                socket.emit('lotteryResult', {ResultCode: result.code});
+                            } else {
+                                // 增加用户玩游戏次数
+                                CacheUtil.addPlayGameCount(userId);
+                                // 摇奖成功
+                                socket.emit('lotteryResult', {
+                                    ResultCode: result.code,
+                                    ResultData: {
+                                        userscore: result.userscore,
+                                        winscore: result.winscore,
+                                        viewarray: result.viewarray,
+                                        winfreeCount: result.winfreeCount,
+                                        freeCount: result.freeCount,
+                                        score_pool: result.score_pool
+                                    }
+                                });
                             }
-                        });
-                    }
-                }catch (e) {
-                    log.err(socket.userId + 'doLottery' + e);
-                    socket.emit('lotteryResult', {ResultCode: -1});
+                        }catch (e) {
+                            log.err(userId + 'doLottery' + e);
+                            socket.emit('lotteryResult', {ResultCode: -1});
+                        }
+                    })
+                });
+            })
+        });
+    })
+
+}
+
+// 新手控制
+exports.newhandProtectControl = function newhandProtectControl (userId, isVip, totalRecharge, callback) {
+    CacheUtil.getScoreConfig().then(async (conf) => {
+        const score_amount_ratio = conf.score_amount_ratio;
+        let currUserGoldPool = 0;
+        if (isVip) {
+            // VIP用户个人奖池=充值金额*金币比例
+            currUserGoldPool = totalRecharge * score_amount_ratio;
+        } else {
+            // VIP0的初始个人奖池=VIP1/2
+            const vipConfig = await CacheUtil.getVipConfig();
+            currUserGoldPool = vipConfig.find(item => item.level).vipScore * score_amount_ratio;
+        }
+
+        CacheUtil.getNewhandProtectConfig().then(newHandConfig => {
+            const rebateRatio = newHandConfig.rebateRatio;
+            const protectScore = newHandConfig.protectScore;
+            const recharge = newHandConfig.recharge;
+
+
+            CacheUtil.getPlayGameWinscore(userId).then(winscore => {
+                if (totalRecharge > recharge && winscore > protectScore) {  // 充值大于新手保护金额且 赢的金币大于新手保护金币
+                    // 跳过新手保护区
+                    // 获取自动黑白名单-根据赢分区间获得返奖率
+                    CacheUtil.getBlackWhiteListConfig().then(bwConfig => {
+                        const normalScore = bwConfig.normal[bwConfig.normal.length - 1].winScoreSection;
+                        const normalRebateRatio = bwConfig.normal[bwConfig.normal.length - 1].rebateRatio;
+
+                        let ratio = 0;
+                        if (winscore > normalScore) {
+                            // 排序
+                            for (const item in bwConfig.black) {
+                                const score = bwConfig.black[item].winScoreSection;
+                                if (winscore > score) {
+                                    ratio = bwConfig.black[item].rebateRatio
+                                }
+                            }
+                        } else {
+                            // 排序
+                            for (const item in bwConfig.white) {
+                                const score = bwConfig.white[item].winScoreSection;
+                                if (winscore > score) {
+                                    ratio = bwConfig.black[item].rebateRatio
+                                }
+                                if (winscore < normalScore && winscore > score) {
+                                    ratio = normalRebateRatio;
+                                }
+                            }
+                        }
+                        callback(ratio / 100, TypeEum.NewHandFlag.old, currUserGoldPool)
+                    })
+                } else {
+                    // 新手返奖率
+                    callback(rebateRatio / 100, TypeEum.NewHandFlag.new, currUserGoldPool)
                 }
-            });
+            })
+
         })
-    });
+    })
 }
 
 
 
-exports.preLottery  = function preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig){
+exports.preLottery  = function preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig, rebateRatio, currUserGoldPool, historyWinScore){
     const config = {};
 
+    config.historyWinScore =  historyWinScore ? historyWinScore : 0;
+    config.rebateRatio = rebateRatio;
+    config.currUserGoldPool= currUserGoldPool;
     config.gameType = gameConfig.gameType;
     config.serverId = gameConfig.serverId;
     config.gameName = gameConfig.gameName;
@@ -139,9 +210,9 @@ exports.preLottery  = function preLottery(userId, nBetSum, gameJackpot, gameConf
 
 
 
-exports.Lottery  = function Lottery (config, gameInfo) {
+exports.Lottery  = function Lottery(config, gameInfo, newHandFlag) {
     // 下注非法
-    if (config.nBetSum %  config.nGameLines.length !== 0) {
+    if (config.nBetSum % config.nGameLines.length !== 0) {
         log.info("非法下注");
         return {code: -1};
     }
@@ -174,7 +245,7 @@ exports.Lottery  = function Lottery (config, gameInfo) {
     // 增加库存和奖池
     gameInfo.A.addGamblingBalanceGold(addBalance, addJackpot);
 
-    const target_rtp_start_position = 10;
+    const target_rtp_start_position = 1000;
     let nHandCards = [];
     let win = 0;
     let winJackpot = 0;
@@ -182,18 +253,22 @@ exports.Lottery  = function Lottery (config, gameInfo) {
     let source_rtp = 0;
     let dictAnalyseResult = {};
     let lotteryCount = 0;
+    let lotteryCountLimit = 50;
+
+    const winFlag = StringUtil.generateGameResult(config.rebateRatio);
+
     // 生成图案，分析结果（结果不满意继续）
-    while(true){
+    while (true) {
         dictAnalyseResult = analyse_result.initResult(config.nBetSum);
 
         // 分析jackpot
-        winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
+        winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
 
         // 生成图案
         nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard, config.iconTypeBind, winJackpot, config.blankCard);
 
-        // 分析图案
-        if(config.gameType === TypeEum.GameType.laba_sequence){
+        // 按类型类型进行图案分析
+        if (config.gameType === TypeEum.GameType.laba_sequence) {
             const GAME_COMBINATIONS_DIAMOND = [
                 {3: 10, 4: 20, 5: 100},		// hand cards no fix line 0
                 {3: 10, 4: 20, 5: 100},		// hand cards no fix line 1
@@ -208,45 +283,66 @@ exports.Lottery  = function Lottery (config, gameInfo) {
             ];
             // 列数判断型
             LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, winJackpot, GAME_COMBINATIONS_DIAMOND, dictAnalyseResult);
-        }else if(config.gameType === TypeEum.GameType.laba_normal){
+        } else if (config.gameType === TypeEum.GameType.laba_normal) {
             // 普通判断型
             LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCards, config.freeTimes, dictAnalyseResult);
-        }else if(config.gameType === TypeEum.GameType.laba_single){
+        } else if (config.gameType === TypeEum.GameType.laba_single) {
             LABA.HandCardsAnalyse_Single(nHandCards, config.cards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nBetSum, config.cardsNumber, config.freeCards, config.freeTimes, dictAnalyseResult);
-        }else{
+        } else {
             log.err('不支持的游戏类型')
             return {code: -1};
         }
 
+        // 每种游戏特殊玩法
+        if (config.gameName === 'fortunetiger') {
+            // 老虎全屏
+            tigerFullScreen(dictAnalyseResult, config.nGameLines);
+        }
+
         // 图案连线奖
-        win =  dictAnalyseResult["win"];
+        win = dictAnalyseResult["win"];
         // 图案最终价值
         fin_value = win + winJackpot;
 
         // 开了配牌器
-        if(config.iconTypeBind && config.iconTypeBind.length > 0 || win === 0){
+        if (config.iconTypeBind && config.iconTypeBind.length > 0) {
             break;
         }
+
+        // 当前用户奖励上限控制
+       /* if (config.historyWinScore && config.currUserGoldPool < (config.historyWinScore + fin_value) && fin_value > 0) {
+            log.info('当前用户奖励上限控制 fin_value:' + fin_value + 'historyWinScore:' +  config.historyWinScore + 'currUserGoldPool:' + config.currUserGoldPool);
+            continue;
+        }*/
+
+        // 返奖率控制流程 输赢与预期不符
+        if (winFlag !== undefined && winFlag !== (fin_value > 0)) {
+            log.info('返奖率控制流程 输赢与预期不符 winFlag:' + winFlag + 'userId:' +  config.userId + 'fin_value:' + fin_value);
+            if (++lotteryCount > lotteryCountLimit) {
+                return {code: -1};
+            }
+            continue;
+        }
         // 库存上限控制
-        if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
-            log.info('库存上限控制', config.userId);
-            if(++lotteryCount > 30){
+        if (GamblingBalanceLevelBigWin.nGamblingBalanceGold < win && newHandFlag === TypeEum.NewHandFlag.old) {
+            log.info('非新手库存上限控制', config.userId);
+            if (++lotteryCount > lotteryCountLimit) {
                 return {code: -1};
             }
             continue;
         }
         // RTP控制
-        if(gameInfo.lotteryCount > target_rtp_start_position) {
+        if (gameInfo.lotteryCount > target_rtp_start_position) {
             // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
             source_rtp = ((this.totalBackBet / this.totalBet) * 100) > 100 ? 100 : ((this.totalBackBet / this.totalBet) * 100).toFixed(2);
             // 当前RTP大于目标RTP 而且 摇的结果是赢的
             if (source_rtp > expectRTP && fin_value > 0) {
-                log.info('需要让用户输 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:'+ fin_value)
+                log.info('需要让用户输 source_rtp:' + source_rtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
                 continue;
             }
             // 当前RTP小于目标RTP 而且 摇的结果是输的
             if (source_rtp < expectRTP && fin_value < 1) {
-                log.info('需要让用户赢 source_rtp:'+ source_rtp + 'expectRTP:'+ expectRTP + 'fin_value:' + fin_value)
+                log.info('需要让用户赢 source_rtp:' + source_rtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
                 continue;
             }
         }
@@ -256,8 +352,21 @@ exports.Lottery  = function Lottery (config, gameInfo) {
     // 减少库存和奖池
     const winscore = parseInt(dictAnalyseResult["win"]) + winJackpot;
     if (winscore > 0) {
-        gameInfo.A.subGamblingBalanceGold(winscore, winJackpot);
+        // 赢
+        if (GamblingBalanceLevelBigWin.nGamblingBalanceGold < win && newHandFlag === TypeEum.NewHandFlag.new) {
+            // 减少系统库存 用户奖池
+            gameInfo.A.subSysBalanceGold(winscore, winJackpot);
+        } else {
+            // 减少用户库存 用户奖池
+            gameInfo.A.subGamblingBalanceGold(winscore, winJackpot);
+        }
+        CacheUtil.playGameWinscore(config.userId, winscore);
+    } else {
+        // 输
+        CacheUtil.playGameWinscore(config.userId, -config.nBetSum);
     }
+
+
     // 结果处理
     const user = gameInfo.userList[config.userId];
     const freeCount = dictAnalyseResult["getFreeTime"]["nFreeTime"];
@@ -271,8 +380,23 @@ exports.Lottery  = function Lottery (config, gameInfo) {
     // 摇奖次数统计
     gameInfo.lotteryTimes(lotteryResult, winscore, config.nBetSum, fin_value);
     // 打印图案排列日志
-    LABA.handCardLog(nHandCards, config.col_count, config.line_count,config.nBetSum, winscore, winJackpot, expectRTP);
+    LABA.handCardLog(nHandCards, config.col_count, config.line_count, config.nBetSum, winscore, winJackpot, expectRTP);
     // 返回结果
     return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, 0);
 };
+
+
+
+function tigerFullScreen(dictAnalyseResult, nGameLines) {
+    // 全屏奖乘10倍
+    const nWinLines = dictAnalyseResult["nWinLines"];
+    if(nWinLines.length === nGameLines.length){
+        for (let i in dictAnalyseResult["nWinDetail"]) {
+            dictAnalyseResult["nWinDetail"][i] *= 10;
+        }
+        dictAnalyseResult["win"] *= 10;
+        dictAnalyseResult["isAllWin"] = true;
+        dictAnalyseResult["nMultiple"] *= 10;
+    }
+}
 

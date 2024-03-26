@@ -32,6 +32,7 @@ var GameInfo = function () {
 
         this.serverId = gameConfig.serverId;
         this.gameName = gameConfig.gameName;
+        this.gameId = gameConfig.gameId;
 
         //初始化游戏
         this.init = function () {

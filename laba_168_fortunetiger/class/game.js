@@ -25,7 +25,7 @@ var GameInfo = function () {
 
         this.serverId = gameConfig.serverId;
         this.gameName = gameConfig.gameName;
-        this.sendMessage_mul = gameConfig.sendMessage_mul;
+        this.gameId = gameConfig.gameId;
 
         //初始化游戏
         this.init = function () {
@@ -71,7 +71,7 @@ var GameInfo = function () {
                 var nowDate = new Date();
                 var minute = nowDate.getMinutes();
                 var second = nowDate.getSeconds();
-                if (minute % 10 === 0 && second === 1) {
+                if (second % 25 === 0) {
                     self.saveGamblingBalanceGold();
                     console.log("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
@@ -448,10 +448,9 @@ var GameInfo = function () {
 
         //保存库存 奖池
         this.saveGamblingBalanceGold = function () {
-            //获得库存奖池
-            const dict = this.A.getGamblingBalanceGold();
-            gameDao.Update_GamblingBalanceGold(dict.nGamblingBalanceGold, function (Result) {
-            })
+            // 获得库存奖池
+            const obj = this.A.getGamblingBalanceGold();
+            gameDao.Update_GamblingBalanceGold(obj.nGamblingBalanceGold, obj.nSysBalanceGold )
         };
 
         this.updateGamblingBalanceGold = function (_info) {

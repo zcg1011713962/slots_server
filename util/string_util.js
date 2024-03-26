@@ -1,6 +1,13 @@
 const crypto = require('crypto');
 
 
+exports.generateOrderId = function generateOrderId() {
+    const timestamp = Date.now().toString();
+    const randomDigits = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${timestamp}${randomDigits}`;
+}
+
+
 exports.findElementCount  =function countOccurrences(arr, searchElement) {
     return arr.reduce((acc, curr) => {
         return curr === searchElement ? acc + 1 : acc;
@@ -103,4 +110,12 @@ exports.kingEncrypt  = function encrypt(text) {
     return encrypted;
 }
 
+
+exports.generateGameResult  = function generateGameResult(winRate) {
+    if(winRate === undefined){
+        return winRate;
+    }
+    const randomNumber = Math.random(); // 生成一个 0 到 1 之间的随机数
+    return randomNumber < winRate
+}
 

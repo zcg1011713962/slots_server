@@ -175,6 +175,11 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
                 };
             }
 
+            if(temp.length === 1 && jackpotCard === temp[0] || freeCards.includes(temp[0])){
+                // 只有一张牌直接返回图案索引
+                dictAnalyseResult["nWinLines"].push(temp[0]);
+            }
+
             // 普通图案某行中奖
             if(nMultiple > 0){
                 // 设置中奖金额
@@ -200,18 +205,8 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
     }
 
     // 获取免费次数
-    if (freeCards.length > 1) {
+    if (freeCards.length > 0) {
         dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);
-    }
-    // 全屏奖乘10倍
-    const nWinLines = dictAnalyseResult["nWinLines"];
-    if(nWinLines.length === nGameLines.length){
-        for (let i in dictAnalyseResult["nWinDetail"]) {
-            dictAnalyseResult["nWinDetail"][i] *= 10;
-        }
-        dictAnalyseResult["win"] *= 10;
-        dictAnalyseResult["isAllWin"] = true;
-        dictAnalyseResult["nMultiple"] *= 10;
     }
 
     dictAnalyseResult["nHandCards"]  = nHandCards;
@@ -349,7 +344,7 @@ check_count = function (check_list, x) {
 function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line_count, jackpotCard, winJackpot, blankCard) {
     const nHandCards = [];
 
-    // 从左到右发指定数量手牌 这里剔除了jackpot牌
+    // 从左到右发指定数量手牌 这里剔除了jackpot牌 空白牌
     for (let i = 0; i < nGameHandCardsNumber; i++) {
         // 计算每个图案，占一列的权重
         const col_num= i % col_count;

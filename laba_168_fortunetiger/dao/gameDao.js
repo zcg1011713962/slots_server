@@ -256,11 +256,11 @@ exports.getGamblingGame = function getGamblingGame(callback) {
 };
 
 // 保存库存
-exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, callback) {
-    const sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?  WHERE nGameID = ?";
+exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, nSysBalanceGold) {
+    const sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?, nSysBalanceGold=? WHERE nGameID = ?";
     pool.getConnection(function (err, connection) {
-        const values = [nGamblingBalanceGold, gameConfig.gameId];
-        console.log("库存 id");
+        const values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
+        console.log("保存用户库存 系统库存 游戏ID");
         console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {

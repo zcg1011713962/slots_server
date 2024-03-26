@@ -102,31 +102,32 @@ io.on('connection', function (socket) {
     socket.emit('connected', 'connect game server');
 
     //客户登录游戏
-    socket.on('LoginGame', function (GameInfo) {
+    socket.on('LoginGame', function (userInfo) {
         try {
-            var data = JSON.parse(GameInfo);
-            GameInfo = data;
+            var data = JSON.parse(userInfo);
+            userInfo = data;
         } catch (e) {
             log.warn('LoginGame-json');
         }
-        if (!GameInfo) {
+        if (!userInfo) {
             console.log("登录游戏,参数不正确!");
             return;
         }
-        console.log("客户登录游戏 userId:", GameInfo.userid);
+        console.log("客户登录游戏 userId:", userInfo.userid);
 
-        if (GameInfo.sign) {
+        if (userInfo.sign) {
 
-            if (!gameInfo.getUser(GameInfo.userid)) {
-                gameInfo.addUser(GameInfo, socket);
-                var msg = {
-                    userid: GameInfo.userid,
-                    sign: GameInfo.sign,
-                    gameId: gameInfo.serverId,
+            if (!gameInfo.getUser(userInfo.userid)) {
+                gameInfo.addUser(userInfo, socket);
+                const msg = {
+                    userid: userInfo.userid,
+                    sign: userInfo.sign,
+                    gameId: userInfo.serverId,
                     serverSign: signCode,
                     serverId: gameConfig.serverId
                 };
                 Csocket.emit('LoginGame', msg);
+                CacheUtil.delayPushGameJackpot(userInfo, gameInfo.userList);
             } else {
                 console.log("用户已经在服务器了，无需重复登录");
             }

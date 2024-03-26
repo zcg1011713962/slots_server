@@ -98,7 +98,7 @@ exports.bindIniteCode = function bindIniteCode(invite_uid ,invitee_uid, callback
             }
             connection.query({sql: sql, values: values}, function (err, rows) {
                 if (err) {
-                    log.err('绑定邀请码'+ err);
+                    log.err('绑定邀请码'+ invite_uid + err);
                     connection.release();
                     callback(0);
                 } else {
@@ -590,4 +590,33 @@ exports.addInviteSends = function addInviteSends(userId, gold, connection, callb
             }
         }
     })
+}
+
+
+
+
+// 查询活动配置页
+exports.searchActivityConfigPage = function searchActivityConfigPage(callback){
+    const sql = 'SELECT id, status, show_location showLocation, show_type showType, title, `order`, pic_group picGroup, game_address gameAddress, UNIX_TIMESTAMP(start_time) startTime, UNIX_TIMESTAMP(end_time) endTime, create_time createTime, update_time  updateTime FROM activity_page_config';
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询活动配置页'+ err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
 }

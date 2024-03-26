@@ -895,6 +895,139 @@ exports.checkVip = function checkVip(userId, callback) {
     });
 };
 
+// 订单记录
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+
+    let values = [];
+    values.push(orderId);
+    values.push(userId);
+    values.push(amount);
+    values.push(currencyType);
+    values.push(vipLevel);
+    values.push(goodsType);
+    values.push(price);
+    values.push(group);
+    values.push(service);
+
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("订单记录");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 查询订单
+exports.searchOrder = function searchOrder(userId, orderId, callback) {
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group` FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    let values = [];
+    values.push(orderId);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询订单");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+
+// 更新订单
+exports.updateOrder = function updateOrder(userId, orderId, callback) {
+    const sql = 'update pay_order set `status` = 1 where orderId = ? and userId = ?';
+    let values = [];
+    values.push(orderId);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("更新订单");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+exports.getVipLevel = function getVipLevel(userId, callback) {
+    const sql = 'select housecard from newuseraccounts where Id=?';
+    let values = [];
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("checkVip");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1, rows[0].housecard);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
 //查询累计充值
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
     const sql = 'select totalRecharge,housecard,score_flow from newuseraccounts where Id=?';
@@ -1704,7 +1837,7 @@ exports.AddDiamondSub = function AddGoldSub(userInfo, callback) {
 };
 
 
-//上下分记录
+// 游戏上下分记录
 exports.score_changeLog = function score_changeLog(userInfo) {
     const sql = "INSERT INTO score_changelog(userid,score_before,score_change,score_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
     let values = [];
@@ -1732,6 +1865,33 @@ exports.score_changeLog = function score_changeLog(userInfo) {
             }
         }
         connection.release();
+    });
+};
+
+// 金币改变记录
+exports.scoreChangeLog = function scoreChangeLog(userid, score_before, score_change, score_current, change_type, isOnline) {
+    const sql = "INSERT INTO score_changelog(userid,score_before,score_change,score_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
+    let values = [];
+    values.push(userid);
+    values.push(score_before);
+    values.push(score_change);
+    values.push(score_current);
+    values.push(change_type);
+    values.push(isOnline);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("score_changeLog");
+                console.log(err);
+            }
+            values = [];
+        });
     });
 };
 
@@ -2082,6 +2242,38 @@ exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
     });
 };
 
+
+// 更新新手领取金币状态
+exports.updateNewHandGive = function updateNewHandGive(userId, callback) {
+    const sql = "UPDATE userinfo SET newHandGive = 1 WHERE userId= ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("更新新手领取金币状态");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+        values = [];
+    });
+};
+
+
 //更新充值数据
 exports.checkRecharge = function checkRecharge(out_trade_no, callback) {
     const sql = "call checkRecharge(?)";
@@ -2310,6 +2502,35 @@ exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
     });
 }
 
+// 获取是否购买过首充
+exports.searchFirstRecharge = function (userId, callback) {
+    const sql = "select firstRecharge  from userinfo  where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("获取是否购买过首充");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
 
 // 更新新手指引步数
 exports.updateGuideStep = function (userId, step, callback) {

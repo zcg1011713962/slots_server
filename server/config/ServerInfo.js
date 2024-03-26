@@ -181,13 +181,14 @@ var ServerInfo = function () {
             return GameConfig[0].GameName;
         };
 
-        this.getServerIpById = function (_id) {
-            return GameConfig[0].GameId;
-        };
-
         //通过ID获得服务器关键信息
         this.getServerInfoById = function (_id) {
-            return GameConfig[_id - 1];
+            for (const i in GameConfig) {
+                if (GameConfig[i].GameId === parseInt(_id)) {
+                    return GameConfig[i];
+                }
+            }
+            return null;
         };
 
         //获得进场数据

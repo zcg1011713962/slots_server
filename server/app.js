@@ -1,7 +1,6 @@
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-let withdrawal_api = require('./class/withdrawal_api');
 const bodyParser = require('body-parser');
 const registerByGuestApi = require('./class/login_api');
 const Robotname = require('./config/RobotName');
@@ -100,6 +99,87 @@ app.get('/devcodesearch', function (req, res) {
         }
     });
 });
+
+
+// 获取游戏线注
+app.get('/betsJackpot', function (req, res) {
+    //验证版本
+    const gameId = req.query.gameId;
+    if(gameId === undefined || isNaN(gameId)){
+        return;
+    }
+    gameInfo.betsJackpot(gameId, row =>{
+        if(row){
+            res.send({code: 1, data: row});
+        }else{
+            res.send({code: 0, data: row});
+        }
+    });
+});
+
+
+// 获取商品列表
+app.get('/goodsList', function (req, res) {
+    //验证版本
+    const userId = req.query.userId;
+    if(userId === undefined || userId === ''){
+        return;
+    }
+    gameInfo.getShoppingGoods(parseInt(userId), (code, msg, data) =>{
+        if(code){
+            res.send({code: code, data: data});
+        }else{
+            res.send({code: code, msg: msg});
+        }
+    });
+});
+
+
+// 购买商品
+app.get('/Shopping', async function (req, res) {
+    //验证版本
+    const userId = req.query.userId;
+    const productId = req.query.productId;
+    const count = req.query.count;
+    const service = req.query.service;
+    const shopType = req.query.shopType;
+
+    if(isNaN(service) || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
+
+    const ret = await CacheUtil.recordUserProtocol(userId, "Shopping",)
+    if (ret) {
+        gameInfo.Shopping(userId, parseInt(productId), parseInt(count), service, (code, msg, data) => {
+            CacheUtil.delUserProtocol(userId, "Shopping")
+            if(code){
+                res.send({code: code, data: data});
+            }else{
+                res.send({code: code, msg: msg});
+            }
+        });
+    }
+});
+
+// 购买商品订单回调
+app.get('/shoppingCallBack', async function (req, res) {
+    //验证版本
+    const userId = req.query.userId;
+    const orderId = req.query.orderId;
+    if(userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
+
+    const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
+    if (ret) {
+        gameInfo.sendShopGoods(parseInt(userId), orderId, (code, msg, data) => {
+            CacheUtil.delUserProtocol(userId, "shoppingCallBack")
+            res.send({code: code, msg: msg});
+            if(code && gameInfo.userList[userId]){
+                gameInfo.userList[userId]._socket.emit('ShoppingResult',  {code: code, data: data});
+            }
+        });
+    }else{
+        res.send({code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+    }
+});
+
 
 
 var serverSign = "slel3@lsl334xx,deka";
@@ -323,9 +403,10 @@ io.on('connection', function (socket) {
     });
 
     // 商城商品列表
-    socket.on("getShoppingList", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getShoppingGoods(socket, (code, msg, data) =>{
+   /* socket.on("getShoppingList", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            gameInfo.getShoppingGoods(userId, (code, msg, data) =>{
                 if(code){
                     socket.emit("getShoppingResult", {code: code, data: data});
                 }else{
@@ -335,17 +416,17 @@ io.on('connection', function (socket) {
         }else {
             socket.emit('getShoppingResult', {code:ErrorCode.USER_OFFLINE.code,msg: ErrorCode.USER_OFFLINE.msg});
         }
-    });
+    });*/
 
     // 购买商品
-    socket.on("Shopping", async function (data) {
+   /* socket.on("Shopping", async function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
         if(!d || d.productId === undefined || d.count === undefined) return;
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
             if(ret){
-                gameInfo.Shopping(socket.userId, d.productId, d.count, socket, (code, msg, data) =>{
+                gameInfo.Shopping(socket.userId, d.productId, d.count, (code, msg, data) =>{
                     CacheUtil.delUserProtocol(userId, "Shopping")
                     if(code){
                         socket.emit('ShoppingResult', {code:code,data: data});
@@ -357,7 +438,7 @@ io.on('connection', function (socket) {
         }else{
             socket.emit('ShoppingResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
         }
-    });
+    });*/
 
     // 兑换礼品
     socket.on("exchangeGift", async function (data) {
@@ -710,11 +791,13 @@ io.on('connection', function (socket) {
                     if (ok) {
                         socket.emit('signInResult', {code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
                     } else {
+                        log.info('签到失败' + userId)
                         socket.emit('signInResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
                     }
                 });
             }
         } else {
+            log.info('签到失败用户离线' + userId)
             socket.emit('signInResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
         }
     });
@@ -738,9 +821,13 @@ io.on('connection', function (socket) {
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, "getLuckyCoin");
             if(ret){
-                gameInfo.getLuckyCoin(socket, d.type, (code, msg) =>{
+                gameInfo.getLuckyCoin(socket, d.type, (code, msg, data) =>{
                     CacheUtil.delUserProtocol(userId, "getLuckyCoin")
-                    socket.emit('getLuckyCoinResult', {code:code, msg: msg});
+                    if(code){
+                        socket.emit('getLuckyCoinResult', {code:code, msg: msg});
+                    }else{
+                        socket.emit('getLuckyCoinResult', {code:code, msg: msg, data : data});
+                    }
                 });
             }
         }else{
@@ -791,9 +878,7 @@ io.on('connection', function (socket) {
                                 if(ret){
                                     // 免费幸运币数量
                                     redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
-                                        // 活动奖池
-                                        const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                        gameInfo.turntable(socket, 1, activityJackpot, (code, msg, data) =>{
+                                        gameInfo.turntable(socket, 1, (code, msg, data) =>{
                                             CacheUtil.delUserProtocol(userId, 'turntable')
                                             if(code){
                                                 socket.emit('turntableResult', {code:code, data: data});
@@ -818,8 +903,7 @@ io.on('connection', function (socket) {
                         if(res){
                             redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
                                 // 活动奖池
-                                const activityJackpot = jackpot ? jackpot * laba_config.activity_jackpot_ratio : 0;
-                                gameInfo.turntable(socket, d.mul, activityJackpot,(code, msg, data) =>{
+                                gameInfo.turntable(socket, d.mul,(code, msg, data) =>{
                                     CacheUtil.delUserProtocol(userId, 'turntable')
                                     if(code){
                                         socket.emit('turntableResult', {code:code, data: data});
@@ -1096,12 +1180,13 @@ io.on('connection', function (socket) {
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, 'newHandGive')
             if(ret){
-                CacheUtil.getNewhandProtectConfig().then(newHandConfig =>{
-                    if(gameInfo.userList[userId].newHandGive === 0){
-                        gameInfo.userList[userId].newHandGive = 1;
-                        socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [newHandConfig.giveGold]}});
-                    }
+                gameInfo.getNewhandProtectGlod(userId, giveGold =>{
                     CacheUtil.delUserProtocol(userId, 'newHandGive')
+                    if(giveGold){
+                        socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [giveGold]}});
+                    }else{
+                        socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [0]}});
+                    }
                 });
             }
         }else{
@@ -1110,6 +1195,12 @@ io.on('connection', function (socket) {
     });
 
 
+    // 查询大厅活动页配置
+    socket.on("activityPage", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.getActivityConfigPage(socket);
+        }
+    });
 
 
     // 游戏结算
@@ -1399,19 +1490,6 @@ io.on('connection', function (socket) {
             log.warn('getCoinLog-json');
         }
         gameInfo.getCoinLog(socket, _info);
-    });
-
-    //用户申请提现
-    socket.on("withdraw_apply", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('withdraw_apply');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            withdrawal_api(socket, _info);
-        }
     });
 
 });

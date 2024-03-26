@@ -25,10 +25,12 @@ arithmetic = function (_idx) {
         return betCount;
     }
 
+
     this.getGamblingBalanceGold = function () {
         //获取库存 奖池
         return {
-            nGamblingBalanceGold: this.nGamblingBalanceGold
+            nGamblingBalanceGold: this.nGamblingBalanceGold,
+            nSysBalanceGold: this.nSysBalanceGold
         }
     }
     this.addGamblingBalanceGold = function (Gold, Pool) {
@@ -36,22 +38,33 @@ arithmetic = function (_idx) {
         this.nGamblingBalanceGold += parseInt(Gold);
         // redis存储奖池
         redis_laba_win_pool.redis_win_pool_incrby(parseInt(Pool));
-        log.info("添加库存:" + Gold + "当前库存" + this.nGamblingBalanceGold);
-        log.info("添加奖池:" + Pool);
+        log.info("添加库存:" + Gold +  "当前用户库存" + this.nGamblingBalanceGold + "添加奖池:" + Pool);
     }
+
+
     this.subGamblingBalanceGold = function (Gold, Pool) {
         //减少库存 奖池
-        log.info("减少库存:" + Gold +  "库存" + this.nGamblingBalanceGold);
         this.nGamblingBalanceGold -= parseInt(Gold);
-        log.info("减少奖池:" + Pool);
+        log.info("减少用户库存:" + Gold +  "当前用户库存" + this.nGamblingBalanceGold + "减少奖池:" + Pool);
         //redis奖池
         redis_laba_win_pool.redis_win_pool_decrby(parseInt(Pool))
     }
+
+    this.subSysBalanceGold = function (Gold, Pool) {
+        //减少库存 奖池
+        this.nSysBalanceGold -= parseInt(Gold);
+        log.info("减少系统库存:" + Gold +  "当前系统库存" + this.nSysBalanceGold + "减少奖池:" + Pool);
+        //redis奖池
+        redis_laba_win_pool.redis_win_pool_decrby(parseInt(Pool))
+    }
+
+
     this.getGamblingBalanceLevelBigWin = function () {
         //获取库存 水位 幸运值  判断中奖使用
         return {
             nGamblingWaterLevelGold: this.nGamblingWaterLevelGold,
             nGamblingBalanceGold: this.nGamblingBalanceGold,
+            nSysBalanceGold: this.nSysBalanceGold,
             nGamblingBigWinLevel: this.nGamblingBigWinLevel,
             nGamblingBigWinLuck: this.nGamblingBigWinLuck,
             expectRTP: this.expectRTP
@@ -66,8 +79,10 @@ arithmetic = function (_idx) {
     this.initGamblingGame = function () {
         const self = this;
         gameDao.getGamblingGame(function (Result) {
-            self.nGamblingWaterLevelGold = Result[0].nGamblingWaterLevelGold;  //水位
-            self.nGamblingBalanceGold = Result[0].nGamblingBalanceGold;      //库存
+            self.nGamblingWaterLevelGold = Result[0].nGamblingWaterLevelGold;  // 水位
+            self.nGamblingBalanceGold = Result[0].nGamblingBalanceGold;      // 用户库存
+            self.nSysBalanceGold = Result[0].nSysBalanceGold; // 系统库存
+
             self.nGamblingBigWinLevel = Result[0].nGamblingBigWinLevel.split(',').map(Number);  //大奖幸运等级
             self.nGamblingBigWinLuck = Result[0].nGamblingBigWinLuck.split(',').map(Number);    //大奖幸运概率
             self.nGamblingBigWinLuck = Result[0].nGamblingBigWinLuck.split(',').map(Number);    //大奖幸运概率
@@ -75,7 +90,8 @@ arithmetic = function (_idx) {
 
             console.log("读取采池数据完毕!");
             console.log("水位:" + self.nGamblingWaterLevelGold);
-            console.log("库存:" + self.nGamblingBalanceGold);
+            console.log("用户库存:" + self.nGamblingBalanceGold);
+            console.log("系统库存:" + self.nSysBalanceGold);
             console.log("大奖幸运等级:" + self.nGamblingBigWinLevel);
             console.log("大奖幸运概率:" + self.nGamblingBigWinLuck);
         });

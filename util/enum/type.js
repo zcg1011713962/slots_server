@@ -1,9 +1,7 @@
 const LangType = {
-    Brazil: 0, // 巴西
+    English: 0, // 英语
     Portugal: 1,    // 葡萄牙
-    China_Jian: 2, // 中国简体
-    China_Fan: 3, // 中国繁体
-    America: 4,    // 美国
+    China_Jian: 2 // 中文
 };
 
 const GoodsType = {
@@ -15,9 +13,9 @@ const GoodsType = {
 
 
 const CurrencyType = {
-    Brazil_BRL: 0, // R$雷亚尔
-    China_RMB: 1, // RMB人民币
-    America_US: 2,    // $美元
+    Brazil_BRL: 'BRL' // R$雷亚尔
+  /*  China_RMB: 1, // RMB人民币
+    America_US: 2,    // $美元*/
 };
 
 
@@ -71,6 +69,23 @@ const GameType = {
 
 
 
+const ScoreChangeType = {
+    daySign: 0, // 每日签到
+    vipDaylyGet: 1, // vip每日领取
+    vipMonthlyGet: 2, // vip每月领取
+    luckyCoinGive: 3, // 领取幸运币活动送金币
+    inviteBindUser: 4, // 邀请绑定给被邀请用户送金币
+    inviteBindAgent: 5, // 邀请绑定给代理人送金币
+    newHandGive: 6 ,//新手送金币
+    rebateShop: 7  // 邀请绑定-购物返点
+};
+
+const NewHandFlag = {
+    new: 1, // 新手
+    old: 0, // 非新手
+};
+
+
 module.exports = {
     GoodsType,
     CurrencyType,
@@ -82,5 +97,7 @@ module.exports = {
     LangType,
     VipGetGoldType,
     TurntableGameMode,
-    GameType
+    GameType,
+    ScoreChangeType,
+    NewHandFlag
 };

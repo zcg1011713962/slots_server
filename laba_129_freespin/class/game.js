@@ -28,6 +28,7 @@ var GameInfo = function () {
 
         this.serverId = gameConfig.serverId;
         this.gameName = gameConfig.gameName;
+        this.gameId = gameConfig.gameId;
 
         //初始化游戏
         this.init = function () {
@@ -73,9 +74,7 @@ var GameInfo = function () {
                 let nowDate = new Date();
                 let minute = nowDate.getMinutes();
                 let second = nowDate.getSeconds();
-                if (minute % 10 == 0 && second == 1) {
-                    //if (second == 1){
-                    //	self.saveSocrePool();
+                if (second === 25) {
                     self.saveGamblingBalanceGold();
                     console.log("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
@@ -440,7 +439,7 @@ var GameInfo = function () {
         this.saveGamblingBalanceGold = function () {
             //获得库存奖池
             const dict = this.A.getGamblingBalanceGold();
-            gameDao.Update_GamblingBalanceGold(dict.nGamblingBalanceGold, function (Result) {
+            gameDao.Update_GamblingBalanceGold(dict.nGamblingBalanceGold, dict.nSysBalanceGold, function (Result) {
             })
         };
 

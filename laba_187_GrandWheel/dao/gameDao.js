@@ -149,7 +149,8 @@ exports.score_changeLog = function score_changeLog(userInfo) {
 
     pool.getConnection(function (err, connection) {
         for (var i = 0; i < userInfo.length; i++) {
-            values.push(userInfo[i].userid);
+            const userId = userInfo[i].userid;
+            values.push(userId);
             values.push(userInfo[i].score_before);
             values.push(userInfo[i].score_change);
             values.push(userInfo[i].score_current);
@@ -158,7 +159,7 @@ exports.score_changeLog = function score_changeLog(userInfo) {
 
             connection.query({sql: sql, values: values}, function (err, rows) {
                 if (err) {
-                    console.log("score_changeLog");
+                    console.log("score_changeLog" + userId);
                     console.log(err);
                 }
             })
@@ -254,12 +255,12 @@ exports.getGamblingGame = function getGamblingGame(callback) {
 }
 
 //保存库存奖池
-exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, callback) {
-    var sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?  WHERE nGameID = ?";
+exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, nSysBalanceGold, callback) {
+    var sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?, nSysBalanceGold = ?  WHERE nGameID = ?";
 
     pool.getConnection(function (err, connection) {
-        var values = [nGamblingBalanceGold, gameConfig.gameId];
-        console.log("库存 id");
+        var values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
+        console.log("用户库存 系统库存 游戏ID");
         console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {

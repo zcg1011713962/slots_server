@@ -2,6 +2,7 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const {getInstand: log} = require("../CClass/class/loginfo");
 const ErrorCode = require("./ErrorCode");
+const TypeEnum = require("./enum/type");
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -9,6 +10,7 @@ const userPlayGameCount= 'userPlayGameCount';
 const sendEmailExpireKey = 'sendEmailCodeExpire';
 const VIPDailyGetKey = 'VIPDailyGet';
 const VIPMonthlyGetKey = 'VIPMonthlyGet';
+const userPlayGameWinScore= 'userPlayGameWinScore';
 
 const sendEmailKey = 'sendEmailCode';
 
@@ -33,21 +35,20 @@ const hallConfig = {
     hallConfigKey: 'hallConfig',
     notice_config: 'notice_config',
     vip_config: 'vip_config',
-    activity_jackpot_config: 'activity_jackpot_config',
     black_white_list_config: 'black_white_list_config',
     bank_transfer_config: 'bank_transfer_config',
     shop_config: 'shop_config',
     lucky_coin_config: 'lucky_coin_config',
     sign_in_config: 'sign_in_config',
-    customer_service_config: 'customer_service_config',
     invite_download_config: 'invite_download_config',
-    newhand_protect_config: 'newhand_protect_config'
+    newhand_protect_config: 'newhand_protect_config',
+    score_config : 'score_config'
 }
 
 
-exports.getGameConfig = async function(gameName, serverId){
+exports.getGameConfig = async function(gameName, gameId){
     try{
-        return RedisUtil.hget(gameConfig.gameConfigKey, gameName + serverId).then(config => JSON.parse(config))
+        return RedisUtil.hget(gameConfig.gameConfigKey, gameName + gameId).then(config => JSON.parse(config))
     } catch(e){
         log.err('getGameConfig');
     }
@@ -72,12 +73,30 @@ exports.getNoticeConfig = async function(){
 }
 
 
+exports.getScoreConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.score_config).then(config => JSON.parse(config));
+    }
+    catch(e){
+        log.err('getVipConfig');
+    }
+}
+
 exports.getVipConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.vip_config).then(config => JSON.parse(config).levelConfig)
+    }
+    catch(e){
+        log.err('getVipConfig');
+    }
+}
+
+exports.getVConfig = async function(){
     try{
         return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.vip_config).then(config => JSON.parse(config))
     }
     catch(e){
-        log.err('getVipConfig');
+        log.err('getVConfig');
     }
 }
 
@@ -111,7 +130,7 @@ exports.getSignInConfig = async function(){
 
 exports.getActivityJackpotConfig = async function(){
     try{
-        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.activity_jackpot_config).then(config => JSON.parse(config))
+        return RedisUtil.get(jackpotConfig.jackpotConfigKey).then(config => JSON.parse(config))
     }
     catch(e){
         log.err('getJackpotConfig');
@@ -136,14 +155,6 @@ exports.getDownloadExtConfig = async function(){
     }
 }
 
-exports.getCustomerServiceConfig = async function(){
-    try{
-        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.customer_service_config).then(config => JSON.parse(config))
-    }
-    catch(e){
-        log.err('getCustomerServiceConfig');
-    }
-}
 
 exports.getNewhandProtectConfig  = async function(){
     try{
@@ -205,8 +216,22 @@ exports.getGameJackpot  = function getGameJackpot(callback){
     });
 }
 
+
+exports.delayPushGameJackpot = function (userInfo, userList) {
+    let u = userInfo;
+    let items = userList;
+
+    // 延时1秒发送跑马灯
+    setTimeout(() => {
+        const us = []
+        us[u.userid] = items[u.userid];
+        this.pushGameJackpot(us);
+    }, 1000);
+}
+
+
 exports.pushGameJackpot  = function pushGameJackpot(userList){
-    if(userList){
+    if(userList && userList.length > 0){
         this.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
             for (const userId in userList) {
                 const jackpot = {
@@ -216,8 +241,8 @@ exports.pushGameJackpot  = function pushGameJackpot(userList){
                     minor_jackpot: minorJackpot,
                     mini_jackpot: miniJackpot,
                 }
-                log.info('推送奖池数据' + userId + 'jackpot' + JSON.stringify(jackpot))
-                userList[userId]._socket.emit("pushGamblingWinPool", jackpot);
+                log.info('推送奖池数据' + userId + 'jackpot' + JSON.stringify(jackpot) + 'user:' + userList[userId])
+                if(userList[userId]) userList[userId]._socket.emit("pushGamblingWinPool", jackpot);
             }
         })
     }
@@ -310,6 +335,21 @@ exports.addPlayGameCount  = function addPlayGameCount(userId){
 // 获取玩家玩游戏次数
 exports.getPlayGameCount  = function getPlayGameCount(userId){
     return RedisUtil.hget(userPlayGameCount, userId);
+}
+
+
+// 获取玩家赢金币数值
+exports.getPlayGameWinscore  = function getPlayGameWinscore(userId){
+    return RedisUtil.hget(userPlayGameWinScore, userId);
+}
+
+// 记录玩家赢金币数值
+exports.playGameWinscore  = function playGameWinscore(userId, winScore){
+    this.getPlayGameWinscore(userId).then(winscore =>{
+        const oldWin = winscore ? winscore : 0;
+        const win = Number(oldWin) +  Number(winScore);
+        return RedisUtil.hmset(userPlayGameWinScore, userId, win);
+    })
 }
 
 // 邮箱验证码-存储过期key
