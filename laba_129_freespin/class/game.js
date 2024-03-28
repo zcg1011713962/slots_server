@@ -11,6 +11,7 @@ const analyse_result = require("../../util/lottery_analyse_result");
 const LABA = require("../../util/laba");
 const {getInstand: log} = require("../../CClass/class/loginfo");
 const Config = require("../config/read_config").getInstand;
+const CacheUtil = require("../../util/cache_util")
 
 
 var GameInfo = function () {
@@ -230,7 +231,6 @@ var GameInfo = function () {
         };
 
         this.updateUser = function (userInfo) {
-            //console.log("update")
             if (!this.userList[userInfo._userId]) return;
             let result = {};
             //已经断线
@@ -245,17 +245,25 @@ var GameInfo = function () {
             this.LoginGame(userInfo._userId, this.serverId);
             ++this.onlinePlayerCount;
 
-            let resultObj = {
-                account: this.userList[userInfo._userId]._account,
-                id: this.userList[userInfo._userId]._userId,
-                nickname: this.userList[userInfo._userId]._nickname,
-                score: this.userList[userInfo._userId]._score,
-                betList: Config.coinConfig,
-                priceList:  Config.icon_mul[0],
-            };
-            result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-            this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
-
+            CacheUtil.getGameConfig(this.gameName, this.gameId).then(config =>{
+                try {
+                    const icon_mul = config.icon_mul.reduce((acc, curr) => {
+                        return acc.concat(curr);
+                    }, []);
+                    let resultObj = {
+                        account: this.userList[userInfo._userId]._account,
+                        id: this.userList[userInfo._userId]._userId,
+                        nickname: this.userList[userInfo._userId]._nickname,
+                        score: this.userList[userInfo._userId]._score,
+                        betList: config.coinConfig,
+                        priceList: icon_mul,
+                    };
+                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                    this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
+                }catch (e){
+                    log.err(e)
+                }
+            })
         };
 
         //获得在线人数

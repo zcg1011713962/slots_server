@@ -1,5 +1,5 @@
 const http_bc = require("./../util/http_broadcast");
-
+const log = require("../CClass/class/loginfo")
 
 exports.initResult  = function (nBetSum) {
     // 初始化手牌结果
@@ -35,16 +35,21 @@ exports.initResult  = function (nBetSum) {
 }
 
 exports.build  = function build(dictAnalyseResult, gameName, nHandCards, userId, nBetSum, winscore, freeCount, GamblingBalanceLevelBigWin, user, sendMessage_mul){
-    //判断是否需要发送中奖信息到通知服
-    if (http_bc && dictAnalyseResult["win"] >= nBetSum * sendMessage_mul) {
-        let data = {
-            userId: userId,
-            nickName: user._nickname,
-            gameName: gameName,
-            win: dictAnalyseResult["win"]
-        };
-        http_bc.send(data);
+    try {
+        //判断是否需要发送中奖信息到通知服
+        if (http_bc && dictAnalyseResult["win"] >= nBetSum * sendMessage_mul) {
+            let data = {
+                userId: userId,
+                nickName: user._nickname,
+                gameName: gameName,
+                win: dictAnalyseResult["win"]
+            };
+            http_bc.send(data);
+        }
+    }catch (e){
+        log.err(e)
     }
+
     if(nHandCards) {
         // 手牌加1处理，返回给客户端
         dictAnalyseResult["nHandCards"] = [];

@@ -8,7 +8,8 @@ const GoodsType = {
     gold: 0, // 金币
     diamond: 1, // 钻石
     prop: 2,    // 道具
-    monthCard: 3 // 月卡
+    monthCard: 3, // 月卡
+    turntableTicket: 4, // 免费转盘门票
 };
 
 
@@ -85,6 +86,20 @@ const NewHandFlag = {
     old: 0, // 非新手
 };
 
+const ShopType = {
+    store: 0, // 商城
+    free_turntable: 1, // 转盘活动
+    discount_Limited: 2 // 限时折扣
+};
+
+const NewHandGuideFlow = {
+    newHandGuide: 0, // 新手引导流程（终生一次）
+    promoCode: 1, // 推广码填写（终生一次）
+    signIn: 2, // 七天签到（每日首次）
+    firstRecharge: 3, // 首充（每日首次）
+    activityPop: 4 // 活动弹窗（每日首次）
+};
+
 
 module.exports = {
     GoodsType,
@@ -99,5 +114,7 @@ module.exports = {
     TurntableGameMode,
     GameType,
     ScoreChangeType,
-    NewHandFlag
+    NewHandFlag,
+    ShopType,
+    NewHandGuideFlow
 };

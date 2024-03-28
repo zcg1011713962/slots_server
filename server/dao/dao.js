@@ -659,6 +659,69 @@ exports.webGetUser = function webGetUser(accountname, callback) {
     });
 };
 
+
+exports.searchUserById = function searchUserById(userId, callback) {
+    const sql = 'SELECT a.*,b.*, c.* FROM newuseraccounts a LEFT JOIN userinfo_imp b ON a.`Id` = b.`userId` LEFT JOIN userinfo c ON a.`Id` = c.`userId`  WHERE a.ID=?';
+    let values = [];
+
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询用户信息");
+                console.log(err);
+                callback(0);
+                return
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1, rows[0]);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+// 增加领取破产补助次数
+exports.addGetBustTimes = function addGetBustTimes(userId, callback) {
+    const sql = 'update userinfo set bustTimes = bustTimes + 1 where userId = ?';
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("增加领取破产补助次数");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
 //查询注册ip是否存在
 exports.getUserIdByIp = function getUserIdByIp(ip, callback) {
     const sql = 'SELECT Id FROM newuseraccounts WHERE loginip=?';
@@ -896,8 +959,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType,  callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -909,6 +972,8 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(price);
     values.push(group);
     values.push(service);
+    values.push(mul);
+    values.push(shopType);
 
 
     pool.getConnection(function (err, connection) {
@@ -938,7 +1003,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group` FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType FROM pay_order where status = 0 and orderId = ? and userId = ?';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -1058,11 +1123,44 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
     });
 };
 
-//修改累计充值
-exports.updateTotalCharge = function updateTotalCharge(userId, num, callback) {
-    const sql = 'update newuseraccounts set totalRecharge=? where Id=?';
+
+
+// 查询提现额度
+exports.searchWithdrawLimit = function searchWithdrawLimit(userId, callback) {
+    const sql = 'select withdrawLimit from userinfo_imp where userId = ?';
     let values = [];
-    values.push(num);
+
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询提现额度");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(1, rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+//修改累计充值
+exports.updateTotalCharge = function updateTotalCharge(userId, amount, callback) {
+    const sql = 'update newuseraccounts set totalRecharge = totalRecharge + ? where Id=?';
+    let values = [];
+    values.push(Number(amount));
     values.push(userId);
 
     pool.getConnection(function (err, connection) {
@@ -1074,7 +1172,7 @@ exports.updateTotalCharge = function updateTotalCharge(userId, num, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateTotalCharge");
+                console.log("修改累计充值");
                 console.log(err);
                 callback(0);
             } else {
@@ -1238,12 +1336,12 @@ exports.updateVipScore = function updateVipScore(userId, vipScore, callback) {
     });
 };
 
-// 增加巴西账户余额
-exports.add_bx_balance = function add_bx_balance(userId, amount, callback) {
-    const sql = 'update userinfo_imp set bx_balance = bx_balance + ? where userId=?';
+// 增加提现额度
+exports.addWithdrawLimit = function addWithdrawLimit(userId, withdrawLimit, callback) {
+    const sql = 'update userinfo_imp set withdrawLimit = withdrawLimit + ? where userId=?';
     let values = [];
 
-    values.push(amount);
+    values.push(withdrawLimit);
     values.push(userId);
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1254,7 +1352,7 @@ exports.add_bx_balance = function add_bx_balance(userId, amount, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("add_bx_balance");
+                console.log("增加提现额度");
                 console.log(err);
                 callback(0);
             } else {
@@ -1266,9 +1364,9 @@ exports.add_bx_balance = function add_bx_balance(userId, amount, callback) {
 };
 
 
-// 减少巴西账户余额
-exports.reduce_bx_balance = function reduce_bx_balance(userId, amount, callback) {
-    const sql = 'update userinfo_imp set bx_balance = bx_balance - ? where userId=? and bx_balance > ?';
+// 减少提现额度
+exports.reduceWithdrawLimit = function reduceWithdrawLimit(userId, amount, callback) {
+    const sql = 'update userinfo_imp set withdrawLimit = withdrawLimit - ? where userId=?';
     let values = [];
     values.push(amount);
     values.push(userId);
@@ -1283,7 +1381,7 @@ exports.reduce_bx_balance = function reduce_bx_balance(userId, amount, callback)
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("reduce_bx_balance");
+                console.log("减少提现额度");
                 console.log(err);
                 callback(0);
             } else {
@@ -1487,14 +1585,15 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 
 //添加银行卡
-exports.addBank = function addBank(userId, account, name, bankType, callback) {
-    const sql = 'call addBankCard(?,?,?,?)';
+exports.addBank = function addBank(userId, account, name, cpf, bankType, callback) {
+    const sql = 'call AddBankCard(?,?,?,?,?)';
     let values = [];
 
     values.push(userId);
     values.push(account);
     values.push(name);
     values.push(bankType);
+    values.push(cpf);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1600,15 +1699,11 @@ exports.getBank = function getBank(_userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getPropByUserId");
+                console.log("获得用户银行卡");
                 console.log(err);
                 callback(0);
             } else {
-                if (rows.length == 0) {
-                    callback(0);
-                } else {
-                    callback(1, rows);
-                }
+                callback(1, rows);
             }
         });
         values = [];
@@ -2243,8 +2338,8 @@ exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
 };
 
 
-// 更新新手领取金币状态
-exports.updateNewHandGive = function updateNewHandGive(userId, callback) {
+// 已领取新手礼包
+exports.setNewHandGive = function setNewHandGive(userId, callback) {
     const sql = "UPDATE userinfo SET newHandGive = 1 WHERE userId= ?";
     let values = [];
     values.push(userId);
@@ -2258,7 +2353,7 @@ exports.updateNewHandGive = function updateNewHandGive(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("更新新手领取金币状态");
+                console.log("已领取新手礼包");
                 console.log(err);
                 callback(0);
             } else {
@@ -2532,6 +2627,136 @@ exports.searchFirstRecharge = function (userId, callback) {
     });
 }
 
+// 获取用户货币账户
+exports.searchUserMoney = function searchUserMoney(userId, callback) {
+    const sql = "select score,diamond, bankScore,luckyCoin, withdrawLimit from userinfo_imp  where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("获取用户货币账户");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 锁定银行积分
+exports.lockBankScore = function lockBankScore(userId, bankScore , callback) {
+    const sql = "update userinfo_imp set bankScore = bankScore - ?, lockBankScore = lockBankScore + ? where userId = ?";
+    let values = [];
+    values.push(bankScore);
+    values.push(bankScore);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("锁定银行积分");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+// 更新提现订单支付状态
+exports.updateWithdrawPayStatus = function updateWithdrawPayStatus(userId, orderId, payStatus, callback) {
+    const sql = "update withdraw_record set pay_status = ? where orderId = ? and userId = ? ";
+    let values = [];
+    values.push(payStatus);
+    values.push(orderId);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("更新提现订单支付状态");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 解锁银行积分
+exports.unlockBankScore = function unlockBankScore(userId, bankScore , callback) {
+    const sql = "update userinfo_imp set bankScore = bankScore + ?, lockBankScore = lockBankScore - ? where userId = ?";
+    let values = [];
+    values.push(bankScore);
+    values.push(bankScore);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("解锁银行积分");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
 // 更新新手指引步数
 exports.updateGuideStep = function (userId, step, callback) {
     const sql = "update newuseraccounts set step = ? where Id = ?";
@@ -2562,6 +2787,108 @@ exports.updateGuideStep = function (userId, step, callback) {
         values = [];
     });
 }
+
+
+// 提现申请记录
+exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, callback) {
+    const sql = "INSERT INTO withdraw_record(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType) VALUES(?, ?, ?, ? , ?, ?, ?, ?, ?, ?)";
+
+    let values = [];
+    values.push(userId);
+    values.push(amount);
+    values.push(account);
+    values.push(bankType);
+    values.push(name);
+    values.push(cpf);
+    values.push(callbackUrl);
+    values.push(orderId);
+    values.push(lockBankScore);
+    values.push(currencyType);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("提现申请记录");
+                console.log(err);
+                callback(0)
+                return;
+            }
+            if(rows){
+                callback(1)
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 通过订单查询提现申请记录
+exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(userId, orderId, callback) {
+    const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus,lockBankScore FROM withdraw_record WHERE userId = ? and orderId = ?";
+
+    let values = [];
+    values.push(userId);
+    values.push(orderId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("通过订单查询提现申请记录");
+                console.log(err);
+                callback(0)
+                return;
+            }
+            if(rows && rows.length > 0){
+                callback(1, rows[0])
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+};
+
+// 查询提现申请记录
+exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, callback) {
+    const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus FROM withdraw_record WHERE userId = ?";
+
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询提现申请记录");
+                console.log(err);
+                callback(0)
+                return;
+            }
+            if(rows && rows.length > 0){
+                callback(1, rows)
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+};
 
 // 保存邮件记录
 exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
@@ -3082,19 +3409,13 @@ exports.getScore = function getScore(_userId, callback) {
                     callback(0);
                 }
             }
-
+            values = [];
         })
-        values = [];
     });
 }
 
-//增加金币
+// 增加金币
 exports.addAccountScore = function addAccountScore(_userId, score, callback) {
-    if(isNaN(score)){
-        log.err('增加金币参数错误' + _userId + '参数' + score);
-        callback(0)
-        return;
-    }
     const sql = "update userinfo_imp set score = score + ? where userId = ?";
     let values = [];
     values.push(score);
@@ -3119,8 +3440,8 @@ exports.addAccountScore = function addAccountScore(_userId, score, callback) {
                     callback(0);
                 }
             }
+            values = []
         })
-        values = [];
     });
 }
 
@@ -3222,44 +3543,6 @@ exports.getcharLog = function getcharLog(userId, callback) {
 }
 
 
-//添加提现记录
-exports.socreOut = function socreOut(_info, callback) {
-    var sql = 'INSERT INTO scoreout(userId,score,cardType,cardId,out_trade_no,tax,coin) VALUES(?,?,?,?,?,?,?)';
-    var values = [];
-
-    values.push(_info.sendUserId);
-    values.push(_info.sendCoin);
-    values.push(_info.cardType);
-    values.push(_info.cardId);
-    values.push(_info.out_trade_no);
-    values.push(_info.tax);
-    values.push(_info.coin);
-
-    if (_info.zfb_account && _info.zfb_name) {
-        sql = 'INSERT INTO scoreout(userId,score,cardType,cardId,out_trade_no,tax,coin,zfb_account,zfb_name) VALUES(?,?,?,?,?,?,?,?,?)';
-        values.push(_info.zfb_account);
-        values.push(_info.zfb_name);
-    }
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("scoreout");
-                console.log(err);
-                callback(0);
-            } else {
-                callback(1);
-            }
-        })
-        values = [];
-    });
-}
 
 
 //更新充值数据

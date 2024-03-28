@@ -1,16 +1,16 @@
 const HTTPRequest = require('../../util/http_util');
 
 // 下订单
-exports.buyOrder  = async function buyOrder(uid, prodcut_id, orderId, amount, currency) {
+exports.buyOrder  = async function buyOrder(uid, prodcut_id, orderId, amount, currency, callbackUrl) {
     try {
         const params = {
             orderId: orderId,
             amount: `${amount}`,
             currency: currency,
             uid: `${uid}`,
-            product_id: `${prodcut_id}`
+            product_id: `${prodcut_id}`,
+            returnUrl: `${callbackUrl}`
         };
-
         const url = 'http://pay.pokerslotgame.com/api/betcatpay/createPaymentOrder';
         const body = JSON.stringify(params);
         const headers = {

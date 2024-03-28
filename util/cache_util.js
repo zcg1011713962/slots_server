@@ -2,7 +2,8 @@ const RedisUtil = require("./redis_util");
 const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const {getInstand: log} = require("../CClass/class/loginfo");
 const ErrorCode = require("./ErrorCode");
-const TypeEnum = require("./enum/type");
+const StringUtil = require("./string_util");
+
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -11,8 +12,10 @@ const sendEmailExpireKey = 'sendEmailCodeExpire';
 const VIPDailyGetKey = 'VIPDailyGet';
 const VIPMonthlyGetKey = 'VIPMonthlyGet';
 const userPlayGameWinScore= 'userPlayGameWinScore';
-
+const userInfoKey = 'userInfo';
 const sendEmailKey = 'sendEmailCode';
+const newHandGuideFlowKey = 'newHandGuideFlow';
+const userDiscountLimitedKey = 'userDiscountLimited';
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -42,7 +45,10 @@ const hallConfig = {
     sign_in_config: 'sign_in_config',
     invite_download_config: 'invite_download_config',
     newhand_protect_config: 'newhand_protect_config',
-    score_config : 'score_config'
+    score_config : 'score_config',
+    bankrupt_config: 'bankrupt_config',
+    turntable_config: 'turntable_config',
+    discountLimited_config: 'discountLimited_config'
 }
 
 
@@ -63,6 +69,30 @@ exports.getJackpotConfig = async function(){
     }
 }
 
+
+exports.getDiscountLimitedConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.discountLimited_config).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getDiscountLimitedConfig');
+    }
+}
+
+exports.getTurntableConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.turntable_config).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getTurntableConfig');
+    }
+}
+
+exports.getBankruptConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.bankrupt_config).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getBankruptConfig');
+    }
+}
 
 exports.getNoticeConfig = async function(){
     try{
@@ -198,7 +228,7 @@ exports.searchBankPwdErrorCount = function (userId) {
 
 
 // 获取游戏奖池
-exports.getGameJackpot  = function getGameJackpot(callback){
+exports.getGameJackpot  = function (callback){
     const self = this;
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
@@ -230,7 +260,7 @@ exports.delayPushGameJackpot = function (userInfo, userList) {
 }
 
 
-exports.pushGameJackpot  = function pushGameJackpot(userList){
+exports.pushGameJackpot  = function (userList){
     if(userList && userList.length > 0){
         this.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
             for (const userId in userList) {
@@ -250,7 +280,7 @@ exports.pushGameJackpot  = function pushGameJackpot(userList){
 
 
 // 设置每个用户的幸运配置
-exports.activityLuckyConfig  = function activityLuckyConfig(userId, callback){
+exports.activityLuckyConfig  = function (userId, callback){
     this.getLuckyCoinConfig().then(luckyCoinConfig =>{
         RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
             if(!ret){
@@ -278,14 +308,14 @@ exports.activityLuckyConfig  = function activityLuckyConfig(userId, callback){
 }
 
 // 更新用户幸运活动配置
-exports.updateActivityLuckyConfig  = function updateActivityLuckyConfig(userId, data){
+exports.updateActivityLuckyConfig  = function (userId, data){
     // 更新用户配置
     return RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(data));
 }
 
 
 // 获取每个用户的幸运配置
-exports.getActivityLuckyDetailByUserId  = function getActivityLuckyDetailByUserId(userId, callback){
+exports.getActivityLuckyDetailByUserId  = function (userId, callback){
     RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
         if(ret){
             const luckyDetail = JSON.parse(ret);
@@ -297,7 +327,7 @@ exports.getActivityLuckyDetailByUserId  = function getActivityLuckyDetailByUserI
 }
 
 // 获取所有用户的幸运配置
-exports.getActivityLuckyDetail  = function getActivityLuckyDetail(callback){
+exports.getActivityLuckyDetail  = function (callback){
     RedisUtil.hgetall(everydayLuckyCoin).then(ret =>{
         if(ret){
             callback(ret);
@@ -309,7 +339,7 @@ exports.getActivityLuckyDetail  = function getActivityLuckyDetail(callback){
 
 
 // 增加玩家玩游戏次数
-exports.addPlayGameCount  = function addPlayGameCount(userId){
+exports.addPlayGameCount = function (userId){
     try{
         RedisUtil.hget(userPlayGameCount, userId).then(count =>{
             count = count ? parseInt(count) + 1 : 1;
@@ -320,7 +350,7 @@ exports.addPlayGameCount  = function addPlayGameCount(userId){
                 if(d && d.doLuckyCoinTask){
                     const doLuckyCoinTask = d.doLuckyCoinTask;
                     d.doLuckyCoinTask = parseInt(doLuckyCoinTask) + 1;
-                    if(Number(doLuckyCoinTask) < Number(d.luckyCoinTask)){
+                    if(StringUtil.compareNumbers(doLuckyCoinTask, d.luckyCoinTask)){
                         RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
                     }
                 }
@@ -333,7 +363,7 @@ exports.addPlayGameCount  = function addPlayGameCount(userId){
 
 
 // 获取玩家玩游戏次数
-exports.getPlayGameCount  = function getPlayGameCount(userId){
+exports.getPlayGameCount  = function (userId){
     return RedisUtil.hget(userPlayGameCount, userId);
 }
 
@@ -353,7 +383,7 @@ exports.playGameWinscore  = function playGameWinscore(userId, winScore){
 }
 
 // 邮箱验证码-存储过期key
-exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, toEmail, callback){
+exports.cacheEmailExpireCode  = function (verificationCode, toEmail, callback){
     try {
         RedisUtil.set(sendEmailExpireKey + toEmail, verificationCode).then(ret1 =>{
             RedisUtil.expire(sendEmailExpireKey + toEmail, emailCodeLongExpireSecond).then(ret2 =>{
@@ -370,7 +400,7 @@ exports.cacheEmailExpireCode  = function cacheEmailExpireCode(verificationCode, 
     }
 }
 // 邮箱验证码-存储
-exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, callback){
+exports.cacheEmailCode  = function (verificationCode, toEmail, callback){
     // 邮箱验证码设置
     RedisUtil.set(sendEmailKey + toEmail, verificationCode).then(ret1 =>{
         RedisUtil.expire(sendEmailKey + toEmail, emailCodeExpireSecond).then(ret2 =>{
@@ -385,7 +415,7 @@ exports.cacheEmailCode  = function cacheEmailCode(verificationCode, toEmail, cal
 
 
 // 邮箱验证码-校验
-exports.verifyEmailCode  = function verifyEmailCode(code, email, callback){
+exports.verifyEmailCode  = function (code, email, callback){
     // 是否过期存储
     RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
         RedisUtil.get(sendEmailKey + email).then(verificationCode => {
@@ -411,7 +441,7 @@ exports.verifyEmailCode  = function verifyEmailCode(code, email, callback){
 
 
 // 设置用户调用协议记录
-exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol){
+exports.recordUserProtocol  = async function (userId, protocol){
     try {
         const key = protocol + '_' + userId;
         const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
@@ -427,7 +457,7 @@ exports.recordUserProtocol  = async function recordUserProtocol(userId, protocol
 }
 
 // 删除用户调用协议记录
-exports.delUserProtocol  = async function delUserProtocol(userId, protocol){
+exports.delUserProtocol  = async function (userId, protocol){
     const key = protocol + '_' + userId;
     console.log('delUserProtocol:', key)
     await RedisUtil.del(key);
@@ -513,3 +543,77 @@ exports.getActivityJackpot = function(callback){
         })
     })
 }
+
+
+// 存储用户信息
+exports.setUserInfo = function(userId, userInfo){
+    const v = {
+        isVip: userInfo.is_vip,
+        totalRecharge : userInfo.totalRecharge,
+        withdrawLimit : userInfo.withdrawLimit
+    }
+   return RedisUtil.hmset(userInfoKey, userId , JSON.stringify(v))
+}
+
+// 获取用户信息
+exports.getUserInfo = function(userId){
+    return RedisUtil.hget(userInfoKey, userId);
+}
+
+// 是否破产
+exports.isBankrupt = function isBankrupt(currScore, currBankScore, callback) {
+    // 是否破产
+    // （携带账户+银行账户）金币小于破产补助金时
+    this.getBankruptConfig().then(config =>{
+        const bustTimes = config.Bust_times;
+        const bustBonus = config.Bust_Bonus;
+        const bankrupt = Number(currScore) + Number(currBankScore) < bustBonus;
+        callback(bankrupt, bustBonus , bustTimes);
+    });
+}
+
+
+// 获取每个用户新手引导流程
+exports.getNewHandGuideFlowKey = function(userId){
+    RedisUtil.hget(newHandGuideFlowKey, userId).then(val =>{
+        if(!val){
+           /* const flow = [
+
+            ]
+            // 首次进入大厅
+            RedisUtil.hmset(newHandGuideFlowKey, userId, )*/
+        }
+
+
+    })
+}
+
+// 设置限时折扣
+exports.userDiscountLimited  = function (userId, callback){
+    this.getDiscountLimitedConfig().then(config =>{
+        const expire = config[0].Discount_time * 60;
+        const key = userDiscountLimitedKey + '_' + userId;
+        const currTime = new Date().getTime();
+        RedisUtil.set(key, currTime).then(r =>{
+            if(r){
+                RedisUtil.expire(key, expire).then(o =>{
+                    if(r && o){
+                        callback(currTime)
+                    }else{
+                        callback(0)
+                    }
+                });
+            }else{
+                callback(0)
+            }
+        })
+    })
+
+}
+
+// 获取限时折扣
+exports.getUserDiscountLimited  = function (userId){
+    const key = userDiscountLimitedKey + '_' + userId;
+    return RedisUtil.get(key);
+}
+

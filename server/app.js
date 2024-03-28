@@ -120,7 +120,6 @@ app.get('/betsJackpot', function (req, res) {
 
 // 获取商品列表
 app.get('/goodsList', function (req, res) {
-    //验证版本
     const userId = req.query.userId;
     if(userId === undefined || userId === ''){
         return;
@@ -135,20 +134,34 @@ app.get('/goodsList', function (req, res) {
 });
 
 
+// 获取限时折扣物品
+app.get('/discountLimited', function (req, res) {
+    const userId = req.query.userId;
+    if(userId === undefined || userId === ''){
+        return;
+    }
+    gameInfo.discountLimited(parseInt(userId), (code, msg, data) =>{
+        if(code){
+            res.send({code: code, data: data});
+        }else{
+            res.send({code: code, msg: msg});
+        }
+    });
+});
+
 // 购买商品
 app.get('/Shopping', async function (req, res) {
-    //验证版本
     const userId = req.query.userId;
     const productId = req.query.productId;
-    const count = req.query.count;
-    const service = req.query.service;
-    const shopType = req.query.shopType;
+    const count = req.query.count ? req.query.count : 1;
+    const service = req.query.service ? req.query.service : 0;
+    const shopType = req.query.shopType ? req.query.shopType : 0;
 
-    if(isNaN(service) || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
+    if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
 
-    const ret = await CacheUtil.recordUserProtocol(userId, "Shopping",)
+    const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
-        gameInfo.Shopping(userId, parseInt(productId), parseInt(count), service, (code, msg, data) => {
+        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType),(code, msg, data) => {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 res.send({code: code, data: data});
@@ -161,26 +174,67 @@ app.get('/Shopping', async function (req, res) {
 
 // 购买商品订单回调
 app.get('/shoppingCallBack', async function (req, res) {
-    //验证版本
-    const userId = req.query.userId;
-    const orderId = req.query.orderId;
-    if(userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
+    try {
+        //验证版本
+        const userId = req.query.userId ? Number(req.query.userId) : 0;
+        const orderId = req.query.orderId ? req.query.orderId : null;
+        if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
 
-    const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
-    if (ret) {
-        gameInfo.sendShopGoods(parseInt(userId), orderId, (code, msg, data) => {
-            CacheUtil.delUserProtocol(userId, "shoppingCallBack")
-            res.send({code: code, msg: msg});
-            if(code && gameInfo.userList[userId]){
-                gameInfo.userList[userId]._socket.emit('ShoppingResult',  {code: code, data: data});
-            }
-        });
-    }else{
-        res.send({code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+        const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
+        if (ret) {
+            gameInfo.shoppingCallBack(userId, orderId, (code, msg, data, shopType, service) => {
+                CacheUtil.delUserProtocol(userId, "shoppingCallBack")
+                // 响应
+                res.send({code: code, msg: msg});
+                // 回调socket
+                if (gameInfo.userList[userId]) {
+                    if(service === 0){ // 大厅
+                        gameInfo.sendHallShopCallBack(userId, shopType, code, msg, data)
+                    }else if(service === 1){ // 游戏内
+                        gameInfo.sendGameShopCallBack(userId, shopType, code, msg, data)
+                    }
+                }
+            });
+        } else {
+            res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+        }
+    }catch (e){
+        log.err('shoppingCallBack' + e)
     }
 });
 
+// 提现审核通过回调地址
+app.get('/withdrawCallBack', async function (req, res) {
+    //验证版本
+    const userId = req.query.userId ? Number(req.query.userId) : 0;
+    const orderId = req.query.orderId ? req.query.orderId : null;
+    if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
+    gameInfo.withdrawCallBack(userId, orderId, (code, msg) =>{
+        if(code){
+            res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
+        }else{
+            res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        }
+    })
+});
 
+
+
+// 判断用户是否破产
+app.get('/bankrupt', function (req, res) {
+    //验证版本
+    const userId = req.query.userId ;
+    if(userId === undefined || userId === ''){
+        return;
+    }
+    gameInfo.bankruptGrant(parseInt(userId), (code, msg, data) =>{
+        if(code){
+            res.send({code: code, msg: msg, data: data});
+        }else{
+            res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        }
+    });
+});
 
 var serverSign = "slel3@lsl334xx,deka";
 
@@ -290,7 +344,10 @@ io.on('connection', function (socket) {
                     userId: _userinof.userid,
                     tableId: -1,
                     seatId: -1,
-                    vip_score: _userinof.vip_score
+                    vip_score: userInfo.vip_score,
+                    is_vip: userInfo.is_vip,
+                    bankScore: userInfo.bankScore,
+                    totalRecharge: userInfo.totalRecharge
                 };
                 gameInfo.lineOutSet(info);
             } else {
@@ -663,6 +720,70 @@ io.on('connection', function (socket) {
         }
     });
 
+
+    // 提现页
+    socket.on('withdrawPage', async function () {
+        const userId = socket.userId;
+        const ret = await CacheUtil.recordUserProtocol(userId, "withdrawPage");
+        if (ret) {
+            gameInfo.getWithdrawPage(userId, (code, msg, data) => {
+                CacheUtil.delUserProtocol(userId, "withdrawPage")
+                if (code) {
+                    socket.emit('withdrawPageResult', {code: code, data: data});
+                } else {
+                    socket.emit('withdrawPageResult', {code: code, msg: msg});
+                }
+            });
+        }
+    })
+
+
+    // 绑定银行卡
+    socket.on('bindBankCard', function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || !d.cpf || !d.account || !d.name || !d.bankType) return;
+
+        const userId = socket.userId;
+        if(gameInfo.IsPlayerOnline(userId)){
+            gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf , (code, msg) => {
+                if (code) {
+                    socket.emit('bindBankCardResult', {code: code, msg: msg});
+                } else {
+                    socket.emit('bindBankCardResult', {code: code, msg: msg});
+                }
+            });
+        }else {
+            socket.emit('bindBankCardResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
+        }
+    })
+
+    // 发起提现申请
+    socket.on('withdraw', async function (data) {
+        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
+        if(!d || !d.account || !d.pwd || !d.amount || !d.currencyType) return;
+        const userId = socket.userId;
+        const ret = await CacheUtil.recordUserProtocol(userId, "withdraw");
+        if (ret) {
+            gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg) => {
+                CacheUtil.delUserProtocol(userId, "withdraw")
+                socket.emit('withdrawResult', {code: code, msg: msg});
+            });
+        }
+    })
+
+    // 提现记录查询
+    socket.on('withdrawRecord', function () {
+        const userId = socket.userId;
+        gameInfo.withdrawRecord(userId, (code, msg, data) => {
+            if(code){
+                socket.emit('withdrawRecordResult', {code: code, data: data});
+            }else{
+                socket.emit('withdrawRecordResult', {code: code, msg: msg});
+            }
+        });
+    })
+
+
     // 设置银行密码
     socket.on('setBankPwd', function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
@@ -824,9 +945,9 @@ io.on('connection', function (socket) {
                 gameInfo.getLuckyCoin(socket, d.type, (code, msg, data) =>{
                     CacheUtil.delUserProtocol(userId, "getLuckyCoin")
                     if(code){
-                        socket.emit('getLuckyCoinResult', {code:code, msg: msg});
-                    }else{
                         socket.emit('getLuckyCoinResult', {code:code, msg: msg, data : data});
+                    }else{
+                        socket.emit('getLuckyCoinResult', {code:code, msg: msg});
                     }
                 });
             }
@@ -853,70 +974,47 @@ io.on('connection', function (socket) {
     });
 
 
-    // 大厅转盘游戏
-    socket.on("turntable", async function (data) {
-
+    // 大厅转盘游戏免费模式
+    socket.on("turntable", async function () {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, 'turntable')
             if(ret){
-                const gameMode = data ? TypeEnum.TurntableGameMode.charge : TypeEnum.TurntableGameMode.free; // 0 免费游戏 1收费游戏
-                if(gameMode === TypeEnum.TurntableGameMode.free){
-                    // 免费模式扣除幸运币
-                    CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
-                        CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
-                            const turntableCoin = luckyCoinConfig.turntableCoin;
-                            const luckyCoin = luckyDetail.luckyCoin;
-                            if(luckyCoin < turntableCoin){
-                                socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
-                                return;
-                            }
-                            // 扣幸运币
-                            luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
-                            log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
-                            CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
-                                if(ret){
-                                    // 免费幸运币数量
-                                    redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
-                                        gameInfo.turntable(socket, 1, (code, msg, data) =>{
-                                            CacheUtil.delUserProtocol(userId, 'turntable')
-                                            if(code){
-                                                socket.emit('turntableResult', {code:code, data: data});
-                                            }else{
-                                                socket.emit('turntableResult', {code:code, msg: msg});
-                                            }
-                                        });
-
-                                    });
-                                    return;
-                                }
-                                socket.emit('turntableResult', {code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
-                            })
-                        });
-                    });
-                }else if(gameMode === TypeEnum.TurntableGameMode.charge){
-                    const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-                    // 购买加倍转盘
-                    if(!d.mul) return;
-                    // 扣款成功
-                    gameInfo.mulBuy(d.mul, res =>{
-                        if(res){
-                            redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
-                                // 活动奖池
-                                gameInfo.turntable(socket, d.mul,(code, msg, data) =>{
-                                    CacheUtil.delUserProtocol(userId, 'turntable')
-                                    if(code){
-                                        socket.emit('turntableResult', {code:code, data: data});
-                                    }else{
-                                        socket.emit('turntableResult', {code:code, msg: msg});
-                                    }
-                                });
-                            });
-                        }else{
-                            socket.emit('turntableResult', {code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+                // 免费模式扣除幸运币
+                CacheUtil.getActivityLuckyDetailByUserId(userId, luckyDetail =>{
+                    CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig =>{
+                        const turntableCoin = luckyCoinConfig.turntableCoin;
+                        const luckyCoin = luckyDetail.luckyCoin;
+                        if(luckyCoin < turntableCoin){
+                            CacheUtil.delUserProtocol(userId, 'turntable')
+                            socket.emit('turntableResult', {code:0, msg:"幸运币不足"});
+                            return;
                         }
+                        // 扣幸运币
+                        luckyDetail.luckyCoin = Number(luckyDetail.luckyCoin) - turntableCoin;
+                        log.info('用户' + userId + '转盘扣幸运币' + turntableCoin + '剩余幸运币' + luckyDetail.luckyCoin);
+                        CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
+                            if(ret){
+                                // 免费幸运币数量
+                                redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
+                                    gameInfo.turntable(userId, 1, (code, msg, data) =>{
+                                        CacheUtil.delUserProtocol(userId, 'turntable')
+                                        if(code){
+                                            socket.emit('turntableResult', {code:code, data: data});
+                                        }else{
+                                            socket.emit('turntableResult', {code:code, msg: msg});
+                                        }
+                                    });
+
+                                });
+                                return;
+                            }else{
+                                CacheUtil.delUserProtocol(userId, 'turntable')
+                            }
+                            socket.emit('turntableResult', {code:ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+                        })
                     });
-                }
+                });
             }
         }else{
             socket.emit('turntableResult', {code: ErrorCode.USER_OFFLINE.code, msg: ErrorCode.USER_OFFLINE.msg});
@@ -1291,33 +1389,6 @@ io.on('connection', function (socket) {
         }
         if (gameInfo.checkDataPassword(socket, _info)) {
             gameInfo.updatePassword(socket, _info);
-        }
-    });
-
-
-    //银行卡
-    socket.on("BankInfo", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('BankInfo-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.BankInfo(socket, _info);
-        }
-    });
-
-    //获取自己银行卡
-    socket.on("getBank", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('getBank-json');
-        }
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getBank(socket, _info);
         }
     });
 

@@ -119,3 +119,50 @@ exports.generateGameResult  = function generateGameResult(winRate) {
     return randomNumber < winRate
 }
 
+
+exports.addNumbers  = function addNumbers(a, b) {
+    // 使用parseInt()或parseFloat()将输入转换为数字
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2)) {
+        return NaN;
+    }
+    return num1 + num2;
+}
+
+
+exports.reduceNumbers  = function reduceNumbers(a, b) {
+    // 使用parseInt()或parseFloat()将输入转换为数字
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2)) {
+        return NaN;
+    }
+    return num1 - num2;
+}
+
+
+exports.compareNumbers  = function compareNumbers(a, b) {
+    // 使用parseInt()或parseFloat()将输入转换为数字
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2)) {
+        return NaN;
+    }
+    return num1 < num2;
+}
+
+exports.rideNumbers  = function rideNumbers(a, b) {
+    // 使用parseInt()或parseFloat()将输入转换为数字
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2)) {
+        return NaN;
+    }
+    return num1 * num2;
+}
+
