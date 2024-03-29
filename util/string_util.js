@@ -163,6 +163,6 @@ exports.rideNumbers  = function rideNumbers(a, b) {
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
     }
-    return num1 * num2;
+    return (num1 * num2).toFixed(2);
 }
 

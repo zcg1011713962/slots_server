@@ -13,6 +13,7 @@ const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
 const CacheUtil = require("../../util/cache_util");
 const StringUtil = require("../../util/string_util");
+const dao = require('../../util/dao/dao');
 
 var GameInfo = function () {
 
@@ -576,6 +577,26 @@ var GameInfo = function () {
             })
 
         };
+
+
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 25 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
             var self = this;

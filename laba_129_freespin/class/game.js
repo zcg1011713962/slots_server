@@ -12,7 +12,7 @@ const LABA = require("../../util/laba");
 const {getInstand: log} = require("../../CClass/class/loginfo");
 const Config = require("../config/read_config").getInstand;
 const CacheUtil = require("../../util/cache_util")
-
+const dao = require('../../util/dao/dao');
 
 var GameInfo = function () {
 
@@ -602,6 +602,28 @@ var GameInfo = function () {
                 });
             })
         };
+
+
+
+
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 25 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
 
 
         //断线保存

@@ -18,10 +18,6 @@ User = function(userInfo,_socket){
 	this.SeatId = -1;			//座位ID
 	this.sign = "";
 	this._isLeave = true;
-	this.vip_score = 0;
-	this.is_vip = 0;
-	this.bankScore = 0;
-	this.totalRecharge = 0;
 
 	this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.userid;

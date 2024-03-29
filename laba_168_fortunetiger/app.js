@@ -215,3 +215,8 @@ var server = http.listen(app.get('port'), function () {
 });
 log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
+const period = 3000;
+setInterval(function () {
+    // 批量更新用户信息
+    gameInfo.batchUpdateOnLineAccount();
+}, period);

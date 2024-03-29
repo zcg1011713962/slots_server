@@ -11,7 +11,8 @@ const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
 const CacheUtil = require("../../util/cache_util");
-
+const dao = require('../../util/dao/dao');
+const {getInstand: log} = require("../../CClass/class/loginfo");
 
 var GameInfo = function () {
 
@@ -431,7 +432,7 @@ var GameInfo = function () {
                 };
                 gameDao.saveFree(info, function (result) {
                     if (!result)
-                        logInfo.error("存免费次数:" + _userinfo.userId + "失败!")
+                        console.log("存免费次数:" + _userinfo.userId + "失败!")
                 });
                 this._Csocket.emit("lineOut", {
                     signCode: gameConfig.LoginServeSign,
@@ -529,20 +530,25 @@ var GameInfo = function () {
             }
         };
 
-        //保存时间段输赢状况
-        this.saveSocrePool = function () {
-            //获得虚拟池
-            var Virtualpool = this.A.getVirtualScorePool();
-            //获得实际池
-            var poollist = this.A.getScorePoolList();
 
-            //var poollistLength = this.A.getScorePoolListLength();
-
-            var poollistId = this.A.getScoreId();
-
-            gameDao.Update_score_pool(poollist, Virtualpool, poollistId, function (Result) {
-            })
-        };
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 25 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
 
         //保存库存 奖池
         this.saveGamblingBalanceGold = function () {

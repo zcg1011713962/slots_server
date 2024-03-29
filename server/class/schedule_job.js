@@ -1,13 +1,14 @@
 const schedule = require('node-schedule');
 const CacheUtil = require('../../util/cache_util')
+const log = require('../../CClass/class/loginfo').getInstand
 
 // 定义每日定时任务
 const dayJob = schedule.scheduleJob('0 0 * * *', async () => {
     try {
         CacheUtil.clearVIPDailyGetKey();
-        console.log('每日清理数据！');
+        log.info('每日清理数据！');
     } catch (error) {
-        console.error('每日清理数据：', error);
+        log.err('每日清理数据：'+ error);
     }
 });
 
@@ -16,8 +17,8 @@ const dayJob = schedule.scheduleJob('0 0 * * *', async () => {
 const monthJob = schedule.scheduleJob('0 0 1 * *', async () => {
     try {
         CacheUtil.clearVIPMonthlyGetKey();
-        console.log('每月清理数据！');
+        log.info('每月清理数据！');
     } catch (error) {
-        console.error('每月清理数据：', error);
+        log.err('每月清理数据：'+ error);
     }
 });

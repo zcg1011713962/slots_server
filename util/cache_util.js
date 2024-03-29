@@ -3,7 +3,7 @@ const redis_laba_win_pool = require('../util/redis_laba_win_pool');
 const {getInstand: log} = require("../CClass/class/loginfo");
 const ErrorCode = require("./ErrorCode");
 const StringUtil = require("./string_util");
-
+const TypeEnum = require("./enum/type");
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -34,6 +34,11 @@ const jackpotConfig = {
 }
 
 
+const serverConfig = {
+    serverConfigKey: 'serverConfig',
+    urlKey: 'url'
+}
+
 const hallConfig = {
     hallConfigKey: 'hallConfig',
     notice_config: 'notice_config',
@@ -51,6 +56,14 @@ const hallConfig = {
     discountLimited_config: 'discountLimited_config'
 }
 
+
+exports.getServerUrlConfig = async function(){
+    try{
+        return RedisUtil.hget(serverConfig.serverConfigKey, serverConfig.urlKey).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getGameConfig');
+    }
+}
 
 exports.getGameConfig = async function(gameName, gameId){
     try{
@@ -574,17 +587,22 @@ exports.isBankrupt = function isBankrupt(currScore, currBankScore, callback) {
 
 
 // 获取每个用户新手引导流程
-exports.getNewHandGuideFlowKey = function(userId){
+exports.getNewHandGuideFlowKey = function(userId, callback){
     RedisUtil.hget(newHandGuideFlowKey, userId).then(val =>{
         if(!val){
-           /* const flow = [
-
-            ]
             // 首次进入大厅
-            RedisUtil.hmset(newHandGuideFlowKey, userId, )*/
+            const obj = Object.values(TypeEnum.NewHandGuideFlow);
+            RedisUtil.hmset(newHandGuideFlowKey, userId, obj)
+            callback(obj);
+        }else{
+            // 更新步骤
+            const items = TypeEnum.NewHandGuideFlow;
+            delete items.newHandGuide;
+            delete items.promoCode;
+            const obj = Object.values(items)
+            RedisUtil.hmset(newHandGuideFlowKey, userId, obj)
+            callback(obj);
         }
-
-
     })
 }
 
@@ -594,11 +612,13 @@ exports.userDiscountLimited  = function (userId, callback){
         const expire = config[0].Discount_time * 60;
         const key = userDiscountLimitedKey + '_' + userId;
         const currTime = new Date().getTime();
+        const endTime = currTime + expire * 60;
+
         RedisUtil.set(key, currTime).then(r =>{
             if(r){
                 RedisUtil.expire(key, expire).then(o =>{
                     if(r && o){
-                        callback(currTime)
+                        callback(1, currTime, endTime)
                     }else{
                         callback(0)
                     }

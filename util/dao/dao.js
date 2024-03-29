@@ -1,9 +1,9 @@
 const mysql = require('mysql2');
 const log = require("../../CClass/class/loginfo").getInstand;
-const mysql_config = require("../../util/config/mysql_config");
-const ErrorCode = require('../../util/ErrorCode');
-const RedisUtil = require('../../util/redis_util');
-const StringUtil = require("../../util/string_util");
+const mysql_config = require("../config/mysql_config");
+const ErrorCode = require('../ErrorCode');
+const RedisUtil = require('../redis_util');
+const StringUtil = require("../string_util");
 
 const pool = mysql.createPool({
     connectionLimit: 10000,
@@ -554,20 +554,29 @@ exports.phoneCheck = function phoneCheck(userInfo, callback) {
 // 批量更新用户信息
 exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
     const sql = 'call BatchUpdateAccount(?)';
-    const users = userList.map(user =>{
-        return {
-            id : user._userId,
-            score : user._score ? user._score : 0,
-            diamond : user._diamond ? user._diamond : 0,
-            bankScore : user.bankScore ? user.bankScore : 0,
-            bankLock : user.bankLock,
-            housecard : user.vip_level,
-            is_vip : user.is_vip,
-            vip_score : user.vip_score,
-            luckyCoin : user.luckyCoin,
-            firstRecharge : user.firstRecharge,
+    const users = userList.map(user => {
+        const newUser = {
+            id: user._userId,
+            score: user._score,
+            diamond: user._diamond,
+            bankScore: user.bankScore,
+            bankLock: user.bankLock,
+            housecard: user.vip_level,
+            is_vip: user.is_vip,
+            vip_score: user.vip_score,
+            luckyCoin: user.luckyCoin,
+            firstRecharge: user.firstRecharge,
             loginCount: user.LoginCount
-        }
+        };
+
+        // 移除字段为空的属性
+        Object.keys(newUser).forEach(key => {
+            if (newUser[key] === null || newUser[key] === undefined || newUser[key] === '') {
+                delete newUser[key];
+            }
+        });
+
+        return newUser;
     });
 
     let values = [];
@@ -2883,7 +2892,7 @@ exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, c
             if(rows && rows.length > 0){
                 callback(1, rows)
             }else{
-                callback(0)
+                callback(1, [])
             }
         });
         values = [];
@@ -3769,5 +3778,33 @@ exports.searchInvitedCode = function searchInvitedCode(userId, callback) {
             }
         });
         values = [];
+    });
+};
+
+
+// 批量查询用户信息
+exports.bathchSearchUserInfo = function bathchSearchUserInfo(userIds, callback) {
+    const sql = 'SELECT a.*,b.*, c.* FROM newuseraccounts a LEFT JOIN userinfo_imp b ON a.`Id` = b.`userId` LEFT JOIN userinfo c ON a.`Id` = c.`userId`  WHERE a.ID in (?)';
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: userIds}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("批量查询用户信息");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        });
     });
 };

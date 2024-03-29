@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const registerByGuestApi = require('./class/login_api');
 const Robotname = require('./config/RobotName');
 const gm_api = require('./class/gm_api');
-const dao = require('./dao/dao');
+const dao = require('../util/dao/dao');
 const log = require("../CClass/class/loginfo").getInstand;
 const consolidate = require('consolidate');
 const StringUtil = require("../util/string_util");
@@ -59,7 +59,7 @@ app.post('/gmManage', function (req, res) {
 
 // 游客注册
 app.get('/registerByGuest', function (req, res) {
-    //外部接口
+
     registerByGuestApi(req, gameInfo, function (act, sendStr) {
         if (act == 1) {
             res.send(sendStr);
@@ -69,14 +69,12 @@ app.get('/registerByGuest', function (req, res) {
     });
 });
 
-
-
 //版本验证
 app.post('/checkVersion', function (req, res) {
     //验证版本
     const r = req.query.key;
     let key = version + num;
-    console.log("版本验证" , key)
+    log.info('版本验证' + key)
     if (r !== key) {
         res.send({code: 0, url: "http://yidali.youmegame.cn/tg/"});
         return;
@@ -88,6 +86,7 @@ app.post('/checkVersion', function (req, res) {
 app.get('/devcodesearch', function (req, res) {
     //验证版本
     const deviceCode = req.query.deviceCode;
+    log.info('根据设备码获取用户名信息' + deviceCode)
     if(!deviceCode || deviceCode.length < 1){
         return;
     }
@@ -105,6 +104,7 @@ app.get('/devcodesearch', function (req, res) {
 app.get('/betsJackpot', function (req, res) {
     //验证版本
     const gameId = req.query.gameId;
+    log.info('获取游戏线注' + gameId)
     if(gameId === undefined || isNaN(gameId)){
         return;
     }
@@ -118,9 +118,29 @@ app.get('/betsJackpot', function (req, res) {
 });
 
 
+// 保存新手指引步数
+app.get('/saveGuideStep', function (req, res) {
+    //验证版本
+    const userId = req.query.userId ? parseInt( req.query.userId) : 0;
+    const step = req.query.step;
+    log.info('保存新手指引步数' + userId + 'step:' + step)
+
+    if(step === '' || step === undefined || !gameInfo.IsPlayerOnline(userId)){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return
+    }
+    gameInfo.saveGuideStep(userId, step, (code, msg) =>{
+        res.send({code: code, msg: msg});
+    });
+});
+
+
+
+
 // 获取商品列表
 app.get('/goodsList', function (req, res) {
     const userId = req.query.userId;
+    log.info('获取商品列表' + userId)
     if(userId === undefined || userId === ''){
         return;
     }
@@ -137,6 +157,7 @@ app.get('/goodsList', function (req, res) {
 // 获取限时折扣物品
 app.get('/discountLimited', function (req, res) {
     const userId = req.query.userId;
+    log.info('获取限时折扣物品' + userId)
     if(userId === undefined || userId === ''){
         return;
     }
@@ -156,6 +177,7 @@ app.get('/Shopping', async function (req, res) {
     const count = req.query.count ? req.query.count : 1;
     const service = req.query.service ? req.query.service : 0;
     const shopType = req.query.shopType ? req.query.shopType : 0;
+    log.info('购买商品' + userId + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service)
 
     if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
 
@@ -178,6 +200,7 @@ app.get('/shoppingCallBack', async function (req, res) {
         //验证版本
         const userId = req.query.userId ? Number(req.query.userId) : 0;
         const orderId = req.query.orderId ? req.query.orderId : null;
+        log.info('购买商品订单回调' + userId + '订单' + orderId)
         if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
 
         const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
@@ -187,12 +210,11 @@ app.get('/shoppingCallBack', async function (req, res) {
                 // 响应
                 res.send({code: code, msg: msg});
                 // 回调socket
-                if (gameInfo.userList[userId]) {
-                    if(service === 0){ // 大厅
-                        gameInfo.sendHallShopCallBack(userId, shopType, code, msg, data)
-                    }else if(service === 1){ // 游戏内
-                        gameInfo.sendGameShopCallBack(userId, shopType, code, msg, data)
-                    }
+                if(service === 0){ // 大厅
+                    gameInfo.sendHallShopCallBack(userId, shopType, code, msg, data)
+                }else if(service === 1){ // 游戏内
+                    const serverId = 15129;
+                    gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
                 }
             });
         } else {
@@ -200,6 +222,7 @@ app.get('/shoppingCallBack', async function (req, res) {
         }
     }catch (e){
         log.err('shoppingCallBack' + e)
+        res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
     }
 });
 
@@ -208,6 +231,7 @@ app.get('/withdrawCallBack', async function (req, res) {
     //验证版本
     const userId = req.query.userId ? Number(req.query.userId) : 0;
     const orderId = req.query.orderId ? req.query.orderId : null;
+    log.info('提现审核通过回调地址' + userId + '订单' + orderId)
     if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
     gameInfo.withdrawCallBack(userId, orderId, (code, msg) =>{
         if(code){
@@ -224,11 +248,13 @@ app.get('/withdrawCallBack', async function (req, res) {
 app.get('/bankrupt', function (req, res) {
     //验证版本
     const userId = req.query.userId ;
+    log.info('判断用户是否破产' + userId)
     if(userId === undefined || userId === ''){
         return;
     }
     gameInfo.bankruptGrant(parseInt(userId), (code, msg, data) =>{
         if(code){
+            log.info('判断用户是否破产' + userId + '数据:' +data)
             res.send({code: code, msg: msg, data: data});
         }else{
             res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
@@ -459,43 +485,6 @@ io.on('connection', function (socket) {
         }
     });
 
-    // 商城商品列表
-   /* socket.on("getShoppingList", function () {
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            gameInfo.getShoppingGoods(userId, (code, msg, data) =>{
-                if(code){
-                    socket.emit("getShoppingResult", {code: code, data: data});
-                }else{
-                    socket.emit("getShoppingResult", {code: code, msg: msg});
-                }
-            });
-        }else {
-            socket.emit('getShoppingResult', {code:ErrorCode.USER_OFFLINE.code,msg: ErrorCode.USER_OFFLINE.msg});
-        }
-    });*/
-
-    // 购买商品
-   /* socket.on("Shopping", async function (data) {
-        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-        if(!d || d.productId === undefined || d.count === undefined) return;
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
-            if(ret){
-                gameInfo.Shopping(socket.userId, d.productId, d.count, (code, msg, data) =>{
-                    CacheUtil.delUserProtocol(userId, "Shopping")
-                    if(code){
-                        socket.emit('ShoppingResult', {code:code,data: data});
-                    }else{
-                        socket.emit('ShoppingResult', {code:code,msg:msg});
-                    }
-                });
-            }
-        }else{
-            socket.emit('ShoppingResult', {code:ErrorCode.USER_OFFLINE.code, msg:ErrorCode.USER_OFFLINE.msg});
-        }
-    });*/
 
     // 兑换礼品
     socket.on("exchangeGift", async function (data) {
@@ -1253,7 +1242,7 @@ io.on('connection', function (socket) {
         }
     });
 
-    // 保存新手指引步数
+   /* // 保存新手指引步数
     socket.on("saveGuideStep", async function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
         if(!d || d.step === '' || !d.step) return;
@@ -1269,7 +1258,7 @@ io.on('connection', function (socket) {
         }else{
             socket.emit('saveGuideStepResult', {code:0, msg:"用户不在线"});
         }
-    });
+    });*/
 
 
     // 新用户送金币
