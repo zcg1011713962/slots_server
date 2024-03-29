@@ -28,7 +28,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
         const vipLevel =  row.housecard
         // 新手保护逻辑
         newhandProtectControl(userId, vipLevel > 0 , totalRecharge, (rebateRatio, newHandFlag, currUserGoldPool)=>{
-            log.info(userId + '用户下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool)
+            log.info(userId + '用户下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool + 'currScore:' + currScore + 'currBankScore:' +currBankScore + 'vipLevel' + vipLevel)
 
             // 获取总奖池
             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
@@ -87,23 +87,36 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
 
 // 是否需要弹首充商品
 async function winPopFirstRecharge(config, result, gameInfo) {
-    CacheUtil.getNewhandProtectConfig().then(cf =>{
-        try {
-            const winJackpot = result.viewarray.getJackpot['bFlag'];
-            const currTotalWinScore = StringUtil.addNumbers(config.historyWinScore, result.winscore);
-            if(cf.firstRecharge){
-               return;
-            }
-            log.info('用户' + config.userId + '未购买首充礼包' + 'currTotalWinScore:' + currTotalWinScore + 'winJackpot:' + winJackpot)
-            const protectScore = cf.protectScore;
-            if (StringUtil.compareNumbers(protectScore, currTotalWinScore) || winJackpot) {
-                CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
-            }
-        }catch (e){
-            log.err('是否需要弹首充商品' + e)
-        }
-    })
+    dao.searchFirstRecharge(config.userId, row =>{
+        CacheUtil.getNewhandProtectConfig().then(cf =>{
+            try {
+                if(!row) return;
+                const winScorePopFirstRecharge = row.winScorePopFirstRecharge;
+                const winJackpot = result.viewarray.getJackpot['bFlag'];
+                const currTotalWinScore = StringUtil.addNumbers(config.historyWinScore, result.winscore);
+                if(row.firstRecharge === null || row.firstRecharge === undefined || row.firstRecharge === 1){
+                    return;
+                }
 
+                const protectScore = cf.protectScore;
+                if (winJackpot) {
+                    log.info('中jackpot弹首充' +  config.userId)
+                    CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
+                }else if(currTotalWinScore > 0 && StringUtil.compareNumbers(protectScore, currTotalWinScore) &&  winScorePopFirstRecharge === 0){
+                    log.info('currTotalWinScore过大弹首充' +  config.userId)
+                    // 只弹一次
+                    dao.updateWinScorePopFirstRecharge(config.userId, ret =>{
+                        if(ret){
+                            CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
+                        }
+                    })
+                }
+                log.info(config.userId + '未购买首充礼包' + 'currTotalWinScore:' + currTotalWinScore + 'protectScore:' + protectScore + 'winJackpot:' + winJackpot )
+            }catch (e){
+                log.err('是否需要弹首充商品' + e)
+            }
+        })
+    })
 }
 
 // 新手保护逻辑

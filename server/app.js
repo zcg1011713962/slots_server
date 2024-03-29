@@ -753,9 +753,14 @@ io.on('connection', function (socket) {
         const userId = socket.userId;
         const ret = await CacheUtil.recordUserProtocol(userId, "withdraw");
         if (ret) {
-            gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg) => {
+            gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
-                socket.emit('withdrawResult', {code: code, msg: msg});
+                if(code){
+                    socket.emit('withdrawResult', {code: code, msg: msg, data: data});
+                }else{
+                    socket.emit('withdrawResult', {code: code, msg: msg});
+                }
+
             });
         }
     })

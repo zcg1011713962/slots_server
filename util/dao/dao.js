@@ -968,8 +968,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType,  callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, val) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -983,7 +983,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(service);
     values.push(mul);
     values.push(shopType);
-
+    values.push(val);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1012,7 +1012,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, val FROM pay_order where status = 0 and orderId = ? and userId = ?';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -2608,7 +2608,7 @@ exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
 
 // 获取是否购买过首充
 exports.searchFirstRecharge = function (userId, callback) {
-    const sql = "select firstRecharge  from userinfo  where userId = ?";
+    const sql = "select firstRecharge, winScorePopFirstRecharge  from userinfo  where userId = ?";
     let values = [];
     values.push(userId);
 
@@ -2668,11 +2668,13 @@ exports.searchUserMoney = function searchUserMoney(userId, callback) {
 
 
 // 锁定银行积分
-exports.lockBankScore = function lockBankScore(userId, bankScore , callback) {
-    const sql = "update userinfo_imp set bankScore = bankScore - ?, lockBankScore = lockBankScore + ? where userId = ?";
+exports.lockBankScore = function lockBankScore(userId, bankScore, lockWithdrawLimit , callback) {
+    const sql = "update userinfo_imp set bankScore = bankScore - ?, lockBankScore = lockBankScore + ?,  withdrawLimit = withdrawLimit - ?, lockWithdrawLimit = lockWithdrawLimit + ? where userId = ?";
     let values = [];
     values.push(bankScore);
     values.push(bankScore);
+    values.push(lockWithdrawLimit);
+    values.push(lockWithdrawLimit);
     values.push(userId);
 
     pool.getConnection(function (err, connection) {
@@ -2734,11 +2736,13 @@ exports.updateWithdrawPayStatus = function updateWithdrawPayStatus(userId, order
 
 
 // 解锁银行积分
-exports.unlockBankScore = function unlockBankScore(userId, bankScore , callback) {
-    const sql = "update userinfo_imp set bankScore = bankScore + ?, lockBankScore = lockBankScore - ? where userId = ?";
+exports.unlockBankScore = function unlockBankScore(userId, bankScore, withdrawLimit , callback) {
+    const sql = "update userinfo_imp set bankScore = bankScore + ?, lockBankScore = lockBankScore - ?,  withdrawLimit = withdrawLimit + ?, lockWithdrawLimit = lockWithdrawLimit - ? where userId = ?";
     let values = [];
     values.push(bankScore);
     values.push(bankScore);
+    values.push(withdrawLimit);
+    values.push(withdrawLimit);
     values.push(userId);
 
     pool.getConnection(function (err, connection) {
@@ -2797,6 +2801,34 @@ exports.updateGuideStep = function (userId, step, callback) {
     });
 }
 
+exports.updateWinScorePopFirstRecharge = function (userId, callback) {
+    const sql = "update userinfo set winScorePopFirstRecharge = 1 where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("updateWinScorePopFirstRecharge");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
 
 // 提现申请记录
 exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, callback) {

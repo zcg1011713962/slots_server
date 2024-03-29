@@ -78,7 +78,8 @@ const ScoreChangeType = {
     inviteBindUser: 4, // 邀请绑定给被邀请用户送金币
     inviteBindAgent: 5, // 邀请绑定给代理人送金币
     newHandGive: 6 ,//新手送金币
-    rebateShop: 7  // 邀请绑定-购物返点
+    rebateShop: 7,  // 邀请绑定-购物返点
+    bustBonus: 8  // 破产补助金
 };
 
 const NewHandFlag = {

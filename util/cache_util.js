@@ -246,13 +246,13 @@ exports.getGameJackpot  = function (callback){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
             // 游戏奖池
-            let gameJackpot = jackpot ? jackpot * (jackpotConfig.jackpot_ratio.game / 100) : 0;
+            let gameJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100)) : 0;
             // 奖池划分比例
             const game_jackpot_ratio = jackpotConfig.game_jackpot_ratio;
-            const grandJackpot =  Math.floor((gameJackpot * game_jackpot_ratio[0].ratio / 100).toFixed(2));
-            const majorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[1].ratio / 100).toFixed(2));
-            const minorJackpot = Math.floor((gameJackpot * game_jackpot_ratio[2].ratio / 100).toFixed(2));
-            const miniJackpot = Math.floor((gameJackpot * game_jackpot_ratio[3].ratio / 100).toFixed(2));
+            const grandJackpot =  StringUtil.rideNumbers(gameJackpot, game_jackpot_ratio[0].ratio / 100);
+            const majorJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[1].ratio / 100);
+            const minorJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[2].ratio / 100);
+            const miniJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[3].ratio / 100);
             const gJackpot= Math.floor(gameJackpot.toFixed(2));
             callback(gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
         });
