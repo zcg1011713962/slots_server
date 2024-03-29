@@ -177,13 +177,14 @@ app.get('/Shopping', async function (req, res) {
     const count = req.query.count ? req.query.count : 1;
     const service = req.query.service ? req.query.service : 0;
     const shopType = req.query.shopType ? req.query.shopType : 0;
-    log.info('购买商品' + userId + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service)
+    const serverId = req.query.serverId ? req.query.serverId : 0; // 大厅0 游戏serverId
+    log.info('购买商品' + userId + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId)
 
     if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
 
     const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
-        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType),(code, msg, data) => {
+        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, (code, msg, data) => {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 res.send({code: code, data: data});
@@ -205,15 +206,14 @@ app.get('/shoppingCallBack', async function (req, res) {
 
         const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
         if (ret) {
-            gameInfo.shoppingCallBack(userId, orderId, (code, msg, data, shopType, service) => {
+            gameInfo.shoppingCallBack(userId, orderId, (code, msg, data, shopType, service, serverId) => {
                 CacheUtil.delUserProtocol(userId, "shoppingCallBack")
                 // 响应
                 res.send({code: code, msg: msg});
                 // 回调socket
-                if(service === 0){ // 大厅
+                if(serverId === 0){ // 大厅
                     gameInfo.sendHallShopCallBack(userId, shopType, code, msg, data)
-                }else if(service === 1){ // 游戏内
-                    const serverId = 15129;
+                }else if(serverId !==0 ){ // 游戏内
                     gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
                 }
             });
@@ -243,18 +243,17 @@ app.get('/withdrawCallBack', async function (req, res) {
 });
 
 
-
 // 判断用户是否破产
 app.get('/bankrupt', function (req, res) {
     //验证版本
     const userId = req.query.userId ;
-    log.info('判断用户是否破产' + userId)
+    const serverId = req.query.serverId ? req.query.serverId : 0;
+    log.info('判断用户是否破产' + userId + 'serverId:' + serverId)
     if(userId === undefined || userId === ''){
         return;
     }
-    gameInfo.bankruptGrant(parseInt(userId), (code, msg, data) =>{
+    gameInfo.bankruptGrant(parseInt(userId), parseInt(serverId),(code, msg, data) =>{
         if(code){
-            log.info('判断用户是否破产' + userId + '数据:' +data)
             res.send({code: code, msg: msg, data: data});
         }else{
             res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
@@ -1266,9 +1265,10 @@ io.on('connection', function (socket) {
     });*/
 
 
-    // 新用户送金币
+    // 新手领送金币
     socket.on('newHandGive', async function () {
         const userId = socket.userId;
+        log.info('新手领送金币' +  userId)
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, 'newHandGive')
             if(ret){

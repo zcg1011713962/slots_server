@@ -254,7 +254,7 @@ var GameInfo = function () {
                 function (result, callback) {
                     // 登录成功返回结果
                     const login_token_key = 'login_token_key:';
-                    redis_laba_win_pool.get_redis_win_pool().then(function (data) {
+                    redis_laba_win_pool.get_redis_win_pool().then(jackpot => {
                         // 生成新token返回
                         StringUtil.generateUniqueToken().then(token =>{
                             RedisUtil.set(login_token_key + token , userInfo.Id).then(ret1 =>{
@@ -262,7 +262,7 @@ var GameInfo = function () {
                                 RedisUtil.expire(login_token_key + token, expire).then(ret2 =>{
                                     if(ret1 && ret2){
                                         result.Obj.token = token;
-                                        result.win_pool = data;
+                                        result.win_pool = Math.floor(Number(jackpot).toFixed(2));
                                         socket.emit('loginResult', result);
                                         ++self.onlinePlayerCount;
 
@@ -322,7 +322,7 @@ var GameInfo = function () {
             setTimeout(() => {
                 const noticeMsg = [{
                     type: TypeEnum.notifyType.vipEnterHall,
-                    content_id: "c2000",
+                    content_id: "languageId_256",
                     extend:{
                         vipLevel: userInfo.housecard,
                         nickName: userInfo.nickname,
@@ -521,27 +521,28 @@ var GameInfo = function () {
             }
         }
 
-        this.sendGameShopCallBack =function (userId, shopType, serverId ,code, msg, data) {
+        this.sendGameShopCallBack =function (userId, shopType, serverId, code, msg, data) {
             try {
-                /*const socket = this._io.sockets[serverId];
-                const params = {
-                    shopCallBack: 'ShopCallBack',
-                    protocel : 'ShoppingResult'
-                }*/
-                if (TypeEnum.ShopType.store === shopType) {
-                    this._io.sockets.emit('ShoppingResult', {code: code, data: data});
-                } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                    this._io.sockets._socket.emit('turntableResult', {code: code, data: data});
-                } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                    this._io.sockets._socket.emit('discountLimitedResult', {code: code, data: data});
+                const gameScoket = ServerInfo.getScoket(serverId);
+                if(gameScoket){
+                    log.info('商城购买回调，通知游戏内 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType)
+                    if (TypeEnum.ShopType.store === shopType) {
+                        gameScoket.emit('ShoppingResult', {code: code, data: data});
+                    } else if (TypeEnum.ShopType.free_turntable === shopType) {
+                        gameScoket._socket.emit('turntableResult', {code: code, data: data});
+                    } else if (TypeEnum.ShopType.discount_Limited === shopType) {
+                        gameScoket._socket.emit('discountLimitedResult', {code: code, data: data});
+                    }
+                }else{
+                    log.err('商城购买回调，通知游戏内 userId:' + userId + 'serverId:' + serverId )
                 }
             }catch (e){
-
+                log.err('sendGameShopCallBack' + e);
             }
         }
 
         //商城购买
-        this.Shopping = function (userId, productId, count, service, shopType, callback) {
+        this.Shopping = function (userId, productId, count, service, shopType, serverId, callback) {
             CacheUtil.getServerUrlConfig().then(config =>{
                 try {
                     const hallUrl = config.hallUrl ? config.hallUrl : '';
@@ -549,11 +550,11 @@ var GameInfo = function () {
                     const orderId = StringUtil.generateOrderId();
 
                     if(TypeEnum.ShopType.store === shopType){
-                        this.storeBuy(orderId, userId, productId, count, service, hallUrl, callback)
+                        this.storeBuy(orderId, userId, productId, count, service, hallUrl, serverId,  callback)
                     }else if(TypeEnum.ShopType.free_turntable === shopType){
-                        this.turntableBuy(orderId, userId, productId, service, hallUrl, callback);
+                        this.turntableBuy(orderId, userId, productId, service, hallUrl, serverId, callback);
                     }else if(TypeEnum.ShopType.discount_Limited === shopType){
-                        this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, callback);
+                        this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, serverId, callback);
                     }else{
                         callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                     }
@@ -564,7 +565,7 @@ var GameInfo = function () {
             })
         };
         
-        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, callback) {
+        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, serverId, callback) {
             const self = this;
 
             CacheUtil.getUserDiscountLimited(userId).then(ok =>{
@@ -595,7 +596,7 @@ var GameInfo = function () {
                             if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
-                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store,ret =>{
+                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store, 1, serverId,ret =>{
                                         if(ret){
                                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                         }else{
@@ -615,7 +616,7 @@ var GameInfo = function () {
 
         }
         
-        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, callback) {
+        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, serverId, callback) {
             const self = this;
             // 获取幸运币配置
             CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig => {
@@ -643,7 +644,7 @@ var GameInfo = function () {
                         if(orderResult && orderResult.code === 200){
                             self.getVipLevel(userId, vipLevel =>{
                                 // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, TypeEnum.GoodsType.turntableTicket, amount, 0, service, mul, TypeEnum.ShopType.free_turntable, ret =>{
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, TypeEnum.GoodsType.turntableTicket, amount, 0, service, mul, TypeEnum.ShopType.free_turntable, 1, serverId, ret =>{
                                     if(ret){
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                     }else{
@@ -662,7 +663,7 @@ var GameInfo = function () {
             });
         }
         
-        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, callback) {
+        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, serverId, callback) {
             const self = this;
             // 查询购买的金币道具的数量和价值
             CacheUtil.getShopConfig().then(shopConfig =>{
@@ -698,7 +699,7 @@ var GameInfo = function () {
                             if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
-                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.store, val, ret =>{
+                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.store, val, serverId, ret =>{
                                         if(ret){
                                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                         }else{
@@ -785,11 +786,15 @@ var GameInfo = function () {
                     const mul = row.mul;
                     const service = row.service;
                     const val = row.val;
+                    const serverId = row.serverId;
+
 
                     if(TypeEnum.ShopType.store === shopType){
-                        this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, callback)
+                        this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, callback)
                     }else if(TypeEnum.ShopType.free_turntable === shopType){
-                        this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, callback)
+                        this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
+                    }else if (TypeEnum.ShopType.discount_Limited === shopType){
+                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {goodsType: goodsType, val: val})
                     }else{
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
@@ -836,7 +841,7 @@ var GameInfo = function () {
         }
         
         
-        this.bankruptGrant = function (userId, callback) {
+        this.bankruptGrant = function (userId, serverId, callback) {
             dao.searchUserById(userId, (code, row) =>{
                 if(!code){
                     callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
@@ -851,31 +856,45 @@ var GameInfo = function () {
                     const remainTimes = StringUtil.reduceNumbers(bustTimes, getBustTimes);
 
                     if(bankrupt && StringUtil.compareNumbers(getBustTimes, bustTimes)){   // 破产且还有补助金领取次数
-                        // 发放补助金
-                        dao.addAccountScore(userId, parseInt(bustBonus), (r) =>{
-                            if(!r){
-                                callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
-                                return;
-                            }
-                            dao.scoreChangeLog(userId, score_before, parseInt(bustBonus), score_current, TypeEnum.ScoreChangeType.bustBonus, 1)
-                            log.info(userId + '领取破产补助:' + bustBonus + '已领取次数:' + getBustTimes)
-                            if(this.userList[userId]) this.userList[userId]._score +=  Number(bustBonus);
-                            // 减少领取次数
-                            dao.addGetBustTimes(userId, ret =>{
-                                if(!ret){
+                        dao.getUserCoinById(userId, (code, score_before) =>{
+                            // 发放补助金
+                            dao.addAccountScore(userId, parseInt(bustBonus), (r) =>{
+                                if(!r){
                                     callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                     return;
                                 }
-                                log.info(userId + '破产补助金发放' + bustBonus + '剩余领取次数' + remainTimes)
-                                const data = {
-                                    bankrupt: true,
-                                    bustBonus: bustBonus,
-                                    bustTimes: remainTimes
+                                const score_current = StringUtil.addNumbers(score_before, bustBonus);
+                                dao.scoreChangeLog(userId, score_before, parseInt(bustBonus), score_current, TypeEnum.ScoreChangeType.bustBonus, 1)
+                                log.info(userId + '领取破产补助:' + bustBonus + '已领取次数:' + getBustTimes)
+
+
+                                if(this.userList[userId]){
+                                    this.userList[userId]._score +=  Number(bustBonus)
+                                }else{
+                                    const gameScoket = ServerInfo.getScoket(serverId);
+                                    if(gameScoket){
+                                        gameScoket.emit('addgold', {userid: userId, addgold: parseInt(bustBonus)})
+                                    }
                                 }
-                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+
+                                // 减少领取次数
+                                dao.addGetBustTimes(userId, ret =>{
+                                    if(!ret){
+                                        callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
+                                        return;
+                                    }
+                                    log.info(userId + '破产补助金发放' + bustBonus + '剩余领取次数' + remainTimes)
+                                    const data = {
+                                        bankrupt: true,
+                                        bustBonus: bustBonus,
+                                        bustTimes: remainTimes
+                                    }
+                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                })
                             })
                         })
                     }else{
+                        log.info(userId + '破产:' + bankrupt + '已领取次数:' + getBustTimes + '配置补助次数:' +  bustTimes)
                         const data = {
                             bankrupt: false,
                             bustBonus: bustBonus,
@@ -889,7 +908,7 @@ var GameInfo = function () {
         }
 
         // 商城购买回调
-        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, callback) {
+        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, callback) {
 
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
@@ -968,12 +987,12 @@ var GameInfo = function () {
                                     }
                                     result.firstRecharge = self.userList[userId].firstRecharge;
                                     result.vipLevel = self.userList[userId].vip_level;
-                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service)
+                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service, serverId)
                                 } else {
                                     // 查询是否购买首充礼包
                                     dao.searchFirstRecharge(userId, row => {
                                         result.firstRecharge = row.firstRecharge;
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service)
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service, serverId)
                                     })
                                 }
 
@@ -988,13 +1007,13 @@ var GameInfo = function () {
         }
 
         // 免费转盘购买回调
-        this.freeTurntableBuyCallback = function (userId, orderId, mul, shopType, service, callback) {
+        this.freeTurntableBuyCallback = function (userId, orderId, mul, shopType, service, serverId, callback) {
             this.turntableCharge(userId, mul, (code, msg, data) =>{
                 if(code){
                     // 更新订单状态
                     dao.updateOrder(userId, orderId, ret =>{})
                 }
-                callback(code, msg, data,  shopType, service)
+                callback(code, msg, data,  shopType, service, serverId)
             });
         }
 
@@ -1030,7 +1049,7 @@ var GameInfo = function () {
             ymDao.cdKeySearch(cdkey, row =>{
                 if(row){
                     if(row.status === 1){
-                        callback(0, "已使用过的兑换卷")
+                        callback(ErrorCode.CDK_USERED_ERROR.code, ErrorCode.CDK_USERED_ERROR.msg)
                         return;
                     }
                     // 更新兑换卷状态=已使用
@@ -1047,7 +1066,7 @@ var GameInfo = function () {
                         }
                     });
                 }else{
-                    callback(0, "不存在的兑换卷")
+                    callback(ErrorCode.CDK_EXPIRE.code, ErrorCode.CDK_EXPIRE.msg)
                 }
             })
         }
@@ -3280,60 +3299,6 @@ var GameInfo = function () {
             }
         };
 
-        // 充值
-       /* this.Recharge = function (userId, currencyType, amount, callback) {
-            // 查询累计充值
-            dao.checkTotalCharge(parseInt(userId), (res, data) => {
-                if(!amount || amount < 0){
-                    callback(0);
-                    return;
-                }
-                try {
-                    if (res === 1) {
-                        data.totalRecharge += parseInt(amount);
-                        const housecard = data.housecard;
-                        const scoreFlow = data.score_flow ? data.score_flow: 0;
-                        // 增加账户余额
-                        this.add_bx_balance(userId, amount, (ret) => {
-                            if (!ret) {
-                                log.err('add_bx_balance' + ret);
-                                callback(0);
-                            } else {
-                                log.info('充值成功' + userId +'增加货币类型:' + currencyType  + '数量:' + amount);
-
-                                // 计算充值获得VIP积分
-                                const rechargeVipScore = data.totalRecharge * (gameConfig.recharge_vip_socre_percentage / 100);
-                                const flowVipScore = (scoreFlow / gameConfig.score_amount_ratio) * (gameConfig.flow_vip_socre_percentage / 100);
-
-                                // VIP积分=充值获得积分+消费流水获得积分
-                                const vScore = parseInt(rechargeVipScore) + parseInt(flowVipScore);
-                                // 计算VIP等级
-                                this.getVipLevelByScore(vScore, vipLevel =>{
-                                    // 更新VIP积分
-                                    this.userList[userId].vip_score = vScore;
-                                    this.updateVipScore(userId, vScore);
-
-                                    // VIP升级
-                                    this.vipUpgrade(userId, vipLevel, housecard);
-                                    // 更新下级充值返点
-                                    this.juniorRecharge(userId, currencyType, amount);
-                                    // 修改累计充值
-                                    this.updateTotalCharge(userId, data.totalRecharge, amount);
-                                    callback(1);
-                                });
-                            }
-                        });
-
-                    } else {
-                        callback(0);
-                    }
-                }catch (e) {
-                    log.err(e);
-                    callback(0);
-                }
-            });
-        }*/
-
         // VIP升级
         this.vipUpgrade = function (userId, vipLevel, housecard) {
             // VIP升级
@@ -3346,7 +3311,7 @@ var GameInfo = function () {
                         const _nickname = this.userList[userId] ? this.userList[userId]._nickname : userId;
                         const noticeMsg = [{
                             type: TypeEnum.notifyType.vipUpgrade,
-                            content_id: "c2001",
+                            content_id: "languageId_257",
                             extend: {
                                 currVipLevel: vipLevel,
                                 oldVipLevel: housecard,

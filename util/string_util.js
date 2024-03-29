@@ -115,6 +115,9 @@ exports.generateGameResult  = function generateGameResult(winRate) {
     if(winRate === undefined){
         return winRate;
     }
+    if(winRate <= 0){
+        return false;
+    }
     const randomNumber = Math.random(); // 生成一个 0 到 1 之间的随机数
     return randomNumber < winRate
 }

@@ -968,8 +968,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, val) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -984,6 +984,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(mul);
     values.push(shopType);
     values.push(val);
+    values.push(serverId);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1012,7 +1013,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, val FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId FROM pay_order where status = 0 and orderId = ? and userId = ?';
     let values = [];
     values.push(orderId);
     values.push(userId);

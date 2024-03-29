@@ -6,18 +6,13 @@ class ErrorCode {
     static get ERROR() { return { code: 0, msg: '出错了' }; }
     static get USER_OFFLINE() { return { code: 0, msg: '用户不在线' }; }
 
-
-
     static get REGISTER_SUCCESS() { return { code: 'R200', msg: '注册成功' }; }
     static get ACCOUNT_REGISTERED_ERROR() { return { code: 'R400', msg: '账号已注册' }; }
 
-
     static get EMAIL_CODE_VERIFY_SUCCESS() { return { code: 'E210', msg: '校验成功' }; }
 
-
-
-    static get EMAIL_CODE_INPUT_ERROR() { return { code: 'E401', msg: '验证码错误' }; }
-    static get EMAIL_CODE_EXPIRED() { return { code: 'E402', msg: '验证码过期' }; }
+    static get EMAIL_CODE_INPUT_ERROR() { return { code: 'E401', msg: '验证码不正确', langCode: 'languageId_260' }; }
+    static get EMAIL_CODE_EXPIRED() { return { code: 'E402', msg: '验证码已失效，请重新获取', langCode: 'languageId_261' }; }
     static get EMAIL_CODE_FAILED() { return { code: 'E403', msg: '错误的验证码' }; }
     static get EMAIL_INPUT_ERROR() { return { code: 'E404', msg: '邮箱格式错误' }; }
     static get EMAIL_BINDED() { return { code: 'E405', msg: '邮箱已绑定' }; }
@@ -32,6 +27,8 @@ class ErrorCode {
     static get LOGIN_ACCOUNT_NOT_FOUND() { return { code: 'L405', msg: '账户不存在' }; }
     static get LOGIN_ERROR() { return { code: 'L406', msg: '登录错误' }; }
     static get LOGIN_TOKEN_NOT_FOUND() { return { code: 'L407', msg: 'token过期' }; }
+    static get CDK_USERED_ERROR() { return { code: 'E500', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_13' }; }
+    static get CDK_EXPIRE() { return { code: 'E501', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_12' }; }
 }
 
 module.exports = ErrorCode;

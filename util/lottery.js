@@ -70,7 +70,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
                                         winPopFirstRecharge(config, result, gameInfo).then();
                                     }
                                 }catch (e) {
-                                    log.err(userId + 'doLottery' + e);
+                                    log.err(userId + 'doLottery' + e.stack);
                                     socket.emit('lotteryResult', {ResultCode: -1});
                                 }
                             })

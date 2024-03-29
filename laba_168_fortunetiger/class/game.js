@@ -429,10 +429,9 @@ var GameInfo = function () {
                 console.log("加分,未登录");
                 return 0
             } else {
-                console.log(score);
                 if (this.userList[_userId].addgold(score)) {
-                    console.log(this.userList[_userId].getScore());
-                    console.log("加分成功!");
+                    log.info('游戏内增加金币:' + score + '当前金币:' + this.userList[_userId].getScore())
+
                     var tablestring = "table" + this.userList[_userId].getTable();
                     this._io.sockets.in(tablestring).emit('addgoldResult', {
                         userId: _userId,
