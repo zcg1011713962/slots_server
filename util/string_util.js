@@ -134,6 +134,18 @@ exports.addNumbers  = function addNumbers(a, b) {
     return num1 + num2;
 }
 
+exports.addTNumbers  = function addTNumbers(a, b, c) {
+    // 使用parseInt()或parseFloat()将输入转换为数字
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    const num3 = parseFloat(c);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2) || isNaN(num3)) {
+        return NaN;
+    }
+    return num1 + num2 + num3;
+}
+
 
 exports.reduceNumbers  = function reduceNumbers(a, b) {
     // 使用parseInt()或parseFloat()将输入转换为数字
@@ -167,6 +179,33 @@ exports.rideNumbers  = function rideNumbers(a, b) {
         return NaN;
     }
     return Math.floor((num1 * num2).toFixed(2));
+}
+
+
+
+
+exports.RandomNumForList = function RandomNumForList(arr) {
+    //从指定数组中选取随机值
+    return arr[Math.floor((Math.random() * arr.length))]
+}
+
+exports.RandomNumBoth = function RandomNumBoth(Min, Max) {
+    //生成指定范围内随机整数
+    var Range = Max - Min;
+    var Rand = Math.random();
+    var num = Min + Math.round(Rand * Range); //四舍五入
+    return num;
+}
+
+exports.list_one_count = function list_one_count(x, list) {
+    //数组中指定值出现次数
+    var count = 0;
+    for (var i in list) {
+        if (list[i] == x) {
+            count++
+        }
+    }
+    return count;
 }
 
 

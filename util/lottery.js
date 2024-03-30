@@ -28,7 +28,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
         const vipLevel =  row.housecard
         // 新手保护逻辑
         newhandProtectControl(userId, vipLevel > 0 , totalRecharge, (rebateRatio, newHandFlag, currUserGoldPool)=>{
-            log.info(userId +'下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool + 'currScore:' + currScore + 'currBankScore:' +currBankScore + 'vipLevel' + vipLevel)
+            log.info(userId+ '数据库金币:' + currScore + '游戏账户金币:'+ gameInfo.userList[userId]._score +'下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool + 'currScore:' + currScore + 'currBankScore:' +currBankScore + 'vipLevel' + vipLevel)
 
             // 获取总奖池
             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
@@ -239,6 +239,8 @@ function preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig, reb
     config.nGameMagicCardIndex  = -1;
     // 空白图案
     config.blankCard  = -1;
+    // 开宝箱牌
+    config.openBoxCard = -1;
     for (let i = 0; i < gameConfig.iconInfos.length; i++) {
         if(gameConfig.iconInfos[i].icon_s_type_WILD){
             config.nGameMagicCardIndex = gameConfig.iconInfos[i].icon_type;
@@ -252,6 +254,9 @@ function preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig, reb
         }
         if(gameConfig.iconInfos[i].icon_s_type_jackpot){
             config.jackpotCard = gameConfig.iconInfos[i].icon_type;
+        }
+        if(gameConfig.iconInfos[i].icon_s_type_openBoxCard){
+            config.openBoxCard = gameConfig.iconInfos[i].icon_type;
         }
     }
     config.jackpotRatio = jackpotConfig.game_jackpot_ratio.map(item => item.ratio)
@@ -324,9 +329,7 @@ function Lottery(config, gameInfo, newHandFlag) {
     let fin_value = 0;
     let source_rtp = 0;
     let dictAnalyseResult = {};
-    let lotteryCount = 0;
-    let lotteryCountLimit = 50;
-
+    let openBoxCardWin = 0;
     // 返奖率
     const winFlag = StringUtil.generateGameResult(config.rebateRatio);
 
@@ -378,22 +381,22 @@ function Lottery(config, gameInfo, newHandFlag) {
         if (config.gameName === 'fortunetiger') {
             // 老虎全屏
             tigerFullScreen(dictAnalyseResult, config.nGameLines);
+        }else if(config.gameName === 'GrandWheel'){
+            openBoxCardWin = ddddd(dictAnalyseResult, nHandCards, config.openBoxCard, config.nBetSum)
         }
 
         // 图案连线奖
         win = dictAnalyseResult["win"];
         // 图案最终价值
-        fin_value = StringUtil.addNumbers(win, winJackpot);
+        fin_value = StringUtil.addTNumbers(win, winJackpot, openBoxCardWin);
 
         // 开了配牌器
         if (config.iconTypeBind && config.iconTypeBind.length > 0) {
             break;
         }
 
-
-
         // 预期是赢 赢的不超过线注
-        if(winFlag && config.nBetSum >= fin_value){
+        if(winFlag && config.nBetSum < fin_value){
             break;
         }
         // 返奖率控制流程 输赢与预期不符
@@ -428,7 +431,7 @@ function Lottery(config, gameInfo, newHandFlag) {
     }
 
     // 减少库存和奖池
-    const winscore =  StringUtil.addNumbers(dictAnalyseResult["win"], winJackpot)
+    const winscore =  StringUtil.addTNumbers(dictAnalyseResult["win"], winJackpot, openBoxCardWin)
     if (winscore > 0) {
         // 赢
         if (GamblingBalanceLevelBigWin.nGamblingBalanceGold < win) {
@@ -461,6 +464,69 @@ function Lottery(config, gameInfo, newHandFlag) {
     LABA.handCardLog(nHandCards, config.col_count, config.line_count, config.nBetSum, winscore, winJackpot, expectRTP);
     // 返回结果
     return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, 0);
+}
+
+
+function ddddd(dictAnalyseResult, nHandCards, openBoxCard, nBetSum){
+    let openBoxCardWin = 0;
+
+    let bonusNum = StringUtil.list_one_count(openBoxCard, nHandCards);
+    if (bonusNum === 1) {
+        let resultList = [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 15, 18, 28, 30, 38];
+        let mul = StringUtil.RandomNumForList(resultList);
+        for (let i = 0; i < nHandCards.length; i++) {
+            if (nHandCards[i] === openBoxCard) {
+                let data = {
+                    mul: mul,
+                    count: 1,
+                    list: resultList,
+                };
+                dictAnalyseResult["bonusList"][i] = data;
+                dictAnalyseResult["nWinCards"][i] = true;
+            }
+        }
+        openBoxCardWin += mul * nBetSum;
+    } else if (bonusNum === 2) {
+        let resultList = [8, 10, 12, 15, 16, 18, 19, 20, 25, 28, 30, 36, 38, 40, 48, 50];
+        let mul = StringUtil.RandomNumForList(resultList);
+        let mul1 = StringUtil.RandomNumBoth(0, mul - 1);
+        let mul2 = mul - mul1;
+        let idx = 0;
+        for (let i = 0; i < nHandCards.length; i++) {
+            if (nHandCards[i] === openBoxCard) {
+                let data = {};
+                if (idx === 0) {
+                    data = {
+                        mul: mul1,
+                        count: 2,
+                        list: [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 15, 18, 28, 30, 38],
+                    };
+                    idx++;
+                } else {
+                    data = {
+                        mul: mul2,
+                        count: 2,
+                        list: [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 15, 18, 28, 30, 38],
+                    };
+                }
+                dictAnalyseResult["bonusList"][i] = data;
+                dictAnalyseResult["nWinCards"][i] = true;
+            }
+        }
+        openBoxCardWin += mul * nBetSum;
+    } else if (bonusNum === 3) {
+        dictAnalyseResult["nWinCards"] = [true, true, true];
+        let resultList = [20, 888, 25, 188, 58, 1000, 500, 35, 70, 30, 138, 55, 288, 60, 80, 50, 38, 88, 75, 68, 18, 28, 15];
+        let mul = StringUtil.RandomNumForList(resultList);
+        dictAnalyseResult["getOpenBox"] = {
+            bFlag: true,
+            mul: mul,
+            list: resultList,
+            win: mul * nBetSum,
+        };
+        openBoxCardWin += mul * nBetSum;
+    }
+    return openBoxCardWin;
 }
 
 

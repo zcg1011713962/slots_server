@@ -508,15 +508,24 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
     }
     let _bet = nBetSum;
 
-    let l = gameInfo.userList[config.userId].getWildList();
-    let haveNewWild = false;
-    for (let i = 0; i < l.length; i++) {
-        if (l[i]) {
-            nHandCards[i] = config.nGameMagicCardIndex;
-        } else if (nHandCards[i] === config.nGameMagicCardIndex) {
-            haveNewWild = true;
+    let array = gameInfo.userList[config.userId].getWildList();
+
+
+    let wilds = [];
+    // 上次定住百变的位置
+    if(array.length > 0){
+        for (let i = 0; i < array.length; i++) {
+            if(array[i]){
+                nHandCards[i] = config.nGameMagicCardIndex;
+                log.info('上次定住百变的位置:' + i)
+                wilds.push(true);
+            }else{
+                wilds.push(false);
+            }
         }
+        gameInfo.userList[config.userId].setWildList([false, false, false]);
     }
+
 
     let haveWin = false;
     let wildNum = list_one_count(nGameMagicCardIndex, nHandCards);
@@ -637,17 +646,33 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
     }
 
 
-    if (haveNewWild) {
-        if (wildNum > 0 && wildNum < 3) {
-            dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 1};
+    // 把上次替换的万能卡 变为普通卡
+    if(array.length > 0){
+        for (let i = 0; i < array.length; i++) {
+            if(array[i]){
+                nHandCards[i] = 1;
+            }
         }
     }
-
 
     // 获取免费次数
     if (freeCards && freeCards.length > 0) {
         dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);
     }
+
+    // 把万能卡存起来
+    let list = [];
+    for (let i = 0; i < nHandCards.length; i++) {
+        if (nHandCards[i] === nGameMagicCardIndex) {
+            list.push(true);
+        } else {
+            list.push(false);
+        }
+    }
+    gameInfo.userList[config.userId].setWildList(list);
+
+
+
 
 }
 

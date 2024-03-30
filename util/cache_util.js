@@ -360,9 +360,9 @@ exports.addPlayGameCount = function (userId){
             // 幸运活动增加玩游戏次数
             RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
                 const d = JSON.parse(ret);
-                if(d && d.doLuckyCoinTask){
-                    const doLuckyCoinTask = d.doLuckyCoinTask;
-                    d.doLuckyCoinTask = parseInt(doLuckyCoinTask) + 1;
+                const doLuckyCoinTask = d.doLuckyCoinTask === undefined ? 0 : parseInt(d.doLuckyCoinTask);
+                if(d){
+                    d.doLuckyCoinTask = doLuckyCoinTask + 1;
                     if(StringUtil.compareNumbers(doLuckyCoinTask, d.luckyCoinTask)){
                         RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
                     }

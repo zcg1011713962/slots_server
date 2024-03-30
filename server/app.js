@@ -158,7 +158,7 @@ app.get('/goodsList', function (req, res) {
 // 获取限时折扣物品
 app.get('/discountLimited', function (req, res) {
     const userId = req.query.userId;
-    log.info('获取限时折扣物品' + userId)
+    log.info(userId + '获取限时折扣物品')
     if(userId === undefined || userId === ''){
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
@@ -442,6 +442,7 @@ io.on('connection', function (socket) {
             return;
         }
         const userId = socket.userId;
+        log.info('发送邮箱验证码' + userId)
         try {
             const ret = await CacheUtil.recordUserProtocol(userId, "sendEmailCode");
             if(ret){

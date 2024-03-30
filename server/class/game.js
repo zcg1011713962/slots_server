@@ -589,6 +589,8 @@ var GameInfo = function () {
                     const amount = parseFloat(shopItem['target_price']);
                     // 巴西币
                     const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
+                    // 金币数量
+                    const val = parseFloat(shopItem['Discount_BONUS']);
 
                     const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                     // 下购买订单
@@ -599,7 +601,7 @@ var GameInfo = function () {
                             //if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
-                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store, 1, serverId,ret =>{
+                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store, val, serverId,ret =>{
                                         if(ret){
                                             //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
@@ -800,8 +802,7 @@ var GameInfo = function () {
                     }else if(TypeEnum.ShopType.free_turntable === shopType){
                         this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
                     }else if (TypeEnum.ShopType.discount_Limited === shopType){
-                        const data = {goodsType: goodsType, val: val}
-                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                        this.discountLimitedBuyCallback(userId, serverId, goodsType, val, callback)
                     }else{
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
@@ -957,13 +958,22 @@ var GameInfo = function () {
                                 }
 
                                 if (TypeEnum.GoodsType.gold === goodsType) {
+                                    if(this.userList[userId]){
+                                        this.userList[userId]._score +=  Number(totalVal)
+                                    }else{
+                                        const gameScoket = ServerInfo.getScoket(serverId);
+                                        if(gameScoket){
+                                            gameScoket.emit('addgold', {userid: userId, addgold: parseInt(totalVal)})
+                                        }
+                                    }
+                                    log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型'+ currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
                                     // 账户增加金币
-                                    dao.addAccountScore(userId, totalVal, ret =>{
+                                   /* dao.addAccountScore(userId, totalVal, ret =>{
                                         if(ret){
                                             if(this.userList[userId]) this.userList[userId]._score +=  Number(totalVal);
                                             log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型'+ currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
                                         }
-                                    })
+                                    })*/
                                 } else if (TypeEnum.GoodsType.diamond === goodsType) {
                                     if(self.userList[userId]){
                                         // 账户增加钻石
@@ -1022,6 +1032,18 @@ var GameInfo = function () {
                 }
                 callback(code, msg, data,  shopType, service, serverId)
             });
+        }
+        
+        this.discountLimitedBuyCallback = function (userId, serverId, goodsType, val, callback) {
+            if(this.userList[userId]){
+                this.userList[userId]._score +=  Number(val)
+            }else{
+                const gameScoket = ServerInfo.getScoket(serverId);
+                if(gameScoket){
+                    gameScoket.emit('addgold', {userid: userId, addgold: val})
+                }
+            }
+            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {goodsType: goodsType, val: val})
         }
 
 
