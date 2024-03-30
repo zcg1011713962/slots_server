@@ -17,6 +17,7 @@ User = function(userInfo,_socket){
 	this.SeatId = -1;			//座位ID
 	this.sign = "";
 	this._isLeave = true;
+	this.wildList = [];
 
 	this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.userid;
@@ -158,6 +159,17 @@ User = function(userInfo,_socket){
 	//获得免费游戏次数
 	this.getFreeCount = function(){
 		return this.freeCount;
+	};
+
+
+	//获得万能位置
+	this.getWildList = function () {
+		return this.wildList;
+	}
+
+	//保存万能位置
+	this.setWildList = function (list) {
+		this.wildList = list;
 	};
 
 	this.init(userInfo,_socket);

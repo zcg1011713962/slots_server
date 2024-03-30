@@ -1,7 +1,7 @@
 const ErrorCode = require("./ErrorCode");
 const log = require('../CClass/class/loginfo').getInstand
 
-// 游戏内推首充礼包
+// 推首充礼包
 exports.pushFirstRecharge = function (socket) {
     try {
         if(socket){

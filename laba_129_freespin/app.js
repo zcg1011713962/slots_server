@@ -74,6 +74,21 @@ Csocket.on('getgold', function (msg) {
 
 });
 
+Csocket.on('gameForward', function (msg) {
+    if (!msg) {
+        return;
+    }
+    const protocol = msg.protocol;
+    const data = msg.data;
+    const userId = msg.userId;
+    if(gameInfo.userList[userId]){
+        gameInfo.userList[userId]._socket.emit(protocol, data);
+    }else{
+        log.info('gameForward' + userId + '用户不在游戏内')
+    }
+
+});
+
 Csocket.on('disconnectUser', function (msg) {
     //console.log("disconnectUser" + msg.userId);
     var list = gameInfo.getOnlinePlayer();

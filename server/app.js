@@ -142,6 +142,7 @@ app.get('/goodsList', function (req, res) {
     const userId = req.query.userId;
     log.info('获取商品列表' + userId)
     if(userId === undefined || userId === ''){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
     }
     gameInfo.getShoppingGoods(parseInt(userId), (code, msg, data) =>{
@@ -159,6 +160,7 @@ app.get('/discountLimited', function (req, res) {
     const userId = req.query.userId;
     log.info('获取限时折扣物品' + userId)
     if(userId === undefined || userId === ''){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
     }
     gameInfo.discountLimited(parseInt(userId), (code, msg, data) =>{
@@ -178,17 +180,22 @@ app.get('/Shopping', async function (req, res) {
     const service = req.query.service ? req.query.service : 0;
     const shopType = req.query.shopType ? req.query.shopType : 0;
     const serverId = req.query.serverId ? req.query.serverId : 0; // 大厅0 游戏serverId
-    log.info('购买商品' + userId + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId)
+    log.info(userId + '购买商品' + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId)
 
-    if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined) return;
+    if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined || isNaN(serverId)) {
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return
+    }
 
     const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
         gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, (code, msg, data) => {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
+                log.info(userId + '购买商品下单成功');
                 res.send({code: code, data: data});
             }else{
+                log.info(userId + '购买商品下单失败');
                 res.send({code: code, msg: msg});
             }
         });
@@ -202,7 +209,10 @@ app.get('/shoppingCallBack', async function (req, res) {
         const userId = req.query.userId ? Number(req.query.userId) : 0;
         const orderId = req.query.orderId ? req.query.orderId : null;
         log.info('购买商品订单回调' + userId + '订单' + orderId)
-        if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
+        if (userId === undefined || userId === '' || orderId === undefined || orderId === ''){
+            res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+            return;
+        }
 
         const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
         if (ret) {
@@ -212,7 +222,7 @@ app.get('/shoppingCallBack', async function (req, res) {
                 res.send({code: code, msg: msg});
                 // 回调socket
                 if(serverId === 0){ // 大厅
-                    gameInfo.sendHallShopCallBack(userId, shopType, code, msg, data)
+                    gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
                 }else if(serverId !==0 ){ // 游戏内
                     gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
                 }
@@ -232,7 +242,10 @@ app.get('/withdrawCallBack', async function (req, res) {
     const userId = req.query.userId ? Number(req.query.userId) : 0;
     const orderId = req.query.orderId ? req.query.orderId : null;
     log.info('提现审核通过回调地址' + userId + '订单' + orderId)
-    if (userId === undefined || userId === '' || orderId === undefined || orderId === '') return;
+    if (userId === undefined || userId === '' || orderId === undefined || orderId === ''){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return;
+    }
     gameInfo.withdrawCallBack(userId, orderId, (code, msg) =>{
         if(code){
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
@@ -250,6 +263,7 @@ app.get('/bankrupt', function (req, res) {
     const serverId = req.query.serverId ? req.query.serverId : 0;
     log.info('判断用户是否破产' + userId + 'serverId:' + serverId)
     if(userId === undefined || userId === ''){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
     }
     gameInfo.bankruptGrant(parseInt(userId), parseInt(serverId),(code, msg, data) =>{

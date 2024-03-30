@@ -28,7 +28,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
         const vipLevel =  row.housecard
         // 新手保护逻辑
         newhandProtectControl(userId, vipLevel > 0 , totalRecharge, (rebateRatio, newHandFlag, currUserGoldPool)=>{
-            log.info(userId + '用户下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool + 'currScore:' + currScore + 'currBankScore:' +currBankScore + 'vipLevel' + vipLevel)
+            log.info(userId +'下注:' + nBetSum + '返奖率:' + rebateRatio + '是否新手:' + newHandFlag + '当前用户金币池:' + currUserGoldPool + 'currScore:' + currScore + 'currBankScore:' +currBankScore + 'vipLevel' + vipLevel)
 
             // 获取总奖池
             redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
@@ -100,10 +100,10 @@ async function winPopFirstRecharge(config, result, gameInfo) {
 
                 const protectScore = cf.protectScore;
                 if (winJackpot) {
-                    log.info('中jackpot弹首充' +  config.userId)
+                    log.info(config.userId + '中jackpot弹首充')
                     CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
                 }else if(currTotalWinScore > 0 && StringUtil.compareNumbers(protectScore, currTotalWinScore) &&  winScorePopFirstRecharge === 0){
-                    log.info('currTotalWinScore过大弹首充' +  config.userId)
+                    log.info(config.userId + 'currTotalWinScore过大弹首充')
                     // 只弹一次
                     dao.updateWinScorePopFirstRecharge(config.userId, ret =>{
                         if(ret){
@@ -136,7 +136,8 @@ function newhandProtectControl (userId, isVip, totalRecharge, callback) {
 
 
             CacheUtil.getPlayGameWinscore(userId).then(winscore => {
-                if (totalRecharge > recharge && StringUtil.compareNumbers(protectScore, winscore)) {  // 充值大于新手保护金额且 赢的金币大于新手保护金币
+               log.info(userId +'新手保护判断 总充值:' + totalRecharge + '跳出新手保护需要充值:' + recharge + '新手保护分:' + protectScore + '新手赢分差:' + winscore);
+                if (totalRecharge > 0  && StringUtil.compareNumbers(recharge, totalRecharge) && StringUtil.compareNumbers(protectScore, winscore)) {  // 充值大于新手保护金额且 赢的金币大于新手保护金币
                     // 跳过新手保护区
                     // 获取自动黑白名单-根据赢分区间获得返奖率
                     CacheUtil.getBlackWhiteListConfig().then(bwConfig => {
@@ -359,9 +360,9 @@ function Lottery(config, gameInfo, newHandFlag) {
             // 普通判断型
             LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCards, config.freeTimes, dictAnalyseResult);
         } else if (config.gameType === TypeEum.GameType.laba_single) {
-            LABA.HandCardsAnalyse_Single(nHandCards, config.cards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nBetSum, config.cardsNumber, config.freeCards, config.freeTimes, dictAnalyseResult);
+            LABA.HandCardsAnalyse_Single(nHandCards, config.cards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nBetSum, config.cardsNumber, config.freeCards, config.freeTimes, dictAnalyseResult, gameInfo, config);
         } else {
-            log.err('不支持的游戏类型')
+            log.err(config.userId + '不支持的游戏类型')
             return {code: -1};
         }
 
@@ -390,22 +391,20 @@ function Lottery(config, gameInfo, newHandFlag) {
         }
 
 
+
+        // 预期是赢 赢的不超过线注
+        if(winFlag && config.nBetSum >= fin_value){
+            break;
+        }
         // 返奖率控制流程 输赢与预期不符
         if (winFlag !== undefined && winFlag !== (fin_value > config.nBetSum)   ) {
-            log.info('返奖率控制流程 输赢与预期不符 winFlag:' + winFlag + 'userId:' +  config.userId + 'win:' + win + 'winJackpot:' + winJackpot + 'nBetSum:' + config.nBetSum);
-            if(config.nBetSum >= fin_value){
-                break;
-            }
+            log.info(config.userId +'返奖率控制,输赢与预期不符 winFlag:' + winFlag  + 'win:' + win + 'winJackpot:' + winJackpot + 'nBetSum:' + config.nBetSum);
             continue;
         }
-
         // 非新手- (历史赢分差 + 本局赢分 > 当前用户金币池上限控制) 且 本局为赢的状态
         const currTotalWinScore = StringUtil.addNumbers(config.historyWinScore , fin_value);
         if (config.currUserGoldPool > - 1 && currTotalWinScore > config.currUserGoldPool && fin_value > config.nBetSum) {
-            log.info('当前用户奖励上限控制 win:' + win + 'winJackpot:' + winJackpot  + 'historyWinScore:' +  config.historyWinScore + 'currUserGoldPool:' + config.currUserGoldPool + 'nBetSum:' + config.nBetSum);
-            if(config.nBetSum >= fin_value){
-                break;
-            }
+            log.info(config.userId +'用户奖励上限控制 win:' + win + 'winJackpot:' + winJackpot  + 'historyWinScore:' +  config.historyWinScore + 'currUserGoldPool:' + config.currUserGoldPool + 'nBetSum:' + config.nBetSum);
             continue;
         }
 

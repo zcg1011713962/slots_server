@@ -501,12 +501,23 @@ module.exports.CreateRandomCardList = function (init_type_card_list, column, row
  * @param dictAnalyseResult
  * @constructor
  */
-module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines, icon_mul, nGameMagicCardIndex, nBetSum, cardsNumber, freeCards, freeTimes, dictAnalyseResult){
+module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines, icon_mul, nGameMagicCardIndex, nBetSum, cardsNumber, freeCards, freeTimes, dictAnalyseResult, gameInfo, config){
     // 分析图案
     for (let i = 0; i < cardsNumber; i++) {
         dictAnalyseResult["nWinCards"].push(false);
     }
     let _bet = nBetSum;
+
+    let l = gameInfo.userList[config.userId].getWildList();
+    let haveNewWild = false;
+    for (let i = 0; i < l.length; i++) {
+        if (l[i]) {
+            nHandCards[i] = config.nGameMagicCardIndex;
+        } else if (nHandCards[i] === config.nGameMagicCardIndex) {
+            haveNewWild = true;
+        }
+    }
+
     let haveWin = false;
     let wildNum = list_one_count(nGameMagicCardIndex, nHandCards);
     if (wildNum === 0 || wildNum === 3) {
@@ -561,7 +572,11 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
                 dictAnalyseResult["nWinLines"].push(0);
                 dictAnalyseResult["nWinDetail"].push(3 * _bet);
                 dictAnalyseResult["nWinLinesDetail"].push(nGameLines[0]);
-                dictAnalyseResult["nWinCards"] = [nHandCards[0] === 0 || nGameMagicCardIndex, nHandCards[1] === 0 || nGameMagicCardIndex, nHandCards[2] === 0 || nGameMagicCardIndex];
+                dictAnalyseResult["nWinCards"] = [
+                    nHandCards[0] === 0 || nHandCards[0] === nGameMagicCardIndex,
+                    nHandCards[1] === 0 || nHandCards[1] === nGameMagicCardIndex,
+                    nHandCards[2] === 0 || nHandCards[2] === nGameMagicCardIndex
+                ];
                 dictAnalyseResult["win"] += 3 * _bet;
             } else {
                 if (wildNum === 1) {
@@ -604,7 +619,11 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
                 dictAnalyseResult["nWinLines"].push(0);
                 dictAnalyseResult["nWinDetail"].push(3 * _bet);
                 dictAnalyseResult["nWinLinesDetail"].push(nGameLines[0]);
-                dictAnalyseResult["nWinCards"] = [nHandCards[0] === 0 || nGameMagicCardIndex, nHandCards[1] === 0 || nGameMagicCardIndex, nHandCards[2] === 0 || nGameMagicCardIndex];
+                dictAnalyseResult["nWinCards"] = [
+                    nHandCards[0] === 0 || nHandCards[0] === nGameMagicCardIndex,
+                    nHandCards[1] === 0 || nHandCards[1] === nGameMagicCardIndex,
+                    nHandCards[2] === 0 || nHandCards[2] === nGameMagicCardIndex
+                ];
                 dictAnalyseResult["win"]  += 3 * _bet;
             } else if (list_one_count(0, nHandCards) === 1) {
                 haveWin = true;
@@ -616,6 +635,14 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
             }
         }
     }
+
+
+    if (haveNewWild) {
+        if (wildNum > 0 && wildNum < 3) {
+            dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 1};
+        }
+    }
+
 
     // 获取免费次数
     if (freeCards && freeCards.length > 0) {

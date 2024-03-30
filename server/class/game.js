@@ -506,7 +506,8 @@ var GameInfo = function () {
             }
         }
 
-        this.sendHallShopCallBack =function (userId, shopType, code, msg, data) {
+        this.sendHallShopCallBack =function (userId, shopType, serverId, code, msg, data) {
+            log.info('商城购买回调，通知大厅 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType)
             if(this.userList[userId]){
                 // 大厅
                 if (TypeEnum.ShopType.store === shopType) {
@@ -516,25 +517,27 @@ var GameInfo = function () {
                 }else if (TypeEnum.ShopType.discount_Limited === shopType) {
                     this.userList[userId]._socket.emit('discountLimitedResult', {code: code, data: data});
                 }
-            }else{
-                log.info('购物回调，用户不在大厅' + userId)
             }
         }
 
         this.sendGameShopCallBack =function (userId, shopType, serverId, code, msg, data) {
             try {
                 const gameScoket = ServerInfo.getScoket(serverId);
+                log.info('商城购买回调，通知游戏内 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType + 'gameScoket' + gameScoket)
                 if(gameScoket){
-                    log.info('商城购买回调，通知游戏内 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType)
+                    let protocol = '';
                     if (TypeEnum.ShopType.store === shopType) {
-                        gameScoket.emit('ShoppingResult', {code: code, data: data});
+                        protocol = 'ShoppingResult';
                     } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                        gameScoket._socket.emit('turntableResult', {code: code, data: data});
-                    } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                        gameScoket._socket.emit('discountLimitedResult', {code: code, data: data});
+                        protocol = 'turntableResult';
+                    }else if (TypeEnum.ShopType.discount_Limited === shopType) {
+                        protocol = 'discountLimitedResult';
                     }
-                }else{
-                    log.err('商城购买回调，通知游戏内 userId:' + userId + 'serverId:' + serverId )
+                    // 游戏内推
+                    const gameScoket = ServerInfo.getScoket(serverId);
+                    if(gameScoket){
+                        gameScoket.emit('gameForward', { userId: userId,  protocol: protocol,  data: {code: code, data: data}})
+                    }
                 }
             }catch (e){
                 log.err('sendGameShopCallBack' + e);
@@ -589,29 +592,30 @@ var GameInfo = function () {
 
                     const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                     // 下购买订单
-                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                    //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                         try{
-                            log.info(userId + '下购买订单' + res)
-                            const orderResult = JSON.parse(res);
-                            if(orderResult && orderResult.code === 200){
+                            //log.info(userId + '下购买订单' + res)
+                            //const orderResult = JSON.parse(res);
+                            //if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
                                     dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store, 1, serverId,ret =>{
                                         if(ret){
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
                                         }else{
                                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                         }
                                     })
                                 })
-                            }else{
-                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                            }
+                            //}else{
+                               // callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            //}
                         }catch (e){
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
                     });
-                })
+                //})
             })
 
         }
@@ -633,33 +637,34 @@ var GameInfo = function () {
                 // 购买倍数
                 const mul = buyMulPriceItem.mul;
 
-               log.info('购买免费转盘门票' + 'amount:' + amount + 'currencyType:' +  currencyType + 'mul:' + mul)
+               log.info(userId + '购买免费转盘门票' + 'amount:' + amount + 'currencyType:' +  currencyType + 'mul:' + mul)
 
                 const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                 // 下购买订单
-                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                     try{
-                        log.info(userId + '下购买订单' + res)
-                        const orderResult = JSON.parse(res);
-                        if(orderResult && orderResult.code === 200){
+                        //log.info(userId + '下购买订单' + res)
+                        //const orderResult = JSON.parse(res);
+                        //if(orderResult && orderResult.code === 200){
                             self.getVipLevel(userId, vipLevel =>{
                                 // 记录订单详情
                                 dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, TypeEnum.GoodsType.turntableTicket, amount, 0, service, mul, TypeEnum.ShopType.free_turntable, 1, serverId, ret =>{
                                     if(ret){
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                        //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
                                     }else{
                                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                     }
                                 })
                             })
-                        }else{
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
+                        //}else{
+                        //    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        //}
                     }catch (e){
                         log.err(e)
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
-                })
+                //})
             });
         }
         
@@ -692,28 +697,29 @@ var GameInfo = function () {
 
                     const callbackUrl =  hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                     // 下购买订单
-                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                    //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                         try{
-                            log.info(userId + '下购买订单' + res)
-                            const orderResult = JSON.parse(res);
-                            if(orderResult && orderResult.code === 200){
+                            //log.info(userId + '下购买订单' + res)
+                            //const orderResult = JSON.parse(res);
+                            //if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
                                     dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.store, val, serverId, ret =>{
                                         if(ret){
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            // callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
                                         }else{
                                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                         }
                                     })
                                 })
-                            }else{
-                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                            }
+                            //}else{
+                            //    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            //}
                         }catch (e){
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
-                    });
+                    //});
 
                 });
             })
@@ -721,7 +727,7 @@ var GameInfo = function () {
         
 
         // 充值统计
-        this.rechargeCount = function (userId, amount, currencyType, score_amount_ratio, recharge_vip_socre_percentage, flow_vip_socre_percentage, callback) {
+        this.rechargeCount = function (userId, amount, currencyType, score_amount_ratio, recharge_vip_socre_percentage, flow_vip_socre_percentage, serverId, callback) {
             const self = this;
             dao.checkTotalCharge(parseInt(userId), (res, data) => {
                 if (!amount || amount < 0) {
@@ -749,7 +755,7 @@ var GameInfo = function () {
                             }
                             self.updateVipScore(userId, vScore);
                             // VIP升级
-                            self.vipUpgrade(userId, vipLevel, housecard);
+                            self.vipUpgrade(userId, vipLevel, housecard, serverId);
                             // 更新下级充值返点
                             self.juniorRecharge(userId, currencyType, amount, score_amount_ratio);
                             // 修改累计充值
@@ -794,7 +800,8 @@ var GameInfo = function () {
                     }else if(TypeEnum.ShopType.free_turntable === shopType){
                         this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
                     }else if (TypeEnum.ShopType.discount_Limited === shopType){
-                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {goodsType: goodsType, val: val})
+                        const data = {goodsType: goodsType, val: val}
+                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
                     }else{
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
@@ -928,7 +935,7 @@ var GameInfo = function () {
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
                             // 充值统计VIP升级
-                            self.rechargeCount(userId, amount, currencyType, score_amount_ratio, recharge_vip_socre_percentage, flow_vip_socre_percentage, currVipLevel =>{
+                            self.rechargeCount(userId, amount, currencyType, score_amount_ratio, recharge_vip_socre_percentage, flow_vip_socre_percentage, serverId, currVipLevel =>{
                                 const config  = self.getVipConfigByLevel(vConfig.levelConfig, currVipLevel)
                                 // 购买金币
                                 if (TypeEnum.GoodsType.gold === goodsType) {
@@ -1378,27 +1385,29 @@ var GameInfo = function () {
 
                         self.getTurntableJackpot(activityJackpot, turntableJackpot =>{
                             self.getBaseMul(userId, activityJackpot, null, baseMul =>{
-                                // 获取转盘图案
-                                const iconInfos = Config.iconInfos.map(str => parseInt(str, 10));
 
-                                let ret = {};
-                                if(val){
-                                    // 付费转盘
-                                    ret = {
-                                        baseMul: baseMul,
-                                        turntableJackpot: turntableJackpot,
-                                        iconInfos: iconInfos,  // 获取转盘的格子
-                                        turntableBuyMulPrice: luckyCoinConfig.turntableBuyMulPrice,
+                                CacheUtil.getTurntableConfig().then(config =>{
+                                    const iconInfos = config.icon_mul;
+
+                                    let ret = {};
+                                    if(val){
+                                        // 付费转盘
+                                        ret = {
+                                            baseMul: baseMul,
+                                            turntableJackpot: turntableJackpot,
+                                            iconInfos: iconInfos,  // 获取转盘的格子
+                                            turntableBuyMulPrice: luckyCoinConfig.turntableBuyMulPrice,
+                                        }
+                                    }else{
+                                        // 免费转盘
+                                        ret = {
+                                            baseMul: baseMul,
+                                            turntableJackpot: turntableJackpot,
+                                            iconInfos: iconInfos
+                                        }
                                     }
-                                }else{
-                                    // 免费转盘
-                                    ret = {
-                                        baseMul: baseMul,
-                                        turntableJackpot: turntableJackpot,
-                                        iconInfos: iconInfos
-                                    }
-                                }
-                                socket.emit('luckyCoinDetailResult', {code: 1, data: ret});
+                                    socket.emit('luckyCoinDetailResult', {code: 1, data: ret});
+                                })
                             });
                         })
                     })
@@ -3300,7 +3309,7 @@ var GameInfo = function () {
         };
 
         // VIP升级
-        this.vipUpgrade = function (userId, vipLevel, housecard) {
+        this.vipUpgrade = function (userId, vipLevel, housecard, serverId) {
             // VIP升级
             if (vipLevel > housecard) {
                 if(this.userList[userId]) this.userList[userId].vip_level = vipLevel;
@@ -3323,8 +3332,17 @@ var GameInfo = function () {
                         this.sendAllNotifyMsg(noticeMsg);
                         // VIP升级奖励
                         this.popUpgradeGiveGlod(userId, housecard, vipLevel);
-                        // 推首充
-                        CommonEvent.pushFirstRecharge(this.userList[userId]._socket);
+
+                        if(this.userList[userId]){
+                            // 大厅推
+                            CommonEvent.pushFirstRecharge(this.userList[userId]._socket);
+                        }else {
+                            // 游戏内推
+                            const gameScoket = ServerInfo.getScoket(serverId);
+                            if(gameScoket){
+                                gameScoket.emit('gameForward', { userId: userId,  protocol: 'showFirstRechargeShop',  data: {code:  ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg}})
+                            }
+                        }
                     }
                 });
             }
