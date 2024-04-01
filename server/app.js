@@ -125,7 +125,7 @@ app.get('/saveGuideStep', function (req, res) {
     const step = req.query.step;
     log.info('保存新手指引步数' + userId + 'step:' + step)
 
-    if(step === '' || step === undefined || !gameInfo.IsPlayerOnline(userId)){
+    if(step === '' || step === undefined) {
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return
     }
@@ -140,15 +140,18 @@ app.get('/saveGuideStep', function (req, res) {
 // 获取商品列表
 app.get('/goodsList', function (req, res) {
     const userId = req.query.userId;
-    log.info('获取商品列表' + userId)
+    log.info('获取商品列表 request' + userId)
     if(userId === undefined || userId === ''){
+        log.info('获取商品列表 失败:' + userId)
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
     }
     gameInfo.getShoppingGoods(parseInt(userId), (code, msg, data) =>{
         if(code){
+            log.info('获取商品列表 成功:' + userId)
             res.send({code: code, data: data});
         }else{
+            log.info('获取商品列表 失败:' + userId)
             res.send({code: code, msg: msg});
         }
     });

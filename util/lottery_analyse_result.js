@@ -21,7 +21,7 @@ exports.initResult  = function (nBetSum) {
             nFreeTime: 0,
             nIndex: 0
         },
-        bonusList: [null, null, null], // 轮子大奖
+        bonusList: [null, null, null], // 轮子开宝箱
         getBigWin: { // 空白图案-特殊奖
             bFlag: false,
         },

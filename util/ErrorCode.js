@@ -10,12 +10,10 @@ class ErrorCode {
     static get ACCOUNT_REGISTERED_ERROR() { return { code: 'R400', msg: '账号已注册' }; }
 
     static get EMAIL_CODE_VERIFY_SUCCESS() { return { code: 'E210', msg: '校验成功' }; }
-
-    static get EMAIL_CODE_INPUT_ERROR() { return { code: 'E401', msg: '验证码不正确', langCode: 'languageId_260' }; }
     static get EMAIL_CODE_EXPIRED() { return { code: 'E402', msg: '验证码已失效，请重新获取', langCode: 'languageId_261' }; }
-    static get EMAIL_CODE_FAILED() { return { code: 'E403', msg: '错误的验证码' }; }
+    static get EMAIL_CODE_FAILED() { return { code: 'E403', msg: '输入的验证码不正确，请重新输入', langCode: 'languageId_210' }; }
     static get EMAIL_INPUT_ERROR() { return { code: 'E404', msg: '邮箱格式错误' }; }
-    static get EMAIL_BINDED() { return { code: 'E405', msg: '邮箱已绑定' }; }
+    static get EMAIL_BINDED() { return { code: 'E405', msg: '此邮箱地址已被其他账号绑定，请使用不同的邮箱进行绑定。', langCode: 'languageId_261'}; }
 
 
     static get LOGIN_SUCCESS() { return { code: 'L200', msg: '登录成功' }; }
@@ -29,6 +27,26 @@ class ErrorCode {
     static get LOGIN_TOKEN_NOT_FOUND() { return { code: 'L407', msg: 'token过期' }; }
     static get CDK_USERED_ERROR() { return { code: 'E500', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_13' }; }
     static get CDK_EXPIRE() { return { code: 'E501', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_12' }; }
+
+    static get ERROR_INVITE_CODE() { return { code: 'E502', msg: '错误的邀请码', langCode: 'languageId_316' } ; }
+
+    static get SELF_INVITE_CODE() { return { code: 'E503', msg: '自己的邀请码' , langCode: 'languageId_317' }; }
+
+
+    static get BANK_TRANSFER_TITLE() { return { code: 'c0001', msg: '银行转账邮件' , langCode: 'languageId_318' }; }
+
+    static get BANK_TRANSFER_CONTENT() { return { code: 'c0002', msg: '银行转账邮件内容' , langCode: 'languageId_52' }; }
+
+    static get NEW_HAND_BIND_TITLE() { return { code: 'c0003', msg: '新手绑定邮件' , langCode: 'languageId_319' }; }
+
+    static get NEW_HAND_BIND_CONTENT() { return { code: 'c0004', msg: '新手绑定邮件内容' , langCode: 'languageId_53' }; }
+
+    static get VIP_ENTER_HALL_NOTIFY() { return { code: 'p0001', msg: 'VIP进大厅跑马灯' , langCode: 'languageId_320' }; }
+    static get VIP_UPGRADE_NOTIFY() { return { code: 'p0002', msg: '发送VIP升级通知' , langCode: 'languageId_321' }; }
+    static get BANK_TRANSFER_NOTIFY() { return { code: 'p0002', msg: '转账消息通知' , langCode: 'languageId_52' }; }
+
+
+    static get BANK_TRANSFER_NOTIFY() { return { code: 'p0002', msg: '转账消息通知' , langCode: 'languageId_52' }; }
 }
 
 module.exports = ErrorCode;

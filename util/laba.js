@@ -168,8 +168,8 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
             }
 
             // 只有一张牌直接返回图案索引 针对免费转盘需要nWinLines字段特殊牌展示
-            if(temp.length === 1 && jackpotCard === temp[0] || freeCards.includes(temp[0])){
-                dictAnalyseResult["nWinLines"].push(temp[0]);
+            if(nHandCards.length === 1 && jackpotCard === nHandCards[0] || freeCards.includes(nHandCards[0])){
+                dictAnalyseResult["nWinLines"].push(nHandCards[0]);
             }
 
             // 普通图案某行中奖
@@ -180,7 +180,7 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
                 dictAnalyseResult["nWinDetail"].push(nMultiple * nBetList[nLineNum]);
                 if(temp.length === 1){
                     // 只有一张牌直接返回图案索引
-                    dictAnalyseResult["nWinLines"].push(temp[0]);
+                    dictAnalyseResult["nWinLines"].push(nHandCards[0]);
                 }else{
                     // nLineNum 对应nGameLines的索引
                     dictAnalyseResult["nWinLines"].push(nLineNum);
@@ -340,6 +340,7 @@ function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line
         // 计算每个图案，占一列的权重
         const col_num= i % col_count;
         const weights = weight_two_array[col_num];
+        // log.info('列下标:' +  col_num + '权重数组:' + weights)
         nHandCards.push(weightedRandomCardType(cards, weights, jackpotCard, blankCard));
     }
     // 中了jackpot,把某行置为jackpot牌
@@ -368,7 +369,6 @@ function weightedRandomCardType(cards, weights, jackpotCard, blankCard) {
             ws.push(weights[i]);
         }
     }
-
     // 根据权重出
     const totalWeight = ws.reduce((sum, ws) => sum + ws, 0);
     const randomValue = Math.random() * totalWeight;
@@ -376,6 +376,7 @@ function weightedRandomCardType(cards, weights, jackpotCard, blankCard) {
     for (let i = 0; i < ws.length; i++) {
         currentWeight += ws[i];
         if (randomValue <= currentWeight) {
+            // log.info('总权重:' + totalWeight + '随机出的权重:' + currentWeight + '图案下标:' + i)
             return cs[i];
         }
     }
@@ -517,7 +518,7 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
         for (let i = 0; i < array.length; i++) {
             if(array[i]){
                 nHandCards[i] = config.nGameMagicCardIndex;
-                log.info('上次定住百变的位置:' + i)
+                // log.info('上次定住百变的位置:' + i)
                 wilds.push(true);
             }else{
                 wilds.push(false);
@@ -646,15 +647,15 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
     }
 
 
-    // 把上次替换的万能卡 变为普通卡
+    // 把上次替换的万能卡 变为自定义特殊卡
     if(array.length > 0){
         for (let i = 0; i < array.length; i++) {
             if(array[i]){
-                nHandCards[i] = 1;
+                // 定义一张
+                nHandCards[i] = 999;
             }
         }
     }
-
     // 获取免费次数
     if (freeCards && freeCards.length > 0) {
         dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);
@@ -671,8 +672,12 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
     }
     gameInfo.userList[config.userId].setWildList(list);
 
-
-
+    // 把上次替换的特殊卡 变为百变卡 返回给客户端
+    for (let i = 0; i < nHandCards.length; i++) {
+        if(nHandCards[i] === 999){
+            nHandCards[i] = nGameMagicCardIndex;
+        }
+    }
 
 }
 

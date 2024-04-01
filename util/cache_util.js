@@ -8,6 +8,8 @@ const TypeEnum = require("./enum/type");
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
 const userPlayGameCount= 'userPlayGameCount';
+const playGameBetRecord= 'playGameBetRecord';
+
 const sendEmailExpireKey = 'sendEmailCodeExpire';
 const VIPDailyGetKey = 'VIPDailyGet';
 const VIPMonthlyGetKey = 'VIPMonthlyGet';
@@ -381,12 +383,25 @@ exports.getPlayGameCount  = function (userId){
 }
 
 
+// 增加玩家摇奖次数
+exports.updatePlayGameBetRecord  = function (userId, v){
+    return RedisUtil.hmset(playGameBetRecord, userId, v);
+}
+
+
+// 获取玩家摇奖次数
+exports.getPlayGameBetRecord  = function (userId){
+    return RedisUtil.hget(playGameBetRecord, userId).then(it => JSON.parse(it));
+}
+
+
+
 // 获取玩家赢金币数值
 exports.getPlayGameWinscore  = function getPlayGameWinscore(userId){
     return RedisUtil.hget(userPlayGameWinScore, userId);
 }
 
-// 记录玩家赢金币数值
+// 记录玩家赢分差
 exports.playGameWinscore  = function playGameWinscore(userId, winScore){
     this.getPlayGameWinscore(userId).then(winscore =>{
         const oldWin = winscore ? winscore : 0;

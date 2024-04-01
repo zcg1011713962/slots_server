@@ -56,6 +56,7 @@ var GameInfo = function () {
             //维护模式
             this.maintain = false;
 
+
             this.sever = new sever();
 
             this.ranScore = Math.floor(Math.random() * 900000000 + 100000000);

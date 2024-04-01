@@ -322,7 +322,7 @@ var GameInfo = function () {
             setTimeout(() => {
                 const noticeMsg = [{
                     type: TypeEnum.notifyType.vipEnterHall,
-                    content_id: "languageId_256",
+                    content_id: ErrorCode.VIP_ENTER_HALL_NOTIFY.code,
                     extend:{
                         vipLevel: userInfo.housecard,
                         nickName: userInfo.nickname,
@@ -446,41 +446,45 @@ var GameInfo = function () {
                 CacheUtil.getDownloadExtConfig().then(downloadExtConfig =>{
                     CacheUtil.isVIPDailyGet(userId, dailyGet =>{
                         CacheUtil.isVIPMonthlyGet(userId, monthlyGet =>{
-                            const ret =  {
-                                account: user._account,  // 用户名
-                                id: user._userId,       // 用户ID
-                                nickname: user._nickname, // 昵称
-                                score: user._score,  // 用户金币数量
-                                sign: user._sign,
-                                proplist: user._proList,
-                                headimgurl: user._headimgurl, // 头像ID
-                                diamond: user._diamond, // 钻石数量
-                                phoneNo: user._phoneNo, // 手机号
-                                official: user._official,
-                                isVip: user.is_vip,  // 是否VIP
-                                totalRecharge: user.totalRecharge, // 总充值
-                                vip_level: user.vip_level, // VIP等级
-                                vip_score: user.vip_score, // VIP点数
-                                dailyGet: dailyGet,   // 是否领取了每日金币
-                                monthlyGet: monthlyGet, // 是否领取了每月金币
-                                firstRecharge: user.firstRecharge, // 是否购买首充礼包
-                                bankScore: user.bankScore, // 银行积分，也就是银行里的金币
-                                bankLock: user.bankLock,  // 银行是否被锁定
-                                addDate: user.addDate, // 注册时间
-                                existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
-                                email: user._email ? user._email : '' , // 邮箱
-                                firstLogin: user.LoginCount > 1 ? 0 : 1, // 是否首次登录
-                                inviteCode: user.inviteCode ? user.inviteCode : '', // 邀请码
-                                ptLink: downloadExtConfig.download_url ? downloadExtConfig.download_url : '', // 推广链接
-                                currTime: new Date().getTime(), // 当前时间戳
-                                luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
-                                luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
-                                luckyCoin: luckObject.luckyCoin ,// 幸运金币数量
-                                luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
-                                p: user._p, // king
-                                step :  user.step // 新手指引步数
-                            };
-                            callback(ret);
+                            CacheUtil.getBankTransferConfig().then(tConfig =>{
+                                const goldTransferMin =  tConfig.gold_transfer_min;
+                                const ret =  {
+                                    account: user._account,  // 用户名
+                                    id: user._userId,       // 用户ID
+                                    nickname: user._nickname, // 昵称
+                                    score: user._score,  // 用户金币数量
+                                    sign: user._sign,
+                                    proplist: user._proList,
+                                    headimgurl: user._headimgurl, // 头像ID
+                                    diamond: user._diamond, // 钻石数量
+                                    phoneNo: user._phoneNo, // 手机号
+                                    official: user._official,
+                                    isVip: user.is_vip,  // 是否VIP
+                                    totalRecharge: user.totalRecharge, // 总充值
+                                    vip_level: user.vip_level, // VIP等级
+                                    vip_score: user.vip_score, // VIP点数
+                                    dailyGet: dailyGet,   // 是否领取了每日金币
+                                    monthlyGet: monthlyGet, // 是否领取了每月金币
+                                    firstRecharge: user.firstRecharge, // 是否购买首充礼包
+                                    bankScore: user.bankScore, // 银行积分，也就是银行里的金币
+                                    bankLock: user.bankLock,  // 银行是否被锁定
+                                    addDate: user.addDate, // 注册时间
+                                    existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
+                                    email: user._email ? user._email : '' , // 邮箱
+                                    firstLogin: user.LoginCount > 1 ? 0 : 1, // 是否首次登录
+                                    inviteCode: user.inviteCode ? user.inviteCode : '', // 邀请码
+                                    ptLink: downloadExtConfig.download_url ? downloadExtConfig.download_url : '', // 推广链接
+                                    currTime: new Date().getTime(), // 当前时间戳
+                                    luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
+                                    luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
+                                    luckyCoin: luckObject.luckyCoin ,// 幸运金币数量
+                                    luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
+                                    p: user._p, // king
+                                    step :  user.step, // 新手指引步数
+                                    goldTransferMin: goldTransferMin
+                                };
+                                callback(ret);
+                            })
                         })
                     })
                 });
@@ -594,30 +598,30 @@ var GameInfo = function () {
 
                     const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                     // 下购买订单
-                    //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                         try{
-                            //log.info(userId + '下购买订单' + res)
-                            //const orderResult = JSON.parse(res);
-                            //if(orderResult && orderResult.code === 200){
+                            log.info(userId + '下购买订单' + res)
+                            const orderResult = JSON.parse(res);
+                            if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
                                     dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.store, val, serverId,ret =>{
                                         if(ret){
-                                            //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            /*callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})*/
                                         }else{
                                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                         }
                                     })
                                 })
-                            //}else{
-                               // callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                            //}
+                            }else{
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            }
                         }catch (e){
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
                     });
-                //})
+                })
             })
 
         }
@@ -643,30 +647,30 @@ var GameInfo = function () {
 
                 const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                 // 下购买订单
-                //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                     try{
-                        //log.info(userId + '下购买订单' + res)
-                        //const orderResult = JSON.parse(res);
-                        //if(orderResult && orderResult.code === 200){
+                        log.info(userId + '下购买订单' + res)
+                        const orderResult = JSON.parse(res);
+                        if(orderResult && orderResult.code === 200){
                             self.getVipLevel(userId, vipLevel =>{
                                 // 记录订单详情
                                 dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, TypeEnum.GoodsType.turntableTicket, amount, 0, service, mul, TypeEnum.ShopType.free_turntable, 1, serverId, ret =>{
                                     if(ret){
-                                        //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                        /*callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})*/
                                     }else{
                                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                     }
                                 })
                             })
-                        //}else{
-                        //    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        //}
+                        }else{
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        }
                     }catch (e){
                         log.err(e)
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
-                //})
+                })
             });
         }
         
@@ -699,30 +703,29 @@ var GameInfo = function () {
 
                     const callbackUrl =  hallUrl + '/shoppingCallBack?userId=' + userId+'&orderId=' + orderId;
                     // 下购买订单
-                    //PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
+                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res =>{
                         try{
-                            //log.info(userId + '下购买订单' + res)
-                            //const orderResult = JSON.parse(res);
-                            //if(orderResult && orderResult.code === 200){
+                            log.info(userId + '下购买订单' + res)
+                            const orderResult = JSON.parse(res);
+                            if(orderResult && orderResult.code === 200){
                                 self.getVipLevel(userId, vipLevel =>{
                                     // 记录订单详情
                                     dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.store, val, serverId, ret =>{
                                         if(ret){
-                                            // callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                           /* callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})*/
                                         }else{
                                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                                         }
                                     })
                                 })
-                            //}else{
-                            //    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                            //}
+                            }else{
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            }
                         }catch (e){
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
-                    //});
-
+                    });
                 });
             })
         } 
@@ -796,16 +799,22 @@ var GameInfo = function () {
                     const val = row.val;
                     const serverId = row.serverId;
 
-
-                    if(TypeEnum.ShopType.store === shopType){
-                        this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, callback)
-                    }else if(TypeEnum.ShopType.free_turntable === shopType){
-                        this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
-                    }else if (TypeEnum.ShopType.discount_Limited === shopType){
-                        this.discountLimitedBuyCallback(userId, serverId, goodsType, val, callback)
-                    }else{
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                    }
+                    dao.getScore(userId, (code, row) =>{
+                        if(!code){
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            return;
+                        }
+                        const currScore = row.score;
+                        if(TypeEnum.ShopType.store === shopType){
+                            this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, callback)
+                        }else if(TypeEnum.ShopType.free_turntable === shopType){
+                            this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
+                        }else if (TypeEnum.ShopType.discount_Limited === shopType){
+                            this.discountLimitedBuyCallback(userId, serverId, goodsType, val, currScore, callback)
+                        }else{
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        }
+                    })
                 })
             }catch (e){
                 log.err(e)
@@ -895,9 +904,10 @@ var GameInfo = function () {
                                     const data = {
                                         bankrupt: true,
                                         bustBonus: bustBonus,
-                                        bustTimes: remainTimes
+                                        bustTimes: remainTimes,
+                                        score: StringUtil.addNumbers(currScore, bustBonus)
                                     }
-                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data )
                                 })
                             })
                         })
@@ -916,7 +926,7 @@ var GameInfo = function () {
         }
 
         // 商城购买回调
-        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, callback) {
+        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, callback) {
 
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
@@ -967,13 +977,6 @@ var GameInfo = function () {
                                         }
                                     }
                                     log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型'+ currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
-                                    // 账户增加金币
-                                   /* dao.addAccountScore(userId, totalVal, ret =>{
-                                        if(ret){
-                                            if(this.userList[userId]) this.userList[userId]._score +=  Number(totalVal);
-                                            log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型'+ currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
-                                        }
-                                    })*/
                                 } else if (TypeEnum.GoodsType.diamond === goodsType) {
                                     if(self.userList[userId]){
                                         // 账户增加钻石
@@ -985,6 +988,7 @@ var GameInfo = function () {
                                 // 更新订单状态
                                 dao.updateOrder(userId, orderId, ret =>{})
 
+                                // 查询当前金
                                 const result = {
                                     vipLevel: currVipLevel,
                                     addVipPoint: addVipPoint,
@@ -993,9 +997,9 @@ var GameInfo = function () {
                                     sourceVal: sourceVal,
                                     addVal: addVal,
                                     totalVal: totalVal,
-                                    shopScoreAddRate: config.shopScoreAddRate
+                                    shopScoreAddRate: config.shopScoreAddRate,
+                                    score: StringUtil.addNumbers(currScore, totalVal)
                                 }
-
                                 if (self.userList[userId]) {
                                     // 是否购买了首充礼包
                                     if (group === TypeEnum.ShopGroupType.rechargeGift && !self.userList[userId].firstRecharge) {
@@ -1012,6 +1016,7 @@ var GameInfo = function () {
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service, serverId)
                                     })
                                 }
+
 
                             });
                         })
@@ -1034,16 +1039,16 @@ var GameInfo = function () {
             });
         }
         
-        this.discountLimitedBuyCallback = function (userId, serverId, goodsType, val, callback) {
+        this.discountLimitedBuyCallback = function (userId, serverId, goodsType, val, currScore, callback) {
             if(this.userList[userId]){
                 this.userList[userId]._score +=  Number(val)
             }else{
                 const gameScoket = ServerInfo.getScoket(serverId);
                 if(gameScoket){
-                    gameScoket.emit('addgold', {userid: userId, addgold: val})
+                    gameScoket.emit('addgold', {userid: userId, addgold: val, score: StringUtil.addNumbers(currScore, val) })
                 }
             }
-            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {goodsType: goodsType, val: val})
+            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {goodsType: goodsType, val: val, score: StringUtil.addNumbers(currScore, val)})
         }
 
 
@@ -1691,10 +1696,10 @@ var GameInfo = function () {
                 const userId = socket.userId;
                 if(!row){
                     // 错误的邀请码
-                    callback(0, '错误的邀请码')
+                    callback(ErrorCode.ERROR_INVITE_CODE.code, ErrorCode.ERROR_INVITE_CODE.msg)
                 }else if(row.userId === userId){
                     // 自己的邀请码
-                    callback(0, '自己的邀请码')
+                    callback(ErrorCode.ERROR_INVITE_CODE.code, ErrorCode.ERROR_INVITE_CODE.msg)
                 }else{
                     const agentUserId = row.userId;
                     // 绑定 事务connection
@@ -1770,7 +1775,6 @@ var GameInfo = function () {
                     });
                 }
             })
-
         }
 
 
@@ -2450,9 +2454,9 @@ var GameInfo = function () {
             }
 
             SendEmail(toEmail,  code =>{
-                //if(code){
-                    // const verificationCode = code;
-                    const verificationCode = 666666;
+                if(code){
+                    const verificationCode = code;
+                    // const verificationCode = 666666;
                     CacheUtil.cacheEmailExpireCode(verificationCode, toEmail, ret =>{
                         if(ret){
                             // 存储验证码
@@ -2469,7 +2473,7 @@ var GameInfo = function () {
                             callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                         }
                     });
-                //}
+                }
             });
         };
 
@@ -2477,14 +2481,14 @@ var GameInfo = function () {
         this.bindEmail = function (socket, email, code, callback) {
             // 邮箱地址校验
             if (!emailValidator(email)) {
-                callback(0, ErrorCode.EMAIL_INPUT_ERROR.msg)
+                callback(ErrorCode.EMAIL_INPUT_ERROR.code, ErrorCode.EMAIL_INPUT_ERROR.msg)
                 return;
             }
             // 判断邮箱是否绑定
             dao.emailSearch(email, exits =>{
                 if(exits){
                     console.log('邮箱已绑定', socket.userId, 'email:', email);
-                    callback(0, ErrorCode.EMAIL_BINDED.msg)
+                    callback(ErrorCode.EMAIL_BINDED.code, ErrorCode.EMAIL_BINDED.msg)
                 }else{
                     // 验证码校验
                     this.verifyEmailCode(email, code, (c, msg) =>{
@@ -2504,7 +2508,7 @@ var GameInfo = function () {
                                 }
                             });
                         }else{
-                            callback(0, msg)
+                            callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg)
                         }
                     });
                 }
@@ -2524,7 +2528,7 @@ var GameInfo = function () {
         // 注册
         this.registerByEmail = function (_socket, email, code, callback) {
             if(isNaN(code)){
-                callback(ErrorCode.EMAIL_CODE_INPUT_ERROR.code, ErrorCode.EMAIL_CODE_INPUT_ERROR.msg)
+                callback(ErrorCode.EMAIL_CODE_FAILED.code, ErrorCode.EMAIL_CODE_FAILED.msg)
                 return;
             }
             this.verifyEmailCode(email, code, (code, msg) =>{
@@ -3342,7 +3346,7 @@ var GameInfo = function () {
                         const _nickname = this.userList[userId] ? this.userList[userId]._nickname : userId;
                         const noticeMsg = [{
                             type: TypeEnum.notifyType.vipUpgrade,
-                            content_id: "languageId_257",
+                            content_id: ErrorCode.VIP_UPGRADE_NOTIFY.code,
                             extend: {
                                 currVipLevel: vipLevel,
                                 oldVipLevel: housecard,
@@ -3353,7 +3357,7 @@ var GameInfo = function () {
                         // 发送VIP升级通知
                         this.sendAllNotifyMsg(noticeMsg);
                         // VIP升级奖励
-                        this.popUpgradeGiveGlod(userId, housecard, vipLevel);
+                        this.popUpgradeGiveGlod(userId, housecard, vipLevel, serverId);
 
                         if(this.userList[userId]){
                             // 大厅推
@@ -3373,7 +3377,7 @@ var GameInfo = function () {
 
 
         // 弹VIP升级奖励
-        this.popUpgradeGiveGlod = function (userId, housecard, vipLevel) {
+        this.popUpgradeGiveGlod = function (userId, housecard, vipLevel, serverId) {
             CacheUtil.getVipConfig().then(config =>{
                 const upgradeGiveGlod = config.find(it => it.level === vipLevel).upgradeGiveGlod;
                 const data = {
@@ -3384,6 +3388,12 @@ var GameInfo = function () {
                 }
                 if(this.userList[userId]){
                     this.userList[userId]._socket.emit('vipUpgrade', {code : 1, data: data});
+                }else{
+                    // 游戏内推
+                    const gameScoket = ServerInfo.getScoket(serverId);
+                    if(gameScoket){
+                        gameScoket.emit('gameForward', { userId: userId,  protocol: 'vipUpgrade',  data:  {code : 1, data: data}})
+                    }
                 }
             })
         }
@@ -3549,7 +3559,7 @@ var GameInfo = function () {
         this.transferMsgNotify = function (giveUserId, userId, logTransferId) {
             const noticeMsg = [{
                 type: TypeEnum.notifyType.bankTransfer,
-                content_id: "c2002",
+                content_id: ErrorCode.BANK_TRANSFER_NOTIFY.code,
                 extend:{
                     formUserId: userId,
                     toUserId: giveUserId,
@@ -3655,12 +3665,14 @@ var GameInfo = function () {
                         CacheUtil.getBankTransferConfig().then(config => {
                             const withdrawWard = config.withdrawWard;
                             const withdrawChannel = config.withdrawChannel;
+                            const withdrawalCommission = config.withdrawal_commission;
                             const data ={
                                 withdrawLimit: withdrawLimit,
                                 currencyType: "BRL",
                                 withdrawWard: withdrawWard,
                                 withdrawChannel: withdrawChannel,
-                                cards: cards
+                                cards: cards,
+                                withdrawalCommission: withdrawalCommission
                             }
                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
                         })

@@ -518,7 +518,7 @@ exports.searchIssue = function searchIssue(callback){
 
 // 查询代理当日是否邀请过人
 exports.searchCurrDayInvite = function searchCurrDayInvite(userId, callback){
-    const sql = 'select count(1) from account_invite_sends where uid = ? and DATE(created_at) = CURDATE();';
+    const sql = 'select * from account_invite_sends where uid = ? and DATE(created_at) = CURDATE();';
     const values = []
     values.push(userId);
 
@@ -534,7 +534,7 @@ exports.searchCurrDayInvite = function searchCurrDayInvite(userId, callback){
                 log.err('查询代理当日是否邀请过人'+ err);
                 callback(0);
             } else {
-                if (rows) {
+                if (rows && rows.length > 0) {
                     callback(1);
                 } else {
                     callback(0);
