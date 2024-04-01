@@ -900,7 +900,7 @@ var GameInfo = function () {
                                         callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                         return;
                                     }
-                                    log.info(userId + '破产补助金发放' + bustBonus + '剩余领取次数' + remainTimes)
+                                    log.info(userId + '破产补助金发放' + bustBonus + '剩余领取次数' + remainTimes + '当前金币:' + StringUtil.addNumbers(currScore, bustBonus))
                                     const data = {
                                         bankrupt: true,
                                         bustBonus: bustBonus,

@@ -514,7 +514,7 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
 
     let wilds = [];
     // 上次定住百变的位置
-    if(array.length > 0){
+    if(array.length > 0 && array.includes(true)){
         for (let i = 0; i < array.length; i++) {
             if(array[i]){
                 nHandCards[i] = config.nGameMagicCardIndex;
@@ -646,16 +646,16 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
         }
     }
 
-
     // 把上次替换的万能卡 变为自定义特殊卡
-    if(array.length > 0){
-        for (let i = 0; i < array.length; i++) {
-            if(array[i]){
+    if(wilds.length > 0 && wilds.includes(true)){
+        for (let i = 0; i < wilds.length; i++) {
+            if(wilds[i]){
                 // 定义一张
                 nHandCards[i] = 999;
             }
         }
     }
+
     // 获取免费次数
     if (freeCards && freeCards.length > 0) {
         dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);

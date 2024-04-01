@@ -44,7 +44,6 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
                             CacheUtil.getPlayGameBetRecord(userId).then(cf =>{
                                 let totalBet = !cf || !cf.totalBet ? 0 : Number(cf.totalBet);
                                 let totalBackBet = !cf || !cf.totalBackBet ? 0 : Number(cf.totalBackBet);
-                                log.info(userId + '总下注' + totalBet + '总返奖' + totalBackBet)
                                 // 判断玩家是否破产
                                 CacheUtil.isBankrupt(currScore, currBankScore, (bankrupt, bustBonus , Bust_times) =>{
                                     try {
@@ -104,7 +103,7 @@ async function winPopFirstRecharge(config, result, gameInfo) {
                 }
 
                 const protectScore = cf.protectScore;
-                log.info(config.userId + '是否需要弹首充礼包判断,currTotalWinScore:' + currTotalWinScore + 'protectScore:' + protectScore + 'winJackpot:' + winJackpot )
+                log.info(config.userId + '是否需要弹首充礼包判断,当前赢分差:' + currTotalWinScore + '新手保护金币:' + protectScore + 'winJackpot:' + winJackpot )
                 if (winJackpot) {
                     CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
                 }else if(currTotalWinScore > 0 && StringUtil.compareNumbers(protectScore, currTotalWinScore) &&  winScorePopFirstRecharge === 0){
@@ -321,7 +320,7 @@ function Lottery(config, gameInfo, newHandFlag) {
     // 幸运大奖
     const is_luck = false;
     // 目标RTP
-    const expectRTP = config.rebateRatio;
+    const expectRTP = config.rebateRatio / 100;
     // 进入奖池的钱
     const addJackpot = config.nBetSum * parseInt(nGamblingWaterLevelGold) / 100;
     // 进入库存的钱
@@ -396,34 +395,24 @@ function Lottery(config, gameInfo, newHandFlag) {
         // 图案最终价值
         fin_value = StringUtil.addTNumbers(win, winJackpot, openBoxCardWin);
 
-
         // 中奖总金币大于等于线注 认为本次为赢
-        if(fin_value >= config.nBetSum){
-            winFlag = true;
-        }else{
-            winFlag = false;
-        }
+        winFlag = fin_value >= config.nBetSum;
 
         // 开了配牌器
         if (config.iconTypeBind && config.iconTypeBind.length > 0) {
             break;
         }
 
-        // 返奖率控制流程 输赢与预期不符
-       /* if (winFlag !== undefined && winFlag !== (fin_value > config.nBetSum)   ) {
-            log.info(config.userId +'返奖率控制,输赢与预期不符 winFlag:' + winFlag  + 'win:' + win + 'winJackpot:' + winJackpot + 'nBetSum:' + config.nBetSum);
-            continue;
-        }*/
         // 非新手- (历史赢分差 + 本局赢分 > 当前用户金币池上限控制) 且 本局为赢的状态
         const currTotalWinScore = StringUtil.addNumbers(config.historyWinScore , fin_value);
-        if (config.currUserGoldPool > - 1 && currTotalWinScore > config.currUserGoldPool && fin_value > config.nBetSum) {
-            log.info(config.userId +'用户奖励上限控制 win:' + win + 'winJackpot:' + winJackpot  + 'historyWinScore:' +  config.historyWinScore + 'currUserGoldPool:' + config.currUserGoldPool + 'nBetSum:' + config.nBetSum);
+        if (config.currUserGoldPool > - 1 && currTotalWinScore > config.currUserGoldPool && winFlag) {
+            log.info(config.userId +'当前赢分差:' + currTotalWinScore + '当前用户最大金币池:' + 'nBetSum:' + config.nBetSum);
             continue;
         }
 
         // RTP控制
         // 如果超过摇奖总数超过target_rtp_start_position次，开始向期望RTP走
-        const backBetRatio = Number(config.totalBet) ? (config.totalBackBet / config.totalBet) * 100 : 0;
+        const backBetRatio = config.totalBet ? (config.totalBackBet / config.totalBet) : 0;
         currRtp = Number(backBetRatio.toFixed(2));
         // 当前RTP大于目标RTP 而且 摇的结果是赢的
         if (currRtp > expectRTP && winFlag) {
