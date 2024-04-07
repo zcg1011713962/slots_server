@@ -1440,7 +1440,7 @@ var GameInfo = function () {
 
            dao.userSignIn(userId, (res, connection) =>{
                if(res.rcode){
-                   log.info('用户签到' + userId + 'code:' + res.rcode,'lastDay:' , res.lastDay)
+                   log.info('用户签到' + userId + 'code:' + res.rcode,'用户持续:'+ StringUtil.addNumbers(res.lastDay, 1) + '天')
                    try {
                        const consecutiveDays = res.rcode;
                        CacheUtil.getSignInConfig().then(config => {
@@ -1456,12 +1456,12 @@ var GameInfo = function () {
                                    }else{
                                        for (let i = 0; i < signInConfig.award.length; i++) {
                                            if (signInConfig.award[i].type === 0) {
-                                               const addScore = parseInt(signInConfig.award[0].val * currVipConfig.dailySignScoreAddRate / 100);
+                                               const addScore = StringUtil.rideNumbers(signInConfig.award[0].val , currVipConfig.dailySignScoreAddRate / 100);
                                                // 发放金币
                                                const beforeScore = this.userList[userId]._score;
                                                this.userList[userId]._score += addScore;
                                                dao.scoreChangeLog(userId, beforeScore, addScore, this.userList[userId]._score, TypeEnum.ScoreChangeType.daySign, 1);
-                                               console.log(userId, '签到天数', consecutiveDays , '每日签到前金币', beforeScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate, '每日签到后金币', this.userList[userId]._score)
+                                               log.info(userId, '签到天数', consecutiveDays , '每日签到前金币', beforeScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate, '每日签到后金币', this.userList[userId]._score)
                                            } else if (signInConfig.award[i].type === 1) {
                                                // 发放钻石
                                            }
@@ -1479,6 +1479,7 @@ var GameInfo = function () {
                    }
                }else{
                    callback(0)
+                   log.info(userId + '签到失败,重复签到')
                }
            });
         }

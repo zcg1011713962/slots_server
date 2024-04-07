@@ -919,15 +919,14 @@ io.on('connection', function (socket) {
         const userId = socket.userId;
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, "signIn");
-            console.log('用户进行签到', userId, '-' , ret)
+            log.info(userId + '用户进行签到', ret)
             if (ret) {
                 gameInfo.signIn(socket, ok => {
                     CacheUtil.delUserProtocol(userId, "signIn")
                     if (ok) {
                         socket.emit('signInResult', {code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
                     } else {
-                        log.info('签到失败' + userId)
-                        socket.emit('signInResult', {code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+                        socket.emit('signInResult', {code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
                     }
                 });
             }
