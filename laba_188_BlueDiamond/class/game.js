@@ -87,7 +87,7 @@ var GameInfo = function () {
                 }
 
                 //推送奖池给玩家
-                if (second % 20 == 0) {
+                if (second % 10 === 0) {
                     CacheUtil.pushGameJackpot(self.userList);
                 }
             });
@@ -490,13 +490,13 @@ var GameInfo = function () {
         //获得用户当前分数
         this.getPlayerScore = function (_userId) {
             if (!_userId) {	//传输ID错误
-                console.log("查询分数,参数错误");
+                log.info('==========================查询分数,参数错误"');
                 return -1;
             }
             if (this.userList[_userId]) {//未找到用户
-                //console.log("查询在线,未找到" + _userId + "用户");
                 return this.userList[_userId].getScore();
             } else {
+                log.info('=============================用户不在线');
                 return -1;
             }
         };
@@ -542,7 +542,7 @@ var GameInfo = function () {
                 const seconds = new Date().getSeconds()
                 if(users){
                     for (let i = 0; i < users.length; ++i) {
-                        if(seconds % 25 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                        if(seconds % 5 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
                     }
                 }
                 saveList = [];

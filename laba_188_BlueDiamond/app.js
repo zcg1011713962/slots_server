@@ -39,7 +39,7 @@ Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    console.log(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
+    log.info(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {
@@ -61,6 +61,19 @@ Csocket.on('addgold', function (msg) {
     if (User) {
         var tablestring = "table" + User.getTable();
         io.sockets.in(tablestring).emit('userGoldUpdate', {userId: msg.userid, updateSocre: User.getScore()});
+    }
+});
+
+// 增加钻石
+Csocket.on('addDiamond', function (msg) {
+    if (!msg) {
+        return;
+    }
+    if(gameInfo.userList[msg.userId]){
+        gameInfo.userList[msg.userId]._diamond += msg.addDiamond;
+        log.info(msg.userId + '游戏内增加钻石前数量:' + msg.addDiamond + '增加后数量:' + gameInfo.userList[msg.userId]._diamond)
+    }else{
+        log.err(msg.userId + '游戏内增加钻石前数量:' + msg.addDiamond + '需要补发')
     }
 });
 
@@ -135,6 +148,7 @@ io.on('connection', function (socket) {
 
     //客户登录游戏
     socket.on('LoginGame', function (userInfo) {
+        log.info('客户端登录游戏1' + userInfo)
         try {
             userInfo = JSON.parse(userInfo);
         } catch (e) {
@@ -156,8 +170,9 @@ io.on('connection', function (socket) {
                     serverSign: signCode,
                     serverId: gameConfig.serverId
                 };
-                Csocket.emit('LoginGame', msg);
+                log.info('客户端登录游戏2' + userInfo)
                 CacheUtil.delayPushGameJackpot(userInfo, gameInfo.userList);
+                Csocket.emit('LoginGame', msg);
             } else {
                 console.log("用户已经在服务器了，无需重复登录");
             }
@@ -188,6 +203,18 @@ io.on('connection', function (socket) {
     //登录游戏获取免费游戏次数
     socket.on('LoginfreeCount', function () {
         gameInfo.LoginfreeCount(socket.userId, socket);
+    });
+
+    // 获取游戏内金币
+    socket.on('getGold', function () {
+        const gold = gameInfo.getPlayerScore(socket.userId);
+        if(gold >= 0){
+            log.info('获取游戏内金币' + gold)
+            socket.emit('getGoldResult', {code: 1, data: {gold: gold}})
+        }else{
+            log.err('---------------------------------------------------获取金币失败');
+            socket.emit('getGoldResult', {code: 0, msg: '获取金币失败'});
+        }
     });
 
     //登录游戏获取免费游戏次数
@@ -247,7 +274,7 @@ var server = http.listen(app.get('port'), function () {
 console.log("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
 
-const period = 5000;
+const period = 3000;
 setInterval(function () {
 
     // 批量更新用户信息

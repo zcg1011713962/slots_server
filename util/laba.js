@@ -11,7 +11,7 @@ module.exports.createHandCards = function (cards, weight_two_array, col_count, l
     return getCard(cards, cardsNumber, weight_two_array, col_count, line_count, jackpotCard, winJackpot, blankCard);
 };
 
-module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpot_ratio, jackpot_level_money, jackpot_level_prob, bet_jackpot_level_bet, bet_jackpot_level_index, jackpot_pay_level, iconTypeBind, jackpotCard, jackpotCardLowerLimit) {
+module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpot_ratio, jackpot_level_money, jackpot_level_prob, bet_jackpot_level_bet, bet_jackpot_level_index, jackpot_pay_level, iconTypeBind, jackpotCard, jackpotCardLowerLimit, config, currRtp, expectRTP) {
     if(jackpotCard === undefined || jackpotCard < 0){
         return 0;
     }
@@ -23,8 +23,9 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
     }
 
     try{
-        const minJackpotLimit = jackpot_level_money.reduce((min, current) => Math.min(min, current), Infinity);
-        if(jackpot < minJackpotLimit){
+        const minJackpot = jackpot_level_money.reduce((min, current) => Math.min(min, current), Infinity);
+        if(jackpot < minJackpot){
+            log.info('当前奖池小于配置最低奖池直接跳过奖池，当前奖池:'+ jackpot + '最低配置:' + minJackpot)
             return 0;
         }
         // 中的概率
@@ -35,7 +36,8 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
             }
         }
         const num = Math.floor(Math.random() * 100);
-        if(num < prop){
+        log.info('奖池概率:' + prop + '随机数:' + num)
+        if(prop > num && currRtp <= expectRTP){
             // 有中jackpot的机会
             // 判断下注对应的奖池种类
             let jpIndex = 0;
@@ -44,8 +46,11 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
                     jpIndex = bet_jackpot_level_index[i];
                 }
             }
-            // 不同奖池种类对应的概率实现
+            // 下注对应的奖池的概率数组
             const payProps = jackpot_pay_level[jpIndex];
+
+            log.info('奖池概率:' + prop + '奖池种类下标:' + jpIndex + '下注对应的奖池的概率数组:' + payProps)
+
             // 从高级的奖池开始碰运气
             let payJpIndex = -1;
             for(let i = payProps.length - 1; i >= 0 ; i--){
@@ -55,12 +60,14 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
                     if(n < payProp){
                         // 碰中了
                         payJpIndex = i;
+                        config.payJpIndex = payJpIndex;
+                        log.info('碰中的奖池索引payJpIndex:'+ payJpIndex +'payProp:' + payProp + '随机数:' + n)
                         break;
                     }
                 }
             }
             // 计算中了多少奖
-            if(payJpIndex > 0){
+            if(payJpIndex > -1){
                 const JpRatio = jackpot_ratio[payJpIndex];
                 const getJp = jackpot * (JpRatio / 100);
                 const jp = getJp > 0 ? getJp.toFixed(0) : 0
@@ -346,8 +353,10 @@ function getCard(cards , nGameHandCardsNumber, weight_two_array, col_count, line
     // 中了jackpot,把某行置为jackpot牌
     if(winJackpot > 0){
         const lineNum = Math.floor(Math.random() * line_count); // 随机一行
+
         let lineStartIndex = lineNum * line_count
-        let lineEndIndex = lineNum + col_count;
+        let lineEndIndex = lineStartIndex + col_count;
+        log.info('中了jackpot,把某行置为jackpot牌 行号:' + lineNum + 'lineStartIndex:' + lineStartIndex + 'lineEndIndex:' + lineEndIndex)
         for(let i = lineStartIndex; i < lineEndIndex; i++){
             nHandCards[i] = jackpotCard;
         }

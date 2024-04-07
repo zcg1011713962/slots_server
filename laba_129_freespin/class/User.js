@@ -1,6 +1,5 @@
 User = function (userInfo, _socket) {
     //相关属性
-
     this._userId = "";			//数据库ID
     this._socket = "";			//socketID
     this._account = "";			//用户帐号
@@ -17,6 +16,7 @@ User = function (userInfo, _socket) {
     this.SeatId = -1;			//座位ID
     this.sign = "";
     this._isLeave = true;
+    this._diamond = 0;
 
 
     this.init = function (_userInfo, _socket) {
@@ -27,8 +27,6 @@ User = function (userInfo, _socket) {
         //socket绑定用户id
         _socket.userId = _userInfo.userid;
         this._isLeave = false;
-        //console.log("#########" + _userInfo.Id + "##########" + _socket.userId)
-        //console.log(_socket.userId);
     };
 
     this.update = function (_userInfo) {
@@ -38,8 +36,8 @@ User = function (userInfo, _socket) {
             this._nickname = _userInfo._nickname;
             this.LoginCount = _userInfo.LoginCount;
             this._islogin = true;
+            this._diamond = _userInfo._diamond;
         }
-
     };
 
     this.updateFreeGame = function (_userInfo) {

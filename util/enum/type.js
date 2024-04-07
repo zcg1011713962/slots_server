@@ -79,7 +79,8 @@ const ScoreChangeType = {
     inviteBindAgent: 5, // 邀请绑定给代理人送金币
     newHandGive: 6 ,//新手送金币
     rebateShop: 7,  // 邀请绑定-购物返点
-    bustBonus: 8  // 破产补助金
+    bustBonus: 8,  // 破产补助金
+    upgradeGiveGlod: 9 //VIP升级奖励
 };
 
 const NewHandFlag = {
@@ -90,7 +91,8 @@ const NewHandFlag = {
 const ShopType = {
     store: 0, // 商城
     free_turntable: 1, // 转盘活动
-    discount_Limited: 2 // 限时折扣
+    discount_Limited: 2, // 限时折扣
+    firstRecharge: 3, // 首充
 };
 
 const NewHandGuideFlow = {

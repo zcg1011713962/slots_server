@@ -62,6 +62,19 @@ Csocket.on('addgold', function (msg) {
     }
 });
 
+// 增加钻石
+Csocket.on('addDiamond', function (msg) {
+    if (!msg) {
+        return;
+    }
+    if(gameInfo.userList[msg.userId]){
+        gameInfo.userList[msg.userId]._diamond += msg.addDiamond;
+        log.info(msg.userId + '游戏内增加钻石前数量:' + msg.addDiamond + '增加后数量:' + gameInfo.userList[msg.userId]._diamond)
+    }else{
+        log.err(msg.userId + '游戏内增加钻石前数量:' + msg.addDiamond + '需要补发')
+    }
+});
+
 Csocket.on('gameForward', function (msg) {
     if (!msg) {
         return;
@@ -183,6 +196,18 @@ io.on('connection', function (socket) {
     //登录游戏获取免费游戏次数
     socket.on('LoginfreeCount', function () {
         gameInfo.LoginfreeCount(socket.userId, socket);
+    });
+
+    // 获取游戏内金币
+    socket.on('getGold', function () {
+        const gold = gameInfo.getPlayerScore(socket.userId);
+        if(gold >= 0){
+            log.info('获取游戏内金币' + gold)
+            socket.emit('getGoldResult', {code: 1, data: {gold: gold}})
+        }else{
+            log.err('---------------------------------------------------获取金币失败');
+            socket.emit('getGoldResult', {code: 0, msg: '获取金币失败'});
+        }
     });
 
     //登录游戏获取免费游戏次数

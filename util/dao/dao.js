@@ -968,8 +968,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -985,6 +985,9 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(shopType);
     values.push(val);
     values.push(serverId);
+    values.push(buyContinueRewardGold);
+    values.push(buyContinueRewardDiamond);
+    values.push(buyContinueDays);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1013,7 +1016,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status = 0 and orderId = ? and userId = ?';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -1594,6 +1597,7 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 
 
+
 //添加银行卡
 exports.addBank = function addBank(userId, account, name, cpf, bankType, callback) {
     const sql = 'call AddBankCard(?,?,?,?,?)';
@@ -1719,6 +1723,8 @@ exports.getBank = function getBank(_userId, callback) {
         values = [];
     });
 };
+
+
 
 //获得用户道具
 exports.getPropByUserId = function getPropByUserId(_userId, callback) {
@@ -2628,6 +2634,39 @@ exports.searchFirstRecharge = function (userId, callback) {
             } else {
                 if(rows && rows.length > 0){
                     callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+
+// 买过首充
+exports.updateFirstRecharge = function (userId, callback) {
+    const sql = "update userinfo set firstRecharge = 1 where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("买过首充");
+                console.log(err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
                 }else{
                     callback(0);
                 }

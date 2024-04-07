@@ -10,6 +10,7 @@ const dao = require('../util/dao/dao');
 const ErrorCode = require("./ErrorCode");
 const CommonEven = require("./event_util");
 
+
 exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
     const userId = socket.userId;
     if(!gameInfo.userList[userId]){
@@ -265,15 +266,17 @@ function preLottery(userId, nBetSum, gameJackpot, gameConfig, jackpotConfig, reb
             config.openBoxCard = gameConfig.iconInfos[i].icon_type;
         }
     }
+    // 游戏奖池比例
     config.jackpotRatio = jackpotConfig.game_jackpot_ratio.map(item => item.ratio)
     // 奖池金币数组
     config.jackpotLevelMoney = jackpotConfig.jackpot_level.map(item => item.jackpot)
     // 奖池金币对应的概率
     config.jackpotLevelProb = jackpotConfig.jackpot_level.map(item => item.prop)
+
     // 下注数组
-    config.betJackpotLevelBet = jackpotConfig.bet_jackpot_level.map(item => item.bet)
+    config.betJackpotLevelBet = gameConfig.betsJackpot.map(item => item.bet)
     // 下注数组对应的奖池
-    config.betJackpotLevelIndex = jackpotConfig.bet_jackpot_level.map(item => item.jackpot_ratio_index)
+    config.betJackpotLevelIndex = gameConfig.betsJackpot.map(item => item.jackpotIndex)
     // 四种奖池对应的概率
     config.jackpotPayLevel = jackpotConfig.jackpot_pay_level;
 
@@ -303,7 +306,7 @@ function Lottery(config, gameInfo, newHandFlag) {
             log.info(config.userId + "输光,没购买首充弹首充商城:" + config.nBetSum);
             return {code: -2};
         }
-        return {code: -1};
+        return {code: -3};
     }
     //用户金币
     const score_before = gameInfo.userList[config.userId].getScore();
@@ -313,12 +316,7 @@ function Lottery(config, gameInfo, newHandFlag) {
     const GamblingBalanceLevelBigWin = gameInfo.A.getGamblingBalanceLevelBigWin();
     // 水位
     const nGamblingWaterLevelGold = GamblingBalanceLevelBigWin.nGamblingWaterLevelGold;
-    // 大奖幸运等级
-    const nGamblingBigWinLevel = GamblingBalanceLevelBigWin.nGamblingBigWinLevel;
-    // 大奖幸运概率
-    const nGamblingBigWinLuck = GamblingBalanceLevelBigWin.nGamblingBigWinLuck;
-    // 幸运大奖
-    const is_luck = false;
+
     // 目标RTP
     const expectRTP = config.rebateRatio / 100;
     // 进入奖池的钱
@@ -326,7 +324,9 @@ function Lottery(config, gameInfo, newHandFlag) {
     // 进入库存的钱
     const addBalance = config.nBetSum - addJackpot;
     // 增加库存和奖池
-    gameInfo.A.addGamblingBalanceGold(addBalance, addJackpot);
+    redis_laba_win_pool.redis_win_pool_incrby(addJackpot);
+    CacheUtil.IncrGamblingBalanceGold(addBalance);
+    log.info("添加库存:" + addBalance +  "添加奖池:" + addJackpot);
 
     let nHandCards = [];
     let win = 0;
@@ -343,7 +343,7 @@ function Lottery(config, gameInfo, newHandFlag) {
         dictAnalyseResult = analyse_result.initResult(config.nBetSum);
 
         // 分析jackpot
-        winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
+        winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit, config, currRtp, expectRTP);
 
         // 生成图案
         nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard, config.iconTypeBind, winJackpot, config.blankCard);
@@ -378,7 +378,8 @@ function Lottery(config, gameInfo, newHandFlag) {
             // jackpot图案某行中奖
             dictAnalyseResult["getJackpot"] = {
                 bFlag: true,
-                bVal: winJackpot
+                bVal: winJackpot,
+                payJpIndex: config.payJpIndex
             };
         }
 
@@ -416,7 +417,7 @@ function Lottery(config, gameInfo, newHandFlag) {
         currRtp = Number(backBetRatio.toFixed(2));
         // 当前RTP大于目标RTP 而且 摇的结果是赢的
         if (currRtp > expectRTP && winFlag) {
-            //log.info('RTP控制 需要让用户输 source_rtp:' + source_rtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
+            log.info('RTP控制 需要让用户输 currRtp:' + currRtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
             continue;
         }
 
@@ -433,10 +434,14 @@ function Lottery(config, gameInfo, newHandFlag) {
     const winscore =  StringUtil.addTNumbers(dictAnalyseResult["win"], winJackpot, openBoxCardWin)
     if (winscore > 0) { // 赢
         if (GamblingBalanceLevelBigWin.nGamblingBalanceGold < win) {  // 系统库存足够，减少系统库存 用户奖池
-            gameInfo.A.subSysBalanceGold(winscore, winJackpot);
+            // gameInfo.A.subSysBalanceGold(winscore, winJackpot);
+            redis_laba_win_pool.redis_win_pool_decrby(winJackpot);
+            CacheUtil.DecrSysBalanceGold(winscore);
         } else {
             // 减少用户库存 用户奖池
-            gameInfo.A.subGamblingBalanceGold(winscore, winJackpot);
+            redis_laba_win_pool.redis_win_pool_decrby(winJackpot);
+            CacheUtil.DecrGamblingBalanceGold(winscore);
+            //gameInfo.A.subGamblingBalanceGold(winscore, winJackpot);
         }
         CacheUtil.playGameWinscore(config.userId, winscore);
     } else {  // 输

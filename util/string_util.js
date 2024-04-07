@@ -209,4 +209,16 @@ exports.list_one_count = function list_one_count(x, list) {
 }
 
 
+exports.currDate = function currDate(x, list) {
+    const currentDate = new Date();
+    // 获取年份
+    const year = currentDate.getFullYear();
+    // 获取月份（月份从0开始，需要加1）
+    const month = currentDate.getMonth() + 1;
+    // 获取日期
+    const day = currentDate.getDate();
+    return `${year}-${month}-${day}`;
+}
+
+
 

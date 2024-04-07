@@ -240,6 +240,36 @@ exports.searchInviteSend = function searchInviteSend(userId, callback){
 
 
 
+exports.searchInvite= function searchInvite(invite_uid, callback){
+    const sql = 'select invitee_uid from account_invites  where invite_uid = ?';
+    const values = []
+    values.push(invite_uid);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('searchInvite'+ err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
+}
+
+
+
+
 // 代理返点记录
 exports.agentRebateRecord = function agentRebateRecord(invite_uid ,invitee_uid, currencyType, currencyVal ,rebateGlod, type, status, callback){
     const sql = 'INSERT INTO agent_rebate (invite_uid, invitee_uid, currency_type, currency_val,rebate_glod, created_at, `type`, `status`) VALUES( ?, ?, ?, ?,?,?,?,?)';

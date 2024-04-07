@@ -5,6 +5,9 @@ const ErrorCode = require("./ErrorCode");
 const StringUtil = require("./string_util");
 const TypeEnum = require("./enum/type");
 
+const gamblingBalanceGold= 'gamblingBalanceGold';
+const sysBalanceGold= 'sysBalanceGold';
+
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
 const userPlayGameCount= 'userPlayGameCount';
@@ -18,6 +21,9 @@ const userInfoKey = 'userInfo';
 const sendEmailKey = 'sendEmailCode';
 const newHandGuideFlowKey = 'newHandGuideFlow';
 const userDiscountLimitedKey = 'userDiscountLimited';
+
+const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
+
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -57,6 +63,66 @@ const hallConfig = {
     turntable_config: 'turntable_config',
     discountLimited_config: 'discountLimited_config'
 }
+
+
+
+
+// 初始化用户库存
+exports.initGamblingBalanceGold  = function () {
+    this.getGamblingBalanceGold().then(val =>{
+        if(!val){
+            RedisUtil.set(gamblingBalanceGold, 0);
+        }
+    });
+}
+// 初始化系统库存
+exports.initSysBalanceGold  = function () {
+    this.getSysBalanceGold().then(val =>{
+        if(!val){
+            RedisUtil.set(sysBalanceGold, 0);
+        }
+    });
+}
+
+// 获取用户库存
+exports.getGamblingBalanceGold  = function () {
+    return RedisUtil.get(gamblingBalanceGold);
+}
+
+exports.IncrGamblingBalanceGold  = function (increment) {
+    if(increment > 0){
+        return RedisUtil.incrementByFloat(gamblingBalanceGold, increment);
+    }
+}
+
+
+exports.DecrGamblingBalanceGold  = function (increment) {
+    if(increment > 0){
+        return RedisUtil.decrementFloat(gamblingBalanceGold, increment);
+    }
+}
+
+// 获取系统库存
+exports.getSysBalanceGold  = function () {
+    return RedisUtil.get(sysBalanceGold);
+}
+
+exports.IncrSysBalanceGold  = function (increment) {
+    if(increment > 0){
+        return RedisUtil.incrementByFloat(sysBalanceGold, increment);
+    }
+}
+
+exports.DecrSysBalanceGold  = function (increment) {
+    if(increment > 0){
+        return RedisUtil.decrementFloat(sysBalanceGold, increment);
+    }
+}
+
+
+
+
+
 
 
 exports.getServerUrlConfig = async function(){
@@ -248,15 +314,15 @@ exports.getGameJackpot  = function (callback){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
             // 游戏奖池
-            let gameJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100)) : 0;
+            let gJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100)) : 0;
             // 奖池划分比例
             const game_jackpot_ratio = jackpotConfig.game_jackpot_ratio;
-            const grandJackpot =  StringUtil.rideNumbers(gameJackpot, game_jackpot_ratio[0].ratio / 100);
-            const majorJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[1].ratio / 100);
-            const minorJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[2].ratio / 100);
-            const miniJackpot = StringUtil.rideNumbers(gameJackpot , game_jackpot_ratio[3].ratio / 100);
-            const gJackpot= Math.floor(gameJackpot.toFixed(2));
-            callback(gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
+            const grandJackpot =  StringUtil.rideNumbers(gJackpot, game_jackpot_ratio[3].ratio / 100);
+            const majorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[2].ratio / 100);
+            const minorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[1].ratio / 100);
+            const miniJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[0].ratio / 100);
+            const gameJackpot= Math.floor(gJackpot.toFixed(2));
+            callback(gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
         });
     });
 }
@@ -270,8 +336,9 @@ exports.delayPushGameJackpot = function (userInfo, userList) {
     setTimeout(() => {
         const us = []
         us[u.userid] = items[u.userid];
+        log.info(u.userid + '延时500毫秒推送奖池')
         this.pushGameJackpot(us);
-    }, 1000);
+    }, 500);
 }
 
 
@@ -310,7 +377,8 @@ exports.activityLuckyConfig  = function (userId, callback){
                     luckyRushEndTime: endTime,
                     luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
                     luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
-                    pushStatus: 1 // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
+                    pushStatus: 1, // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
+                    currCoinCount: 0 // 当日领取幸运币数量
                 }
                 RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret)).then(r =>{
                     callback(1)
@@ -652,3 +720,21 @@ exports.getUserDiscountLimited  = function (userId){
     return RedisUtil.get(key);
 }
 
+
+
+// 设置购买首充持续奖励
+exports.setFirstRechargeContinueReward  = function (userId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, lastGetTime){
+    const obj = {
+        buyContinueRewardGold: buyContinueRewardGold,
+        buyContinueRewardDiamond: buyContinueRewardDiamond,
+        buyContinueDays: buyContinueDays,
+        lastGetTime: lastGetTime
+    }
+    return RedisUtil.hmset(firstRechargeContinueRewardKey, userId, JSON.stringify(obj));
+}
+
+
+// 获取购买首充持续奖励
+exports.getFirstRechargeContinueReward  = function (userId){
+    return RedisUtil.hget(firstRechargeContinueRewardKey, userId);
+}

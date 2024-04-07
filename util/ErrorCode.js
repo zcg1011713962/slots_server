@@ -46,7 +46,15 @@ class ErrorCode {
     static get BANK_TRANSFER_NOTIFY() { return { code: 'p0002', msg: '转账消息通知' , langCode: 'languageId_52' }; }
 
 
-    static get BANK_TRANSFER_NOTIFY() { return { code: 'p0002', msg: '转账消息通知' , langCode: 'languageId_52' }; }
+    static get PWD_ILLEGAL() { return { code: 'E504', msg: '密码长度非法' , langCode: 'languageId_322' }; }
+
+    static get ACCOUNT_EXCEPTION() { return { code: 'E505', msg: '您的账号暂时无法交易，请联系客服' , langCode: 'languageId_323' }; }
+
+    static get EXIST_PWD() { return { code: 'E506', msg: '存在密码请修改密码' , langCode: 'languageId_324' }; }
+
+    static get TWO_TIME_PWD_DIFFER() { return { code: 'E507', msg: '两次密码不一致' , langCode: 'languageId_325' }; }
+
+    static get SELF_INVITE_SELF() { return { code: 'E507', msg: '不能相互绑定' , langCode: 'languageId_326' }; }
 }
 
 module.exports = ErrorCode;

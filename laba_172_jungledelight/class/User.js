@@ -17,8 +17,9 @@ User = function(userInfo,_socket){
 	this.SeatId = -1;			//座位ID
 	this.sign = "";
 	this._isLeave = true;
+	this._diamond = 0;
 
-	this.init = function(_userInfo,_socket){
+		this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.userid;
 		this.sign = _userInfo.sign;
 		this._socket = _socket;
@@ -37,6 +38,7 @@ User = function(userInfo,_socket){
 			this._nickname = _userInfo._nickname;
 			this.LoginCount = _userInfo.LoginCount;
 			this._islogin = true;
+			this._diamond = _userInfo._diamond;
 		}
 		
 	}

@@ -9,7 +9,8 @@ exports.redis_win_pool_init  = function redis_win_pool_init() {
             RedisUtil.set(redis_jackpot_key, 0);
         }
     });
-};
+}
+
 
 //累加奖池
 exports.redis_win_pool_incrby  = function redis_win_pool_incrby(increment) {

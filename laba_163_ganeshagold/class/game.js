@@ -87,7 +87,7 @@ var GameInfo = function () {
                 }
 
                 //推送奖池给玩家
-                if (second % 20 === 0) {
+                if (second % 10 === 0) {
                     // 奖池推送
                     CacheUtil.pushGameJackpot(self.userList);
                 }
@@ -628,7 +628,7 @@ var GameInfo = function () {
                 const seconds = new Date().getSeconds()
                 if(users){
                     for (let i = 0; i < users.length; ++i) {
-                        if(seconds % 25 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                        if(seconds % 2 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
                     }
                 }
                 saveList = [];

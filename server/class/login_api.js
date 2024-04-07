@@ -8,6 +8,8 @@ const key = "42dfcb34fb02d8cd";
 
 const registerByGuestApi = function (req, gameInfo , callback) {
 	if (req.query.act == "getGuessA") {
+		log.info("游客注册请求");
+
 		const daili = req.query.daili;
 
 		const time = StringUtil.generateTime();
@@ -51,6 +53,7 @@ const registerByGuestApi = function (req, gameInfo , callback) {
 				callback(1, '{"status":0,"msg":"","data":{"password":"' + king + '","account":"' + account + '"}}');
 				return;
 			}
+			log.info("游客注册失败");
 			callback(1, '{"status":1,"msg":"注册失败!"}');
 		});
 	}

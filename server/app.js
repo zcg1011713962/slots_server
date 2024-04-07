@@ -58,8 +58,7 @@ app.post('/gmManage', function (req, res) {
 });
 
 // 游客注册
-app.get('/registerByGuest', function (req, res) {
-
+app.get('/registerByGuest', async function (req, res) {
     registerByGuestApi(req, gameInfo, function (act, sendStr) {
         if (act == 1) {
             res.send(sendStr);
@@ -198,7 +197,7 @@ app.get('/Shopping', async function (req, res) {
                 log.info(userId + '购买商品下单成功');
                 res.send({code: code, data: data});
             }else{
-                log.info(userId + '购买商品下单失败');
+                log.info(userId + '购买商品下单失败:' + msg);
                 res.send({code: code, msg: msg});
             }
         });
@@ -371,6 +370,7 @@ io.on('connection', function (socket) {
 
     // 登录完成之后先进入游戏房间,来自于游戏服务器
     socket.on('LoginGame', function (_userinof) {
+        log.info('登录完成之后,进入游戏房间LoginGame:' + _userinof)
         let result;
         if (_userinof.serverSign === serverSign) {
             //让这个用户进入该游戏
@@ -395,6 +395,7 @@ io.on('connection', function (socket) {
             } else {
                 result = {ResultCode: 0, userid: _userinof.userid, msg: userInfo.msg};
             }
+            log.info('登录完成之后,进入游戏房间LoginGameResult:' + _userinof)
             socket.emit('LoginGameResult', result);
         }
 
@@ -774,8 +775,10 @@ io.on('connection', function (socket) {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(code){
                     socket.emit('withdrawResult', {code: code, msg: msg, data: data});
+                    log.info(userId + '发起提现申请成功:' + data);
                 }else{
-                    socket.emit('withdrawResult', {code: code, msg: msg});
+                   log.info(userId + '发起提现申请失败:' + msg);
+                   socket.emit('withdrawResult', {code: code, msg: msg});
                 }
 
             });
@@ -802,25 +805,25 @@ io.on('connection', function (socket) {
 
         const userId = socket.userId;
         if(d.pwd1.toString().length !== 6){
-            socket.emit('setBankPwdResult', {code: 0, msg: "密码长度非法"});
+            socket.emit('setBankPwdResult', {code: ErrorCode.PWD_ILLEGAL.code, msg: ErrorCode.PWD_ILLEGAL.msg});
             return;
         }
         if (gameInfo.IsPlayerOnline(userId)) {
             // 银行是否被锁
             if(gameInfo.isBankLock(userId)){
-                socket.emit('setBankPwdResult', {code: 0, msg: "您的账号暂时无法交易，请联系客服"});
+                socket.emit('setBankPwdResult', {code: ErrorCode.ACCOUNT_EXCEPTION.code, msg: ErrorCode.ACCOUNT_EXCEPTION.msg});
                 return;
             }
             if (d.pwd2 === d.pwd1) {
                 gameInfo.getUserBankPwd(socket.userId, (pwd) => {
                     if(pwd){
-                        socket.emit('setBankPwdResult', {code: 0, msg: "存在密码请修改密码"});
+                        socket.emit('setBankPwdResult', {code: ErrorCode.EXIST_PWD.code, msg:  ErrorCode.EXIST_PWD.msg});
                     }else{
                         gameInfo.setUserBankPwd(socket, d);
                     }
                 });
             } else {
-                socket.emit('setBankPwdResult', {code: 0, msg: "两次密码不一致"});
+                socket.emit('setBankPwdResult', {code: ErrorCode.TWO_TIME_PWD_DIFFER.code, msg: ErrorCode.TWO_TIME_PWD_DIFFER.msg});
             }
         }
     });
@@ -1149,6 +1152,27 @@ io.on('connection', function (socket) {
             gameInfo.searchAgentGetRebateRecord(socket);
         }else{
             socket.emit('getRebateRecordResult', {code:0, msg:"用户不在线"});
+        }
+    });
+
+
+    // 推广宣传信息
+    socket.on("extendInfo", function () {
+        const userId = socket.userId;
+        if (gameInfo.IsPlayerOnline(userId)) {
+            CacheUtil.getDownloadExtConfig().then(config =>{
+                const rewardAgentOnce = config.reward_agent_once;
+                const rewardInviteeOnce = config.reward_invitee_once;
+                const rewardAgent = config.reward_agent;
+                const data = {
+                    rewardAgentOnce: rewardAgentOnce,
+                    rewardInviteeOnce: rewardInviteeOnce,
+                    rewardAgent: rewardAgent
+                }
+                socket.emit('extendInfoResult', {code:1, data: data});
+            })
+        }else{
+            socket.emit('extendInfoResult', {code:0, msg:"用户不在线"});
         }
     });
 
