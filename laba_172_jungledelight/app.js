@@ -38,7 +38,7 @@ Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    console.log(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
+    log.info(gameConfig.gameName + "登录大厅回应" + JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {
@@ -165,7 +165,6 @@ io.on('connection', function (socket) {
                     serverId: gameConfig.serverId
                 };
                 Csocket.emit('LoginGame', msg);
-                CacheUtil.delayPushGameJackpot(userInfo, gameInfo.userList);
             } else {
                 console.log("用户已经在服务器了，无需重复登录");
             }

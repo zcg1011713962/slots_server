@@ -85,7 +85,6 @@ var GameInfo = function () {
                         online_num: self.onlinePlayerCount
                     });
                 }
-
                 //推送奖池给玩家
                 if (second % 10 === 0) {
                     CacheUtil.pushGameJackpot(self.userList);

@@ -236,11 +236,15 @@ var GameInfo = function () {
         };
 
         this.updateUser = function (userInfo) {
-            if (!this.userList[userInfo._userId]) return;
+            if (!this.userList[userInfo._userId]) {
+                log.err(userInfo._userId + '用户不在线')
+                return;
+            }
 
             let result = {};
             //已经断线
             if (this.userList[userInfo._userId]._isLeave) {
+                log.info(userInfo._userId + '用户已经断线')
                 result = {ResultCode: 0, userId: userInfo._userId};
                 this._Csocket.emit("userDisconnect", result);
                 delete this.userList[userInfo._userId];
@@ -251,25 +255,36 @@ var GameInfo = function () {
             this.LoginGame(userInfo._userId, this.serverId);
             ++this.onlinePlayerCount;
 
-            CacheUtil.getGameConfig(this.gameName, this.gameId).then(config =>{
-                try {
-                    const icon_mul = config.icon_mul.reduce((acc, curr) => {
-                        return acc.concat(curr);
-                    }, []);
-                    let resultObj = {
-                        account: this.userList[userInfo._userId]._account,
-                        id: this.userList[userInfo._userId]._userId,
-                        nickname: this.userList[userInfo._userId]._nickname,
-                        score: this.userList[userInfo._userId]._score,
-                        betList: config.coinConfig,
-                        priceList: icon_mul,
-                    };
-                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-                    this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
-                }catch (e){
-                    log.err(e)
-                }
+            CacheUtil.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
+                CacheUtil.getGameConfig(this.gameName, this.gameId).then(config =>{
+                    try {
+                        const icon_mul = config.icon_mul.reduce((acc, curr) => {
+                            return acc.concat(curr);
+                        }, []);
+                        let resultObj = {
+                            account: this.userList[userInfo._userId]._account,
+                            id: this.userList[userInfo._userId]._userId,
+                            nickname: this.userList[userInfo._userId]._nickname,
+                            score: this.userList[userInfo._userId]._score,
+                            betList: config.coinConfig,
+                            priceList: icon_mul,
+                            jackpot: {
+                                gameJackpot: gJackpot,
+                                grand_jackpot: grandJackpot,
+                                major_jackpot: majorJackpot,
+                                minor_jackpot: minorJackpot,
+                                mini_jackpot: miniJackpot
+                            }
+                        };
+                        result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                        log.info(userInfo._userId + '给用户回应登录结果' + JSON.stringify(result))
+                        this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
+                    }catch (e){
+                        log.err('给用户回应登录结果:' + e)
+                    }
+                })
             })
+
         };
 
         //获得在线人数
@@ -358,8 +373,11 @@ var GameInfo = function () {
             if (_userId) {
                 var socketItem = this.userList[_userId]._socket;
                 result = {resultid: 0, msg: msg};
+                log.info(_userId + '给用户回应登录结果' + result)
                 socketItem.emit('loginGameResult', result);
                 delete this.userList[_userId];
+            }else{
+                log.err('非法的用户')
             }
         };
 

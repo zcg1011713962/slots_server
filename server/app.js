@@ -103,7 +103,7 @@ app.get('/devcodesearch', function (req, res) {
 app.get('/betsJackpot', function (req, res) {
     //验证版本
     const gameId = req.query.gameId;
-    log.info('获取游戏线注' + gameId)
+    log.info(gameId + '获取游戏线注')
     if(gameId === undefined || isNaN(gameId)){
         return;
     }
@@ -282,19 +282,15 @@ var serverSign = "slel3@lsl334xx,deka";
 gameInfo.setIo(io);
 
 io.on('connection', function (socket) {
-    log.info("socket comein........");
     socket.emit('connected', 'connect server');
-
     //服务器进行连接
     socket.on('GameServerConnect', function (info) {
         if (info.signCode == serverSign) {
-            log.info(info.serverName + " | 服务器连接成功!");
-            log.info("游戏Id:" + info.serverId);
+            log.info(info.serverName + "游戏Id:" + info.serverId + '与大厅建立连接成功');
             socket.emit('GameServerConnectResult', {resultCode: 1});
-            if (info.serverId)
-                ServerInfo.setScoket(info.serverId, socket);
+            if (info.serverId)  ServerInfo.setScoket(info.serverId, socket);
         } else {
-            log.info("尝试连接服务器失败,密码不对");
+            log.info("尝试连接服务器失败,signCode错误");
         }
     });
 
@@ -312,7 +308,7 @@ io.on('connection', function (socket) {
             socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_LOGINAGAIN.code, msg: ErrorCode.LOGIN_FAILED_LOGINAGAIN.msg});
             return;
         }
-        log.info("登录大厅" + data);
+        log.info("登录大厅" + JSON.stringify(data));
 
         try {
             const user = StringUtil.isJson(data) ? JSON.parse(data) : data;
@@ -344,6 +340,7 @@ io.on('connection', function (socket) {
     })
     
     function findUser(user, socket) {
+        // 数据库查询用户信息
         dao.login(user, socket, (code, msg, data)=> {
             if(ErrorCode.LOGIN_SUCCESS.code === code){
                 if (!data) {
@@ -368,9 +365,8 @@ io.on('connection', function (socket) {
     }
     
 
-    // 登录完成之后先进入游戏房间,来自于游戏服务器
     socket.on('LoginGame', function (_userinof) {
-        log.info('登录完成之后,进入游戏房间LoginGame:' + _userinof)
+        log.info('游戏服务登录大厅:' + JSON.stringify(_userinof))
         let result;
         if (_userinof.serverSign === serverSign) {
             //让这个用户进入该游戏
@@ -395,7 +391,7 @@ io.on('connection', function (socket) {
             } else {
                 result = {ResultCode: 0, userid: _userinof.userid, msg: userInfo.msg};
             }
-            log.info('登录完成之后,进入游戏房间LoginGameResult:' + _userinof)
+            log.info('游戏服务登录大厅:' + JSON.stringify(_userinof))
             socket.emit('LoginGameResult', result);
         }
 
@@ -906,6 +902,7 @@ io.on('connection', function (socket) {
                 if(code){
                     socket.emit('getSignInDetailResult', {code:code, data: data});
                 }else{
+                    log.info(userId + '查询签到详情页失败' + msg)
                     socket.emit('getSignInDetailResult', {code:code, msg: msg});
                 }
             });
@@ -921,11 +918,12 @@ io.on('connection', function (socket) {
             const ret = await CacheUtil.recordUserProtocol(userId, "signIn");
             log.info(userId + '用户进行签到', ret)
             if (ret) {
-                gameInfo.signIn(socket, ok => {
+                gameInfo.signIn(socket, (code, msg) => {
                     CacheUtil.delUserProtocol(userId, "signIn")
-                    if (ok) {
+                    if (code) {
                         socket.emit('signInResult', {code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
                     } else {
+                        log.err('签到失败' + msg)
                         socket.emit('signInResult', {code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
                     }
                 });

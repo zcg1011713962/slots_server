@@ -346,13 +346,11 @@ var GameInfo = function () {
         //添加用户
         this.addUser = function (_userInfo, socket) {
             this.userList[_userInfo.userid] = new User(_userInfo, socket);
-            console.log("zaixianrenshu----------------------------------", this.onlinePlayerCount);
+            log.info("当前在线用户数:" + this.onlinePlayerCount);
         };
 
         this.updateUser = function (userInfo) {
-            //console.log("update")
             if (!this.userList[userInfo._userId]) return;
-
             //已经断线
             if (this.userList[userInfo._userId]._isLeave) {
                 var result = {ResultCode: 0, userId: userInfo._userId};

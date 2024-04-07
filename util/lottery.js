@@ -324,7 +324,7 @@ function Lottery(config, gameInfo, newHandFlag) {
     // 进入库存的钱
     const addBalance = config.nBetSum - addJackpot;
     // 增加库存和奖池
-    redis_laba_win_pool.redis_win_pool_incrby(addJackpot);
+    CacheUtil.IncrJackpot(addJackpot);
     CacheUtil.IncrGamblingBalanceGold(addBalance);
     log.info("添加库存:" + addBalance +  "添加奖池:" + addJackpot);
 

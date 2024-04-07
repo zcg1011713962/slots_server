@@ -250,10 +250,14 @@ var GameInfo = function () {
         };
         // 更新用户
         this.updateUser = function (userInfo) {
-            if (!this.userList[userInfo._userId]) return;
+            if (!this.userList[userInfo._userId]){
+                log.info(userInfo._userId + '用户不在线')
+                return;
+            }
 
             //已经断线
             if (this.userList[userInfo._userId]._isLeave) {
+                log.info(userInfo._userId + '用户断线')
                 var result = {ResultCode: 0, userId: userInfo._userId};
                 this._Csocket.emit("userDisconnect", result);
                 delete this.userList[userInfo._userId];
@@ -264,18 +268,24 @@ var GameInfo = function () {
             this.LoginGame(userInfo._userId, this.serverId);
             ++this.onlinePlayerCount;
 
-           get_redis_win_pool().then(jackpot =>{
-               jackpot = jackpot > 0 ? jackpot : 0;
-               const resultObj = {
-                   account: this.userList[userInfo._userId]._account,
-                   id: this.userList[userInfo._userId]._userId,
-                   nickname: this.userList[userInfo._userId]._nickname,
-                   score: this.userList[userInfo._userId]._score,
-                   nGamblingWinPool: jackpot + this.ranScore
-               };
-               result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-               this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
-           });
+            CacheUtil.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
+                let resultObj = {
+                    account: this.userList[userInfo._userId]._account,
+                    id: this.userList[userInfo._userId]._userId,
+                    nickname: this.userList[userInfo._userId]._nickname,
+                    score: this.userList[userInfo._userId]._score,
+                    jackpot: {
+                        gameJackpot: gJackpot,
+                        grand_jackpot: grandJackpot,
+                        major_jackpot: majorJackpot,
+                        minor_jackpot: minorJackpot,
+                        mini_jackpot: miniJackpot
+                    }
+                }
+                result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                log.info(userInfo._userId + '给用户返回登录结果' + JSON.stringify(result))
+                this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
+            })
         };
         //获得在线人数
         this.getOnlinePlayerCount = function () {

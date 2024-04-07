@@ -39,7 +39,7 @@ Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    log.info(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
+    log.info(gameConfig.gameName + "登录大厅回应" + JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {
@@ -148,7 +148,6 @@ io.on('connection', function (socket) {
 
     //客户登录游戏
     socket.on('LoginGame', function (userInfo) {
-        log.info('客户端登录游戏1' + userInfo)
         try {
             userInfo = JSON.parse(userInfo);
         } catch (e) {
@@ -169,12 +168,11 @@ io.on('connection', function (socket) {
                     gameId: gameInfo.serverId,
                     serverSign: signCode,
                     serverId: gameConfig.serverId
-                };
-                log.info('客户端登录游戏2' + userInfo)
-                CacheUtil.delayPushGameJackpot(userInfo, gameInfo.userList);
+                }
                 Csocket.emit('LoginGame', msg);
+                log.info(userInfo.userid + '用户登录游戏服务，游戏请求大厅服务')
             } else {
-                console.log("用户已经在服务器了，无需重复登录");
+                log.info("用户已经在服务器了，无需重复登录");
             }
         }
 

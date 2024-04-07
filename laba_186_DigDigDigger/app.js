@@ -139,7 +139,6 @@ io.on('connection', function (socket) {
                     serverId: gameConfig.serverId
                 };
                 Csocket.emit('LoginGame', msg);
-                CacheUtil.delayPushGameJackpot(userInfo, gameInfo.userList);
             } else {
                 console.log("用户已经在服务器了，无需重复登录");
             }

@@ -1508,7 +1508,6 @@ exports.userSignIn = function userSignIn(userId, callback) {
     let values = [];
     values.push(userId);
 
-
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
@@ -1531,6 +1530,7 @@ exports.userSignIn = function userSignIn(userId, callback) {
                     callback(0);
                 } else {
                     callback(rows[0][0], connection);
+                    connection.commit(err =>{})
                 }
                 values = [];
             });

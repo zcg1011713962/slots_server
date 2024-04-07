@@ -50,8 +50,6 @@ var GameInfo = function () {
             // 离线的用户
             this.tempuserList = {};
 
-            this.sendCardList = {};
-
             this.score_changeLogList = [];
 
             this.diamond_changeLogList = [];
@@ -64,15 +62,11 @@ var GameInfo = function () {
                 }
             });
 
-            this.checkNo = {};
-
             this._io = {};
 
             this.gm_socket = {};   //gm登录socket
 
             this.test = false;
-
-            this.todayId = 0;
 
             log.info('初始化用户库存 系统库存 奖池')
             redis_laba_win_pool.redis_win_pool_init();
@@ -91,16 +85,11 @@ var GameInfo = function () {
                     self.disconnectAllUser();
                 }
                 const nowDate = new Date();
-                const now_hours = nowDate.getHours();
-                const minute = nowDate.getMinutes();
                 const second = nowDate.getSeconds();
                 self.game_second = second;
-                if (second === 1) {
+                if (second === 2) {
                     // 奖池推送
                     CacheUtil.pushGameJackpot(self.userList);
-                }
-                if (now_hours == 5) {
-                    this.sendCardList = {};
                 }
             });
         };
@@ -138,10 +127,9 @@ var GameInfo = function () {
             }
         };
 
-        //添加用户
+        // 添加用户
         this.addUser = function (userInfo, socket, callback_a) {
             log.info("添加用户:" + userInfo.Id);
-
             const newDate = new Date();
             const key = "slezz;e3";
             const md5 = crypto.createHash('md5');
@@ -149,92 +137,81 @@ var GameInfo = function () {
             userInfo.sign = md5.digest('hex');
 
             //在没有添加用户之前找到道具列表
+            userInfo.propList = {};
+
             const self = this;
-            //console.log(userInfo);
             async.waterfall([
-                //callback到最后
                 function (callback) {
-                    dao.getPropByUserId(userInfo.Id, function (result, row) {
-                        log.info(userInfo.Id + "登录获取道具");
-                        if (result) {
-                            var proplist = {};
-                            for (var i = 0; i < row.length; i++) {
-                                proplist[row[i].propid] = row[i].propcount;
-                            }
-                            userInfo.propList = proplist;
-                        } else {
-                            userInfo.propList = {};
-                        }
-                        // 用户信息
-                        self.userList[userInfo.Id] = new User(userInfo, socket);
+                    // 用户信息
+                    self.userList[userInfo.Id] = new User(userInfo, socket);
 
-                        // 每日转盘活动
-                        CacheUtil.activityLuckyConfig(userInfo.Id, ret =>{
-                            if(ret){
-                                // 构建返回的用户信息
-                                CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
-                                    let luckObject = {
-                                        luckyCoin: 0,
-                                        luckyRushStartTime: 0,
-                                        luckyRushEndTime: 0,
-                                        luckyCoinGetStatus: 0,
-                                        currCoinCount: 0
-                                    }
-                                    if(ret){
-                                        luckObject.luckyCoin = ret.luckyCoin;
-                                        luckObject.luckyRushStartTime = ret.luckyRushStartTime;
-                                        luckObject.luckyRushEndTime = ret.luckyRushEndTime;
-                                        luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
-                                        luckObject.currCoinCount = ret.currCoinCount;
-                                    }
-                                    self.loginUserInfo(userInfo.Id, luckObject, loginUser =>{
-                                        CacheUtil.getFirstRechargeContinueReward(userInfo.Id).then(d =>{
-                                            let buyContinueRewardGold = 0;
-                                            let buyContinueRewardDiamond = 0;
-                                            let buyContinueDays = 0;
-                                            if(d){
-                                                const data = JSON.parse(d);
-                                                if(data.buyContinueDays > 0 && StringUtil.currDate() !== data.lastGetTime){
-                                                    buyContinueRewardGold = data.buyContinueRewardGold;
-                                                    buyContinueRewardDiamond = data.buyContinueRewardDiamond;
-                                                    buyContinueDays = data.buyContinueDays;
-                                                    data.buyContinueDays -= 1
-                                                    data.lastGetTime = StringUtil.currDate();
+                    // 设置每个用户的幸运配置(只限登录一次)
+                    CacheUtil.activityLuckyConfig(userInfo.Id, ret =>{
+                        if(ret){
+                            // 构建返回的用户信息
+                            CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
 
-                                                    self.userList[userInfo.Id]._score += buyContinueRewardGold;
-                                                    self.userList[userInfo.Id]._diamond += buyContinueRewardDiamond;
-                                                    if(data.buyContinueDays === 0){
-                                                        data.buyContinueRewardGold = 0;
-                                                        data.buyContinueRewardDiamond = 0;
-                                                    }
-                                                    CacheUtil.setFirstRechargeContinueReward(userInfo.Id, data.buyContinueRewardGold, data.buyContinueRewardDiamond, data.buyContinueDays, data.lastGetTime).then(r =>{})
+                                let luckObject = {
+                                    luckyCoin: 0,
+                                    luckyRushStartTime: 0,
+                                    luckyRushEndTime: 0,
+                                    luckyCoinGetStatus: 0,
+                                    currCoinCount: 0
+                                }
+                                if(ret){
+                                    luckObject.luckyCoin = ret.luckyCoin;
+                                    luckObject.luckyRushStartTime = ret.luckyRushStartTime;
+                                    luckObject.luckyRushEndTime = ret.luckyRushEndTime;
+                                    luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                                    luckObject.currCoinCount = ret.currCoinCount;
+                                }
+                                self.loginUserInfo(userInfo.Id, luckObject, loginUser =>{
+                                    CacheUtil.getFirstRechargeContinueReward(userInfo.Id).then(d =>{
+                                        let buyContinueRewardGold = 0;
+                                        let buyContinueRewardDiamond = 0;
+                                        let buyContinueDays = 0;
+                                        if(d){
+                                            const data = JSON.parse(d);
+                                            if(data.buyContinueDays > 0 && StringUtil.currDate() !== data.lastGetTime){
+                                                buyContinueRewardGold = data.buyContinueRewardGold;
+                                                buyContinueRewardDiamond = data.buyContinueRewardDiamond;
+                                                buyContinueDays = data.buyContinueDays;
+                                                data.buyContinueDays -= 1
+                                                data.lastGetTime = StringUtil.currDate();
+
+                                                self.userList[userInfo.Id]._score += buyContinueRewardGold;
+                                                self.userList[userInfo.Id]._diamond += buyContinueRewardDiamond;
+                                                if(data.buyContinueDays === 0){
+                                                    data.buyContinueRewardGold = 0;
+                                                    data.buyContinueRewardDiamond = 0;
                                                 }
+                                                CacheUtil.setFirstRechargeContinueReward(userInfo.Id, data.buyContinueRewardGold, data.buyContinueRewardDiamond, data.buyContinueDays, data.lastGetTime).then(r =>{})
                                             }
-                                            loginUser.buyContinueRewardGold = buyContinueRewardGold; //首充持续奖励金币
-                                            loginUser.buyContinueRewardDiamond = buyContinueRewardDiamond; //首充持续奖励钻石
-                                            loginUser.buyContinueDays = buyContinueDays; //首充持续奖励天数
-                                            result = {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser};
-                                            callback(null, result);
-                                        })
-                                    });
+                                        }
+                                        loginUser.buyContinueRewardGold = buyContinueRewardGold; //首充持续奖励金币
+                                        loginUser.buyContinueRewardDiamond = buyContinueRewardDiamond; //首充持续奖励钻石
+                                        loginUser.buyContinueDays = buyContinueDays; //首充持续奖励天数
+                                        callback(null, {code: ErrorCode.LOGIN_SUCCESS.code, msg: ErrorCode.LOGIN_SUCCESS.msg, Obj: loginUser});
+                                    })
                                 });
-                            }else{
-                                callback("设置用户信息失败", result);
-                            }
-                        });
-                    })
+                            });
+                        }else{
+                            log.err('设置用户信息失败,每日转盘活动查询缓存出错')
+                            callback("设置用户信息失败", null);
+                        }
+                    });
                 },
-                function (result, callback) {//读取重要数据
+                function (result, callback) {
                     dao.getScore(userInfo.Id, function (Result, rows) {
                         if (Result) {
                             result.Obj.score = rows.score;
                             result.Obj.diamond = rows.diamond;
-                            log.info("登录获取金币:" + result);
+                            log.info(userInfo.Id + "登录获取金币:" + rows.score + '获取钻石:' + rows.diamond);
                             callback(null, result);
                         }
                     })
                 },
-                function (result, callback) {
+                /*function (result, callback) {
                     log.info(userInfo.Id + "登录添加金币");
                     dao.LoginaddTempScore(userInfo.Id, function (Result, rows) {
                         if (Result) {
@@ -257,8 +234,8 @@ var GameInfo = function () {
                         }
                         callback(null, result);
                     });
-                },
-                function (result, callback) {
+                },*/
+               /* function (result, callback) {
                     log.info(userInfo.Id + "登录添加钻石");
                     dao.LoginaddTempDiamond(userInfo.Id, function (Result, rows) {
                         if (Result) {
@@ -281,7 +258,7 @@ var GameInfo = function () {
                         }
                         callback(null, result);
                     });
-                },
+                },*/
                 function (result, callback) {
                     // 登录成功返回结果
                     const login_token_key = 'login_token_key:';
@@ -294,10 +271,9 @@ var GameInfo = function () {
                                     if(ret1 && ret2){
                                         result.Obj.token = token;
                                         result.win_pool = gameJackpot;
-                                        socket.emit('loginResult', result);
-                                        ++self.onlinePlayerCount;
 
-                                        log.info('登录结果' + JSON.stringify(result));
+                                        log.info(userInfo.Id + '登录大厅结果' + JSON.stringify(result));
+                                        socket.emit('loginResult', result);
                                         callback(null, result);
                                     }
                                 });
@@ -339,6 +315,7 @@ var GameInfo = function () {
                             callback_a(1);
                         });
 
+                        self.onlinePlayerCount ++;
                         log.info("大厅在线人数:" + self.getOnlinePlayerCount());
                     }
                 }catch (e){
@@ -646,11 +623,11 @@ var GameInfo = function () {
                                 })
                             }else{
                                 log.err(userId + '购买商品下购买订单失败')
-                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                callback(ErrorCode.FAILED.code, '购买商品下购买订单失败')
                             }
                         }catch (e){
                             log.err(userId + '购买商品下购买订单异常' + e)
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            callback(ErrorCode.FAILED.code, '购买商品下购买订单异常')
                         }
                     });
                 });
@@ -1394,7 +1371,6 @@ var GameInfo = function () {
 
                         const currentDate = new Date();
                         const currentDateString = currentDate.toISOString().split('T')[0];
-
                         const lastSignInDate = res.last_sign_in_date.toISOString().split('T')[0];
 
                         let currSignInFlag = 0;
@@ -1440,7 +1416,6 @@ var GameInfo = function () {
 
            dao.userSignIn(userId, (res, connection) =>{
                if(res.rcode){
-                   log.info('用户签到' + userId + 'code:' + res.rcode,'用户持续:'+ StringUtil.addNumbers(res.lastDay, 1) + '天')
                    try {
                        const consecutiveDays = res.rcode;
                        CacheUtil.getSignInConfig().then(config => {
@@ -1449,11 +1424,14 @@ var GameInfo = function () {
                            CacheUtil.getVipConfig().then(vipConfig => {
                                const currVipConfig = vipConfig.find(item => item.level === level);
                                // 提交签到事务
-                               connection.commit( err => {
-                                   connection.release();
+                               connection.commit( (err) => {
                                    if(err){
-                                       callback(0)
+                                       connection.rollback(err1 => {
+                                           connection.release();
+                                       });
+                                       callback(0,'数据库操作异常')
                                    }else{
+                                       connection.release();
                                        for (let i = 0; i < signInConfig.award.length; i++) {
                                            if (signInConfig.award[i].type === 0) {
                                                const addScore = StringUtil.rideNumbers(signInConfig.award[0].val , currVipConfig.dailySignScoreAddRate / 100);
@@ -1461,12 +1439,12 @@ var GameInfo = function () {
                                                const beforeScore = this.userList[userId]._score;
                                                this.userList[userId]._score += addScore;
                                                dao.scoreChangeLog(userId, beforeScore, addScore, this.userList[userId]._score, TypeEnum.ScoreChangeType.daySign, 1);
-                                               log.info(userId, '签到天数', consecutiveDays , '每日签到前金币', beforeScore, '未加成前领取金币', signInConfig.award[0].val, '加成百分比', currVipConfig.dailySignScoreAddRate, '每日签到后金币', this.userList[userId]._score)
+                                               log.info(userId + '连续签到' + consecutiveDays + '天,每日签到前金币' +  beforeScore + '未加成前领取金币' + signInConfig.award[0].val + '加成百分比' + currVipConfig.dailySignScoreAddRate + '每日签到后金币' + this.userList[userId]._score)
                                            } else if (signInConfig.award[i].type === 1) {
                                                // 发放钻石
                                            }
                                        }
-                                       callback(1)
+                                       callback(1, '签到成功')
                                    }
                                });
 
@@ -1474,12 +1452,15 @@ var GameInfo = function () {
                        })
                    }catch (e){
                        // 回滚签到事务
-                       connection.rollback();
-                       log.err('签到失败' + e)
+                       connection.rollback(err => {
+                           connection.release();
+                       });
+                       callback(0, '签到异常')
+                       log.err('签到异常' + e)
                    }
                }else{
-                   callback(0)
-                   log.info(userId + '签到失败,重复签到')
+                   callback(0, '重复签到')
+                   connection.release();
                }
            });
         }
@@ -2247,12 +2228,12 @@ var GameInfo = function () {
         this.LoginGame = function (_userId, _sign, gametype, _enCoin) {
             //用户添加游戏ID
             if (!this.userList[_userId]) {
-                log.err("进入游戏,用户" + _userId + "不存在");
+                log.err("进入游戏失败,用户" + _userId + "不存在");
                 return {_userId: 0, msg: "用户不存在"};
             }
 
             if (this.userList[_userId].deleteFlag) {
-                log.err("进入游戏,用户正在删除" + _userId);
+                log.err("进入游戏失败,用户正在删除" + _userId);
                 return {_userId: 0, msg: "用户不存在"};
             }
 
@@ -2260,20 +2241,18 @@ var GameInfo = function () {
             var linemsg = this.getLineOutMsg(_userId);
 
             if (_enCoin === -1) {
-                log.err("进入房间条件出错!")
+                log.err("进入游戏失败 进场金币不足!")
                 return {_userId: 0, msg: "进入房间条件出错!"};
             }
 
             if (this.userList[_userId]._Robot && RobotConfig.robotEnterCoin[gametype]) {
                 this.userList[_userId]._score = Math.floor(Math.random() * (RobotConfig.robotEnterCoin[gametype].max - RobotConfig.robotEnterCoin[gametype].min)) + RobotConfig.robotEnterCoin[gametype].min;
-                log.info(gametype);
-                log.info(this.userList[_userId]._score);
             }
 
 
             //获得对应游戏所需要进入的金币
             if (this.userList[_userId]._sign == _sign) {
-                log.info(_userId + "进入游戏" + gametype);
+                log.info(_userId + "进入游戏成功" + gametype);
                 this.userList[_userId].loginGame(gametype);
                 var userInfo = {};
                 userInfo._userId = this.userList[_userId]._userId;
@@ -2293,7 +2272,7 @@ var GameInfo = function () {
                 userInfo.totalRecharge = this.userList[_userId].totalRecharge;   //银行积分
                 return userInfo;
             } else {
-                log.err("用户进入游戏" + _userId + "密码错误!");
+                log.err("用户进入游戏失败" + _userId + "_sign错误!");
                 return {_userId: 0, msg: "密码错误!"};
             }
 
@@ -2989,7 +2968,7 @@ var GameInfo = function () {
                 const seconds = new Date().getSeconds();
                 if(users){
                     for (let i = 0; i < users.length; ++i) {
-                        if(seconds % 25 === 0) log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                        // if(seconds % 25 === 0) log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
                     }
                 }
                 saveList = [];
@@ -4210,7 +4189,7 @@ var GameInfo = function () {
         this.lineOutSet = function (_info) {
             // 登录游戏成功  移除大厅内用户
             if(_info.userId){
-                log.info('登录游戏'+ _info.gameId +' 成功 移除大厅内用户' + _info.userId)
+                log.info(_info.userId + '登录游戏'+ _info.gameId +' 成功 移除大厅内用户')
                 delete this.userList[_info.userId];
             }
             if (_info.state === 1) {
@@ -4221,8 +4200,6 @@ var GameInfo = function () {
                     seatId: _info.seatId,
                     tableKey: _info.tableKey
                 }
-                // dao.saveLineOut(_info.userId)
-                console.log(this.lineOutList[_info.userId]);
             } else {
                 delete this.lineOutList[_info.userId];
             }

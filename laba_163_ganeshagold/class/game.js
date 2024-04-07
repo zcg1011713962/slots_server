@@ -274,6 +274,7 @@ var GameInfo = function () {
                 nGamblingWinPool: nGamblingWinPool + this.ranScore
             };
             result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+            log.info(userInfo._userId + '给用户回应登录结果' + JSON.stringify(result))
             this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
 
         };

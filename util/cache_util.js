@@ -7,6 +7,7 @@ const TypeEnum = require("./enum/type");
 
 const gamblingBalanceGold= 'gamblingBalanceGold';
 const sysBalanceGold= 'sysBalanceGold';
+const redisJackpotKey = "jackpot";
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -65,6 +66,38 @@ const hallConfig = {
 }
 
 
+
+
+
+
+// 初始奖池
+exports.initJackpot  = function () {
+    // 如果不存在奖池,初始化奖池
+    this.get_redis_win_pool().then(jackpot =>{
+        if(!jackpot){
+            RedisUtil.set(redisJackpotKey, 0);
+        }
+    });
+}
+
+// 累加奖池
+exports.IncrJackpot  = function (val) {
+    if(val > 0){
+        return RedisUtil.incrementByFloat(redisJackpotKey, val);
+    }
+};
+
+// 累减奖池
+exports.decrJackpot  = function (val) {
+    if(val > 0){
+        return RedisUtil.decrementFloat(redisJackpotKey, val);
+    }
+};
+
+// 获取奖池
+exports.getJackpot  = function get_redis_win_pool() {
+    return RedisUtil.get(redisJackpotKey);
+};
 
 
 // 初始化用户库存
@@ -644,9 +677,15 @@ exports.getActivityJackpot = function(callback){
 // 存储用户信息
 exports.setUserInfo = function(userId, userInfo){
     const v = {
-        isVip: userInfo.is_vip,
-        totalRecharge : userInfo.totalRecharge,
-        withdrawLimit : userInfo.withdrawLimit
+        userId: userInfo.is_vip,
+        account : userInfo.totalRecharge,
+        nickname : userInfo.totalRecharge,
+        score : userInfo.withdrawLimit,
+        diamond : userInfo.diamond,
+        freeCount : userInfo.totalRecharge,
+        vipScore : userInfo.totalRecharge,
+        bankScore : userInfo.totalRecharge,
+        luckyCoin: userInfo.luckyCoin
     }
    return RedisUtil.hmset(userInfoKey, userId , JSON.stringify(v))
 }
