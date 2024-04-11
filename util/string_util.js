@@ -131,7 +131,7 @@ exports.addNumbers  = function addNumbers(a, b) {
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
     }
-    return num1 + num2;
+    return this.toFixed((num1 + num2), 2);
 }
 
 exports.addTNumbers  = function addTNumbers(a, b, c) {
@@ -143,7 +143,7 @@ exports.addTNumbers  = function addTNumbers(a, b, c) {
     if (isNaN(num1) || isNaN(num2) || isNaN(num3)) {
         return NaN;
     }
-    return num1 + num2 + num3;
+    return this.toFixed( ( num1 + num2 + num3), 2);
 }
 
 
@@ -155,7 +155,7 @@ exports.reduceNumbers  = function reduceNumbers(a, b) {
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
     }
-    return num1 - num2;
+    return this.toFixed( (num1 - num2), 2);
 }
 
 
@@ -170,18 +170,34 @@ exports.compareNumbers  = function compareNumbers(a, b) {
     return num1 < num2;
 }
 
-exports.rideNumbers  = function rideNumbers(a, b) {
-    // 使用parseInt()或parseFloat()将输入转换为数字
+exports.rideNumbers  = function rideNumbers(a, b, decimalPlaces) {
     const num1 = parseFloat(a);
     const num2 = parseFloat(b);
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
     }
-    return Math.floor((num1 * num2).toFixed(2));
+    return this.toFixed((num1 * num2), decimalPlaces);
 }
 
 
+exports.divNumbers  = function divNumbers(a, b, decimalPlaces) {
+    const num1 = parseFloat(a);
+    const num2 = parseFloat(b);
+    // 检查输入是否为有效数字，若无效则返回NaN
+    if (isNaN(num1) || isNaN(num2)) {
+        return NaN;
+    }
+    return this.toFixed((num1 / num2), decimalPlaces);
+}
+
+exports.toFixed  = function toFixed(num, decimalPlaces) {
+    const parsedNum = typeof num === 'string' ? parseFloat(num) : num;
+    // 将数字转换为字符串并保留指定位数的小数
+    const fixedNumber = parsedNum.toFixed(decimalPlaces);
+    // 将字符串转换回数字
+    return parseFloat(fixedNumber);
+}
 
 
 exports.RandomNumForList = function RandomNumForList(arr) {
@@ -220,5 +236,10 @@ exports.currDate = function currDate(x, list) {
     return `${year}-${month}-${day}`;
 }
 
+exports.currDateTime = function currDateTime() {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    return currentDate.getTime();
+}
 
 

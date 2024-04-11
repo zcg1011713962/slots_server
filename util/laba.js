@@ -24,7 +24,7 @@ module.exports.JackpotAnalyse = function JackpotAnalyse(jackpot, nBetSum, jackpo
 
     try{
         const minJackpot = jackpot_level_money.reduce((min, current) => Math.min(min, current), Infinity);
-        if(jackpot < minJackpot){
+        if(jackpot < minJackpot && config.currUserGoldPool > -1){
             log.info('当前奖池小于配置最低奖池直接跳过奖池，当前奖池:'+ jackpot + '最低配置:' + minJackpot)
             return 0;
         }
@@ -227,6 +227,8 @@ FreeTimeAnalyse = function (nHandCards, freeCards, freeTimes) {
             nIndex.push(nHandCards[i])
         }
     }
+
+
     if(nCount > 0){
         dictResult["nFreeTime"] = nCount;
         dictResult["bFlag"] = true;
@@ -524,16 +526,22 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
     let wilds = [];
     // 上次定住百变的位置
     if(array.length > 0 && array.includes(true)){
-        for (let i = 0; i < array.length; i++) {
-            if(array[i]){
-                nHandCards[i] = config.nGameMagicCardIndex;
-                // log.info('上次定住百变的位置:' + i)
-                wilds.push(true);
-            }else{
-                wilds.push(false);
+        const wildCount = array.filter(item => item === true).length;
+        if(wildCount === array.length){
+            // 三个百变重新计算
+            gameInfo.userList[config.userId].setWildList([false, false, false]);
+        }else{
+            for (let i = 0; i < array.length; i++) {
+                if(array[i]){
+                    nHandCards[i] = config.nGameMagicCardIndex;
+                    // log.info('上次定住百变的位置:' + i)
+                    wilds.push(true);
+                }else{
+                    wilds.push(false);
+                }
             }
         }
-        gameInfo.userList[config.userId].setWildList([false, false, false]);
+
     }
 
 
@@ -664,29 +672,13 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
             }
         }
     }
-
+    log.info('手牌:' + nHandCards)
     // 获取免费次数
     if (freeCards && freeCards.length > 0) {
         dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);
     }
 
-    // 把万能卡存起来
-    let list = [];
-    for (let i = 0; i < nHandCards.length; i++) {
-        if (nHandCards[i] === nGameMagicCardIndex) {
-            list.push(true);
-        } else {
-            list.push(false);
-        }
-    }
-    gameInfo.userList[config.userId].setWildList(list);
 
-    // 把上次替换的特殊卡 变为百变卡 返回给客户端
-    for (let i = 0; i < nHandCards.length; i++) {
-        if(nHandCards[i] === 999){
-            nHandCards[i] = nGameMagicCardIndex;
-        }
-    }
 
 }
 

@@ -4,6 +4,7 @@ const {getInstand: log} = require("../CClass/class/loginfo");
 const ErrorCode = require("./ErrorCode");
 const StringUtil = require("./string_util");
 const TypeEnum = require("./enum/type");
+const dao = require("./dao/dao");
 
 const gamblingBalanceGold= 'gamblingBalanceGold';
 const sysBalanceGold= 'sysBalanceGold';
@@ -24,7 +25,7 @@ const newHandGuideFlowKey = 'newHandGuideFlow';
 const userDiscountLimitedKey = 'userDiscountLimited';
 
 const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
-
+const buyCallBackSwitchKey  = 'buyCallBackSwitch';
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -83,15 +84,13 @@ exports.initJackpot  = function () {
 // 累加奖池
 exports.IncrJackpot  = function (val) {
     if(val > 0){
-        return RedisUtil.incrementByFloat(redisJackpotKey, val);
+        RedisUtil.incrementByFloat(redisJackpotKey, val);
     }
 };
 
 // 累减奖池
-exports.decrJackpot  = function (val) {
-    if(val > 0){
-        return RedisUtil.decrementFloat(redisJackpotKey, val);
-    }
+exports.DecrJackpot  = function (val) {
+    return RedisUtil.decrementFloat(redisJackpotKey, val)
 };
 
 // 获取奖池
@@ -124,15 +123,13 @@ exports.getGamblingBalanceGold  = function () {
 
 exports.IncrGamblingBalanceGold  = function (increment) {
     if(increment > 0){
-        return RedisUtil.incrementByFloat(gamblingBalanceGold, increment);
+        RedisUtil.incrementByFloat(gamblingBalanceGold, increment);
     }
 }
 
 
 exports.DecrGamblingBalanceGold  = function (increment) {
-    if(increment > 0){
-        return RedisUtil.decrementFloat(gamblingBalanceGold, increment);
-    }
+    RedisUtil.decrementFloat(gamblingBalanceGold, increment);
 }
 
 // 获取系统库存
@@ -147,9 +144,7 @@ exports.IncrSysBalanceGold  = function (increment) {
 }
 
 exports.DecrSysBalanceGold  = function (increment) {
-    if(increment > 0){
-        return RedisUtil.decrementFloat(sysBalanceGold, increment);
-    }
+    RedisUtil.decrementFloat(sysBalanceGold, increment);
 }
 
 
@@ -347,14 +342,14 @@ exports.getGameJackpot  = function (callback){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
             // 游戏奖池
-            let gJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100)) : 0;
+            let gJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100), 2) : 0;
             // 奖池划分比例
             const game_jackpot_ratio = jackpotConfig.game_jackpot_ratio;
-            const grandJackpot =  StringUtil.rideNumbers(gJackpot, game_jackpot_ratio[3].ratio / 100);
-            const majorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[2].ratio / 100);
-            const minorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[1].ratio / 100);
-            const miniJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[0].ratio / 100);
-            const gameJackpot= Math.floor(gJackpot.toFixed(2));
+            const grandJackpot =  StringUtil.rideNumbers(gJackpot, game_jackpot_ratio[3].ratio / 100, 2);
+            const majorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[2].ratio / 100, 2);
+            const minorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[1].ratio / 100, 2);
+            const miniJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[0].ratio / 100, 2);
+            const gameJackpot= StringUtil.toFixed(gJackpot, 2);
             callback(gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
         });
     });
@@ -394,34 +389,32 @@ exports.pushGameJackpot  = function (userList){
 }
 
 
-// 设置每个用户的幸运配置
-exports.activityLuckyConfig  = function (userId, callback){
-    this.getLuckyCoinConfig().then(luckyCoinConfig =>{
-        RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
-            if(!ret){
-                // 没进入过每日活动的用户默认配置
-                const startTime =  new Date().getTime();
-                const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
-                const ret = {
-                    luckyCoin: luckyCoinConfig.turntableCoin,  // 活动幸运币数量
-                    doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
-                    luckyCoinTask: luckyCoinConfig.luckyCoinTask,
-                    luckyRushStartTime: startTime,
-                    luckyRushEndTime: endTime,
-                    luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
-                    luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
-                    pushStatus: 1, // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
-                    currCoinCount: 0 // 当日领取幸运币数量
-                }
-                RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(ret)).then(r =>{
-                    callback(1)
-                });
-            }else{
-                callback(1)
+exports.setActivityLuckyConfig = function (userId) {
+    const self = this;
+    return self.getLuckyCoinConfig().then(luckyCoinConfig =>{
+        // 没进入过每日活动的用户默认配置
+        const startTime =  new Date().getTime();
+        const endTime = startTime + luckyCoinConfig.luckyRushTime * 60 * 1000;
+        const userLuckyConfig = {
+            luckyCoin: luckyCoinConfig.turntableCoin,  // 活动幸运币数量
+            doLuckyCoinTask: 0, // 幸运活动每日完成的任务数量
+            luckyCoinTask: luckyCoinConfig.luckyCoinTask,
+            luckyRushStartTime: startTime,
+            luckyRushEndTime: endTime,
+            luckyCoinGetStatus: 1 ,// 幸运币领取状态0不可领取 1可领取 默认第一次可领取
+            luckyCoinTaskGetStatus: 0, // 任务领取状态0不可领取 1可领取
+            pushStatus: 1, // 推送状态(防止重复推送用) 默认第一次可领取，所以默认推送
+            currCoinCount: 0 // 当日领取幸运币数量
+        }
+        return RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(userLuckyConfig)).then(ok =>{
+            if(ok){
+                return JSON.stringify(userLuckyConfig);
             }
+            return null;
         });
     });
 }
+
 
 // 更新用户幸运活动配置
 exports.updateActivityLuckyConfig  = function (userId, data){
@@ -432,12 +425,15 @@ exports.updateActivityLuckyConfig  = function (userId, data){
 
 // 获取每个用户的幸运配置
 exports.getActivityLuckyDetailByUserId  = function (userId, callback){
-    RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
-        if(ret){
-            const luckyDetail = JSON.parse(ret);
-            callback(luckyDetail);
-        }else {
-            callback(null);
+    const self = this;
+    RedisUtil.hget(everydayLuckyCoin, userId).then(async userLuckyConfig => {
+        if (userLuckyConfig) {
+            callback(JSON.parse(userLuckyConfig));
+        } else {
+            // 设置每个用户的幸运配置
+            await self.setActivityLuckyConfig(userId).then(ret =>{
+                callback(JSON.parse(ret));
+            });
         }
     });
 }
@@ -486,7 +482,7 @@ exports.getPlayGameCount  = function (userId){
 
 // 增加玩家摇奖次数
 exports.updatePlayGameBetRecord  = function (userId, v){
-    return RedisUtil.hmset(playGameBetRecord, userId, v);
+    RedisUtil.hmset(playGameBetRecord, userId, v).then(r =>{});
 }
 
 
@@ -574,7 +570,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
     try {
         const key = protocol + '_' + userId;
         const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
-        console.log('recordUserProtocol:' + key + 'setResult' + setResult)
+        log.info('协议被调用:' + key + 'code:' + setResult)
         if (setResult === 1) {
             // 如果设置成功，则设置过期时间
             await RedisUtil.expire(key, userSocketProtocolExpireSecond);
@@ -588,7 +584,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
 // 删除用户调用协议记录
 exports.delUserProtocol  = async function (userId, protocol){
     const key = protocol + '_' + userId;
-    console.log('delUserProtocol:', key)
+    log.info('协议被释放:' + key)
     await RedisUtil.del(key);
 }
 
@@ -660,6 +656,11 @@ exports.clearVIPDailyGetKey  = function clearVIPDailyGetKey(){
     RedisUtil.del(VIPDailyGetKey)
 }
 
+// 清理幸运币每日领取上限
+exports.clearLuckyCoinLimit  = function clearLuckyCoinLimit(){
+    RedisUtil.del(everydayLuckyCoin)
+}
+
 
 // 获取活动奖池
 exports.getActivityJackpot = function(callback){
@@ -667,33 +668,200 @@ exports.getActivityJackpot = function(callback){
     redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
         self.getJackpotConfig().then(config =>{
             const activityJackpot= jackpot ? jackpot * config.jackpot_ratio.activity / 100 : 0;
-            const val = Math.floor(activityJackpot.toFixed(2))
-            callback(val)
+            callback(StringUtil.toFixed(activityJackpot, 2))
         })
     })
 }
 
 
-// 存储用户信息
+// 存储用户基础信息
 exports.setUserInfo = function(userId, userInfo){
-    const v = {
-        userId: userInfo.is_vip,
-        account : userInfo.totalRecharge,
-        nickname : userInfo.totalRecharge,
-        score : userInfo.withdrawLimit,
+    const obj = {
+        userId: userInfo.Id,
+        account : userInfo.Account,
+        nickname : userInfo.nickname,
+        score : userInfo.score,
         diamond : userInfo.diamond,
-        freeCount : userInfo.totalRecharge,
-        vipScore : userInfo.totalRecharge,
-        bankScore : userInfo.totalRecharge,
-        luckyCoin: userInfo.luckyCoin
+        sign: userInfo.sign
     }
-   return RedisUtil.hmset(userInfoKey, userId , JSON.stringify(v))
+    return RedisUtil.client.hmset(`${userInfoKey}:${userId}`, obj)
 }
 
 // 获取用户信息
-exports.getUserInfo = function(userId){
-    return RedisUtil.hget(userInfoKey, userId);
+exports.getUserInfo = function(userId, callback){
+    return RedisUtil.client.hgetall(`${userInfoKey}:${userId}`, (err, user) => {
+        if (err) {
+            log.err(userId + '获取用户信息:' + err);
+            callback(0)
+        } else {
+            callback(1, user)
+        }
+    });
 }
+
+// 设置免费次数
+exports.setFreeCount = function(userId, freeCount){
+    return RedisUtil.client.hmset(`${userInfoKey}:${userId}`, 'freeCount', freeCount);
+}
+
+// 获取免费次数
+exports.getFreeCount = function(userId){
+    return RedisUtil.hget(`${userInfoKey}:${userId}`, 'freeCount');
+}
+
+// 扣免费次数
+exports.reduceFreeCount = function(userId, reduceFreeCount, callback){
+    this.getFreeCount(userId).then(freeCount =>{
+        if(freeCount >= reduceFreeCount){
+            RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', -reduceFreeCount, (err, currFreeCount) => {
+                if (err) {
+                    log.err(userId + '扣免费次数' + err);
+                    callback(0)
+                } else {
+                    log.info(userId + '扣免费次数' + reduceFreeCount + '成功,当前免费次数:' + currFreeCount);
+                    const beforeFreeCount = freeCount;
+                    callback(1, beforeFreeCount, currFreeCount)
+                }
+            });
+        }else{
+            callback(0)
+        }
+    })
+}
+
+// 给用户加免费次数
+exports.addFreeCount = function(userId, freeCount){
+    RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', freeCount, (err, currFreeCount) => {
+        if (err) {
+            log.err(userId + '增加免费次数' + err);
+        } else {
+            log.info(userId + '增加免费次数' + freeCount + '成功,当前免费次数:' + currFreeCount);
+        }
+    });
+}
+
+// 获取用户金币
+exports.getGoldCoin = function(userId){
+    return RedisUtil.hget(`${userInfoKey}:${userId}`, 'score').then(coin => { return StringUtil.toFixed(coin, 2)});
+}
+
+// 给用户加金币
+exports.addGoldCoin = function(userId, coinsToAdd, type, callback){
+    dao.addAccountScore(userId, coinsToAdd, ret =>{
+        if (!ret) {
+            log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type);
+            callback(0)
+            return;
+        }
+        RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', `${coinsToAdd}`, (err, val) => {
+            if(err){
+                log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type + 'err:' + err);
+                callback(0)
+                return;
+            }
+            const currGoldCoin = StringUtil.toFixed(val, 2);
+            log.info(userId + '增加金币' + coinsToAdd + '类型:' +  type + '当前金币:' + currGoldCoin);
+            const beforeGoldCoins = currGoldCoin - coinsToAdd;
+            // 金币记录
+            dao.scoreChangeLog(userId, beforeGoldCoins, coinsToAdd,  currGoldCoin, type, 1)
+            callback(1, currGoldCoin)
+        });
+    })
+
+}
+
+
+// 给用户加钻石
+exports.addDiamond = function(userId, diamondToAdd, type, callback){
+    dao.addAccountDiamond(userId, diamondToAdd, ret =>{
+        if (!ret) {
+            log.err(userId + '增加钻石失败,数量:'+ diamondToAdd + '类型:' +  type);
+            callback(0)
+            return;
+        }
+        RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'diamond', diamondToAdd, (err, currDiamond) => {
+            if(err){
+                log.err(userId + '增加钻石失败,数量:'+ diamondToAdd + '类型:' +  type + 'err:' + err);
+                callback(0)
+                return;
+            }
+            log.info(userId + '增加钻石' + diamondToAdd + '类型:' +  type + '当前钻石:' + currDiamond);
+            const beforeDiamond = currDiamond - diamondToAdd;
+            // 钻石记录
+            dao.diamondChangeLog(userId, beforeDiamond, diamondToAdd,  currDiamond, type, 1)
+            callback(1, currDiamond)
+        });
+    })
+
+}
+
+// 给用户减金币
+exports.reduceGoldCoin = function(userId, coinsToReduce, type, callback){
+    this.getGoldCoin(userId).then(goldCoin =>{
+        if(goldCoin >= coinsToReduce){
+            dao.reduceAccountScore(userId, coinsToReduce, ret =>{
+                if (!ret) {
+                    log.err(userId + '减少金币失败,数量:'+ coinsToReduce + '类型:' +  type);
+                    callback(0)
+                    return;
+                }
+                RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', -coinsToReduce, (err, val) => {
+                    if (err) {
+                        log.err(userId + '减少金币' + err);
+                        callback(0)
+                    } else {
+                        const currGoldCoin = StringUtil.toFixed(val, 2);
+                        log.info(userId + '减少金币,数量:' + coinsToReduce + '类型:' + type +'当前金币:' + currGoldCoin);
+                        const beforeGoldCoins = goldCoin;
+                        // 金币记录
+                        dao.scoreChangeLog(userId, beforeGoldCoins, -coinsToReduce,  currGoldCoin, type, 1)
+                        callback(1, beforeGoldCoins, currGoldCoin)
+                    }
+                });
+            })
+        }else{
+            callback(0)
+        }
+    })
+
+}
+
+// 扣费用
+exports.feeCost = function(userId, nBetSum, type, callback){
+    const self = this;
+    self.getFreeCount(userId).then(freeCount =>{
+        freeCount = freeCount == null ? 0 : freeCount
+        self.getGoldCoin(userId).then(goldCoin =>{
+            if(freeCount > 0){
+                // 扣免费次数
+                self.reduceFreeCount(userId, 1, (ret) =>{
+                    if(ret){
+                        callback(1, freeCount, goldCoin)
+                    }else{
+                        callback(0)
+                    }
+                });
+            }else{
+                // 扣金币
+                if(goldCoin > 0 && goldCoin >= nBetSum){
+                    self.reduceGoldCoin(userId, nBetSum, type,(ret) =>{
+                        if(ret){
+                            callback(1, freeCount, goldCoin)
+                        }else{
+                            callback(0)
+                        }
+                    });
+                }else{
+                    callback(0)
+                }
+            }
+        })
+    })
+}
+
+
+
+
 
 // 是否破产
 exports.isBankrupt = function isBankrupt(currScore, currBankScore, callback) {
@@ -709,21 +877,40 @@ exports.isBankrupt = function isBankrupt(currScore, currBankScore, callback) {
 
 
 // 获取每个用户新手引导流程
-exports.getNewHandGuideFlowKey = function(userId, callback){
-    RedisUtil.hget(newHandGuideFlowKey, userId).then(val =>{
-        if(!val){
+exports.getNewHandGuideFlowKey = function(userId, firstRecharge, callback){
+    RedisUtil.hget(newHandGuideFlowKey, userId).then(it => JSON.parse(it)).then(newHandGuideFlowItem =>{
+        if(!newHandGuideFlowItem){
             // 首次进入大厅
-            const obj = Object.values(TypeEnum.NewHandGuideFlow);
-            RedisUtil.hmset(newHandGuideFlowKey, userId, obj)
-            callback(obj);
+            const newHandGuideFlow = Object.values(TypeEnum.NewHandGuideFlow);
+            newHandGuideFlowItem = newHandGuideFlow.map((element, index) => {
+                return {
+                    'order': index,
+                    'type': element,
+                    'lastPopDate': StringUtil.currDateTime()
+                };
+            });
+            RedisUtil.hmset(newHandGuideFlowKey, userId, JSON.stringify(newHandGuideFlowItem))
+            callback(newHandGuideFlowItem);
         }else{
-            // 更新步骤
-            const items = TypeEnum.NewHandGuideFlow;
-            delete items.newHandGuide;
-            delete items.promoCode;
-            const obj = Object.values(items)
-            RedisUtil.hmset(newHandGuideFlowKey, userId, obj)
-            callback(obj);
+            // 再次进游戏-更新步骤
+            // 推广码填写（终生一次）移除
+            newHandGuideFlowItem = newHandGuideFlowItem.filter(item => item.type !== TypeEnum.NewHandGuideFlow.promoCode);
+            // 首充过的移除
+            if(firstRecharge){
+                newHandGuideFlowItem = newHandGuideFlowItem.filter(item => item.type !== TypeEnum.NewHandGuideFlow.firstRecharge);
+            }
+
+            const temp = newHandGuideFlowItem.slice()
+            // 当日弹过的把时间置为明天
+            for (const index in newHandGuideFlowItem) {
+                if(newHandGuideFlowItem[index].lastPopDate === StringUtil.currDateTime() || newHandGuideFlowItem[index].lastPopDate === StringUtil.currDateTime() + 24 * 60 * 60 * 1000){
+                    // 置为明天的日期
+                    newHandGuideFlowItem[index].lastPopDate = StringUtil.currDateTime() + 24 * 60 * 60 * 1000;
+                    delete temp[index];
+                }
+            }
+            RedisUtil.hmset(newHandGuideFlowKey, userId, JSON.stringify(newHandGuideFlowItem))
+            callback(temp);
         }
     })
 }
@@ -776,4 +963,16 @@ exports.setFirstRechargeContinueReward  = function (userId, buyContinueRewardGol
 // 获取购买首充持续奖励
 exports.getFirstRechargeContinueReward  = function (userId){
     return RedisUtil.hget(firstRechargeContinueRewardKey, userId);
+}
+
+
+// 购买回调开关
+exports.buyCallBackSwitch = function(){
+    return RedisUtil.get(buyCallBackSwitchKey).then(code =>{
+        if(code){
+            return 1;
+        }else{
+            return 0;
+        }
+    });
 }

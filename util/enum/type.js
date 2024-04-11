@@ -31,6 +31,10 @@ const ShopGroupType = {
     rechargeGift: 1 // 首充礼包商品
 };
 
+const UndoEvenType ={
+    email: 0 // 邮件未读取
+}
+
 
 const notifyType = {
     normal: 0, // 普通消息
@@ -80,8 +84,22 @@ const ScoreChangeType = {
     newHandGive: 6 ,//新手送金币
     rebateShop: 7,  // 邀请绑定-购物返点
     bustBonus: 8,  // 破产补助金
-    upgradeGiveGlod: 9 //VIP升级奖励
+    upgradeGiveGlod: 9, //VIP升级奖励
+    gameGlodCoin: 10, // 玩游戏获得
+    storeBuy: 11, // 商城购买
+    firstRechargeBuy: 12, //首充礼包购买
+    discountLimitedBuy: 13, // 限时折扣购买
+    turntable: 14, // 大厅免费转盘获得
+    bankIntoHallGold: 15, // 银行取出金币到大厅
+    hallGoldIntoBank: 16, // 大厅金币存入银行
+    firstRechargeContinueReward: 17  // 首充持续奖励
 };
+
+const DiamondChangeType = {
+    storeBuy: 0, // 商城购买
+    firstRechargeBuy: 1, //首充礼包购买
+    firstRechargeContinueReward: 2 // 首充持续奖励
+}
 
 const NewHandFlag = {
     new: 1, // 新手
@@ -96,12 +114,13 @@ const ShopType = {
 };
 
 const NewHandGuideFlow = {
-    newHandGuide: 0, // 新手引导流程（终生一次）
-    promoCode: 1, // 推广码填写（终生一次）
-    signIn: 2, // 七天签到（每日首次）
-    firstRecharge: 3, // 首充（每日首次）
-    activityPop: 4 // 活动弹窗（每日首次）
+    promoCode: 0, // 推广码填写（终生一次）
+    signIn: 1, // 七天签到（每日首次）
+    firstRecharge: 2, // 首充（每日首次）
+    activityPop: 3, // 活动弹窗（每日首次）
+    continueReward: 4// 首充持续奖励（每日首次）
 };
+
 
 
 module.exports = {
@@ -119,5 +138,7 @@ module.exports = {
     ScoreChangeType,
     NewHandFlag,
     ShopType,
-    NewHandGuideFlow
+    NewHandGuideFlow,
+    DiamondChangeType,
+    UndoEvenType
 };

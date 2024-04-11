@@ -3,7 +3,7 @@ User = function(_userInfo,_socket){
 	this._userId = "";			//数据库ID
 	this._socket = "";			//socketID
 	this._account = "";			//用户帐号
-	this._score = 0;			//金币
+
 	this._diamond = 0;			//钻石
 	this.is_vip = 0;			//vip
 	this.vip_score = 0;			//vip积分
@@ -18,10 +18,6 @@ User = function(_userInfo,_socket){
 	this._proList = {};			//道具列表
 	this._phoneNo = "";			//电话号码
 	this._email = "";			//电子邮件
-	this._sex = -1;				//性别
-	this._city = "";			//城市
-	this._province = "";		//省份
-	this._country = "";			//国家
 	this.language = 0;			// 语言
 	this._headimgurl = "";		//头像地址
 	this.bankPwd = "";			//银行密码
@@ -29,11 +25,9 @@ User = function(_userInfo,_socket){
 	this.bankLock = 0;			//银行是否被冻结
 	this._chckeNo = "";
 	this._prize = [];
-	this._dayprize = [];
 	this._Robot = false;
 	this._official = false;
 	this._p = "";
-	this._cardList = [];
 	this.deleteFlag = false;
 	this.firstRecharge = 0;   // 是否购买了首充礼包
 	this.AddDate = 0;         // 账户创建时间(时间戳毫秒)
@@ -46,7 +40,7 @@ User = function(_userInfo,_socket){
 	this.init = function(_userInfo,_socket){
 		this._userId = _userInfo.Id;
 		this._account = _userInfo.Account;
-		this._score = _userInfo.score;
+
 		this._nickname = _userInfo.nickname;
 		this._socket = _socket;
 		this._islogin = true;
@@ -62,13 +56,8 @@ User = function(_userInfo,_socket){
 		this.totalRecharge = _userInfo.totalRecharge;
 		this.vip_level = _userInfo.housecard;
 		this._proList = _userInfo.propList;
-
 		this._phoneNo = _userInfo.phoneNo;
 		this._email = _userInfo.email;
-		this._sex = _userInfo.sex;
-		this._city = _userInfo.city;
-		this._province = _userInfo.province;
-		this._country = _userInfo.country;
 		this._headimgurl = _userInfo.headimgurl;
 		this._Robot = _userInfo.Robot;
 		this._official = _userInfo.email ? 1 : _userInfo.official;
@@ -138,9 +127,7 @@ User = function(_userInfo,_socket){
 		return this._userId;
 	};
 
-	this.getScore = function(){
-		return this._score;
-	};
+
 	this.getDiamond = function(){
 		return this._diamond;
 	};
@@ -153,20 +140,7 @@ User = function(_userInfo,_socket){
 		return this._islogin;
 	};
 
-	this.addgold = function(_score){
-		if (_score > 0){
-			//正数,加分
-			this._score += parseInt(_score);
-			return 1;
-		}else{
-			if (this._score >= Math.abs(_score)){
-				this._score += parseInt(_score);
-				return 1;
-			}else{
-				return 0;
-			}
-		}
-	};
+
 	this.adddiamond = function(_score){
 		if (_score > 0){
 			//正数,加分
@@ -183,15 +157,6 @@ User = function(_userInfo,_socket){
 	};
 
 
-	//添加游戏免费次数
-	this.AddFreeCount = function(_count){
-		if (_count >= 0)
-			this.freeCount += _count;
-		else
-			console.log("添加免费次数参数不正确!");
-	};
-
-	//获得免费游戏次数
 	this.getFreeCount = function(){
 		return this.freeCount;
 	};
@@ -199,24 +164,6 @@ User = function(_userInfo,_socket){
 	this.firstRecharge = function(val){
 		this.firstRecharge = val;
 	};
-
-
-	this.newCheckNo = function(){
-		this._chckeNo = Math.floor(Math.random()*9000) + 1000;
-		return this._chckeNo;
-	};
-
-	this.setPhoneNo = function(_phoneNo){
-		this._phoneNo = _phoneNo;
-	};
-
-
-
-	this.cleanCheckNo = function(){
-		this._chckeNo = null;
-	};
-
-
 	this.init(_userInfo,_socket);
 
 };

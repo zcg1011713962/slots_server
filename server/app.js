@@ -139,18 +139,18 @@ app.get('/saveGuideStep', function (req, res) {
 // 获取商品列表
 app.get('/goodsList', function (req, res) {
     const userId = req.query.userId;
-    log.info('获取商品列表 request' + userId)
+    log.info( userId + '获取商品列表')
     if(userId === undefined || userId === ''){
-        log.info('获取商品列表 失败:' + userId)
+        log.info(userId + '获取商品列表失败')
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
     }
     gameInfo.getShoppingGoods(parseInt(userId), (code, msg, data) =>{
         if(code){
-            log.info('获取商品列表 成功:' + userId)
+            log.info(userId + '获取商品列表成功')
             res.send({code: code, data: data});
         }else{
-            log.info('获取商品列表 失败:' + userId)
+            log.info(userId + '获取商品列表失败')
             res.send({code: code, msg: msg});
         }
     });
@@ -207,7 +207,6 @@ app.get('/Shopping', async function (req, res) {
 // 购买商品订单回调
 app.get('/shoppingCallBack', async function (req, res) {
     try {
-        //验证版本
         const userId = req.query.userId ? Number(req.query.userId) : 0;
         const orderId = req.query.orderId ? req.query.orderId : null;
         log.info('购买商品订单回调' + userId + '订单' + orderId)
@@ -365,34 +364,38 @@ io.on('connection', function (socket) {
     }
     
 
-    socket.on('LoginGame', function (_userinof) {
-        log.info('游戏服务登录大厅:' + JSON.stringify(_userinof))
-        let result;
-        if (_userinof.serverSign === serverSign) {
+    socket.on('LoginGame', function (userInfo) {
+        log.info('游戏服务登录大厅:' + JSON.stringify(userInfo))
+        const userId = userInfo.userid;
+        const sign = userInfo.sign;
+        const _serverSign = userInfo.serverSign;
+        const serverId = userInfo.serverId;
+
+        if (_serverSign === serverSign) {
             //让这个用户进入该游戏
-            const encoin = ServerInfo.getServerEnterCoinByProt(_userinof.serverId);
-            const userInfo = gameInfo.LoginGame(_userinof.userid, _userinof.sign, _userinof.serverId, encoin);
-            result = {};
-            if (userInfo._userId) {
-                result = {ResultCode: 1, userInfo: userInfo};
-                const info = {
-                    state: 1,
-                    gameId: _userinof.gameId,
-                    serverId: _userinof.serverId,
-                    userId: _userinof.userid,
-                    tableId: -1,
-                    seatId: -1,
-                    vip_score: userInfo.vip_score,
-                    is_vip: userInfo.is_vip,
-                    bankScore: userInfo.bankScore,
-                    totalRecharge: userInfo.totalRecharge
-                };
-                gameInfo.lineOutSet(info);
-            } else {
-                result = {ResultCode: 0, userid: _userinof.userid, msg: userInfo.msg};
-            }
-            log.info('游戏服务登录大厅:' + JSON.stringify(_userinof))
-            socket.emit('LoginGameResult', result);
+            const encoin = ServerInfo.getServerEnterCoinByProt(userId);
+            CacheUtil.getUserInfo(userId, (ret, user) =>{
+                if(!ret){
+                    socket.emit('LoginGameResult', {ResultCode: 0, userid: userInfo.userid, msg: {_userId: 0, msg: "获取用户信息失败!"}});
+                    return;
+                }
+                //获得对应游戏所需要进入的金币
+                if (user.sign === sign) {
+                    const info = {
+                        state: 1,
+                        gameId: userInfo.gameId,
+                        serverId: userInfo.serverId,
+                        userId: userInfo.userid,
+                        tableId: -1,
+                        seatId: -1
+                    }
+                    gameInfo.lineOutSet(info);
+                    log.info(info.userId + '登录游戏' + info.gameId + ' 移除大厅内用户,大厅人数:' + gameInfo.getOnlinePlayerCount())
+                    socket.emit('LoginGameResult', {ResultCode: 1, userInfo: user});
+                }else{
+                    socket.emit('LoginGameResult', {ResultCode: 0, userid: userInfo.userid, msg: {_userId: 0, msg: "密码错误!"}});
+                }
+            })
         }
 
     });
@@ -400,21 +403,20 @@ io.on('connection', function (socket) {
     //离线操作
     socket.on('disconnect', function () {
         if (socket.gm_id) {
-            console.log("删除gm_socket");
+            log.info("删除gm_socket");
             delete gameInfo.gm_socket[socket.gm_id]
             return;
         }
         //有人离线
-        if (!socket.userId) {
-            return
-        }
-
         if (socket.serverGameid) {
             log.info("游戏服务器 -" + ServerInfo.getServerNameById(socket.serverGameid) + "- 已经断开连接");
-        }else{
-            log.info("用户断开连接:" + socket.userId);
+            return;
         }
-
+        if (!socket.userId) {
+            log.info(socket.id + "断开连接")
+            return
+        }
+        log.info(socket.userId + "断开连接");
         // 如果用户还存在的话，删除
         const userInfo = {userId: socket.userId, nolog: true};
         gameInfo.deleteUser(userInfo);
@@ -430,10 +432,6 @@ io.on('connection', function (socket) {
             gameInfo.deleteUserNoLoginGame(_userInfo.userId, 1);
         }
     });
-
-
-
-
 
 
     // 发送邮箱验证码
@@ -529,6 +527,7 @@ io.on('connection', function (socket) {
         try {
             const userId = socket.userId;
             if (gameInfo.IsPlayerOnline(userId)) {
+                // 获取用户幸运币配置
                 CacheUtil.getActivityLuckyDetailByUserId(socket.userId, ret =>{
                     let luckObject = {
                         luckyCoin: 0,
@@ -1007,16 +1006,13 @@ io.on('connection', function (socket) {
                         CacheUtil.updateActivityLuckyConfig(userId, luckyDetail).then(ret =>{
                             if(ret){
                                 // 免费幸运币数量
-                                redis_laba_win_pool.get_redis_win_pool().then(async function (jackpot) {
-                                    gameInfo.turntable(userId, 1, (code, msg, data) =>{
-                                        CacheUtil.delUserProtocol(userId, 'turntable')
-                                        if(code){
-                                            socket.emit('turntableResult', {code:code, data: data});
-                                        }else{
-                                            socket.emit('turntableResult', {code:code, msg: msg});
-                                        }
-                                    });
-
+                                gameInfo.turntable(userId, 1, (code, msg, data) =>{
+                                    CacheUtil.delUserProtocol(userId, 'turntable')
+                                    if(code){
+                                        socket.emit('turntableResult', {code:code, data: data});
+                                    }else{
+                                        socket.emit('turntableResult', {code:code, msg: msg});
+                                    }
                                 });
                                 return;
                             }else{
@@ -1334,6 +1330,7 @@ io.on('connection', function (socket) {
     });
 
 
+
     // 游戏结算
     socket.on('GameBalance', function (_Info) {
         if (_Info.signCode == serverSign) {
@@ -1342,13 +1339,12 @@ io.on('connection', function (socket) {
     });
 
 
-    //牌局断线
-    socket.on('lineOut', function (_Info) {
-        console.log("lineOut");
-        console.log(_Info);
-        if (_Info.signCode == serverSign) {
-            gameInfo.lineOutSet(_Info);
-        }
+    // 游戏断线
+    socket.on('lineOut', function (info) {
+        /*if (info.signCode === serverSign) {
+            log.info(info.userId + '离开游戏' + info.gameId + ' 移除大厅内用户,大厅人数:' + gameInfo.getOnlinePlayerCount());
+            gameInfo.lineOutSet(info);
+        }*/
     });
 
     //获得断线

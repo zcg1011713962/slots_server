@@ -39,8 +39,6 @@ var GameInfo = function () {
             this.initAlgorithm(0);
             //初始化用户列表
             this.userList = {};
-            //在线人数为0
-            this.onlinePlayerCount = 0;
             //统计
             this.winTotal = 0;
             this.lotteryCount = 0;
@@ -82,7 +80,7 @@ var GameInfo = function () {
                     console.log("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
                         server_id: gameConfig.serverId,
-                        online_num: self.onlinePlayerCount
+                        online_num: self.getOnlinePlayerCount()
                     });
                 }
 
@@ -323,51 +321,56 @@ var GameInfo = function () {
         //添加用户
         this.addUser = function (_userInfo, socket) {
             this.userList[_userInfo.userid] = new User(_userInfo, socket);
-            console.log("zaixianrenshu----------------------------------", this.onlinePlayerCount);
         };
 
+        // 更新用户
         this.updateUser = function (userInfo) {
-
-            if (!this.userList[userInfo._userId]){
-                log.info(userInfo._userId + '用户不在线')
+            const userId = userInfo.userId;
+            if (!this.userList[userId]) {
+                log.err(userId + '用户不在线')
                 return;
             }
+            let result = {};
             //已经断线
-            if (this.userList[userInfo._userId]._isLeave) {
-                log.info(userInfo._userId + '用户已经断线')
-                var result = {ResultCode: 0, userId: userInfo._userId};
+            if (this.userList[userId]._isLeave) {
+                log.info(userId + '用户已经断线')
+                result = {ResultCode: 0, userId: userId};
                 this._Csocket.emit("userDisconnect", result);
-                delete this.userList[userInfo._userId];
+                delete this.userList[userId];
                 return;
             }
-            this.userList[userInfo._userId].update(userInfo);
 
-            this.LoginGame(userInfo._userId, this.serverId);
-            ++this.onlinePlayerCount;
+            this.userList[userId].update(userInfo);
+
+            this.LoginGame(userInfo.userId, this.serverId);
 
             CacheUtil.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
-                let resultObj = {
-                    account: this.userList[userInfo._userId]._account,
-                    id: this.userList[userInfo._userId]._userId,
-                    nickname: this.userList[userInfo._userId]._nickname,
-                    score: this.userList[userInfo._userId]._score,
-                    jackpot: {
-                        gameJackpot: gJackpot,
-                        grand_jackpot: grandJackpot,
-                        major_jackpot: majorJackpot,
-                        minor_jackpot: minorJackpot,
-                        mini_jackpot: miniJackpot,
-                    }
+                try {
+                    let resultObj = {
+                        account: userInfo.account,
+                        id: userInfo.userId,
+                        nickname: userInfo.nickname,
+                        score: userInfo.score,
+                        jackpot: {
+                            gameJackpot: gJackpot,
+                            grand_jackpot: grandJackpot,
+                            major_jackpot: majorJackpot,
+                            minor_jackpot: minorJackpot,
+                            mini_jackpot: miniJackpot
+                        }
+                    };
+                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                    this.userList[userId]._socket.emit('loginGameResult', result);
+                }catch (e){
+                    log.err('给用户回应登录结果:' + e)
                 }
-                result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-                log.info(userInfo._userId + '给用户返回登录结果' + JSON.stringify(result))
-                this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
             })
         };
 
         //获得在线人数
         this.getOnlinePlayerCount = function () {
-            return this.onlinePlayerCount;
+            return Object.keys(this.userList).length;
         };
 
         //在线所有人
@@ -431,29 +434,32 @@ var GameInfo = function () {
 
         //删除用户
         this.deleteUser = function (_socket) {
-            if (_socket.userId) {
-                //存免费次数
-                var info = {
-                    userId: _socket.userId,
-                    freeCount: this.userList[_socket.userId].getFreeCount(),
-                    LotteryCount: this.userList[_socket.userId].getLotteryCount()
-                };
-                gameDao.saveFree(info, function (result) {
-                    if (!result)
-                        console.log("存免费次数:" + _userinfo.userId + "失败!")
-                });
-                this._Csocket.emit("lineOut", {
-                    signCode: gameConfig.LoginServeSign,
-                    state: 0,
-                    gameId: gameConfig.gameId,
-                    serverId: gameConfig.serverId,
-                    userId: _socket.userId,
-                    tableId: -1,
-                    seatId: -1
-                });
-                this.sever.LogoutRoom(this.userList[_socket.userId], _socket);
-                delete this.userList[_socket.userId];
-                --this.onlinePlayerCount;
+            let userId = _socket.userId;
+            const self = this;
+            if (userId) {
+                CacheUtil.getFreeCount(userId).then(freeCount =>{
+                    //存免费次数
+                    const info = {
+                        userId: userId,
+                        freeCount: freeCount,
+                        LotteryCount: 0
+                    };
+                    gameDao.saveFree(info, function (result) {
+                        log.info(userId + '保存免费次数' + info.freeCount);
+                        self._Csocket.emit("lineOut", {
+                            signCode: gameConfig.LoginServeSign,
+                            state: 0,
+                            gameId: gameConfig.gameId,
+                            serverId: gameConfig.serverId,
+                            userId: userId,
+                            tableId: -1,
+                            seatId: -1
+                        });
+                        delete self.userList[userId];
+                        log.info(userId + '离开游戏,移除用户,当前游戏人数:' + self.getOnlinePlayerCount())
+                        userId = null;
+                    });
+                })
             }
         };
 
@@ -601,9 +607,6 @@ var GameInfo = function () {
         //进入游戏
         this.LoginGame = function (_userId, gametype) {
             if (!this.userList[_userId]) return;
-            //用户添加游戏ID
-            //console.log(_userId)
-            //console.log("用户进入游戏" + gametype);
             this.userList[_userId].loginGame(gametype);
         };
 
@@ -666,7 +669,7 @@ var GameInfo = function () {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId
                 self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
 
                 var ResultData = {
                     TableId: LoginResult.tableId,
@@ -703,8 +706,8 @@ var GameInfo = function () {
             gameDao.getFreeCount(_userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
-                self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
+                CacheUtil.setFreeCount(_userId, Result.freeCount)
                 _socket.emit("LoginfreeCountResult", {ResultCode: 1, freeCount: Result.freeCount});
             })
         };

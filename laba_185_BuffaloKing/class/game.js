@@ -643,7 +643,7 @@ var GameInfo = function () {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
                 self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
 
                 var ResultData = {
                     TableId: LoginResult.tableId,

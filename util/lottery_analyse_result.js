@@ -1,5 +1,8 @@
 const http_bc = require("./../util/http_broadcast");
-const log = require("../CClass/class/loginfo")
+const log = require("../CClass/class/loginfo").getInstand
+const CacheUtil = require('../util/cache_util')
+const TypeEnum = require('../util/enum/type')
+const StringUtil = require('../util/string_util')
 
 exports.initResult  = function (nBetSum) {
     // 初始化手牌结果
@@ -35,22 +38,21 @@ exports.initResult  = function (nBetSum) {
     };
 }
 
-exports.build  = function build(dictAnalyseResult, gameName, nHandCards, userId, nBetSum, winscore, freeCount, GamblingBalanceLevelBigWin, user, sendMessage_mul){
+exports.build  = function build(userId, nickname, gameName, nHandCards, nBetSum, currFreeCount, currGoldCoin, dictAnalyseResult, sendMessage_mul){
     try {
         //判断是否需要发送中奖信息到通知服
         if (http_bc && dictAnalyseResult["win"] >= nBetSum * sendMessage_mul) {
             let data = {
                 userId: userId,
-                nickName: user._nickname,
+                nickName: nickname,
                 gameName: gameName,
                 win: dictAnalyseResult["win"]
             };
             http_bc.send(data);
         }
     }catch (e){
-        log.err(e)
+        log.err('发送中奖信息到通知服' + e)
     }
-
     if(nHandCards) {
         // 手牌加1处理，返回给客户端
         dictAnalyseResult["nHandCards"] = [];
@@ -59,26 +61,21 @@ exports.build  = function build(dictAnalyseResult, gameName, nHandCards, userId,
         }
     }
 
-    // 增加免费次数，增加金币
-    user.winscore(winscore);
-    user.AddFreeCount(freeCount);
-    // 剩余免费次数
-    const resFreeCount = user.getFreeCount();
-    if (resFreeCount) {
+    if (currFreeCount) {
         dictAnalyseResult["is_free"] = true;
     } else {
         dictAnalyseResult["is_free"] = false;
     }
-    dictAnalyseResult["user_score"] = user.getScore();
-    dictAnalyseResult["getFreeTime"]["nFreeTime"] = resFreeCount;
+    dictAnalyseResult["user_score"] = currGoldCoin;
+    dictAnalyseResult["getFreeTime"]["nFreeTime"] = currFreeCount;
     return JSON.stringify(dictAnalyseResult);
 }
 
 
-exports.lotteryReturn = function lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, scorePool){
+exports.lotteryReturn = function lotteryReturn(currGoldCoin, winscore, freeCount, resFreeCount, dictAnalyseResult, scorePool){
     return {
         code: 1,
-        userscore: score_current,
+        userscore: currGoldCoin,
         winscore: winscore,
         viewarray: dictAnalyseResult,
         winfreeCount: freeCount,

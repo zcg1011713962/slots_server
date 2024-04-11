@@ -121,16 +121,6 @@ var Sever = function(){
 
 	//离开房间
 	this.LogoutRoom = function(_User,_socket){
-		//console.log("有人离开桌子");
-		var tableid = _User.getTable();
-		var seatid = _User.getSeat()
-		//没有任何座位信息
-		if (tableid == -1 || seatid == -1) return;
-		//console.log("座位," + tableid + "桌," + seatid + "个位置");
-		//分配座位
-		//寻找空座位
-		this.tableList[tableid][seatid] = null;
-		--this.onlienPepole;
 
 		//检测当前桌子还是否有人
 		var isOnline = false;

@@ -557,8 +557,6 @@ exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
     const users = userList.map(user => {
         const newUser = {
             id: user._userId,
-            score: user._score,
-            diamond: user._diamond,
             bankScore: user.bankScore,
             bankLock: user.bankLock,
             housecard: user.vip_level,
@@ -1454,8 +1452,7 @@ exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, chan
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("BankTransfer");
-                console.log(err);
+                log.err("BankTransfer" + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1470,9 +1467,9 @@ exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, chan
 }
 
 
-// 用户签到查询
+// 查询用户签到
 exports.searchUserSignIn = function searchUserSignIn(userId, callback) {
-    const sql = 'SELECT CONVERT_TZ(last_sign_in_date, \'+00:00\', \'+08:00\') AS last_sign_in_date, consecutive_days FROM activity_sign WHERE userId = ?';
+    const sql = 'SELECT last_sign_in_date, consecutive_days FROM activity_sign WHERE userId = ?';
     let values = [];
     values.push(userId);
 
@@ -1486,12 +1483,37 @@ exports.searchUserSignIn = function searchUserSignIn(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("searchUserSignIn");
-                console.log(err);
+                log.err("查询用户签到" + err);
                 callback(0);
             } else {
-                if (rows[0]) {
-                    callback(rows[0]);
+                callback(rows)
+            }
+        });
+        values = [];
+    });
+}
+
+// 用户首次签到
+exports.userFirstSignIn = function (userId, lastSignInDate, callback) {
+    const sql = 'INSERT INTO activity_sign (userId, last_sign_in_date, consecutive_days) VALUES(?, ?, 1)';
+    let values = [];
+    values.push(userId);
+    values.push(lastSignInDate);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('用户首次签到' + err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
                 } else {
                     callback(0);
                 }
@@ -1502,10 +1524,12 @@ exports.searchUserSignIn = function searchUserSignIn(userId, callback) {
 }
 
 
-// 签到
-exports.userSignIn = function userSignIn(userId, callback) {
-    const sql = 'call SignIn(?)';
+// 用户再次签到
+exports.userKeepSignIn = function (userId, lastSignInDate, days, callback) {
+    const sql = 'UPDATE gameaccount.activity_sign SET last_sign_in_date = ? , consecutive_days = ? + 1 WHERE userId = ?';
     let values = [];
+    values.push(lastSignInDate);
+    values.push(days);
     values.push(userId);
 
     pool.getConnection(function (err, connection) {
@@ -1514,30 +1538,54 @@ exports.userSignIn = function userSignIn(userId, callback) {
             callback(0);
             return;
         }
-        // 开启事务
-        connection.beginTransaction(err =>{
-            if(err){
-                log.err('获取数据库连接失败' + err);
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('用户再次签到' + err);
                 callback(0);
-                connection.release();
-                return;
-            }
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                if (err) {
-                    console.log("userSignIn");
-                    console.log(err);
-                    connection.release();
-                    callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
                 } else {
-                    callback(rows[0][0], connection);
-                    connection.commit(err =>{})
+                    callback(0);
                 }
-                values = [];
-            });
-        })
+            }
+        });
+        values = [];
     });
 }
 
+
+
+// 用户签到7天重置天数
+exports.userResetSignIn = function (userId, lastSignInDate, callback) {
+    const sql = 'UPDATE gameaccount.activity_sign SET last_sign_in_date = ?, consecutive_days = 1 WHERE userId = ?;';
+    let values = [];
+    values.push(lastSignInDate);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('用户签到7天重置天数' + err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
 
 
 // 转正
@@ -1618,8 +1666,7 @@ exports.addBank = function addBank(userId, account, name, cpf, bankType, callbac
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("addBank");
-                console.log(err);
+                log.err('addBank' + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1652,8 +1699,7 @@ exports.editBank = function editBank(userId, account, name, bankType, cardId, ca
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("editBank");
-                console.log(err);
+                log.err('editBank' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -1683,8 +1729,7 @@ exports.delBank = function delBank(userId, cardId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("delBank");
-                console.log(err);
+                log.err('delBank' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -1713,8 +1758,7 @@ exports.getBank = function getBank(_userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("获得用户银行卡");
-                console.log(err);
+                log.err('获得用户银行卡' + err);
                 callback(0);
             } else {
                 callback(1, rows);
@@ -1741,8 +1785,7 @@ exports.getPropByUserId = function getPropByUserId(_userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getPropByUserId");
-                console.log(err);
+                log.err('getPropByUserId' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -1772,8 +1815,7 @@ exports.getUseCoin = function getUseCoin(_userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getUseCoin");
-                console.log(err);
+                log.err('getUseCoin' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -1806,8 +1848,7 @@ exports.saveUserLog = function saveUserLog(userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("saveUserLog");
-                console.log(err);
+                log.err('saveUserLog' + err);
                 callback(0);
             } else {
                 callback(1);
@@ -1834,8 +1875,7 @@ exports.AddGold = function AddGold(userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("AddGold");
-                console.log(err);
+                log.err('AddGold' + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1848,7 +1888,7 @@ exports.AddGold = function AddGold(userInfo, callback) {
         values = [];
     });
 };
-//不在线修改钻石
+
 exports.AddDiamond = function AddDiamond(userInfo, callback) {
     const sql = 'call AddDiamond(?,?,?)';
     let values = [];
@@ -1865,8 +1905,7 @@ exports.AddDiamond = function AddDiamond(userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("AddDiamond");
-                console.log(err);
+                log.err('AddDiamond' + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1898,8 +1937,7 @@ exports.AddGoldSub = function AddGoldSub(userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("AddGoldSub");
-                console.log(err);
+                log.err('AddGoldSub' + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1931,8 +1969,7 @@ exports.AddDiamondSub = function AddGoldSub(userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("AddDiamondSub");
-                console.log(err);
+                log.err('AddDiamondSub' + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -1968,8 +2005,7 @@ exports.score_changeLog = function score_changeLog(userInfo) {
 
                 connection.query({sql: sql, values: values}, function (err, rows) {
                     if (err) {
-                        console.log("score_changeLog");
-                        console.log(err);
+                        log.err('score_changeLog' + err);
                     }
                 });
                 values = [];
@@ -1998,41 +2034,36 @@ exports.scoreChangeLog = function scoreChangeLog(userid, score_before, score_cha
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("score_changeLog");
-                console.log(err);
+                log.err('scoreChangeLog' + err);
             }
             values = [];
         });
     });
 };
 
-//上下分记录
-exports.diamond_changeLog = function score_changeLog(userInfo) {
-    var sql = "INSERT INTO diamond_changelog(userid,diamond_before,diamond_change,diamond_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
-    var values = [];
+// 钻石改变记录
+exports.diamondChangeLog = function (userid, diamond_before, diamond_change, diamond_current, change_type, isOnline) {
+    const sql = "INSERT INTO diamond_changelog(userid,diamond_before,diamond_change,diamond_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
+    let values = [];
+    values.push(userid);
+    values.push(diamond_before);
+    values.push(diamond_change);
+    values.push(diamond_current);
+    values.push(change_type);
+    values.push(isOnline);
+
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
             return;
         }
-        for (var i = 0; i < userInfo.length; i++) {
-            if (userInfo[i].userid < 500 || userInfo[i].userid > 1800) {
-                values.push(userInfo[i].userid);
-                values.push(userInfo[i].diamond_before);
-                values.push(userInfo[i].diamond_change);
-                values.push(userInfo[i].diamond_current);
-                values.push(userInfo[i].change_type);
-                values.push(userInfo[i].isOnline);
-                connection.query({sql: sql, values: values}, function (err, rows) {
-                    if (err) {
-                        console.log("diamond_changeLog");
-                        console.log(err);
-                    }
-                });
-                values = [];
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('钻石改变记录' + err);
             }
-        }
-        connection.release();
+            values = [];
+        });
     });
 };
 
@@ -2057,8 +2088,7 @@ exports.insert_mark = function insert_mark(userInfo) {
 
                 connection.query({sql: sql, values: values}, function (err, rows) {
                     if (err) {
-                        console.log("insert_mark");
-                        console.log(err);
+                        log.err('insert_mark' + err);
                     }
                 });
                 values = [];
@@ -2090,8 +2120,7 @@ exports.getRecord = function getRecord(userInfo, callback_c) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getRecord");
-                console.log(err);
+                log.err('getRecord' + err);
                 callback_c(0);
             } else {
                 if (rows.length) {
@@ -2121,8 +2150,7 @@ exports.getLotteryLog = function getLotteryLog(userInfo, callback_c) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getLotteryLog");
-                console.log(err);
+                log.err('getLotteryLog' + err);
             } else {
                 if (rows.length) {
                     callback_c(1, rows[0]);
@@ -2150,8 +2178,7 @@ exports.mark = function mark(userInfo, callback_c) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("mark");
-                console.log(err);
+                log.err('mark' + err);
             } else {
                 callback_c(0);
             }
@@ -2181,8 +2208,7 @@ exports.updateProp = function updateProp(_userInfo, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateProp");
-                console.log(err);
+                log.err('updateProp' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -2221,8 +2247,7 @@ exports.sendEmail = function sendEmail(info, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("sendEmail");
-                console.log(err);
+                log.err('sendEmail' + err);
                 callback(0);
             } else {
                 callback(1, rows[0][0].id);
@@ -2232,95 +2257,6 @@ exports.sendEmail = function sendEmail(info, callback) {
     });
 }
 
-
-//领取每日奖品
-exports.getDayPrize = function getDayPrize(_userId, callback) {
-    const sql = 'UPDATE fish.getcoin SET mark=1 WHERE id=?';
-    let values = [];
-    values.push(_userId);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("getDayPrize");
-                console.log(err);
-                callback(0);
-            } else {
-                callback(1);
-            }
-        })
-        values = [];
-    });
-}
-
-
-
-//创建充值数据
-exports.create_recharge = function create_recharge(userInfo, callback) {
-    const sql = "call createRecharge(?,?,?,?)";
-    let values = [];
-    values.push(userInfo.Account);
-    values.push(userInfo.total_fee);
-    values.push(userInfo.out_trade_no);
-    values.push(userInfo.goodsid);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("create_recharge");
-                console.log(err);
-
-                callback(0);
-            } else {
-                callback(rows[0][0].rcode);
-            }
-        })
-        values = [];
-    });
-}
-
-//创建充值数据SDK
-exports.create_rechargeSDK = function create_rechargeSDK(userInfo, callback) {
-    var sql = "call createRecharge(?,?,?,?,?)";
-    var values = [];
-    values.push(userInfo.userId);
-    values.push(userInfo.Account);
-    values.push(userInfo.total_fee);
-    values.push(userInfo.out_trade_no);
-    values.push(userInfo.goodsid);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("create_rechargeSDK");
-                console.log(err);
-
-                callback(0);
-            } else {
-                callback(rows[0][0].rcode);
-            }
-        })
-        values = [];
-    });
-}
 
 //更新充值数据
 exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
@@ -2337,8 +2273,7 @@ exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateRecharge");
-                console.log(err);
+                log.err('更新充值数据' + err);
                 callback(0);
             } else {
                 if (rows[0][0].rcode) {
@@ -2369,8 +2304,7 @@ exports.setNewHandGive = function setNewHandGive(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("已领取新手礼包");
-                console.log(err);
+                log.err('已领取新手礼包' + err);
                 callback(0);
             } else {
                 if (rows) {
@@ -2400,8 +2334,7 @@ exports.checkRecharge = function checkRecharge(out_trade_no, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("checkRecharge");
-                console.log(err);
+                log.err('更新充值数据' + err);
                 callback(0);
             } else {
                 if (rows[0][0].rcode) {
@@ -2430,8 +2363,7 @@ exports.updateFirstexchange = function updateFirstexchange(_userId) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateFirstexchange");
-                console.log(err);
+                log.err('updateFirstexchange' + err);
             }
         })
         values = [];
@@ -2458,8 +2390,7 @@ exports.sendcoinlog = function sendcoinlog(info, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("sendcoinlog");
-                console.log(err);
+                log.err('保存金币记录' + err);
             } else {
                 callback(1, rows.insertId);
             }
@@ -2483,8 +2414,7 @@ exports.selectcoinlog = function selectcoinlog(userid, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("selectcoinlog");
-                console.log(err);
+                log.err('查询金币记录' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -2513,8 +2443,7 @@ exports.selectgetcoinlog = function selectgetcoinlog(userid, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("selectcoinlog");
-                console.log(err);
+                log.err('selectcoinlog' + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -2543,8 +2472,7 @@ exports.updateCoinLogState = function updateCoinLogState(state, id, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateFirstexchange");
-                console.log(err);
+                log.err('updateFirstexchange' + err);
                 callback(0);
             } else {
                 callback(1);
@@ -2568,8 +2496,7 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("searchAccountByDeviceCode");
-                console.log(err);
+                log.err('searchAccountByDeviceCode' + err);
                 callback(0);
             } else {
                 if(rows && rows.length > 0){
@@ -2598,8 +2525,7 @@ exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateAccountByDeviceCode");
-                console.log(err);
+                log.err('updateAccountByDeviceCode' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2628,8 +2554,7 @@ exports.searchFirstRecharge = function (userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("获取是否购买过首充");
-                console.log(err);
+                log.err('获取是否购买过首充' + err);
                 callback(0);
             } else {
                 if(rows && rows.length > 0){
@@ -2661,8 +2586,7 @@ exports.updateFirstRecharge = function (userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("买过首充");
-                console.log(err);
+                log.err('买过首充' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2691,8 +2615,7 @@ exports.searchUserMoney = function searchUserMoney(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("获取用户货币账户");
-                console.log(err);
+                log.err('获取用户货币账户' + err);
                 callback(0);
             } else {
                 if(rows && rows.length > 0){
@@ -2726,8 +2649,7 @@ exports.lockBankScore = function lockBankScore(userId, bankScore, lockWithdrawLi
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("锁定银行积分");
-                console.log(err);
+                log.err('锁定银行积分' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2758,8 +2680,7 @@ exports.updateWithdrawPayStatus = function updateWithdrawPayStatus(userId, order
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("更新提现订单支付状态");
-                console.log(err);
+                log.err('更新提现订单支付状态' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2794,8 +2715,7 @@ exports.unlockBankScore = function unlockBankScore(userId, bankScore, withdrawLi
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("解锁银行积分");
-                console.log(err);
+                log.err('解锁银行积分' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2826,8 +2746,7 @@ exports.updateGuideStep = function (userId, step, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("更新新手指引步数");
-                console.log(err);
+                log.err('更新新手指引步数' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2855,8 +2774,7 @@ exports.updateWinScorePopFirstRecharge = function (userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateWinScorePopFirstRecharge");
-                console.log(err);
+                log.err('updateWinScorePopFirstRecharge' + err);
                 callback(0);
             } else {
                 if(rows){
@@ -2894,8 +2812,7 @@ exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, accou
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("提现申请记录");
-                console.log(err);
+                log.err('提现申请记录' + err);
                 callback(0)
                 return;
             }
@@ -2926,8 +2843,7 @@ exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(use
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("通过订单查询提现申请记录");
-                console.log(err);
+                log.err('通过订单查询提现申请记录' + err);
                 callback(0)
                 return;
             }
@@ -2956,8 +2872,7 @@ exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, c
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询提现申请记录");
-                console.log(err);
+                log.err('查询提现申请记录' + err);
                 callback(0)
                 return;
             }
@@ -2992,8 +2907,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("saveEmail");
-                console.log(err);
+                log.err('保存邮件记录' + err);
             }
         });
         values = [];
@@ -3016,8 +2930,7 @@ exports.selectEmail = function selectEmail(types, userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询转账邮件记录");
-                console.log(err);
+                log.err('查询转账邮件记录' + err);
             } else {
                 if (rows && rows.length > 0) {
                     callback(1, rows[0]);
@@ -3046,8 +2959,7 @@ exports.selectEmailTypes = function selectEmailTypes(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询邮件类型");
-                console.log(err);
+                log.err('查询邮件类型' + err);
             } else {
                 if (rows && rows.length > 0) {
                     const types = rows.map(obj => obj.type).join(',');
@@ -3076,8 +2988,7 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("设置邮件为已读");
-                console.log(err);
+                log.err('设置邮件为已读' + err);
                 callback(0);
             } else {
                 callback(1);
@@ -3104,8 +3015,7 @@ exports.setEmailisAlllReadByUserId = function setEmailisAlllReadByUserId(userId,
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("设置用户全部邮件为已读");
-                console.log(err);
+                log.err('设置用户全部邮件为已读' + err);
                 callback(0);
             } else {
                 callback(1);
@@ -3131,11 +3041,40 @@ exports.delEmailById = function delEmailById(id, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("删除指定邮件");
-                console.log(err);
+                log.err('删除指定邮件' + err);
                 callback(0);
             } else {
                 callback(1);
+            }
+
+        });
+        values = [];
+    });
+};
+
+// 查询是否有未读邮件
+exports.searchUnReadEmail = function searchUnReadEmail(userId, callback) {
+    const sql = "select * from email where isRead = 0 and to_userid = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询是否有未读邮件' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询是否有未读邮件' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
             }
 
         });
@@ -3158,8 +3097,7 @@ exports.delEmailisAlllReadByUserId = function delEmailisAlllReadByUserId(userId,
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("删除全部已读");
-                console.log(err);
+                log.err('删除全部已读' + err);
                 callback(0);
             } else {
                 callback(1);
@@ -3184,8 +3122,7 @@ exports.selectSystemEmail = function selectSystemEmail(callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询系统邮件记录");
-                console.log(err);
+                log.err('查询系统邮件记录' + err);
             } else {
                 if (rows[0]) {
                     callback(1, rows);
@@ -3198,63 +3135,6 @@ exports.selectSystemEmail = function selectSystemEmail(callback) {
     });
 };
 
-//保存转卡记录
-exports.saveCardRecord = function saveCardRecord(info) {
-    var sql = "INSERT INTO sendcardlog(userid,targetId,coin,cardNum) VALUES(?,?,?,?)";
-    var values = [];
-
-    values.push(info.userid);
-    values.push(info.targetId);
-    values.push(info.coin);
-    values.push(info.cardNum);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("saveCardRecord");
-                console.log(err);
-            }
-        });
-
-        values = [];
-
-    });
-};
-//查询兑换卡记录
-exports.getCardRecord = function getCardRecord(userid, callback) {
-    let sql = "select * from sendcardlog where targetId = ?";
-    let values = [];
-    values.push(userid);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("selectcoinlog");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows.length == 0) {
-                    callback(0, null);
-                } else {
-                    callback(1, rows);
-                }
-            }
-
-        });
-        values = [];
-    });
-};
 
 exports.sendcoinServer = function sendcoinServer(userid, sendCoin, callback) {
     var sql = 'call sendcoinServer(?,?)';
@@ -3272,8 +3152,7 @@ exports.sendcoinServer = function sendcoinServer(userid, sendCoin, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("sendcoinServer");
-                console.log(err);
+                log.err('sendcoinServer' + err);
                 callback(0);
             } else {
                 callback(rows[0][0].recod);
@@ -3297,8 +3176,7 @@ exports.saveLineOut = function saveLineOut(userid) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("saveLineOut");
-                console.log(err);
+                log.err('saveLineOut' + err);
             }
         })
         values = [];
@@ -3318,8 +3196,7 @@ exports.deleteLineOut = function saveLineOut(userid) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("deleteLineOut");
-                console.log(err);
+                log.err('deleteLineOut' + err);
             }
         })
         values = [];
@@ -3338,130 +3215,16 @@ exports.clenaLineOut = function clenaLineOut() {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("clenaLineOut");
-                console.log(err);
+                log.err('clenaLineOut' + err);
             }
         })
         values = [];
     });
 }
 
-//在线游戏时，结算
-exports.tempAddScore = function tempAddScore(userid, score, change_type) {
-    var sql = 'call tempAddScore(?,?,?)';
-    var values = [];
-    values.push(userid);
-    values.push(score);
-    values.push(change_type);
 
 
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("tempAddScore");
-                console.log(err);
-            }
-        })
-
-        values = [];
-    });
-}
-
-//在线游戏时，结算
-exports.tempAddDiamond = function tempAddScore(userid, score, change_type) {
-    var sql = 'call tempAddDiamond(?,?,?)';
-    var values = [];
-
-    values.push(userid);
-    values.push(score);
-    values.push(change_type);
-
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("tempAddScore");
-                console.log(err);
-            }
-        })
-        values = [];
-    });
-}
-
-//登录时使用
-exports.LoginaddTempScore = function LoginaddTempScore(userid, callback) {
-    var sql = 'call LoginaddTempScore(?)';
-    var values = [];
-
-    values.push(userid);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("LoginaddTempScore");
-                console.log(err);
-            } else {
-
-                if (rows[0].length) {
-                    callback(1, rows[0]);
-                } else {
-                    callback(0);
-                }
-            }
-        })
-        values = [];
-    });
-}
-
-//登录时使用
-exports.LoginaddTempDiamond = function LoginaddTempScore(userid, callback) {
-    var sql = 'call LoginaddTempDiamond(?)';
-    var values = [];
-
-    values.push(userid);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("LoginaddTempDiamond");
-                console.log(err);
-            } else {
-                if (rows[0].length) {
-                    callback(1, rows[0]);
-                } else {
-                    callback(0);
-                }
-            }
-        })
-        values = [];
-    });
-}
-
-//获取分数
+//获取金币
 exports.getScore = function getScore(_userId, callback) {
     const sql = "select * from userinfo_imp where userId = ?";
     let values = [];
@@ -3476,8 +3239,7 @@ exports.getScore = function getScore(_userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getScore");
-                console.log(err);
+                log.err("获取金币" + err);
                 callback(0);
             } else {
                 if (rows[0]) {
@@ -3511,8 +3273,7 @@ exports.addAccountScore = function addAccountScore(_userId, score, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("增加金币");
-                console.log(err);
+                log.err("增加金币" + err);
                 callback(0);
             }else{
                 if(rows){
@@ -3525,6 +3286,71 @@ exports.addAccountScore = function addAccountScore(_userId, score, callback) {
         })
     });
 }
+
+
+
+// 减少金币
+exports.reduceAccountScore = function reduceAccountScore(_userId, score, callback) {
+    const sql = "UPDATE userinfo_imp SET score = CASE WHEN score >= ? THEN score - ? ELSE score END WHERE userId = ?;";
+    let values = [];
+    values.push(score);
+    values.push(score);
+    values.push(_userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("减少金币" + err);
+                callback(0);
+            }else{
+                if(rows){
+                    callback(1);
+                }else {
+                    callback(0);
+                }
+            }
+            values = []
+        })
+    });
+}
+
+
+// 增加钻石
+exports.addAccountDiamond = function (_userId, diamond, callback) {
+    const sql = "update userinfo_imp set diamond = diamond + ? where userId = ?";
+    let values = [];
+    values.push(diamond);
+    values.push(_userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("增加钻石" + err);
+                callback(0);
+            }else{
+                if(rows){
+                    callback(1);
+                }else {
+                    callback(0);
+                }
+            }
+            values = []
+        })
+    });
+}
+
 
 
 //转正
@@ -3545,8 +3371,7 @@ exports.changeOfficial = function changeOfficial(_info, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("changeOfficial");
-                console.log(err);
+                log.err("changeOfficial" + err);
                 callback(0);
             } else {
                 var result = {};
@@ -3585,8 +3410,7 @@ exports.addcharLog = function addcharLog(_info, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("addcharLog");
-                console.log(err);
+                log.err("addcharLog" + err);
                 callback(0);
             } else {
                 callback(1);
@@ -3612,8 +3436,7 @@ exports.getcharLog = function getcharLog(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getcharLog");
-                console.log(err);
+                log.err("getcharLog" + err);
                 callback(0);
             } else {
                 callback(1, rows);
@@ -3622,73 +3445,6 @@ exports.getcharLog = function getcharLog(userId, callback) {
         values = [];
     });
 }
-
-
-
-
-//更新充值数据
-exports.updateScoreOut = function updateScoreOut(out_trade_no, flag, remark, callback) {
-    var sql = "call updateScoreOut(?,?,?)";
-    var values = [];
-
-    values.push(out_trade_no);
-    values.push(flag);
-    values.push(remark);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("updateScoreOut");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0][0].rcode) {
-                    callback(1);
-                } else {
-                    callback(0, rows[0][0]);
-                }
-
-            }
-        })
-        values = [];
-    });
-}
-
-//获取兑换数据
-exports.getScoreOut = function getScoreOut(date, callback) {
-    var sql = "SELECT * FROM scoreout WHERE state = 0 AND cardType = 0 AND addDate < '" + date + "' LIMIT 1";
-    var values = [];
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("getScoreOut");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0]) {
-                    callback(1, rows[0]);
-                } else {
-                    callback(0);
-                }
-
-            }
-        });
-        values = [];
-    });
-};
 
 
 //更新聊天记录
@@ -3716,8 +3472,7 @@ exports.updateCharLog = function updateCharLog(userId, idList, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("updateCharLog");
-                console.log(err);
+                log.err("updateCharLog" + err);
                 callback(0);
             } else {
                 callback(1);
@@ -3742,8 +3497,7 @@ exports.selectServerLog = function selectServerLog(callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("selectServerLog");
-                console.log(err);
+                log.err("selectServerLog" + err);
                 callback(0);
             } else {
                 if (rows.length == 0) {
@@ -3773,8 +3527,7 @@ exports.getCoinRank = function getCoinRank(callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("getCoinRank");
-                console.log(err);
+                log.err("查询金币排行榜" + err);
                 callback(0);
             } else {
                 // console.log(rows);
@@ -3807,9 +3560,9 @@ exports.getDiamondRank = function getDiamondRank(callback) {
             if (err) {
                 console.log("getCoinRank");
                 console.log(err);
+                log.err("查询钻石排行榜" + err);
                 callback(0);
             } else {
-                // console.log(rows);
                 if (rows.length == 0) {
                     callback(0);
                 } else {
@@ -3838,8 +3591,7 @@ exports.searchInvitedCode = function searchInvitedCode(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("查询邀请码");
-                console.log(err);
+                log.err("查询邀请码" + err);
                 callback(0);
             } else {
                 if (rows && rows.length > 0) {
@@ -3867,8 +3619,7 @@ exports.bathchSearchUserInfo = function bathchSearchUserInfo(userIds, callback) 
         connection.query({sql: sql, values: userIds}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("批量查询用户信息");
-                console.log(err);
+                log.err("批量查询用户信息" + err);
                 callback(0);
             } else {
                 if (rows && rows.length > 0) {
