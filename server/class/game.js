@@ -479,33 +479,36 @@ var GameInfo = function () {
         //商城购买
         this.Shopping = function (userId, productId, count, service, shopType, serverId, callback) {
             CacheUtil.buyCallBackSwitch().then(nSwitch =>{
-                CacheUtil.getServerUrlConfig().then(config => {
-                    try {
-                        const hallUrl = config.hallUrl ? config.hallUrl : '';
-                        // 生成订单ID
-                        const orderId = StringUtil.generateOrderId();
+                CacheUtil.paySwitch().then(paySwitch =>{
+                    CacheUtil.getServerUrlConfig().then(config => {
+                        try {
+                            const hallUrl = config.hallUrl ? config.hallUrl : '';
+                            // 生成订单ID
+                            const orderId = StringUtil.generateOrderId();
 
-                        if (TypeEnum.ShopType.store === shopType) {
-                            this.storeBuy(orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, callback)
-                        } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                            this.turntableBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback);
-                        } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                            this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback);
-                        } else if (TypeEnum.ShopType.firstRecharge === shopType) {
-                            this.firstRechargeBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback);
-                        } else {
-                            log.info(userId + '下单失败,购买商品类型不存在' + shopType)
+                            if (TypeEnum.ShopType.store === shopType) {
+                                this.storeBuy(orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, callback)
+                            } else if (TypeEnum.ShopType.free_turntable === shopType) {
+                                this.turntableBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                            } else if (TypeEnum.ShopType.discount_Limited === shopType) {
+                                this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                            } else if (TypeEnum.ShopType.firstRecharge === shopType) {
+                                this.firstRechargeBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                            } else {
+                                log.info(userId + '下单失败,购买商品类型不存在' + shopType)
+                                callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
+                            }
+                        } catch (e) {
+                            log.err('ShoppingResult' + e);
                             callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                         }
-                    } catch (e) {
-                        log.err('ShoppingResult' + e);
-                        callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
-                    }
+                    })
+
                 })
             })
         };
 
-        this.firstRechargeBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback) {
+        this.firstRechargeBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
             const self = this;
             // 查询购买的金币道具的数量和价值
             CacheUtil.getShopConfig().then(shopConfig => {
@@ -530,9 +533,9 @@ var GameInfo = function () {
                     // 折扣价
                     const amount = parseFloat(shopItem['target_price']);
                     // 类型
-                    const type = parseFloat(shopItem['type']);
+                    const goodsType = parseFloat(shopItem['type']);
                     // 数量
-                    const val = parseFloat(shopItem['val']);
+                    const goodsVal = parseFloat(shopItem['val']);
                     // 巴西币
                     const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
                     const buyContinueRewardGold = parseFloat(shopItem['buy_continue_reward_gold']);
@@ -540,39 +543,16 @@ var GameInfo = function () {
                     const buyContinueDays = parseFloat(shopItem['buy_continue_days']);
                     log.info(userId + '购买首充商品原价:' + price + '折扣价:' + amount + '持续奖励金币:' + buyContinueRewardGold + '持续奖励钻石:' + buyContinueRewardDiamond + '持续天数:' + buyContinueDays)
 
-                    const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-                    // 下购买订单
-                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                        try {
-                            log.info(userId + '下购买订单' + orderId + res)
-                            const orderResult = JSON.parse(res);
-                            if (orderResult && orderResult.code === 200) {
-                                self.getVipLevel(userId, vipLevel => {
-                                    // 记录订单详情
-                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.firstRecharge, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
-                                        if (ret) {
-                                            orderResult.data.switch = nSwitch;
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                            // callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
-                                        } else {
-                                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                        }
-                                    })
-                                })
-                            } else {
-                                log.err(userId + '购买商品下购买订单失败')
-                                callback(ErrorCode.FAILED.code, '购买商品下购买订单失败')
-                            }
-                        } catch (e) {
-                            log.err(userId + '购买商品下购买订单异常' + e)
-                            callback(ErrorCode.FAILED.code, '购买商品下购买订单异常')
-                        }
-                    });
+                    if(paySwitch){
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
+                    }else{
+                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
+                    }
                 });
             })
         }
 
-        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback) {
+        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
             const self = this;
 
             CacheUtil.getUserDiscountLimited(userId).then(ok => {
@@ -594,42 +574,19 @@ var GameInfo = function () {
                     // 巴西币
                     const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
                     // 金币数量
-                    const val = parseFloat(shopItem['Discount_BONUS']);
+                    const goodsVal = parseFloat(shopItem['Discount_BONUS']);
 
-                    const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-                    // 下购买订单
-                    PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                        try {
-                            log.info(userId + '下购买订单' + res)
-                            const orderResult = JSON.parse(res);
-                            if (orderResult && orderResult.code === 200) {
-                                self.getVipLevel(userId, vipLevel => {
-                                    // 记录订单详情
-                                    dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, 2, service, 0, TypeEnum.ShopType.discount_Limited, val, serverId, 0, 0, 0, ret => {
-                                        if (ret) {
-                                            orderResult.data.switch = nSwitch;
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                            /*callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})*/
-                                        } else {
-                                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                        }
-                                    })
-                                })
-                            } else {
-                                log.err(userId + '购买商品下购买订单失败')
-                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                            }
-                        } catch (e) {
-                            log.err(userId + '购买商品下购买订单异常' + e)
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
-                    });
+                    if(paySwitch){
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    }else{
+                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    }
                 })
             })
 
         }
 
-        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, callback) {
+        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
             const self = this;
             // 获取幸运币配置
             CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig => {
@@ -645,41 +602,85 @@ var GameInfo = function () {
                 const currencyType = buyMulPriceItem.currencyType;
                 // 购买倍数
                 const mul = buyMulPriceItem.mul;
-
                 log.info(userId + '购买免费转盘门票' + 'amount:' + amount + 'currencyType:' + currencyType + 'mul:' + mul)
 
-                const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-                // 下购买订单
-                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                    try {
-                        log.info(userId + '下购买订单' + res)
-                        const orderResult = JSON.parse(res);
-                        if (orderResult && orderResult.code === 200) {
-                            self.getVipLevel(userId, vipLevel => {
-                                // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, TypeEnum.GoodsType.turntableTicket, amount, 0, service, mul, TypeEnum.ShopType.free_turntable, 1, serverId, 0, 0, 0, ret => {
-                                    if (ret) {
-                                        orderResult.data.switch = nSwitch;
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                        /*callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})*/
-                                    } else {
-                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                    }
-                                })
-                            })
-                        } else {
-                            log.err(userId + '购买商品下购买订单失败')
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
-                    } catch (e) {
-                        log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                    }
-                })
+                if(paySwitch){
+                    self.placeOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId, TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                }else{
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId ,TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                }
             });
         }
 
-        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, callback) {
+        this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) {
+            const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
+            // 下购买订单
+            PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
+                try {
+                    log.info(userId + '下购买订单' + res)
+                    const orderResult = JSON.parse(res);
+                    if (orderResult && orderResult.code === 200) {
+                        self.getVipLevel(userId, vipLevel => {
+                            // 记录订单详情
+                            dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                                if (ret) {
+                                    orderResult.data.switch = nSwitch;
+                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                } else {
+                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                }
+                            })
+                        })
+                    } else {
+                        log.err(userId + '购买商品下购买订单失败')
+                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                    }
+                } catch (e) {
+                    log.err(userId + '购买商品下购买订单异常' + e)
+                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                }
+            })
+        }
+
+
+        this.TestPlaceOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) {
+            const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
+            const self = this;
+            // 下购买订单
+            self.getVipLevel(userId, vipLevel => {
+                // 记录订单详情
+                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                    log.info(userId + '测试购买订单记录' + orderId)
+                    if (ret) {
+                        const orderResult = {
+                            "code": 1,
+                            "data": {
+                                "orderStatus": 1,
+                                "orderNo": "77158f8f87b444b2ac7ec5b3db9baecc",
+                                "merOrderNo": orderId,
+                                "amount": 0,
+                                "currency": "BRL",
+                                "createTime": 0,
+                                "updateTime": 0,
+                                "sign": "",
+                                "params": {
+                                    "qrcode": "",
+                                    "url": ""
+                                },
+                                "switch": 1
+                            }
+                        }
+                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                    } else {
+                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                    }
+                })
+            })
+        }
+
+
+
+        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
             const self = this;
             // 查询购买的金币道具的数量和价值
             CacheUtil.getShopConfig().then(shopConfig => {
@@ -694,41 +695,17 @@ var GameInfo = function () {
                 // 折扣价
                 const amount = parseFloat(shopItem['target_price']) * count;
                 // 类型
-                const type = parseFloat(shopItem['type']);
+                const goodsType = parseFloat(shopItem['type']);
                 // 数量
-                const val = parseFloat(shopItem['val']) * count;
+                const goodsVal = parseFloat(shopItem['val']) * count;
                 // 巴西币
                 const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
 
-                const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-                // 下购买订单
-                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                    try {
-                        log.info(userId + '下购买订单' + orderId + res)
-                        const orderResult = JSON.parse(res);
-                        if(orderResult && orderResult.code === 200){
-                        self.getVipLevel(userId, vipLevel => {
-                            // 记录订单详情
-                            dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, shopItem.type, price, shopItem.group, service, 0, TypeEnum.ShopType.store, val, serverId, 0, 0, 0, ret => {
-                                if (ret) {
-                                    orderResult.data.switch = nSwitch;
-                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                    //callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {merOrderNo: orderId})
-                                } else {
-                                    log.err(userId + '购买商品下购买订单失败' + orderResult + 'code:' + orderResult.code)
-                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                }
-                            })
-                        })
-                        }else{
-                            log.err(userId + '购买商品下购买订单失败' + orderResult + 'code:' + orderResult.code)
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
-                    } catch (e) {
-                        log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                    }
-                });
+                if(paySwitch){
+                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                }else{
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                }
             })
         }
 
@@ -1449,12 +1426,12 @@ var GameInfo = function () {
                 CacheUtil.getVipConfig().then(vipConfig => {
                     const currVipConfig = vipConfig.find(item => item.level === level);
                     for (let i = 0; i < signInConfig.award.length; i++) {
-                        if (signInConfig.award[i].type === 0) {
-                            const addScore = StringUtil.rideNumbers(signInConfig.award[0].val, currVipConfig.dailySignScoreAddRate / 100, 2);
+                        if (signInConfig.award[i].type === TypeEnum.GoodsType.gold) {
+                            const addScore = StringUtil.rideNumbers(signInConfig.award[consecutiveDays -1].val, currVipConfig.dailySignScoreAddRate / 100, 2);
                             // 发放金币
                             CacheUtil.addGoldCoin(userId, addScore, TypeEnum.ScoreChangeType.daySign, (ret, currGoldCoin) => {
+                                log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取金币' + signInConfig.award[consecutiveDays -1].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
                             });
-                            log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取金币' + signInConfig.award[0].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
                         } else if (signInConfig.award[i].type === 1) {
                             // 发放钻石
                         }
@@ -2708,91 +2685,6 @@ var GameInfo = function () {
                 log.err(userId + '用户初始化邀请码错误' + e)
             }
         }
-
-        //领奖
-        this.getPrize = function (_socket, _info) {
-            if (!this.userList[_socket.userId]) {
-                return;
-            }
-            var prize = this.userList[_socket.userId]._prize;
-
-            if (!prize || prize.length <= 0) {
-                _socket.emit('getPrizeResult', {Result: 0, msg: "领奖列表为空"});
-                return;
-            }
-
-            var found = false;
-            for (var i = 0; i < prize.length; i++) {
-                if (_info.id == prize[i].id) {
-                    found = true;
-                    if (!prize[i].isGetPrize) {
-                        prize[i].isGetPrize = 1;
-                        _socket.emit('getPrizeResult', {
-                            Result: 1,
-                            msg: "成功领取",
-                            data: {
-                                winPropId: prize[i].propId,
-                                winPropCount: prize[i].propCount,
-                                winScore: prize[i].winScore
-                            }
-                        });
-                        var myNowScore = this.userList[_socket.userId].getScore();
-                        log.info(_socket.userId + "领取前" + myNowScore);
-                        //内存添加金币
-                        this.userList[_socket.userId].addgold(prize[i].winScore);
-
-                        var myAfScore = this.userList[_socket.userId].getScore();
-                        log.info(_socket.userId + "成功领取" + prize[i].winScore);
-                        log.info(_socket.userId + "剩余" + myAfScore);
-                        //内存添加道具
-                        if (this.userList[_socket.userId]._proList[prize[i].propId]) {
-                            this.userList[_socket.userId]._proList[prize[i].propId] += prize[i].propCount;
-                        } else {
-                            this.userList[_socket.userId]._proList[prize[i].propId] = prize[i].propCount;
-                        }
-                        var info = {
-                            userId: _socket.userId,
-                            propId: prize[i].propId,
-                            propCount: prize[i].propCount,
-                            roomid: 0,
-                            typeid: 3
-                        };
-                        //数据库添加道具
-                        dao.updateProp(info, function (result) {
-                        });
-                        //数据库更新
-                        dao.getPrize(_info.id, function (Result) {
-                        });
-
-                        //给自己做钱的记录
-                        var score_change = prize[i].winScore;
-                        if (prize[i].winScore > 0) {
-                            var userInfo = {
-                                userid: _socket.userId,
-                                score_before: myNowScore,
-                                score_change: score_change,
-                                score_current: myAfScore,
-                                change_type: 6,
-                                isOnline: true
-                            };
-                            this.score_changeLogList.push(userInfo);
-                        }
-
-                        return;
-                    } else {
-                        _socket.emit('getPrizeResult', {Result: 0, msg: "奖品已经领取"});
-                        return;
-                    }
-                    break;
-                }
-            }
-
-            if (!found) {
-                _socket.emit('getPrizeResult', {Result: 0, msg: "未能找到领奖ID"});
-                return;
-            }
-        }
-
 
         this.getServerRank = function (_socket, _info) {
             _socket.emit('getServerRankResult', {Result: 1, msg: "", data: this.gameRank[_info.serverId]});

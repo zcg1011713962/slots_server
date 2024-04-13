@@ -26,6 +26,8 @@ const userDiscountLimitedKey = 'userDiscountLimited';
 
 const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
 const buyCallBackSwitchKey  = 'buyCallBackSwitch';
+const paySwitchKey  = 'paySwitch';
+
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -981,3 +983,15 @@ exports.buyCallBackSwitch = function(){
         }
     });
 }
+
+// 购买回调开关
+exports.paySwitch = function(){
+    return RedisUtil.get(paySwitchKey).then(code =>{
+        if(code){
+            return 1;
+        }else{
+            return 0;
+        }
+    });
+}
+

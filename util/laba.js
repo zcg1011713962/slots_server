@@ -589,7 +589,25 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
 
     } else {
         if (list_one_count(99, nHandCards) === 0) {
-            if (wildNum + list_one_count(1, nHandCards) + list_one_count(2, nHandCards) + list_one_count(3, nHandCards) === 3) {
+            const bar1= list_one_count(1, nHandCards)
+            const bar2= list_one_count(2, nHandCards)
+            const bar3= list_one_count(3, nHandCards)
+            if ((wildNum === 1 && (bar1 === 2 || bar2 === 2 || bar3 === 2)) || (wildNum === 2 && (bar1 === 1 || bar2 === 1 || bar3 === 1))) {
+                haveWin = true;
+                let mul = 8;
+                if(bar1 > bar2 && bar1 > bar3){
+                    mul = 18;
+                }else if(bar2 > bar1 && bar2 > bar3){
+                    mul = 28;
+                }else if(bar3 > bar1 && bar3 > bar2){
+                    mul = 38;
+                }
+                dictAnalyseResult["nWinLines"].push(0);
+                dictAnalyseResult["nWinDetail"].push(mul * _bet);
+                dictAnalyseResult["nWinLinesDetail"].push(nGameLines[0]);
+                dictAnalyseResult["nWinCards"] = [true, true, true];
+                dictAnalyseResult["win"] += mul * _bet;
+            }else if (wildNum + list_one_count(1, nHandCards) + list_one_count(2, nHandCards) + list_one_count(3, nHandCards) === 3) {
                 haveWin = true;
                 dictAnalyseResult["nWinLines"].push(0);
                 dictAnalyseResult["nWinDetail"].push(8 * _bet);
