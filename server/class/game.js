@@ -1243,6 +1243,84 @@ var GameInfo = function () {
             });
         };
 
+
+        this.loginSwitch = function (user, socket, callback) {
+            const self = this;
+            if(user.token) {
+                log.info("通过缓存的token登录" + user.uid);
+                const login_token_key  = 'login_token_key:';
+                RedisUtil.get(login_token_key + user.token).then(userId =>{
+                    if(userId){
+                        user.id = userId;
+                        dao.tokenLogin(user, socket, callback);
+                    }else {
+                        callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
+                    }
+                });
+            }else if(user.userName && user.sign) {
+                log.info("游客账户密码登录:" + user.userName);
+                dao.pwdLogin(user, socket, callback);
+            }else if(user.uid){
+                // google登录
+                log.info("google登录" + user.uid);
+                dao.googleLogin(user, socket, (code, msg, data) => {
+                    if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
+                        // 生成账户密码
+                        const time = StringUtil.generateTime();
+                        const account = StringUtil.generateAccount('ABC', time);
+                        const king = StringUtil.generateKing();
+                        const nickname = StringUtil.generateNickName(time);
+                        const pwd = StringUtil.pwdEncrypt(account, king);
+                        // 账户不存在 进行注册
+                        dao.registerByGoogle(user, account, pwd, nickname, king, (rows) =>{
+                            if (rows) {
+                                log.info('google注册成功' + user.uid);
+                                // 设置邀请码
+                                self.setInviteCode(rows.Id);
+                                callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows);
+                            }else{
+                                callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
+                            }
+                        });
+                    }else{
+                        callback(code, msg, data);
+                    }
+                });
+            }else if(user.email && user.code) {
+                log.info("邮箱登录" + user.email + '验证码:' + user.code);
+                self.verifyEmailCode(user.email, user.code, (code, msg) => {
+                    if(code === ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
+                        // 邮箱登录
+                        dao.emailLogin(user, socket, (code, msg, data) =>{
+                            if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
+                                // 生成账户密码
+                                const time = StringUtil.generateTime();
+                                const account = StringUtil.generateAccount('ABC', time);
+                                const king = StringUtil.generateKing();
+                                const nickname = StringUtil.generateNickName(time);
+                                const pwd = StringUtil.pwdEncrypt(account, king);
+                                // 通过邮箱注册
+                                dao.registerByEmail(socket, user.email, account, pwd, nickname, king, (rows) => {
+                                    if (rows) {
+                                        log.info('邮箱注册成功' + user.email);
+                                        // 设置邀请码
+                                        self.setInviteCode(rows.Id);
+                                        callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows);
+                                    }else{
+                                        callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
+                                    }
+                                });
+                            }else{
+                                callback(code, msg, data);
+                            }
+                        })
+                    }
+                })
+            }
+        }
+
+
+
         //用户是否在线
         this.IsPlayerOnline = function (_userId) {
             if (!_userId) {	//传输ID错误
@@ -2627,7 +2705,7 @@ var GameInfo = function () {
                 const inviteCode = HashCodeUtil.generateInviteCode(userId);
                 dao.saveInviteCode(userId, inviteCode);
             } catch (e) {
-                log.err('设置邀请码' + e)
+                log.err(userId + '用户初始化邀请码错误' + e)
             }
         }
 

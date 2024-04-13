@@ -16,53 +16,8 @@ const pool = mysql.createPool({
 });
 
 
-exports.login = function login(user, socket, callback) {
-    const self = this;
-    if(user.token) {
-        // 通过缓存的token登录
-        const login_token_key  = 'login_token_key:';
-        RedisUtil.get(login_token_key + user.token).then(userId =>{
-            if(userId){
-                user.id = userId;
-                tokenLogin(user, socket, callback);
-            }else {
-                callback(ErrorCode.LOGIN_TOKEN_NOT_FOUND.code, ErrorCode.LOGIN_TOKEN_NOT_FOUND.msg);
-            }
-        });
-    }else if(user.userName && user.sign) {
-        // 用户密码登录
-        pwdLogin(user, socket, callback);
-    }else if(user.uid){
-        // google登录
-        log.info("google登录" + user.uid);
-        googleLogin(user, socket, (code, msg, data) => {
-            if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
-                // 生成账户密码
-                const time = StringUtil.generateTime();
-                const account = StringUtil.generateAccount('ABC', time);
-                const king = StringUtil.generateKing();
-                const nickname = StringUtil.generateNickName(time);
-                const pwd = StringUtil.pwdEncrypt(account, king);
-                // 账户不存在 进行注册
-                self.registerByGoogle(user, socket, account, pwd, nickname, king, (c, m, d) =>{
-                    if(c === ErrorCode.LOGIN_SUCCESS.code){
-                        // 设置邀请码
-                        self.setInviteCode(d.Id);
-                    }else{
-                        callback(c, m, d);
-                    }
-                });
-            }else{
-                callback(code, msg, data);
-            }
-        });
-    }else if(user.email && user.code){
-        // 邮箱登录
-        emailLogin(user, socket, callback);
-    }
-}
 
-function googleLogin(user, socket, callback){
+exports.googleLogin = function googleLogin(user, socket, callback){
     // google登录
     const sql = 'CALL LoginByGoogle(?,?,?)';
     let values = [];
@@ -98,7 +53,7 @@ function googleLogin(user, socket, callback){
         })
     });
 }
-function pwdLogin(user, socket, callback){
+exports.pwdLogin = function pwdLogin(user, socket, callback){
     const sql = 'CALL LoginByPassword(?,?)';
     pool.getConnection(function (err, connection) {
         if(err){
@@ -129,7 +84,7 @@ function pwdLogin(user, socket, callback){
 }
 
 // 邮箱登录
-function emailLogin(user, socket, callback){
+exports.emailLogin =  function emailLogin(user, socket, callback){
     // email登录
     const sql = 'CALL LoginByEmail(?)';
 
@@ -162,7 +117,7 @@ function emailLogin(user, socket, callback){
 }
 
 // token登录
-function tokenLogin(user, socket, callback){
+exports.tokenLogin = function tokenLogin(user, socket, callback){
     // email登录
     const sql = 'CALL LoginByToken(?)';
 
@@ -284,7 +239,7 @@ exports.registerByEmail = function registerByEmail(socket, email, account, pwd, 
 }
 
 // google注册
-exports.registerByGoogle = function registerByGoogle(user, socket, account, pwd, nickname,king, callback){
+exports.registerByGoogle = function registerByGoogle(user, account, pwd, nickname,king, callback){
     if(user.displayName &&  user.displayName.length < 50){
         nickname = user.displayName;
     }
@@ -310,12 +265,10 @@ exports.registerByGoogle = function registerByGoogle(user, socket, account, pwd,
                 log.err('google注册' + err);
                 callback(0);
             } else {
-                if (rows[0].length === 0) {
-                    callback(ErrorCode.LOGIN_ERROR.code, ErrorCode.LOGIN_ERROR.code);
-                } else {
-                    rows[0][0].socket = socket;
-                    rows[0][0].gameId = user.gameId;
-                    callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows[0][0]);
+                if(rows && rows.length > 0){
+                    callback(rows[0][0]);
+                }else{
+                    callback(0);
                 }
             }
             values = [];

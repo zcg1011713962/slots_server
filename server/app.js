@@ -17,6 +17,7 @@ const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const TypeEnum = require("../util/enum/type");
 // 触发定时任务
 const ScheduleJob = require("./class/schedule_job");
+const RedisUtil = require("../util/redis_util");
 
 
 //版本密钥和版本号
@@ -321,49 +322,39 @@ io.on('connection', function (socket) {
                 user.sign = user.password;
                 log.info("账户密码登录" + JSON.stringify(data));
             }
-            // 邮箱登录
-            if(user.email && user.code){
-                log.info("邮箱登录" + JSON.stringify(data));
-                gameInfo.verifyEmailCode(user.email, user.code, (code, msg) =>{
-                    if(code !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
-                        socket.emit('loginResult', {code: code, msg: msg});
-                    }else{
-                        findUser(user, socket);
+
+            gameInfo.loginSwitch(user, socket, (code, msg, data)=> {
+                if(ErrorCode.LOGIN_SUCCESS.code === code){
+                    if (!data) {
+                        socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
+                        return;
                     }
-                });
-            }else{
-                findUser(user, socket);
-            }
+                    if (gameInfo.IsPlayerOnline(data.Id)) {
+                        // 返回大厅的用户  不允许在游戏里，断开游戏
+                        gameInfo.existGameDel(data.Id);
+                    }
+                    // 登录成功
+                    gameInfo.addUser(data, socket, function (result) {
+
+                    });
+                }else{
+                    log.warn('登陆失败' + msg);
+                    socket.emit('loginResult', {code: code, msg: msg});
+                }
+            });
+
+
+
         } catch (e) {
             socket.emit("loginResult", {code: ErrorCode.LOGIN_ERROR.code, msg: ErrorCode.LOGIN_ERROR.msg});
             log.err('登录异常', e);
         }
     })
+
     
-    function findUser(user, socket) {
-        // 数据库查询用户信息
-        dao.login(user, socket, (code, msg, data)=> {
-            if(ErrorCode.LOGIN_SUCCESS.code === code){
-                if (!data) {
-                    socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
-                    return;
-                }
-                if (gameInfo.IsPlayerOnline(data.Id)) {
-                    // 返回大厅的用户  不允许在游戏里，断开游戏
-                    gameInfo.existGameDel(data.Id);
-                }
-                // 登录成功
-                gameInfo.addUser(data, socket, function (result) {
-                   /* if (result === 1) {   //断线从连
-                        gameInfo.lineOutSet({userId: user.id})
-                    }*/
-                });
-            }else{
-                log.warn('登陆失败' + msg);
-                socket.emit('loginResult', {code: code, msg: msg});
-            }
-        });
-    }
+
+
+
     
 
     socket.on('LoginGame', function (userInfo) {
