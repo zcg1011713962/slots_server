@@ -77,7 +77,7 @@ var GameInfo = function () {
                 var second = nowDate.getSeconds();
                 if (second === 25) {
                     self.saveGamblingBalanceGold();
-                    console.log("保存库存和奖池");
+                    log.info("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
                         server_id: gameConfig.serverId,
                         online_num: self.getOnlinePlayerCount()

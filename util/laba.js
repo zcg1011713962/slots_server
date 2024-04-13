@@ -525,9 +525,11 @@ module.exports.HandCardsAnalyse_Single = function(nHandCards, cards ,nGameLines,
 
     let wilds = [];
     // 上次定住百变的位置
+    log.info('上次定住百变的位置' + array)
     if(array.length > 0 && array.includes(true)){
         const wildCount = array.filter(item => item === true).length;
         if(wildCount === array.length){
+            log.info('三个百变重新计算')
             // 三个百变重新计算
             gameInfo.userList[config.userId].setWildList([false, false, false]);
         }else{

@@ -319,9 +319,11 @@ io.on('connection', function (socket) {
             if(user.userName && user.password){
                 user.password = StringUtil.pwdEncrypt(user.userName, user.password);
                 user.sign = user.password;
+                log.info("账户密码登录" + JSON.stringify(data));
             }
             // 邮箱登录
             if(user.email && user.code){
+                log.info("邮箱登录" + JSON.stringify(data));
                 gameInfo.verifyEmailCode(user.email, user.code, (code, msg) =>{
                     if(code !== ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code){
                         socket.emit('loginResult', {code: code, msg: msg});
@@ -352,9 +354,9 @@ io.on('connection', function (socket) {
                 }
                 // 登录成功
                 gameInfo.addUser(data, socket, function (result) {
-                    if (result === 1) {   //断线从连
+                   /* if (result === 1) {   //断线从连
                         gameInfo.lineOutSet({userId: user.id})
-                    }
+                    }*/
                 });
             }else{
                 log.warn('登陆失败' + msg);
@@ -439,15 +441,16 @@ io.on('connection', function (socket) {
         if(!toEmail){
             return;
         }
-        const userId = socket.userId;
-        log.info('发送邮箱验证码' + userId)
+        log.info('发送邮箱验证码' + toEmail)
         try {
-            const ret = await CacheUtil.recordUserProtocol(userId, "sendEmailCode");
+            const ret = await CacheUtil.recordUserProtocol(toEmail, "sendEmailCode");
             if(ret){
                 gameInfo.sendEmailCode(socket, toEmail, (code, msg) =>{
-                    CacheUtil.delUserProtocol(userId, "sendEmailCode")
+                    CacheUtil.delUserProtocol(toEmail, "sendEmailCode")
                     socket.emit('sendEmailCodeResult', {code: code, msg: msg});
                 });
+            }else{
+                log.info('发送邮箱验证码操作频繁:' + toEmail)
             }
         } catch (e) {
             log.err('sendEmailCode' +  e);
@@ -896,6 +899,7 @@ io.on('connection', function (socket) {
     // 查询签到详情页
     socket.on("getSignInDetail", function () {
         const userId = socket.userId;
+        log.info(userId + '查询签到详情页')
         if (gameInfo.IsPlayerOnline(userId)) {
             gameInfo.searchUserSignInDetail(socket, (code, msg, data) =>{
                 if(code){
@@ -1315,8 +1319,11 @@ io.on('connection', function (socket) {
                         socket.emit('newHandGiveResult', {code:1, data:{type:[TypeEnum.GoodsType.gold], val: [0]}});
                     }
                 });
+            }else{
+                log.info('新手领送金币,频繁操作' +  userId)
             }
         }else{
+            log.info('新手领送金币,用户不在线' +  userId)
             socket.emit('newHandGiveResult', {code:0, msg:"用户不在线"});
         }
     });

@@ -17,6 +17,7 @@ const pool = mysql.createPool({
 
 
 exports.login = function login(user, socket, callback) {
+    const self = this;
     if(user.token) {
         // 通过缓存的token登录
         const login_token_key  = 'login_token_key:';
@@ -33,6 +34,7 @@ exports.login = function login(user, socket, callback) {
         pwdLogin(user, socket, callback);
     }else if(user.uid){
         // google登录
+        log.info("google登录" + user.uid);
         googleLogin(user, socket, (code, msg, data) => {
             if(code === ErrorCode.LOGIN_ACCOUNT_NOT_FOUND.code){
                 // 生成账户密码
@@ -42,10 +44,10 @@ exports.login = function login(user, socket, callback) {
                 const nickname = StringUtil.generateNickName(time);
                 const pwd = StringUtil.pwdEncrypt(account, king);
                 // 账户不存在 进行注册
-                this.registerByGoogle(user, socket, account, pwd, nickname, king, (c, m, d) =>{
+                self.registerByGoogle(user, socket, account, pwd, nickname, king, (c, m, d) =>{
                     if(c === ErrorCode.LOGIN_SUCCESS.code){
                         // 设置邀请码
-                        this.setInviteCode(d.Id);
+                        self.setInviteCode(d.Id);
                     }else{
                         callback(c, m, d);
                     }
@@ -1106,9 +1108,9 @@ exports.getVipLevel = function getVipLevel(userId, callback) {
 
 //查询累计充值
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
-    const sql = 'select totalRecharge,housecard,score_flow from newuseraccounts where Id=?';
+    const sql = 'select totalRecharge,submittedRecharge subRecharge,housecard,score_flow from newuseraccounts where Id=?';
     let values = [];
-
+    log.info('查询累计充值')
     values.push(userId);
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1119,14 +1121,45 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                console.log("checkTotalCharge");
-                console.log(err);
+                log.err("查询累计充值" + err);
                 callback(0);
             } else {
-                if (rows.length == 0) {
+                if (rows.length === 0) {
                     callback(0);
+                    log.info('查询累计充值为空')
                 } else {
+                    log.info('查询累计充值' + rows[0].subRecharge)
                     callback(1, rows[0]);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+//已经提现金额记录
+exports.submittedRecharge = function submittedRecharge(userId, submittedRecharge, callback) {
+    const sql = 'update newuseraccounts set submittedRecharge = submittedRecharge + ? where Id=?';
+    let values = [];
+    values.push(submittedRecharge);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("submittedRecharge" + err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
                 }
             }
         });
@@ -2829,6 +2862,38 @@ exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, accou
 
 // 通过订单查询提现申请记录
 exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(userId, orderId, callback) {
+    const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus,lockBankScore FROM withdraw_record WHERE userId = ? and orderId = ?";
+
+    let values = [];
+    values.push(userId);
+    values.push(orderId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('通过订单查询提现申请记录' + err);
+                callback(0)
+                return;
+            }
+            if(rows && rows.length > 0){
+                callback(1, rows[0])
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+};
+
+
+
+// 通过订单查询提现申请记录
+exports.searchTotalWithdraw = function searchTotalWithdraw(userId, orderId, callback) {
     const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus,lockBankScore FROM withdraw_record WHERE userId = ? and orderId = ?";
 
     let values = [];

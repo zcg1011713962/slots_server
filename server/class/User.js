@@ -3,7 +3,7 @@ User = function(_userInfo,_socket){
 	this._userId = "";			//数据库ID
 	this._socket = "";			//socketID
 	this._account = "";			//用户帐号
-
+	this.vip_level = 0;
 	this._diamond = 0;			//钻石
 	this.is_vip = 0;			//vip
 	this.vip_score = 0;			//vip积分

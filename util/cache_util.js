@@ -495,7 +495,12 @@ exports.getPlayGameBetRecord  = function (userId){
 
 // 获取玩家赢金币数值
 exports.getPlayGameWinscore  = function getPlayGameWinscore(userId){
-    return RedisUtil.hget(userPlayGameWinScore, userId);
+    return RedisUtil.hget(userPlayGameWinScore, userId).then(winscore =>{
+        if(winscore){
+            return winscore;
+        }
+        return 0;
+    });
 }
 
 // 记录玩家赢分差
@@ -838,7 +843,7 @@ exports.feeCost = function(userId, nBetSum, type, callback){
                     if(ret){
                         callback(1, freeCount, goldCoin)
                     }else{
-                        callback(0)
+                        callback(0, 0, 0)
                     }
                 });
             }else{
@@ -848,11 +853,11 @@ exports.feeCost = function(userId, nBetSum, type, callback){
                         if(ret){
                             callback(1, freeCount, goldCoin)
                         }else{
-                            callback(0)
+                            callback(0, 0, 0)
                         }
                     });
                 }else{
-                    callback(0)
+                    callback(0, 0, 0)
                 }
             }
         })
@@ -906,7 +911,7 @@ exports.getNewHandGuideFlowKey = function(userId, firstRecharge, callback){
                 if(newHandGuideFlowItem[index].lastPopDate === StringUtil.currDateTime() || newHandGuideFlowItem[index].lastPopDate === StringUtil.currDateTime() + 24 * 60 * 60 * 1000){
                     // 置为明天的日期
                     newHandGuideFlowItem[index].lastPopDate = StringUtil.currDateTime() + 24 * 60 * 60 * 1000;
-                    delete temp[index];
+                    temp.splice(0,1);
                 }
             }
             RedisUtil.hmset(newHandGuideFlowKey, userId, JSON.stringify(newHandGuideFlowItem))

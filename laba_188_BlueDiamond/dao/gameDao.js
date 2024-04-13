@@ -259,8 +259,6 @@ exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGambli
 
     pool.getConnection(function (err, connection) {
         const values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
-        console.log("库存 id");
-        console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {
                 console.log(err);

@@ -112,6 +112,7 @@ async function winPopFirstRecharge(config, result, gameInfo) {
                     // 只弹一次
                     dao.updateWinScorePopFirstRecharge(config.userId, ret =>{
                         if(ret){
+                            log.info(config.userId + '当前赢分差达到'+ protectScore +'弹首充')
                             CommonEven.pushFirstRecharge(gameInfo.userList[config.userId]._socket)
                         }
                     })
@@ -337,6 +338,9 @@ function Lottery(config, gameInfo, callback) {
         let dictAnalyseResult = {};
         let openBoxCardWin = 0;
         let winFlag = false;
+        let flag = false;
+
+        let lottyCount = 0;
 
         // 生成图案，分析结果（结果不满意继续）
         while (true) {
@@ -406,7 +410,10 @@ function Lottery(config, gameInfo, callback) {
             // 非新手- (历史赢分差 + 本局赢分 > 当前用户金币池上限控制) 且 本局为赢的状态
             const currTotalWinScore = StringUtil.addNumbers(config.historyWinScore , fin_value);
             if (config.currUserGoldPool > - 1 && currTotalWinScore > config.currUserGoldPool && winFlag) {
-                log.info(config.userId +'当前赢分差:' + currTotalWinScore + '当前用户最大金币池:' + 'nBetSum:' + config.nBetSum);
+                if(++lottyCount > 50 || fin_value <= config.nBetSum){
+                    break;
+                }
+                log.info(config.userId +'当前赢分差:' + currTotalWinScore + '当前用户最大金币池:' + config.currUserGoldPool  + 'nBetSum:' + config.nBetSum);
                 continue;
             }
 
@@ -415,13 +422,19 @@ function Lottery(config, gameInfo, callback) {
             const backBetRatio = config.totalBet ? (config.totalBackBet / config.totalBet) : 0;
             currRtp = StringUtil.toFixed(backBetRatio, 2);
             // 当前RTP大于目标RTP 而且 摇的结果是赢的
-            if (currRtp > expectRTP && winFlag) {
+            if (currRtp > expectRTP && winFlag && dictAnalyseResult["getFreeTime"]["nFreeTime"] === 0) {
+                if(++lottyCount > 50 || fin_value <= config.nBetSum){
+                    break;
+                }
                 log.info('RTP控制 需要让用户输 currRtp:' + currRtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
                 continue;
             }
 
             // 新手 当前RTP小于目标RTP 而且 摇的结果是输的
             if (config.currUserGoldPool === -1 && currRtp < expectRTP && !winFlag) {
+                if(++lottyCount > 50 || fin_value <= config.nBetSum){
+                    break;
+                }
                  log.info('RTP控制 需要让用户赢 currRtp:' + currRtp + 'expectRTP:' + expectRTP + 'fin_value:' + fin_value)
                  continue;
             }

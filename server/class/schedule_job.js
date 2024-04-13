@@ -7,6 +7,7 @@ const dayJob = schedule.scheduleJob('0 0 * * *', async () => {
     try {
         log.info('开始清理VIP每日领取状态');
         CacheUtil.clearVIPDailyGetKey();
+
         log.info('开始清理每日领取幸运币上限');
         CacheUtil.clearLuckyCoinLimit();
 

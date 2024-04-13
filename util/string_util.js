@@ -193,10 +193,19 @@ exports.divNumbers  = function divNumbers(a, b, decimalPlaces) {
 
 exports.toFixed  = function toFixed(num, decimalPlaces) {
     const parsedNum = typeof num === 'string' ? parseFloat(num) : num;
-    // 将数字转换为字符串并保留指定位数的小数
-    const fixedNumber = parsedNum.toFixed(decimalPlaces);
-    // 将字符串转换回数字
-    return parseFloat(fixedNumber);
+    // 将数字转换为字符串
+    const numString = parsedNum.toString();
+    // 找到小数点的位置
+    const decimalIndex = numString.indexOf('.');
+    if (decimalIndex === -1) {
+        // 如果没有小数点，则直接返回原始数字
+        return parsedNum;
+    } else {
+        // 截取小数点后指定位数的字符串
+        const truncatedString = numString.substring(0, decimalIndex + decimalPlaces + 1);
+        // 将截取后的字符串转换回数字
+        return parseFloat(truncatedString);
+    }
 }
 
 
