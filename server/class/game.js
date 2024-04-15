@@ -22,6 +22,7 @@ const HashCodeUtil = require("../../util/hashcode_util");
 const PayAPI = require('../class/pay_api');
 const CommonEvent = require('../../util/event_util');
 const EnumType = require("../../util/enum/type");
+const {ShopType, GoodsType} = require("../../util/enum/type");
 
 var GameInfo = function () {
     var _gameinfo = "";
@@ -624,7 +625,7 @@ var GameInfo = function () {
                         if (orderResult && orderResult.code === 200) {
                             self.getVipLevel(userId, vipLevel => {
                                 // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.PayChannelType.pix,ret => {
                                     if (ret) {
                                         orderResult.data.switch = nSwitch;
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
@@ -651,7 +652,7 @@ var GameInfo = function () {
                         if (orderResult && orderResult.code === 200) {
                             self.getVipLevel(userId, vipLevel => {
                                 // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix,ret => {
                                     if (ret) {
                                         orderResult.data.switch = nSwitch;
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
@@ -680,7 +681,7 @@ var GameInfo = function () {
             // 下购买订单
             self.getVipLevel(userId, vipLevel => {
                 // 记录订单详情
-                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, ret => {
                     log.info(userId + '测试购买订单记录' + orderId)
                     if (ret) {
                         const orderResult = {
@@ -698,7 +699,7 @@ var GameInfo = function () {
                                     "qrcode": "",
                                     "url": ""
                                 },
-                                "switch": 1
+                                "switch": nSwitch ? 1 : 0
                             }
                         }
                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
@@ -3274,6 +3275,41 @@ var GameInfo = function () {
             })
         }
 
+        // 查询订单记录
+        this.orderRecord = function (socket) {
+            // 支付成功的订单
+            dao.searchAllOrder(socket.userId, TypeEnum.PayStatus.success, (rows) =>{
+
+                if(rows){
+                    rows = rows.map(row =>{
+                        let goodsType = '';
+                        if(row.group === TypeEnum.ShopGroupType.rechargeGift){
+                            goodsType = '首充'
+                        }else if(row.goodsType === TypeEnum.GoodsType.gold){
+                            goodsType = '金币'
+                        }else if(row.goodsType === TypeEnum.GoodsType.prop){
+                            goodsType = '道具'
+                        }else if(row.goodsType === TypeEnum.GoodsType.monthCard){
+                            goodsType = '月卡'
+                        }else if(row.goodsType === TypeEnum.GoodsType.turntableTicket){
+                            goodsType = '免费转盘门票'
+                        }
+                        return {
+                            userId: row.userId,
+                            orderId: row.orderId,
+                            amount: row.amount,
+                            currencyType: row.currencyType,
+                            goodsType: goodsType,
+                            orderTime: row.createTime
+                        }
+                    })
+                    socket.emit('orderRecordResult', {code: 1, data: rows})
+                }else{
+                    socket.emit('orderRecordResult', {code: 1, data: []})
+                }
+            })
+        }
+
         // 新用户获取金币
         this.getNewhandProtectGlod = function (userId, callback) {
             const self = this;
@@ -3411,6 +3447,7 @@ var GameInfo = function () {
                                 nickName: _nickname
                             }
                         }]
+                        log.info(userId + 'VIP升级跑马灯通知')
                         // 发送VIP升级通知
                         this.sendAllNotifyMsg(noticeMsg);
                         // VIP升级奖励
@@ -3452,20 +3489,21 @@ var GameInfo = function () {
                     oldVipLevel: housecard
                 }
                 CacheUtil.addGoldCoin(userId, Number(upgradeGiveGlod), TypeEnum.ScoreChangeType.upgradeGiveGlod, (ret, currGoldCoin) => {
-                });
-                if (this.userList[userId]) {
-                    this.userList[userId]._socket.emit('vipUpgrade', {code: 1, data: data});
-                } else {
-                    // 游戏内推
-                    const gameScoket = ServerInfo.getScoket(serverId);
-                    if (gameScoket) {
-                        gameScoket.emit('gameForward', {
-                            userId: userId,
-                            protocol: 'vipUpgrade',
-                            data: {code: 1, data: data}
-                        })
+                    log.info(userId + 'VIP升级弹窗,升级前VIP等级:' + housecard + '当前VIP等级:' + vipLevel + '升级奖励金币:' + upgradeGiveGlod)
+                    if (this.userList[userId]) {
+                        this.userList[userId]._socket.emit('vipUpgrade', {code: 1, data: data});
+                    } else {
+                        // 游戏内推
+                        const gameScoket = ServerInfo.getScoket(serverId);
+                        if (gameScoket) {
+                            gameScoket.emit('gameForward', {
+                                userId: userId,
+                                protocol: 'vipUpgrade',
+                                data: {code: 1, data: data}
+                            })
+                        }
                     }
-                }
+                });
             })
         }
 

@@ -267,7 +267,33 @@ exports.searchInvite= function searchInvite(invite_uid, callback){
     });
 }
 
+// 查询当日是否有新增邀请成员
+exports.searchCurrDateInvite = function (userId, callback){
+    const sql = 'select created_at from account_invites  where invite_uid = ?';
+    const values = []
+    values.push(userId);
 
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询当日邀请'+ err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
+}
 
 
 // 代理返点记录

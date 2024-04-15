@@ -921,8 +921,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel ,callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -941,6 +941,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(buyContinueRewardGold);
     values.push(buyContinueRewardDiamond);
     values.push(buyContinueDays);
+    values.push(payChannel);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -967,7 +968,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 };
 
 
-// 查询订单
+// 查询未支付的指定订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
     const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status = 0 and orderId = ? and userId = ?';
     let values = [];
@@ -998,6 +999,39 @@ exports.searchOrder = function searchOrder(userId, orderId, callback) {
     });
 };
 
+
+
+// 查询所有订单
+exports.searchAllOrder = function (userId, payStatus, callback) {
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, create_time createTime FROM pay_order where status = ? and userId = ?';
+    let values = [];
+    values.push(parseInt(payStatus));
+    values.push(userId);
+
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询订单");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
 
 
 // 更新订单

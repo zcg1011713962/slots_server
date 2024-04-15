@@ -9,9 +9,13 @@ const GoodsType = {
     diamond: 1, // 钻石
     prop: 2,    // 道具
     monthCard: 3, // 月卡
-    turntableTicket: 4, // 免费转盘门票
+    turntableTicket: 4 // 免费转盘门票
 };
 
+
+const CurrencyTypeIndex = {
+    0: 'BRL' // R$雷亚尔
+};
 
 const CurrencyType = {
     Brazil_BRL: 'BRL' // R$雷亚尔
@@ -32,7 +36,10 @@ const ShopGroupType = {
 };
 
 const UndoEvenType ={
-    email: 0 // 邮件未读取
+    email: 0, // 邮件未读取
+    vipGet: 1, // VIP每日奖励领取
+    bindPromote: 2, // 推广
+    currSignIn: 3 // 签到
 }
 
 
@@ -71,6 +78,17 @@ const GameType = {
     laba_sequence: 1, // 数列型拉霸
     laba_single: 2 // 特殊单线拉霸
 };
+
+
+const PayChannelType ={
+    pix: 'pix' // pix
+}
+
+
+const PayStatus ={
+    failed: 0,
+    success: 1
+}
 
 
 
@@ -141,5 +159,8 @@ module.exports = {
     ShopType,
     NewHandGuideFlow,
     DiamondChangeType,
-    UndoEvenType
+    UndoEvenType,
+    PayChannelType,
+    PayStatus,
+    CurrencyTypeIndex
 };

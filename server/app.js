@@ -15,9 +15,7 @@ const ErrorCode = require('../util/ErrorCode');
 const CacheUtil = require('../util/cache_util');
 const redis_laba_win_pool = require("../util/redis_laba_win_pool");
 const TypeEnum = require("../util/enum/type");
-// 触发定时任务
 const ScheduleJob = require("./class/schedule_job");
-const RedisUtil = require("../util/redis_util");
 
 
 //版本密钥和版本号
@@ -1278,23 +1276,7 @@ io.on('connection', function (socket) {
         }
     });
 
-   /* // 保存新手指引步数
-    socket.on("saveGuideStep", async function (data) {
-        const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-        if(!d || d.step === '' || !d.step) return;
-        const userId = socket.userId;
-        if (gameInfo.IsPlayerOnline(userId)) {
-            const ret = await CacheUtil.recordUserProtocol(userId, 'saveGuideStep')
-            if(ret){
-                gameInfo.saveGuideStep(socket, d.step, (code, msg) =>{
-                    CacheUtil.delUserProtocol(userId, 'saveGuideStep')
-                    socket.emit('saveGuideStepResult', {code:code, msg: msg});
-                });
-            }
-        }else{
-            socket.emit('saveGuideStepResult', {code:0, msg:"用户不在线"});
-        }
-    });*/
+
 
 
     // 新手领送金币
@@ -1326,6 +1308,14 @@ io.on('connection', function (socket) {
     socket.on("activityPage", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.getActivityConfigPage(socket);
+        }
+    });
+
+
+    // 查询订单记录
+    socket.on("orderRecord", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.orderRecord(socket);
         }
     });
 
@@ -1596,27 +1586,17 @@ io.on('connection', function (socket) {
 
 
 app.set('port', process.env.PORT || 13000);
-
 const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
 });
 
-
-const period = 2000;
-setInterval(function () {
-    // 幸运币活动刷新
-    gameInfo.refreshLuckCoinActivity();
-    // 批量更新用户信息
-    gameInfo.batchUpdateAccount();
-    // 保存log
-    gameInfo.score_changeLog();
-    gameInfo.diamond_changeLog();
-}, period);
+// 触发定时任务
+ScheduleJob.initDayJob(gameInfo.getOnlinePlayer());
+ScheduleJob.initMonthJob();
+ScheduleJob.interval(gameInfo);
 
 dao.clenaLineOut();
 
-
-
-log.info("登录服务器 v2.0.0");
+log.info("登录服务器 v1.0.0");
 log.info("服务器启动成功!");
-log.info("更新时间:2017.12.17");
+log.info("更新时间:2024.04.01");
