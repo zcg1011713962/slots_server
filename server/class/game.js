@@ -1286,6 +1286,7 @@ var GameInfo = function () {
                                 log.info('google注册成功' + user.uid);
                                 // 设置邀请码
                                 self.setInviteCode(rows.Id);
+                                rows.register = 1; // 注册标识
                                 callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows);
                             }else{
                                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
@@ -1314,6 +1315,7 @@ var GameInfo = function () {
                                         log.info('邮箱注册成功' + user.email);
                                         // 设置邀请码
                                         self.setInviteCode(rows.Id);
+                                        rows.register = 1; // 注册标识
                                         callback(ErrorCode.LOGIN_SUCCESS.code, ErrorCode.LOGIN_SUCCESS.msg, rows);
                                     }else{
                                         callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
