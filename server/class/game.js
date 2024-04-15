@@ -477,7 +477,7 @@ var GameInfo = function () {
         }
 
         //商城购买
-        this.Shopping = function (userId, productId, count, service, shopType, serverId, callback) {
+        this.Shopping = function (userId, productId, count, service, shopType, serverId, goods, callback) {
             CacheUtil.buyCallBackSwitch().then(nSwitch =>{
                 CacheUtil.paySwitch().then(paySwitch =>{
                     CacheUtil.getServerUrlConfig().then(config => {
@@ -487,13 +487,13 @@ var GameInfo = function () {
                             const orderId = StringUtil.generateOrderId();
 
                             if (TypeEnum.ShopType.store === shopType) {
-                                this.storeBuy(orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, callback)
+                                this.storeBuy(orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback)
                             } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                                this.turntableBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                                this.turntableBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback);
                             } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                                this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                                this.discountLimitedBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback);
                             } else if (TypeEnum.ShopType.firstRecharge === shopType) {
-                                this.firstRechargeBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback);
+                                this.firstRechargeBuy(orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback);
                             } else {
                                 log.info(userId + '下单失败,购买商品类型不存在' + shopType)
                                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
@@ -508,7 +508,7 @@ var GameInfo = function () {
             })
         };
 
-        this.firstRechargeBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
+        this.firstRechargeBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback) {
             const self = this;
             // 查询购买的金币道具的数量和价值
             CacheUtil.getShopConfig().then(shopConfig => {
@@ -544,7 +544,7 @@ var GameInfo = function () {
                     log.info(userId + '购买首充商品原价:' + price + '折扣价:' + amount + '持续奖励金币:' + buyContinueRewardGold + '持续奖励钻石:' + buyContinueRewardDiamond + '持续天数:' + buyContinueDays)
 
                     if(paySwitch){
-                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, goods)
                     }else{
                         self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
                     }
@@ -552,7 +552,7 @@ var GameInfo = function () {
             })
         }
 
-        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
+        this.discountLimitedBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback) {
             const self = this;
 
             CacheUtil.getUserDiscountLimited(userId).then(ok => {
@@ -577,7 +577,7 @@ var GameInfo = function () {
                     const goodsVal = parseFloat(shopItem['Discount_BONUS']);
 
                     if(paySwitch){
-                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
                     }else{
                         self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0)
                     }
@@ -586,7 +586,7 @@ var GameInfo = function () {
 
         }
 
-        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
+        this.turntableBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods,  callback) {
             const self = this;
             // 获取幸运币配置
             CacheUtil.getLuckyCoinConfig().then(luckyCoinConfig => {
@@ -605,41 +605,72 @@ var GameInfo = function () {
                 log.info(userId + '购买免费转盘门票' + 'amount:' + amount + 'currencyType:' + currencyType + 'mul:' + mul)
 
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId, TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    self.placeOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId, TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
                 }else{
                     self.TestPlaceOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId ,TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0)
                 }
             });
         }
 
-        this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) {
+        this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, goods) {
+            const self = this;
             const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-            // 下购买订单
-            PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                try {
-                    log.info(userId + '下购买订单' + res)
-                    const orderResult = JSON.parse(res);
-                    if (orderResult && orderResult.code === 200) {
-                        self.getVipLevel(userId, vipLevel => {
-                            // 记录订单详情
-                            dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
-                                if (ret) {
-                                    orderResult.data.switch = nSwitch;
-                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                } else {
-                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                }
+            if(goods){
+                // 下购买订单
+                PayAPI.fastBuyOrder(userId, productId, orderId, amount, currencyType, goods, callbackUrl).then(res => {
+                    try {
+                        log.info(userId + '下购买订单' + res)
+                        const orderResult = JSON.parse(res);
+                        if (orderResult && orderResult.code === 200) {
+                            self.getVipLevel(userId, vipLevel => {
+                                // 记录订单详情
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                                    if (ret) {
+                                        orderResult.data.switch = nSwitch;
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                    } else {
+                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                    }
+                                })
                             })
-                        })
-                    } else {
-                        log.err(userId + '购买商品下购买订单失败')
+                        } else {
+                            log.err(userId + '购买商品下购买订单失败')
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        }
+                    } catch (e) {
+                        log.err(userId + '购买商品下购买订单异常' + e)
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                     }
-                } catch (e) {
-                    log.err(userId + '购买商品下购买订单异常' + e)
-                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                }
-            })
+                })
+            }else{
+                // 下购买订单
+                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
+                    try {
+                        log.info(userId + '下购买订单' + res)
+                        const orderResult = JSON.parse(res);
+                        if (orderResult && orderResult.code === 200) {
+                            self.getVipLevel(userId, vipLevel => {
+                                // 记录订单详情
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                                    if (ret) {
+                                        orderResult.data.switch = nSwitch;
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                    } else {
+                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                    }
+                                })
+                            })
+                        } else {
+                            log.err(userId + '购买商品下购买订单失败')
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        }
+                    } catch (e) {
+                        log.err(userId + '购买商品下购买订单异常' + e)
+                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                    }
+                })
+            }
+
         }
 
 
@@ -680,7 +711,7 @@ var GameInfo = function () {
 
 
 
-        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, callback) {
+        this.storeBuy = function (orderId, userId, productId, count, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback) {
             const self = this;
             // 查询购买的金币道具的数量和价值
             CacheUtil.getShopConfig().then(shopConfig => {
@@ -702,9 +733,9 @@ var GameInfo = function () {
                 const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
 
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
                 }else{
-                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
                 }
             })
         }
@@ -1421,16 +1452,16 @@ var GameInfo = function () {
         // 签到奖励
         this.signReward = function (userId, consecutiveDays) {
             CacheUtil.getSignInConfig().then(config => {
-                const signInConfig = config.find(item => item.id = consecutiveDays);
+                const signInConfig = config.find(item => item.id === consecutiveDays);
                 const level = this.userList[userId].vip_level;
                 CacheUtil.getVipConfig().then(vipConfig => {
                     const currVipConfig = vipConfig.find(item => item.level === level);
                     for (let i = 0; i < signInConfig.award.length; i++) {
                         if (signInConfig.award[i].type === TypeEnum.GoodsType.gold) {
-                            const addScore = StringUtil.rideNumbers(signInConfig.award[consecutiveDays -1].val, currVipConfig.dailySignScoreAddRate / 100, 2);
+                            const addScore = StringUtil.rideNumbers(signInConfig.award[i].val, currVipConfig.dailySignScoreAddRate / 100, 2);
                             // 发放金币
                             CacheUtil.addGoldCoin(userId, addScore, TypeEnum.ScoreChangeType.daySign, (ret, currGoldCoin) => {
-                                log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取金币' + signInConfig.award[consecutiveDays -1].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
+                                log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取金币' + signInConfig.award[i].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
                             });
                         } else if (signInConfig.award[i].type === 1) {
                             // 发放钻石
@@ -2607,9 +2638,11 @@ var GameInfo = function () {
                                     this.changleOfficial(socket.userId);
                                     const result = {
                                         goodsType: [TypeEnum.GoodsType.diamond],
-                                        sourceVal: [30]
+                                        sourceVal: [35]
                                     }
-                                    callback(ErrorCode.SUCCESS.code, result)
+                                    CacheUtil.addDiamond(socket.userId, 35, TypeEnum.DiamondChangeType.changleOfficial, ret =>{
+                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result)
+                                    })
                                 } else {
                                     callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                 }

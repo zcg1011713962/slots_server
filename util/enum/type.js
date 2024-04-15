@@ -98,7 +98,8 @@ const ScoreChangeType = {
 const DiamondChangeType = {
     storeBuy: 0, // 商城购买
     firstRechargeBuy: 1, //首充礼包购买
-    firstRechargeContinueReward: 2 // 首充持续奖励
+    firstRechargeContinueReward: 2, // 首充持续奖励
+    changleOfficial: 3 // 首充持续奖励
 }
 
 const NewHandFlag = {

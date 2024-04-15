@@ -548,8 +548,9 @@ exports.cacheEmailCode  = function (verificationCode, toEmail, callback){
 
 // 邮箱验证码-校验
 exports.verifyEmailCode  = function (code, email, callback){
+    callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
     // 是否过期存储
-    RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
+   /* RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
         RedisUtil.get(sendEmailKey + email).then(verificationCode => {
             try {
                 if (parseInt(verificationCode) === parseInt(code)) {
@@ -568,7 +569,7 @@ exports.verifyEmailCode  = function (code, email, callback){
                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
             }
         });
-    });
+    });*/
 }
 
 

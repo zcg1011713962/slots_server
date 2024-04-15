@@ -290,7 +290,7 @@ CREATE TABLE `t_scene` (
   `online` int(11) NOT NULL DEFAULT '0' COMMENT '在线人数',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -464,4 +464,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-02-28 17:43:40
+-- Dump completed on 2024-04-15 11:05:28

@@ -183,16 +183,18 @@ app.get('/Shopping', async function (req, res) {
     const service = req.query.service ? req.query.service : 0;
     const shopType = req.query.shopType ? req.query.shopType : 0;
     const serverId = req.query.serverId ? req.query.serverId : 0; // 大厅0 游戏serverId
-    log.info(userId + '购买商品' + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId)
+    const goods = req.query.goods ? req.query.goods : '';
+    log.info(userId + '购买商品' + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId + 'goods' + goods)
 
     if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined || isNaN(serverId)) {
+        log.info( userId + '购买参数错误')
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return
     }
 
     const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
-        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, (code, msg, data) => {
+        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, goods, (code, msg, data) => {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 log.info(userId + '购买商品下单成功');
