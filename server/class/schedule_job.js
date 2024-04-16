@@ -32,9 +32,13 @@ exports.initDayJob = function (userList){
                         log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.currSignIn)
                         userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.currSignIn}});
                     }
-                    if(ret.unReadEmail === 0){
+                    if(ret.unReadEmail === 1){
                         log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.email)
                         userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.email}});
+                    }
+                    if(ret.currDateInvite === 1){
+                        log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.bindPromote)
+                        userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.bindPromote}});
                     }
                 })
             }

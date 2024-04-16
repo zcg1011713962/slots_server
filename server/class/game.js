@@ -357,62 +357,65 @@ var GameInfo = function () {
                 if (!user) {
                     return null;
                 }
-                dao.searchUnReadEmail(userId, unReadEmailCode => {
-                    // 查询当前用户签到第几天了
-                    dao.searchUserSignIn(userId, (rows) => {
-                        let currSignInFlag = 0;
-                        if (rows && rows.length > 0) {
-                            // 获取当前日期时间戳
-                            const lastSignInDate = rows[0].last_sign_in_date;
-                            if (StringUtil.currDateTime() === lastSignInDate) {
-                                // 当日已签到
-                                currSignInFlag = 1;
+                ymDao.searchCurrDateInvite(userId, (currDateInvite) =>{
+                    dao.searchUnReadEmail(userId, unReadEmailCode => {
+                        // 查询当前用户签到第几天了
+                        dao.searchUserSignIn(userId, (rows) => {
+                            let currSignInFlag = 0;
+                            if (rows && rows.length > 0) {
+                                // 获取当前日期时间戳
+                                const lastSignInDate = rows[0].last_sign_in_date;
+                                if (StringUtil.currDateTime() === lastSignInDate) {
+                                    // 当日已签到
+                                    currSignInFlag = 1;
+                                }
                             }
-                        }
-                        CacheUtil.getDownloadExtConfig().then(downloadExtConfig => {
-                            CacheUtil.isVIPDailyGet(userId, dailyGet => {
-                                CacheUtil.isVIPMonthlyGet(userId, monthlyGet => {
-                                    CacheUtil.getBankTransferConfig().then(tConfig => {
-                                        const goldTransferMin = tConfig.gold_transfer_min;
-                                        CacheUtil.getUserInfo(userId, (code, u) => {
-                                            const ret = {
-                                                account: u.account,  // 用户名
-                                                id: userId,       // 用户ID
-                                                nickname: u.nickname, // 昵称
-                                                score: StringUtil.toFixed(u.score, 2),  // 用户金币数量
-                                                diamond: parseInt(u.diamond), // 钻石数量
-                                                sign: user._sign,
-                                                proplist: user._proList,
-                                                headimgurl: user._headimgurl, // 头像ID
-                                                phoneNo: user._phoneNo, // 手机号
-                                                official: user._official,
-                                                isVip: user.is_vip,  // 是否VIP
-                                                totalRecharge: user.totalRecharge, // 总充值
-                                                vip_level: user.vip_level, // VIP等级
-                                                vip_score: user.vip_score, // VIP点数
-                                                firstRecharge: user.firstRecharge, // 是否购买首充礼包
-                                                bankScore: StringUtil.toFixed(user.bankScore, 2), // 银行积分，也就是银行里的金币
-                                                bankLock: user.bankLock,  // 银行是否被锁定
-                                                addDate: user.addDate, // 注册时间
-                                                existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
-                                                email: user._email ? user._email : '', // 邮箱
-                                                firstLogin: user.LoginCount > 1 ? 0 : 1, // 是否首次登录
-                                                inviteCode: user.inviteCode ? user.inviteCode : '', // 邀请码
-                                                ptLink: downloadExtConfig.download_url ? downloadExtConfig.download_url : '', // 推广链接
-                                                currTime: new Date().getTime(), // 当前时间戳
-                                                luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
-                                                luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
-                                                luckyCoin: luckObject.luckyCoin,// 幸运金币数量
-                                                luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
-                                                p: user._p, // king
-                                                step: user.step, // 新手指引步数
-                                                goldTransferMin: goldTransferMin, // 最小转账
-                                                dailyGet: dailyGet,   // 是否领取了每日金币
-                                                monthlyGet: monthlyGet, // 是否领取了每月金币
-                                                currSignInFlag: currSignInFlag, // 当日是否签到
-                                                unReadEmail: unReadEmailCode // 是否有未读取邮件
-                                            }
-                                            callback(ret);
+                            CacheUtil.getDownloadExtConfig().then(downloadExtConfig => {
+                                CacheUtil.isVIPDailyGet(userId, dailyGet => {
+                                    CacheUtil.isVIPMonthlyGet(userId, monthlyGet => {
+                                        CacheUtil.getBankTransferConfig().then(tConfig => {
+                                            const goldTransferMin = tConfig.gold_transfer_min;
+                                            CacheUtil.getUserInfo(userId, (code, u) => {
+                                                const ret = {
+                                                    account: u.account,  // 用户名
+                                                    id: userId,       // 用户ID
+                                                    nickname: u.nickname, // 昵称
+                                                    score: StringUtil.toFixed(u.score, 2),  // 用户金币数量
+                                                    diamond: parseInt(u.diamond), // 钻石数量
+                                                    sign: user._sign,
+                                                    proplist: user._proList,
+                                                    headimgurl: user._headimgurl, // 头像ID
+                                                    phoneNo: user._phoneNo, // 手机号
+                                                    official: user._official,
+                                                    isVip: user.is_vip,  // 是否VIP
+                                                    totalRecharge: user.totalRecharge, // 总充值
+                                                    vip_level: user.vip_level, // VIP等级
+                                                    vip_score: user.vip_score, // VIP点数
+                                                    firstRecharge: user.firstRecharge, // 是否购买首充礼包
+                                                    bankScore: StringUtil.toFixed(user.bankScore, 2), // 银行积分，也就是银行里的金币
+                                                    bankLock: user.bankLock,  // 银行是否被锁定
+                                                    addDate: user.addDate, // 注册时间
+                                                    existBankPwd: user.bankPwd ? 1 : 0, // 是否设置了银行密码
+                                                    email: user._email ? user._email : '', // 邮箱
+                                                    firstLogin: user.LoginCount > 1 ? 0 : 1, // 是否首次登录
+                                                    inviteCode: user.inviteCode ? user.inviteCode : '', // 邀请码
+                                                    ptLink: downloadExtConfig.download_url ? downloadExtConfig.download_url : '', // 推广链接
+                                                    currTime: new Date().getTime(), // 当前时间戳
+                                                    luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
+                                                    luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
+                                                    luckyCoin: luckObject.luckyCoin,// 幸运金币数量
+                                                    luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
+                                                    p: user._p, // king
+                                                    step: user.step, // 新手指引步数
+                                                    goldTransferMin: goldTransferMin, // 最小转账
+                                                    dailyGet: dailyGet,   // 是否领取了每日金币
+                                                    monthlyGet: monthlyGet, // 是否领取了每月金币
+                                                    currSignInFlag: currSignInFlag, // 当日是否签到
+                                                    unReadEmail: unReadEmailCode, // 是否有未读取邮件
+                                                    currDateInvite: currDateInvite // 当日是否邀请
+                                                }
+                                                callback(ret);
+                                            })
                                         })
                                     })
                                 })

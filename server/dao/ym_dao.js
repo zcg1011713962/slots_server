@@ -286,7 +286,12 @@ exports.searchCurrDateInvite = function (userId, callback){
                 callback(0);
             } else {
                 if (rows && rows.length > 0) {
-                    callback(rows[0]);
+                    const foundObject = rows.find(obj => new Date(obj.created_at).getDate() === new Date().getDate());
+                    if(foundObject){
+                       callback(1);
+                    }else{
+                       callback(0);
+                    }
                 } else {
                     callback(0);
                 }

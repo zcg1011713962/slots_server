@@ -46,7 +46,7 @@ const UndoEvenType ={
 const notifyType = {
     normal: 0, // 普通消息
     vipUpgrade: 1, // VIP升级
-    bankTransfer: 2 ,// 银行转账
+    bankTransfer: 2,// 银行转账
     vipEnterHall: 3 // VIP进大厅
 };
 
