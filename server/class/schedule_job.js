@@ -24,9 +24,13 @@ exports.initDayJob = function (userList){
                     luckyCoinGetStatus: 0
                 }
                 gameInfo.loginUserInfo(userId, luckObject, (ret) =>{
-                    if(ret.dailyGet || ret.monthlyGet){
-                        log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.vipGet)
-                        userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.vipGet}});
+                    if(ret.dailyGet){
+                        log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.vipDailyGet)
+                        userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.vipDailyGet}});
+                    }
+                    if(ret.monthlyGet){
+                        log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.vipMonthlyGet)
+                        userList[userId]._socket.emit('undoEven', {code: 1, data: {type: TypeEnum.UndoEvenType.vipMonthlyGet}});
                     }
                     if(ret.currSignInFlag === 0){
                         log.info(userId + '推送红点事件类型' + TypeEnum.UndoEvenType.currSignIn)

@@ -222,6 +222,27 @@ exports.RandomNumBoth = function RandomNumBoth(Min, Max) {
     return num;
 }
 
+exports.RandomNum = function RandomNum(min, max) {
+    // 生成指定范围内随机整数
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+exports.luckRandom = function (min, max, val) {
+    // 生成指定范围内随机整数
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    return randomNum < val;
+}
+
+// 从 muls 数组中随机选择一个符合条件的倍数
+exports.getRandomMul = function getRandomMul(muls, mulSection) {
+    const [min, max] = mulSection;
+    const possibleMuls = muls.filter(mul => mul >= min && mul <= max);
+    if (possibleMuls.length === 0) return 0;
+    const randomIndex = this.RandomNum(0, possibleMuls.length - 1);
+    return possibleMuls[randomIndex];
+}
+
 exports.list_one_count = function list_one_count(x, list) {
     //数组中指定值出现次数
     var count = 0;
@@ -252,3 +273,10 @@ exports.currDateTime = function currDateTime() {
 }
 
 
+exports.appendValue = function appendValue(map , key, value) {
+    if (map.has(key)) {
+        map.get(key).push(value);
+    } else {
+        map.set(key, [value]);
+    }
+}

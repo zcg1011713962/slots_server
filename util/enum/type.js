@@ -35,11 +35,20 @@ const ShopGroupType = {
     rechargeGift: 1 // 首充礼包商品
 };
 
+const LotteryResultCode = {
+    normal: 1, // 正常返回
+    parmsError: -1, // 参数非法
+    popFirstRecharge: -2 ,// 输光，弹首充
+    popDiscount: -3// 输光了弹限时折扣界面
+};
+
+
 const UndoEvenType ={
     email: 0, // 邮件未读取
-    vipGet: 1, // VIP每日奖励领取
+    vipDailyGet: 1, // VIP每日奖励领取
     bindPromote: 2, // 推广
-    currSignIn: 3 // 签到
+    currSignIn: 3, // 签到
+    vipMonthlyGet: 4 // VIP每月奖励领取
 }
 
 
@@ -141,6 +150,14 @@ const NewHandGuideFlow = {
 };
 
 
+const pushFirstRechargeType = {
+    winJackpot: '中jackpot',
+    vipUpgrade: 'vip升级',
+    winScorePop: '历史赢金币满足弹首充条件,只弹一次'
+};
+
+
+
 
 module.exports = {
     GoodsType,
@@ -162,5 +179,7 @@ module.exports = {
     UndoEvenType,
     PayChannelType,
     PayStatus,
-    CurrencyTypeIndex
+    CurrencyTypeIndex,
+    pushFirstRechargeType,
+    LotteryResultCode
 };

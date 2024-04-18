@@ -220,7 +220,7 @@ var GameInfo = function () {
                 function (result, callback) {
                     // 登录成功返回结果
                     const login_token_key = 'login_token_key:';
-                    CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) => {
+                    CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) => {
                         // 生成新token返回
                         StringUtil.generateUniqueToken().then(token => {
                             RedisUtil.set(login_token_key + token, userInfo.Id).then(ret1 => {
@@ -1384,8 +1384,10 @@ var GameInfo = function () {
                     // 当日已签到
                     const signInConfig = config.map(item => {
                         let signInFlag = 0;
-                        if (consecutiveDays === 7) {
+                        if (consecutiveDays === 7 && StringUtil.currDateTime() > lastSignInDate) {
                             signInFlag = 0;
+                        }else if(consecutiveDays === 7 && StringUtil.currDateTime() === lastSignInDate){
+                            signInFlag = 1;
                         } else {
                             if (consecutiveDays >= item.id) {
                                 signInFlag = 1;
@@ -3462,7 +3464,7 @@ var GameInfo = function () {
                             dao.searchFirstRecharge(userId, row => {
                                 if (row && row.firstRecharge === 0) {
                                     // 大厅推
-                                    CommonEvent.pushFirstRecharge(this.userList[userId]._socket);
+                                    CommonEvent.pushFirstRecharge(this.userList[userId]._socket, TypeEnum.pushFirstRechargeType.vipUpgrade);
                                 }
                             })
                         } else {

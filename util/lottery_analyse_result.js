@@ -33,12 +33,13 @@ exports.initResult  = function (nBetSum) {
             bVal: 0
         },
         nMultiple: 0,
+        mul: 0,
         nWinCardsDetail: [],
         nBetTime: Number(new Date())
     };
 }
 
-exports.build  = function build(userId, nickname, gameName, nHandCards, nBetSum, currFreeCount, currGoldCoin, dictAnalyseResult, sendMessage_mul){
+exports.build  = function (userId, nickname, gameName, nBetSum, currFreeCount, currGoldCoin, dictAnalyseResult, sendMessage_mul){
     try {
         //判断是否需要发送中奖信息到通知服
         if (http_bc && dictAnalyseResult["win"] >= nBetSum * sendMessage_mul) {
@@ -53,13 +54,6 @@ exports.build  = function build(userId, nickname, gameName, nHandCards, nBetSum,
     }catch (e){
         log.err('发送中奖信息到通知服' + e)
     }
-    if(nHandCards) {
-        // 手牌加1处理，返回给客户端
-        dictAnalyseResult["nHandCards"] = [];
-        for (let i in nHandCards) {
-            dictAnalyseResult["nHandCards"].push(parseInt(nHandCards[i]) + 1)
-        }
-    }
 
     if (currFreeCount) {
         dictAnalyseResult["is_free"] = true;
@@ -72,14 +66,15 @@ exports.build  = function build(userId, nickname, gameName, nHandCards, nBetSum,
 }
 
 
-exports.lotteryReturn = function lotteryReturn(currGoldCoin, winscore, freeCount, resFreeCount, dictAnalyseResult, scorePool){
+exports.lotteryReturn = function (currGoldCoin, winscore, freeCount, resFreeCount, dictAnalyseResult){
     return {
-        code: 1,
-        userscore: currGoldCoin,
-        winscore: winscore,
-        viewarray: dictAnalyseResult,
-        winfreeCount: freeCount,
-        freeCount: resFreeCount,
-        score_pool: scorePool
-    };
+        ResultCode: TypeEnum.LotteryResultCode.normal,
+        ResultData: {
+            userscore: currGoldCoin,
+            winscore: winscore,
+            viewarray: dictAnalyseResult,
+            winfreeCount: freeCount,
+            freeCount: resFreeCount
+        }
+    }
 }

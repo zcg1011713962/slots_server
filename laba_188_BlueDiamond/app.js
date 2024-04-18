@@ -10,6 +10,7 @@ const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
 const CacheUtil = require('../util/cache_util');
+const SampleUtil = require('../util/sample_util');
 
 
 const Csocket = Cio(Urls.hall_url);
@@ -227,10 +228,11 @@ io.on('connection', function (socket) {
 
 app.set('port', process.env.PORT || gameConfig.port);
 
-var server = http.listen(app.get('port'), function () {
-    console.log('start at port:' + server.address().port);
+const server = http.listen(app.get('port'), function () {
+    log.info('start at port:' + server.address().port);
 });
 
-console.log("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
+log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
 

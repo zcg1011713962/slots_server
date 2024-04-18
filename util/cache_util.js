@@ -23,11 +23,12 @@ const userInfoKey = 'userInfo';
 const sendEmailKey = 'sendEmailCode';
 const newHandGuideFlowKey = 'newHandGuideFlow';
 const userDiscountLimitedKey = 'userDiscountLimited';
+const newbierPartKey = 'newbierPart';
 
 const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
 const buyCallBackSwitchKey  = 'buyCallBackSwitch';
 const paySwitchKey  = 'paySwitch';
-
+const nGamblingWaterLevelGoldKey = 'nGamblingWaterLevelGold';
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -35,10 +36,15 @@ const emailCodeLongExpireSecond = 800; // 过期校验过期时间
 
 const gameConfig = {
     gameConfigKey: 'gameConfig',
+    iconValueKey: 'iconValue',
+    controlAwardKey: 'controlAward',
+    handCardsKey: 'handCards',
     base: 'base',
     nGameLines: 'nGameLines',
     iconInfos: 'iconInfos',
-    iconBind: 'iconBind'
+    iconBind: 'iconBind',
+    freeRatio: 'freeRatio',
+    bonusRatio: 'bonusRatio'
 }
 
 const jackpotConfig = {
@@ -131,7 +137,7 @@ exports.IncrGamblingBalanceGold  = function (increment) {
 
 
 exports.DecrGamblingBalanceGold  = function (increment) {
-    RedisUtil.decrementFloat(gamblingBalanceGold, increment);
+    return RedisUtil.decrementFloat(gamblingBalanceGold, increment);
 }
 
 // 获取系统库存
@@ -146,7 +152,7 @@ exports.IncrSysBalanceGold  = function (increment) {
 }
 
 exports.DecrSysBalanceGold  = function (increment) {
-    RedisUtil.decrementFloat(sysBalanceGold, increment);
+    return RedisUtil.decrementFloat(sysBalanceGold, increment);
 }
 
 
@@ -341,7 +347,7 @@ exports.searchBankPwdErrorCount = function (userId) {
 // 获取游戏奖池
 exports.getGameJackpot  = function (callback){
     const self = this;
-    redis_laba_win_pool.get_redis_win_pool().then(function (jackpot) {
+    self.getJackpot().then(function (jackpot) {
         self.getJackpotConfig().then(jackpotConfig =>{
             // 游戏奖池
             let gJackpot = jackpot ? StringUtil.rideNumbers(jackpot, (jackpotConfig.jackpot_ratio.game / 100), 2) : 0;
@@ -352,7 +358,7 @@ exports.getGameJackpot  = function (callback){
             const minorJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[1].ratio / 100, 2);
             const miniJackpot = StringUtil.rideNumbers(gJackpot , game_jackpot_ratio[0].ratio / 100, 2);
             const gameJackpot= StringUtil.toFixed(gJackpot, 2);
-            callback(gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot)
+            callback(gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig)
         });
     });
 }
@@ -374,10 +380,10 @@ exports.delayPushGameJackpot = function (userInfo, userList) {
 
 exports.pushGameJackpot  = function (userList){
     if(userList && userList.length > 0){
-        this.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
+        this.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
             for (const userId in userList) {
                 const jackpot = {
-                    gameJackpot: gJackpot,
+                    gameJackpot: gameJackpot,
                     grand_jackpot: grandJackpot,
                     major_jackpot: majorJackpot,
                     minor_jackpot: minorJackpot,
@@ -507,7 +513,7 @@ exports.getPlayGameWinscore  = function getPlayGameWinscore(userId){
 
 // 记录玩家赢分差
 exports.playGameWinscore  = function playGameWinscore(userId, winScore){
-    this.getPlayGameWinscore(userId).then(winscore =>{
+    return this.getPlayGameWinscore(userId).then(winscore =>{
         const oldWin = winscore ? winscore : 0;
         const win = Number(oldWin) +  Number(winScore);
         return RedisUtil.hmset(userPlayGameWinScore, userId, win);
@@ -738,14 +744,20 @@ exports.reduceFreeCount = function(userId, reduceFreeCount, callback){
 }
 
 // 给用户加免费次数
-exports.addFreeCount = function(userId, freeCount){
-    RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', freeCount, (err, currFreeCount) => {
-        if (err) {
-            log.err(userId + '增加免费次数' + err);
-        } else {
-            log.info(userId + '增加免费次数' + freeCount + '成功,当前免费次数:' + currFreeCount);
-        }
-    });
+exports.addFreeCount = function(userId, freeCount, callback){
+    if(freeCount > 0){
+        RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', freeCount, (err, currFreeCount) => {
+            if (err) {
+                log.err(userId + '增加免费次数' + err);
+                callback(0)
+            } else {
+                log.info(userId + '增加免费次数' + freeCount + '成功,当前免费次数:' + currFreeCount);
+                callback(1)
+            }
+        });
+    }else{
+        callback(1)
+    }
 }
 
 // 获取用户金币
@@ -755,27 +767,30 @@ exports.getGoldCoin = function(userId){
 
 // 给用户加金币
 exports.addGoldCoin = function(userId, coinsToAdd, type, callback){
-    dao.addAccountScore(userId, coinsToAdd, ret =>{
-        if (!ret) {
-            log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type);
-            callback(0)
-            return;
-        }
-        RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', `${coinsToAdd}`, (err, val) => {
-            if(err){
-                log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type + 'err:' + err);
+    if(coinsToAdd > 0){
+        dao.addAccountScore(userId, coinsToAdd, ret =>{
+            if (!ret) {
+                log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type);
                 callback(0)
                 return;
             }
-            const currGoldCoin = StringUtil.toFixed(val, 2);
-            log.info(userId + '增加金币' + coinsToAdd + '类型:' +  type + '当前金币:' + currGoldCoin);
-            const beforeGoldCoins = currGoldCoin - coinsToAdd;
-            // 金币记录
-            dao.scoreChangeLog(userId, beforeGoldCoins, coinsToAdd,  currGoldCoin, type, 1)
-            callback(1, currGoldCoin)
-        });
-    })
-
+            RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', `${coinsToAdd}`, (err, val) => {
+                if(err){
+                    log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type + 'err:' + err);
+                    callback(0)
+                    return;
+                }
+                const currGoldCoin = StringUtil.toFixed(val, 2);
+                log.info(userId + '增加金币' + coinsToAdd + '类型:' +  type + '当前金币:' + currGoldCoin);
+                const beforeGoldCoins = currGoldCoin - coinsToAdd;
+                // 金币记录
+                dao.scoreChangeLog(userId, beforeGoldCoins, coinsToAdd,  currGoldCoin, type, 1)
+                callback(1, currGoldCoin)
+            });
+        })
+    }else{
+        callback(1)
+    }
 }
 
 
@@ -819,7 +834,7 @@ exports.reduceGoldCoin = function(userId, coinsToReduce, type, callback){
                         callback(0)
                     } else {
                         const currGoldCoin = StringUtil.toFixed(val, 2);
-                        log.info(userId + '减少金币,数量:' + coinsToReduce + '类型:' + type +'当前金币:' + currGoldCoin);
+                        log.info(userId + '减少金币:' + coinsToReduce + '类型:' + type +'当前金币:' + currGoldCoin);
                         const beforeGoldCoins = goldCoin;
                         // 金币记录
                         dao.scoreChangeLog(userId, beforeGoldCoins, -coinsToReduce,  currGoldCoin, type, 1)
@@ -838,7 +853,7 @@ exports.reduceGoldCoin = function(userId, coinsToReduce, type, callback){
 exports.feeCost = function(userId, nBetSum, type, callback){
     const self = this;
     self.getFreeCount(userId).then(freeCount =>{
-        freeCount = freeCount == null ? 0 : freeCount
+        freeCount = freeCount == null ? 0 : parseInt(freeCount)
         self.getGoldCoin(userId).then(goldCoin =>{
             if(freeCount > 0){
                 // 扣免费次数
@@ -879,7 +894,7 @@ exports.isBankrupt = function isBankrupt(currScore, currBankScore, callback) {
         const bustTimes = config.Bust_times;
         const bustBonus = config.Bust_Bonus;
         const bankrupt = Number(currScore) + Number(currBankScore) < bustBonus;
-        callback(bankrupt, bustBonus , bustTimes);
+        callback(bankrupt, bustBonus, bustTimes);
     });
 }
 
@@ -996,3 +1011,94 @@ exports.paySwitch = function(){
     });
 }
 
+// 购买回调开关
+exports.getGamblingWaterLevelGold = function(){
+    return RedisUtil.get(nGamblingWaterLevelGoldKey).then(nGamblingWaterLevelGold =>{
+        if(nGamblingWaterLevelGold){
+            return nGamblingWaterLevelGold;
+        }else{
+            return 0;
+        }
+    });
+}
+
+
+
+exports.getNewbierPartMul = function(userId){
+    return RedisUtil.hget(newbierPartKey, userId).then(newbierPart =>{
+        if(!newbierPart){
+            return this.getNewhandProtectConfig().then(c =>{
+                const item = c.newbierPart[0];
+                const removedItem = c.newbierPart.shift();
+                return RedisUtil.hmset(newbierPartKey, userId, JSON.stringify(c.newbierPart)).then(r =>{
+                    return removedItem;
+                });
+            })
+        }else{
+            const part = JSON.parse(newbierPart);
+            const removedItem = part.shift();
+            return RedisUtil.hmset(newbierPartKey, userId, JSON.stringify(part)).then(r =>{
+                return removedItem;
+            });
+        }
+    });
+}
+
+
+
+exports.setControlAward = function(map){
+    return RedisUtil.hmset(gameConfig.gameConfigKey ,gameConfig.controlAwardKey, map);
+}
+
+exports.getControlAwardByRtp = function(rtp){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.controlAwardKey).then(jsonString =>{
+        const rtpMap = new Map(JSON.parse(jsonString));
+        const rtpArr = [...rtpMap.keys()];
+        for(let i = 0; i < rtpArr.length; i++) {
+            if(i === 0 && rtp <= rtpArr[i]){
+                return rtpMap.get(rtpArr[i])
+            }else if(i === rtpArr.length - 1 && rtp > rtpArr[i]){
+                return rtpMap.get(rtpArr[i]);
+            }else{
+                const [min, max] = rtpArr[i];
+                if(rtp > min && rtp < max){
+                    return rtpMap.get(rtpArr[i]);
+                }
+            }
+        }
+    })
+}
+
+exports.getIconValue = function(){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.iconValueKey).then(r => JSON.parse(r));
+}
+
+// 钻石游戏手牌
+exports.setHandCards = function(gameId, mulCardsMap){
+    return RedisUtil.hmset(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, mulCardsMap);
+}
+
+// 钻石游戏手牌
+exports.getHandCardsByMul = function(gameId, mul){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
+        const storedMap = new Map(JSON.parse(jsonString));
+        if(storedMap.has(mul)){
+            return storedMap.get(mul)
+        }
+        return null;
+    })
+}
+
+// 钻石游戏手牌倍数数组
+exports.getHandCardsMuls = function(gameId){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
+        const storedMap = new Map(JSON.parse(jsonString));
+        return Array.from(storedMap.keys());
+    })
+}
+
+
+// 钻石游戏手牌
+exports.setHandCards = function(gameId, mulCardsMap){
+    return RedisUtil.hmset(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, mulCardsMap);
+}

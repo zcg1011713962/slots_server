@@ -90,106 +90,6 @@ var GameInfo = function () {
             });
         };
 
-        this.tt = 0;
-
-        this.lottery = function (config) {
-            // 下注非法
-            if (config.nBetSum %  config.nGameLines.length !== 0) {
-                log.info("非法下注");
-                return {code: -1};
-            }
-            // 扣费或扣免费次数
-            const lotteryResult = this.userList[config.userId].lottery(config.nBetSum);
-            if (!lotteryResult) {
-                log.info(config.userId + "分数不够");
-                return {code: -2};
-            }
-            //用户金币
-            const score_before = this.userList[config.userId].getScore();
-            //获取免费次数
-            const sourceFreeCount = this.userList[config.userId].getFreeCount();
-            const GamblingBalanceLevelBigWin = this.A.getGamblingBalanceLevelBigWin();
-            // 水位
-            const nGamblingWaterLevelGold = GamblingBalanceLevelBigWin.nGamblingWaterLevelGold;
-            // 大奖幸运等级
-            const nGamblingBigWinLevel = GamblingBalanceLevelBigWin.nGamblingBigWinLevel;
-            // 大奖幸运概率
-            const nGamblingBigWinLuck = GamblingBalanceLevelBigWin.nGamblingBigWinLuck;
-            // 幸运大奖
-            const is_luck = false;
-            // 目标RTP
-            const expectRTP = GamblingBalanceLevelBigWin.expectRTP;
-            // 进入奖池的钱
-            const addJackpot = config.nBetSum * parseInt(nGamblingWaterLevelGold) / 100;
-            // 进入库存的钱
-            const addBalance = config.nBetSum - addJackpot;
-            // 增加库存和奖池
-            this.A.addGamblingBalanceGold(addBalance, addJackpot);
-
-            // 中的jackpot
-            let winJackpot = 0;
-            let nHandCards = [];
-            let win = 0;
-            let dictAnalyseResult = {}
-            let fin_value = 0;
-            let lotteryCount = 0;
-            // 得出结果
-            while (true) {
-                dictAnalyseResult = analyse_result.initResult(config.nBetSum);
-
-                // 分析jackpot
-                winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney , config.jackpotLevelProb,config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit);
-
-                // 生成图案
-                nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard , config.iconTypeBind, winJackpot, config.blankCard);
-
-                // 分析图案
-                LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, winJackpot, config.freeCards, config.freeTimes, dictAnalyseResult);
-                dictAnalyseResult["nWinLines"] = nHandCards[0];
-
-                // 图案连线奖
-                win =  dictAnalyseResult["win"];
-                // 图案最终价值
-                fin_value = win + winJackpot;
-                // 开了配牌器
-                if(config.iconTypeBind && config.iconTypeBind.length > 0 || win === 0){
-                    break;
-                }
-                // 库存上限控制
-                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
-                    log.info('库存上限控制', config.userId);
-                    if(++lotteryCount > 30){
-                        return {code: -1};
-                    }
-                    continue;
-                }
-                break;
-            }
-
-            // 减少库存和奖池
-            const winscore = parseInt(dictAnalyseResult["win"]) + winJackpot;
-            if (winscore > 0) {
-                this.A.subGamblingBalanceGold(winscore, winJackpot);
-            }
-            // 结果处理
-            const user = this.userList[config.userId];
-            const freeCount = dictAnalyseResult["getFreeTime"]["nFreeTime"];
-            const resultArray = analyse_result.build(dictAnalyseResult, gameConfig.gameName, nHandCards, config.userId, config.nBetSum, winscore, freeCount, GamblingBalanceLevelBigWin, user, gameConfig.sendMessage_mul);
-            // 剩余免费次数
-            const resFreeCount = user.getFreeCount();
-            const score_current = user.getScore();
-            // 日志记录
-            lottery_record.record(this._Csocket, 0, gameConfig.serverId, gameConfig.gameId, config.userId, config.nBetSum, winscore, score_before, score_current, freeCount, sourceFreeCount,
-                resFreeCount, gameConfig.logflag, this.lotteryLogList, this.score_changeLogList, resultArray);
-            // 摇奖次数统计
-            this.lotteryTimes(lotteryResult, winscore, config.nBetSum);
-            // 打印图案排列日志
-            LABA.handCardLog(nHandCards, config.col_count, config.line_count, config.nBetSum, winscore, winJackpot, expectRTP);
-
-            // 返回结果
-            return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, 0);
-        };
-
 
         this.lotteryTimes = function (lotteryResult, winscore, nBetSum) {
             // 服务器统计
@@ -252,7 +152,7 @@ var GameInfo = function () {
 
             this.LoginGame(userInfo.userId, this.serverId);
 
-            CacheUtil.getGameJackpot((gJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot) =>{
+            CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
                 CacheUtil.getGameConfig(this.gameName, this.gameId).then(config =>{
                     try {
                         const icon_mul = config.icon_mul.reduce((acc, curr) => {
@@ -265,7 +165,7 @@ var GameInfo = function () {
                             score: userInfo.score,
                             priceList: icon_mul,
                             jackpot: {
-                                gameJackpot: gJackpot,
+                                gameJackpot: gameJackpot,
                                 grand_jackpot: grandJackpot,
                                 major_jackpot: majorJackpot,
                                 minor_jackpot: minorJackpot,

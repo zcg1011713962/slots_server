@@ -73,11 +73,14 @@ app.post('/checkVersion', function (req, res) {
     const r = req.query.key;
     let key = version + num;
     log.info('版本验证' + key)
-    if (r !== key) {
-        res.send({code: 0, url: "http://yidali.youmegame.cn/tg/"});
-        return;
-    }
-    res.send({code: 1, url: "http://yidali.youmegame.cn/tg/"});
+    CacheUtil.getDownloadExtConfig().then(config =>{
+        const downloadUrl = config.download_url;
+        if (r !== key) {
+            res.send({code: 0, url: downloadUrl});
+            return;
+        }
+        res.send({code: 1, url: downloadUrl});
+    });
 });
 
 // 根据设备码获取用户名信息

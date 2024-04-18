@@ -280,8 +280,6 @@ var GameInfo = function () {
                 resFreeCount, gameConfig.logflag, this.lotteryLogList, this.score_changeLogList, resultArray);
             // 摇奖次数统计
             this.lotteryTimes(lotteryResult, winscore, nBetSum, fin_value);
-            // 打印图案排列日志
-            LABA.handCardLog(nHandCards, col_count, line_count,nBetSum, winscore, winJackpot, expectRTP);
             // 返回结果
             return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, dictAnalyseResult, 0);
         };
