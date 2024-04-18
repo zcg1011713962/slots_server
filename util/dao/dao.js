@@ -4,6 +4,7 @@ const mysql_config = require("../config/mysql_config");
 const ErrorCode = require('../ErrorCode');
 const RedisUtil = require('../redis_util');
 const StringUtil = require("../string_util");
+const TypeEnum = require("../enum/type");
 
 const pool = mysql.createPool({
     connectionLimit: 10000,
@@ -921,8 +922,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -941,6 +942,8 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(buyContinueRewardGold);
     values.push(buyContinueRewardDiamond);
     values.push(buyContinueDays);
+    values.push(payType);
+
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -969,8 +972,10 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status = 0 and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status = ? or status = ? and orderId = ? and userId = ?';
     let values = [];
+    values.push(TypeEnum.OrderStatus.create);
+    values.push(TypeEnum.OrderStatus.paying);
     values.push(orderId);
     values.push(userId);
 
@@ -1000,10 +1005,44 @@ exports.searchOrder = function searchOrder(userId, orderId, callback) {
 
 
 
-// 更新订单
-exports.updateOrder = function updateOrder(userId, orderId, callback) {
-    const sql = 'update pay_order set `status` = 1 where orderId = ? and userId = ?';
+
+// 查询所有未支付订单
+exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType FROM pay_order where status = ? or status = ?';
     let values = [];
+    values.push(TypeEnum.OrderStatus.create);
+    values.push(TypeEnum.OrderStatus.paying);
+
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询订单");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+// 更新订单
+exports.updateOrder = function updateOrder(userId, orderId, payStatus, callback) {
+    const sql = 'update pay_order set `status` = ?  where orderId = ? and userId = ?';
+    let values = [];
+    values.push(payStatus);
     values.push(orderId);
     values.push(userId);
 
