@@ -209,7 +209,7 @@ app.get('/Shopping', async function (req, res) {
 });
 
 // 购买商品订单回调
-app.get('/shoppingCallBack', async function (req, res) {
+app.get('/shoppingCallBack', function (req, res) {
     try {
         const userId = req.query.userId ? Number(req.query.userId) : 0;
         const orderId = req.query.orderId ? req.query.orderId : null;
@@ -218,23 +218,30 @@ app.get('/shoppingCallBack', async function (req, res) {
             res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
             return;
         }
-
-        const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
-        if (ret) {
-            gameInfo.shoppingCallBack(userId, orderId, (code, msg, data, shopType, service, serverId) => {
-                CacheUtil.delUserProtocol(userId, "shoppingCallBack")
-                // 响应
-                res.send({code: code, msg: msg});
-                // 回调socket
-                if(serverId === 0){ // 大厅
-                    gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
-                }else if(serverId !==0 ){ // 游戏内
-                    gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+        CacheUtil.paySwitch().then(async paySwitch => {
+            // 真实支付
+            if (paySwitch) {
+                log.info('线上环境不支持回调' + userId + '订单' + orderId)
+                res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
+            }else{
+                const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
+                if (ret) {
+                    gameInfo.shoppingCallBack(userId, orderId, TypeEnum.OrderStatus.payedNotify,(code, msg, data, shopType, service, serverId) => {
+                        CacheUtil.delUserProtocol(userId, "shoppingCallBack")
+                        // 响应
+                        res.send({code: code, msg: msg});
+                        // 回调socket
+                        if (serverId === 0) { // 大厅
+                            gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                        } else if (serverId !== 0) { // 游戏内
+                            gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                        }
+                    });
+                } else {
+                    res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
                 }
-            });
-        } else {
-            res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
-        }
+            }
+        })
     }catch (e){
         log.err('shoppingCallBack' + e)
         res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
@@ -1599,6 +1606,7 @@ ScheduleJob.initMonthJob();
 ScheduleJob.interval(gameInfo);
 
 dao.clenaLineOut();
+gameInfo.updateOffLineOrder();
 
 log.info("登录服务器 v1.0.0");
 log.info("服务器启动成功!");

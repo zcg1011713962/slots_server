@@ -1,4 +1,5 @@
 const HTTPRequest = require('../../util/http_util');
+const TypeEnum = require('../../util/enum/type')
 
 // 下订单
 exports.buyOrder  = async function buyOrder(uid, prodcut_id, orderId, amount, currency, callbackUrl) {
@@ -46,4 +47,44 @@ exports.fastBuyOrder  = async function fastBuyOrder(uid, prodcut_id, orderId, am
     }
 }
 
+
+// 查询pix订单
+exports.searchOrder  = async function searchOrder(orderId, payType) {
+    try {
+        const params = {
+            merOrderNo: orderId
+        };
+        let url = '';
+        if(TypeEnum.OrderType.fatpag === payType){
+            url = 'http://pay.pokerslotgame.com/api/fatpagpay/queryPaymentOrder';
+        }else if(TypeEnum.OrderType.betcatpay === payType){
+            url = 'http://pay.pokerslotgame.com/api/betcatpay/queryPaymentOrder';
+        }
+        const body = JSON.stringify(params);
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        return await HTTPRequest.sendRequest(url, 'POST', body, headers);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+// 查询Fatpag订单
+exports.searchOrder  = async function searchOrder(orderId) {
+    try {
+        const params = {
+            merOrderNo: orderId
+        };
+        const url = 'http://pay.pokerslotgame.com/api/betcatpay/queryPaymentOrder';
+        const body = JSON.stringify(params);
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        return await HTTPRequest.sendRequest(url, 'POST', body, headers);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
 

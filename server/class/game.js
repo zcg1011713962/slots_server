@@ -628,8 +628,9 @@ var GameInfo = function () {
                         if (orderResult && orderResult.code === 200) {
                             self.getVipLevel(userId, vipLevel => {
                                 // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.PayChannelType.pix,ret => {
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.PayChannelType.pix, TypeEnum.OrderType.fatpag,ret => {
                                     if (ret) {
+                                        this.intervalSearchOrder(userId, orderId, TypeEnum.OrderType.fatpag);
                                         orderResult.data.switch = nSwitch;
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                     } else {
@@ -655,8 +656,9 @@ var GameInfo = function () {
                         if (orderResult && orderResult.code === 200) {
                             self.getVipLevel(userId, vipLevel => {
                                 // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix,ret => {
+                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.OrderType.fatpag,ret => {
                                     if (ret) {
+                                        this.intervalSearchOrder(userId, orderId,  TypeEnum.OrderType.betcatpay);
                                         orderResult.data.switch = nSwitch;
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
                                     } else {
@@ -683,8 +685,9 @@ var GameInfo = function () {
             const self = this;
             // 下购买订单
             self.getVipLevel(userId, vipLevel => {
-                // 记录订单详情
-                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, ret => {
+                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
+                // 记录订单详情s
+                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.OrderType.betcatpay,ret => {
                     log.info(userId + '测试购买订单记录' + orderId)
                     if (ret) {
                         const orderResult = {
@@ -711,6 +714,92 @@ var GameInfo = function () {
                     }
                 })
             })
+        }
+
+
+        this.intervalSearchOrder = function (userId, orderId, payType){
+            const self = this;
+            let elapsedTime = 0; // 记录经过的时间（秒）
+            // 定时查询某个接口
+            self.searchOrderUpdate(userId, orderId, payType,(ret) =>{
+                if(!ret){
+                    // 定时5秒执行操作
+                    const interval = setInterval(() => {
+                      self.searchOrderUpdate(userId, orderId, payType, (code) =>{
+                          const timeOut = elapsedTime >= 10 * 60;
+                          if (code || timeOut) {
+                              // 条件满足时清除定时器
+                              clearInterval(interval);
+                              if(timeOut){
+                                  dao.updateOrder(userId, orderId, TypeEnum.OrderStatus.payTimeOut, ret =>{
+                                      log.info(userId + '订单超时结束orderId:' + orderId);
+                                  });
+                              }else{
+                                  log.info(userId + '订单完成orderId:' + orderId);
+                              }
+                          }
+                      })
+                        elapsedTime += 5; // 每次操作后增加5秒
+                    }, 5000); // 间隔5秒执行一次
+                }else{
+                    log.info(userId + '订单完成orderId:' + orderId);
+                }
+            })
+        }
+
+        this.searchOrderUpdate = function (userId, orderId, payType, callback){
+            const self = this;
+
+            PayAPI.searchOrder(orderId, payType).then(res =>{
+                //log.info(userId + '查询订单结果:' +  res);
+                /*res = {
+                    "code": 200,
+                    "msg": "success",
+                    "data": {
+                        "orderStatus": 2,
+                        "orderNo": "0d3dcc8ebc634aa6b5a50757011cc840",
+                        "merOrderNo": "1713422734281400",
+                        "amount": 4,
+                        "currency": "BRL",
+                        "cime": 1713422766423,
+                        "updateTime": 1713422767506,
+                        "sign": "fc7fed77bb92b1ad139f3f09991d37073ebbb8282edeafd0ec915d0342c95080"
+                    }
+                }*/
+                if(res && res.code === 200 && res.data){
+                    const orderStatus = res.data.orderStatus;
+                    // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
+                    if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
+                        || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
+                        || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
+
+                        if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
+                            log.info(userId + '订单支付成功:' +  res);
+                            self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
+                                // 回调socket
+                                if (serverId === 0) { // 大厅
+                                    self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                                } else if (serverId !== 0) { // 游戏内
+                                    self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                                }
+                                callback(1)
+                            });
+                        }else{
+                            dao.updateOrder(userId, orderId, orderStatus, ret=>{
+                                log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
+                                callback(1)
+                            })
+                        }
+                    }else{
+                        callback(0)
+                    }
+                }else{
+                    if(res && res.code){
+                        log.info(userId + '查询订单结果:' +  res);
+                    }
+                    callback(0)
+                }
+            });
         }
 
 
@@ -792,8 +881,9 @@ var GameInfo = function () {
 
 
         // 购买订单回调
-        this.shoppingCallBack = function (userId, orderId, callback) {
+        this.shoppingCallBack = function (userId, orderId, payStatus, callback) {
             try {
+                log.info('购买商品支付成功' + userId + '订单' + orderId)
                 // 查询订单
                 dao.searchOrder(userId, orderId, row => {
                     if (!row) {
@@ -823,13 +913,13 @@ var GameInfo = function () {
                         }
                         const currScore = row.score;
                         if (TypeEnum.ShopType.store === shopType) {
-                            this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, callback)
+                            this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback)
                         } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                            this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, callback)
+                            this.freeTurntableBuyCallback(userId, orderId, mul, shopType, service, serverId, payStatus, callback)
                         } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                            this.discountLimitedBuyCallback(userId, service, serverId, goodsType, val, currScore, callback)
+                            this.discountLimitedBuyCallback(userId, service, serverId, goodsType, val, currScore, payStatus, callback)
                         } else if (TypeEnum.ShopType.firstRecharge === shopType) {
-                            this.firstRechargeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, callback)
+                            this.firstRechargeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, callback)
                         } else {
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
@@ -930,7 +1020,7 @@ var GameInfo = function () {
         }
 
         // 商城购买回调
-        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, callback) {
+        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback) {
 
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
@@ -980,7 +1070,7 @@ var GameInfo = function () {
                                     })
                                 }
                                 // 更新订单状态
-                                dao.updateOrder(userId, orderId, ret => {
+                                dao.updateOrder(userId, orderId, payStatus, ret => {
                                 })
 
                                 // 查询当前金
@@ -1022,18 +1112,18 @@ var GameInfo = function () {
         }
 
         // 免费转盘购买回调
-        this.freeTurntableBuyCallback = function (userId, orderId, mul, shopType, service, serverId, callback) {
+        this.freeTurntableBuyCallback = function (userId, orderId, mul, shopType, service, serverId, payStatus, callback) {
             this.turntableCharge(userId, mul, (code, msg, data) => {
                 if (code) {
                     // 更新订单状态
-                    dao.updateOrder(userId, orderId, ret => {
+                    dao.updateOrder(userId, orderId, payStatus,ret => {
                     })
                 }
                 callback(code, msg, data, shopType, service, serverId)
             });
         }
 
-        this.firstRechargeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, callback) {
+        this.firstRechargeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, callback) {
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
             let totalVal = 0; // 总金币数量
@@ -1074,7 +1164,7 @@ var GameInfo = function () {
                                             })
                                         }
                                         // 更新订单状态
-                                        dao.updateOrder(userId, orderId, ret => {
+                                        dao.updateOrder(userId, orderId, payStatus, ret => {
                                         })
                                         // 设置首充持续奖励
                                         CacheUtil.setFirstRechargeContinueReward(userId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, null).then(ret => {
@@ -2790,6 +2880,21 @@ var GameInfo = function () {
                     }
                 })
             });
+        }
+
+
+        // 离线订单恢复查询
+        this.updateOffLineOrder = function () {
+            const self = this;
+            dao.searchAllOffLineOrder(rows =>{
+                for(const item in rows){
+                    const userId = rows[item].userId;
+                    const orderId = rows[item].orderId;
+                    const payType = rows[item].payType;
+                    log.info(userId + '离线订单恢复查询' + orderId)
+                    self.intervalSearchOrder(userId, orderId, payType);
+                }
+            })
         }
 
         // 更新账户信息

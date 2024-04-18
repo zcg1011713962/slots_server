@@ -150,7 +150,17 @@ const NewHandGuideFlow = {
 };
 
 
-const pushFirstRechargeType = {
+const OrderStatus = {
+    create: 0, // 订单生成
+    paying: 1, // 支付中
+    payedNotify: 2, // 支付未通知
+    payedUnNotify: 3, // 支付已通知
+    payFailed: -1, // 交易失败
+    payExpired: -2, // 交易过期
+    payReturn: -3, // 交易退还
+    payExcept: -4, // 交易异常
+    payTimeOut: -99 // 超时未查询到支付成功状态
+};const pushFirstRechargeType = {
     winJackpot: '中jackpot',
     vipUpgrade: 'vip升级',
     winScorePop: '历史赢金币满足弹首充条件,只弹一次'
@@ -158,6 +168,10 @@ const pushFirstRechargeType = {
 
 
 
+const OrderType = {
+    betcatpay: 0, // betcatpay支付
+    fatpag: 1 // fatpag支付
+};
 
 module.exports = {
     GoodsType,
@@ -176,10 +190,11 @@ module.exports = {
     ShopType,
     NewHandGuideFlow,
     DiamondChangeType,
-    UndoEvenType,
+ 	UndoEvenType,
     PayChannelType,
     PayStatus,
     CurrencyTypeIndex,
     pushFirstRechargeType,
-    LotteryResultCode
-};
+    LotteryResultCode,
+ 	OrderStatus,
+    OrderType};
