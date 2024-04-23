@@ -2535,6 +2535,104 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
     });
 }
 
+
+// 保存打点基础数据
+exports.saveDot = function (userId, adid, gps, apptoken, callback) {
+    const sql = "INSERT INTO dot_base_data (userId, adid, gps, apptoken) VALUES(?, ?, ?, ?)";
+    let values = [];
+    values.push(userId);
+    values.push(adid);
+    values.push(gps);
+    values.push(apptoken);
+
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('saveDot' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 更新打点基础数据
+exports.updateDot = function (userId, adid, gps, apptoken, callback) {
+    const sql = "update dot_base_data set adid = ? ,gps = ?,apptoken = ? where userId = ?";
+    let values = [];
+    values.push(adid);
+    values.push(gps);
+    values.push(apptoken);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('updateDot' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 通过用户ID 查询打点基础数据
+exports.searchDotByUserId = function (userId, callback) {
+    const sql = "select userId, adid, gps, apptoken from dot_base_data where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('searchDotByUserId' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
 exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
     const sql = "update newuseraccounts set device_code = ? where Account = ?";
     let values = [];

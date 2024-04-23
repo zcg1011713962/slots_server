@@ -22,6 +22,7 @@ const HashCodeUtil = require("../../util/hashcode_util");
 const PayAPI = require('../class/pay_api');
 const CommonEvent = require('../../util/event_util');
 const EnumType = require("../../util/enum/type");
+const dot = require("../../util/dot");
 
 var GameInfo = function () {
     var _gameinfo = "";
@@ -747,7 +748,7 @@ var GameInfo = function () {
 
             PayAPI.searchOrder(orderId, payType).then(res =>{
                 //log.info(userId + '查询订单结果:' +  res);
-                /*res = {
+               /* res = {
                     "code": 200,
                     "msg": "success",
                     "data": {
@@ -763,14 +764,22 @@ var GameInfo = function () {
                 }*/
                 if(res && res.code === 200 && res.data){
                     const orderStatus = res.data.orderStatus;
+                    const amount = res.data.amount;
                     // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
                     if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
                         || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
                         || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
 
                         if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
-                            log.info(userId + '订单支付成功:' +  res);
+                            log.info(userId + '订单支付成功,金额:' + amount + '响应:' +  res);
                             self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
+                                self.dot(userId, TypeEnum.dotEnum.af_purchase, '', '', '', amount, ret =>{
+                                    if(ret){
+                                        log.info(userId + '订单支付成功，充值打点成功');
+                                    }else{
+                                        log.info(userId + '订单支付成功，充值打点失败');
+                                    }
+                                })
                                 // 回调socket
                                 if (serverId === 0) { // 大厅
                                     self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
@@ -2473,6 +2482,39 @@ var GameInfo = function () {
         // 查询账户信息
         this.searchAccountByDeviceCode = function (deviceCode, callback) {
             dao.searchAccountByDeviceCode(deviceCode, callback);
+        }
+
+        // 存储打点数据
+        this.saveDot = function (userId, adid, gps, apptoken, callback) {
+            dao.saveDot(userId, adid, gps, apptoken, callback);
+        }
+
+        // 存储打点数据
+        this.updateDot = function (userId, adid, gps, apptoken, callback) {
+            dao.updateDot(userId, adid, gps, apptoken, callback);
+        }
+
+
+        // 客户端打点
+        this.dot = function (userId, key, gps, adid, apptoken, money, callback) {
+            dao.searchDotByUserId(userId, row =>{
+                if(row){
+                    money=  !!money ? money : null;
+                    gps =  !!gps ? gps : row.gps;
+                    adid = !!adid  ? adid : row.adid;
+                    apptoken = !!apptoken ? apptoken : row.apptoken;
+                    dot.dotRequest(gps, adid, apptoken, key, money).then(data =>{
+                        const d = JSON.parse(data);
+                        if(d.status === "OK"){
+                            callback(1)
+                        }else{
+                            callback(0)
+                        }
+                    });
+                }else{
+                    callback(0)
+                }
+            })
         }
 
         // 更新账户信息
