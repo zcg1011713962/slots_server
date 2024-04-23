@@ -14526,3 +14526,21 @@
 2024-04-30T16:00:25.026 [INFO ] default - 保存库存和奖池
 2024-04-30T16:01:25.022 [INFO ] default - 保存库存和奖池
 2024-04-30T16:02:25.022 [INFO ] default - 保存库存和奖池
+2024-04-30T16:13:41.902 [INFO ] default - 拉霸_229_freespin服务器启动
+2024-04-30T16:13:54.333 [INFO ] default - 10149用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-04-30T16:13:54.340 [INFO ] default - freespin登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10149","account":"abc2024043011073704","nickname":"USER4401705","score":"1101","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"0","freeCount":"0"}}
+2024-04-30T16:13:54.346 [INFO ] default - 10149给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024043011073704","id":"10149","nickname":"USER4401705","score":"1101","priceList":[0,0.02,600,0.04,100,0.08,50,0.1,0,20,0.5,10,1,5,3,2],"jackpot":{"gameJackpot":453.88,"grand_jackpot":295.02,"major_jackpot":90.77,"minor_jackpot":45.38,"mini_jackpot":22.69}}}
+2024-04-30T16:13:54.358 [INFO ] default - 10149从数据库里获得免费次数0
+2024-04-30T16:14:25.021 [INFO ] default - 保存库存和奖池
+2024-04-30T16:15:25.025 [INFO ] default - 保存库存和奖池
+2024-04-30T16:16:25.018 [INFO ] default - 保存库存和奖池
+2024-04-30T16:17:25.024 [INFO ] default - 保存库存和奖池
+2024-04-30T16:18:25.031 [INFO ] default - 保存库存和奖池
+2024-04-30T16:19:25.020 [INFO ] default - 保存库存和奖池
+2024-04-30T16:20:25.029 [INFO ] default - 保存库存和奖池
+2024-04-30T16:21:25.026 [INFO ] default - 保存库存和奖池
+2024-04-30T16:22:25.029 [INFO ] default - 保存库存和奖池
+2024-04-30T16:23:25.016 [INFO ] default - 保存库存和奖池
+2024-04-30T16:24:25.026 [INFO ] default - 保存库存和奖池
+2024-04-30T16:25:25.009 [INFO ] default - 保存库存和奖池
+2024-04-30T16:26:25.019 [INFO ] default - 保存库存和奖池

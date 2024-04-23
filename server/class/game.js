@@ -22,6 +22,7 @@ const HashCodeUtil = require("../../util/hashcode_util");
 const PayAPI = require('../class/pay_api');
 const CommonEvent = require('../../util/event_util');
 const EnumType = require("../../util/enum/type");
+const dot = require("../../util/dot");
 const {ShopType, GoodsType} = require("../../util/enum/type");
 
 var GameInfo = function () {
@@ -737,17 +738,17 @@ var GameInfo = function () {
 
 
 
-
+        // 定时查询订单
         this.intervalSearchOrder = function (userId, orderId, payType){
             const self = this;
             let elapsedTime = 0; // 记录经过的时间（秒）
-            // 定时查询某个接口
+            // 先查询一次订单
             self.searchOrderUpdate(userId, orderId, payType,(ret) =>{
                 if(!ret){
-                    // 定时5秒执行操作
+                    // 查询一次失败后， 定时10秒再查
                     const interval = setInterval(() => {
                       self.searchOrderUpdate(userId, orderId, payType, (code) =>{
-                          const timeOut = elapsedTime >= 10 * 60;
+                          const timeOut = elapsedTime >= 60 * 60;
                           if (code || timeOut) {
                               // 条件满足时清除定时器
                               clearInterval(interval);
@@ -760,8 +761,8 @@ var GameInfo = function () {
                               }
                           }
                       })
-                        elapsedTime += 5; // 每次操作后增加5秒
-                    }, 5000); // 间隔5秒执行一次
+                        elapsedTime += 10; // 每次操作后增加10秒
+                    }, 10000); // 间隔10秒执行一次
                 }else{
                     log.info(userId + '订单完成orderId:' + orderId);
                 }
@@ -771,20 +772,6 @@ var GameInfo = function () {
         this.searchOrderUpdate = function (userId, orderId, payType, callback){
             const self = this;
             PayAPI.searchOrder(orderId, payType).then(result =>{
-                /*res = {
-               "code": 200,
-               "msg": "success",
-               "data": {
-                   "orderStatus": 2,
-                   "orderNo": "0d3dcc8ebc634aa6b5a50757011cc840",
-                   "merOrderNo": "1713422734281400",
-                   "amount": 4,
-                   "currency": "BRL",
-                   "cime": 1713422766423,
-                   "updateTime": 1713422767506,
-                   "sign": "fc7fed77bb92b1ad139f3f09991d37073ebbb8282edeafd0ec915d0342c95080"
-               }
-               }*/
                 if(StringUtil.isJson(result)){
                     const res = JSON.parse(result);
                     // log.info(userId + '查询订单结果:' +  res);
@@ -2513,6 +2500,39 @@ var GameInfo = function () {
         // 查询账户信息
         this.searchAccountByDeviceCode = function (deviceCode, callback) {
             dao.searchAccountByDeviceCode(deviceCode, callback);
+        }
+
+        // 存储打点数据
+        this.saveDot = function (userId, adid, gps, apptoken, callback) {
+            dao.saveDot(userId, adid, gps, apptoken, callback);
+        }
+
+        // 存储打点数据
+        this.updateDot = function (userId, adid, gps, apptoken, callback) {
+            dao.updateDot(userId, adid, gps, apptoken, callback);
+        }
+
+
+        // 客户端打点
+        this.dot = function (userId, key, gps, adid, apptoken, money, callback) {
+            dao.searchDotByUserId(userId, row =>{
+                if(row){
+                    money=  !!money ? money : null;
+                    gps =  !!gps ? gps : row.gps;
+                    adid = !!adid  ? adid : row.adid;
+                    apptoken = !!apptoken ? apptoken : row.apptoken;
+                    dot.dotRequest(gps, adid, apptoken, key, money).then(data =>{
+                        const d = JSON.parse(data);
+                        if(d.status === "OK"){
+                            callback(1)
+                        }else{
+                            callback(0)
+                        }
+                    });
+                }else{
+                    callback(0)
+                }
+            })
         }
 
         // 更新账户信息

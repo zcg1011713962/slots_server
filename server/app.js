@@ -397,6 +397,67 @@ app.get('/bankrupt', function (req, res) {
     });
 });
 
+// 打点基础数据
+app.get('/dotBase', function (req, res) {
+    //验证版本
+    const userId = req.query.userId;
+    const adid = req.query.adid  === undefined ? '': req.query.adid ;
+    const gps = req.query.gps === undefined ? '' : req.query.gps;
+    const apptoken = req.query.apptoken  === undefined ? '' : req.query.apptoken ;
+    log.info(userId + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken)
+    if(!userId){
+        return;
+    }
+    gameInfo.saveDot(userId, adid, gps, apptoken, row =>{
+        if (row) {
+            log.info(userId + '客户端打点成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+            res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
+        }else{
+            gameInfo.updateDot(userId, adid, gps, apptoken, ret =>{
+                if(ret){
+                    log.info(userId + '更新打点成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+                    res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
+                }else{
+                    res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+                }
+            })
+        }
+    });
+});
+
+// 客户端打点
+app.get('/dot', function (req, res) {
+    //验证版本
+    const userId = req.query.userId;
+    const key = req.query.key;
+    const gps = req.query.gps;
+    const adid = req.query.adid;
+    const apptoken = req.query.apptoken;
+
+    log.info(userId + '客户端打点 key:' + key + 'gps:' + gps + 'adid:' + adid + 'apptoken:' + apptoken)
+    if(!userId || !key){
+        return;
+    }
+    CacheUtil.paySwitch().then(ok =>{
+        if(ok){
+            gameInfo.dot(userId, key,  gps, adid, apptoken, null ,code =>{
+                if(code){
+                    log.info(userId + '客户端打点 key:' + key + '成功')
+                    res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
+                }else{
+                    res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+                }
+            });
+        }else{
+            log.info(userId + '测试环境不支持打点')
+            res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        }
+    })
+});
+
+
+
+
 var serverSign = "slel3@lsl334xx,deka";
 
 gameInfo.setIo(io);

@@ -173,6 +173,19 @@ const PayType = {
     fatpag: 1 // fastPay fatpag支付
 };
 
+
+const dotEnum = {
+    register: 'lvpjkm', // 发起注册
+    af_complete_registration: 'nvixl1', // 完成注册
+    af_login_new: 't93b78', // 登录
+    total_login_success: '30a6od', // 登录成功
+    star_game_100: 'ywt0mq', // 玩家累计游戏局数,玩游戏累计满5局
+    toatl_jackpot: 'xhp537' ,// 总击中奖池
+    total_code_success: 'gvgu9g', // 绑定成功
+    gold_code_success: 'lc2x0f', // 推广发送金币成功
+    af_purchase: 'gg48nw' // 充值成功
+};
+
 module.exports = {
     GoodsType,
     CurrencyType,
@@ -190,6 +203,7 @@ module.exports = {
     ShopType,
     NewHandGuideFlow,
     DiamondChangeType,
+	dotEnum,
  	UndoEvenType,
     PayChannelType,
     CurrencyTypeIndex,
