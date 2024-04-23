@@ -223,6 +223,9 @@ exports.RandomNumBoth = function RandomNumBoth(Min, Max) {
 }
 
 exports.RandomNum = function RandomNum(min, max) {
+    if(min === 0 && max === 0){
+        return 0;
+    }
     // 生成指定范围内随机整数
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -235,12 +238,17 @@ exports.luckRandom = function (min, max, val) {
 }
 
 // 从 muls 数组中随机选择一个符合条件的倍数
-exports.getRandomMul = function getRandomMul(muls, mulSection) {
+/*exports.getRandomMul = function getRandomMul(muls, mulSection) {
     const [min, max] = mulSection;
     const possibleMuls = muls.filter(mul => mul >= min && mul <= max);
     if (possibleMuls.length === 0) return 0;
     const randomIndex = this.RandomNum(0, possibleMuls.length - 1);
     return possibleMuls[randomIndex];
+}*/
+// 从 muls 数组中选择符合条件的倍数数组
+exports.getRandomMuls = function getRandomMul(muls, mulSection) {
+    const [min, max] = mulSection;
+    return muls.filter(mul => mul >= min && mul <= max);
 }
 
 exports.list_one_count = function list_one_count(x, list) {
@@ -279,4 +287,9 @@ exports.appendValue = function appendValue(map , key, value) {
     } else {
         map.set(key, [value]);
     }
+}
+
+exports.es6_set = function es6_set(arr) {
+    //es6 数组去重
+    return Array.from(new Set(arr));
 }

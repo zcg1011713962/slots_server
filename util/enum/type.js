@@ -37,7 +37,7 @@ const ShopGroupType = {
 
 const LotteryResultCode = {
     normal: 1, // 正常返回
-    parmsError: -1, // 参数非法
+    parmsError: -1, // 参数非法系统错误
     popFirstRecharge: -2 ,// 输光，弹首充
     popDiscount: -3// 输光了弹限时折扣界面
 };
@@ -85,20 +85,14 @@ const TurntableGameMode = {
 const GameType = {
     laba_normal: 0, // 普通拉霸
     laba_sequence: 1, // 数列型拉霸
-    laba_single: 2 // 特殊单线拉霸
+    laba_single: 2, // 特殊单线拉霸
+    mixFootball: 3 // 混合足球
 };
 
 
 const PayChannelType ={
     pix: 'pix' // pix
 }
-
-
-const PayStatus ={
-    failed: 0,
-    success: 1
-}
-
 
 
 const ScoreChangeType = {
@@ -159,8 +153,10 @@ const OrderStatus = {
     payExpired: -2, // 交易过期
     payReturn: -3, // 交易退还
     payExcept: -4, // 交易异常
-    payTimeOut: -99 // 超时未查询到支付成功状态
-};const pushFirstRechargeType = {
+    payTimeOut: -99, // 超时未查询到支付成功状态
+    orderNotExist: -98 // 订单不存在
+};
+const pushFirstRechargeType = {
     winJackpot: '中jackpot',
     vipUpgrade: 'vip升级',
     winScorePop: '历史赢金币满足弹首充条件,只弹一次'
@@ -192,7 +188,6 @@ module.exports = {
     DiamondChangeType,
  	UndoEvenType,
     PayChannelType,
-    PayStatus,
     CurrencyTypeIndex,
     pushFirstRechargeType,
     LotteryResultCode,

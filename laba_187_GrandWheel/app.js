@@ -10,6 +10,7 @@ const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const Config = require('./config/read_config').getInstand;
 const CacheUtil = require('../util/cache_util');
+const SampleUtil = require("../util/sample_util");
 
 const Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -79,13 +80,6 @@ Csocket.on('disconnectUser', function (msg) {
         var result = {ResultCode: 0, userId: msg.userId};
         Csocket.emit("userDisconnect", result);
     }
-});
-
-
-Csocket.on('applyMatchResult', function (_info) {
-    //console.log(_info);
-    gameInfo.addRankUserList(_info);
-    //gameInfo.fishShoot(socket,fishShootInfo);
 });
 
 
@@ -220,11 +214,11 @@ io.on('connection', function (socket) {
 
 });
 
+SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
 
 app.set('port', process.env.PORT || gameConfig.port);
-
-var server = http.listen(app.get('port'), function () {
+const server = http.listen(app.get('port'), function () {
     console.log('start at port:' + server.address().port);
 });
 
-console.log("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");

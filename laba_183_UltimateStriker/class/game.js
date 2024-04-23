@@ -1,17 +1,18 @@
-﻿var User = require("./User");
-var gameDao = require("./../dao/gameDao");
-var arithmetic = require("./arithmetic");
-var sever = require("./sever");
-var schedule = require("node-schedule");
-var gameConfig = require("./../config/gameConfig");
-var redis_send_and_listen = require("./../../util/redis_send_and_listen");
-const {getInstand: log} = require("../../CClass/class/loginfo");
+﻿const User = require("./User");
+const gameDao = require("./../dao/gameDao");
+const arithmetic = require("./arithmetic");
+const sever = require("./sever");
+const schedule = require("node-schedule");
+const gameConfig = require("./../config/gameConfig");
+const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
+const CacheUtil = require("../../util/cache_util");
+const dao = require('../../util/dao/dao');
+const {getInstand: log} = require("../../CClass/class/loginfo");
 const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
-const CacheUtil = require("../../util/cache_util");
-//读取文件包
+const StringUtil = require("../../util/string_util");
 
 
 var GameInfo = function () {
@@ -39,8 +40,6 @@ var GameInfo = function () {
             this.initAlgorithm(0);
             //初始化用户列表
             this.userList = {};
-            //在线人数为0
-            this.onlinePlayerCount = 0;
             //统计
             this.winTotal = 0;
             this.lotteryCount = 0;
@@ -62,7 +61,7 @@ var GameInfo = function () {
                 times.push(i);
             }
             rule.second = times;
-            let self = this;
+            var self = this;
             schedule.scheduleJob(rule, function () {
                 if (gameConfig.maintain) {
                     --gameConfig.maintainTime;
@@ -74,542 +73,23 @@ var GameInfo = function () {
 
                 self.score_changeLog();
                 self.lotteryLog();
-                let nowDate = new Date();
-                let minute = nowDate.getMinutes();
-                let second = nowDate.getSeconds();
-                if (minute % 10 == 0 && second == 1) {
+                var nowDate = new Date();
+                var minute = nowDate.getMinutes();
+                var second = nowDate.getSeconds();
+                if (second === 25) {
                     self.saveGamblingBalanceGold();
-                    console.log("保存库存和奖池");
+                    log.info("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
                         server_id: gameConfig.serverId,
-                        online_num: self.onlinePlayerCount
+                        online_num: self.getOnlinePlayerCount()
                     });
-                    //console.log("推送在线人数");
                 }
+
                 //推送奖池给玩家
-                if (second % 20 == 0) {
+                if (second % 10 === 0) {
                     CacheUtil.pushGameJackpot(self.userList);
                 }
             });
-        };
-
-        this.tt = 0;
-
-        this.lottery = function (userId, nBetSum, gameJackpot, redisIconTypeBind) {
-
-            if (!userId) {					//传输ID错误
-                console.log("未传用户ID");
-                return {code: -1};
-            }
-            if (!this.userList[userId]) {	//未找到用户
-                console.log("找不到用户");
-                return {code: -1}
-            }
-            //用户扣钱或者减少免费次数
-            const lotteryResult = this.userList[userId].lottery(nBetSum);
-            if (!lotteryResult) {
-                log.info(userId + "分数不够");
-                return {code: -2};
-            }
-
-            // 每条线下注的金额
-            let len = Config.nGameLines.length;
-            const nBetItem = nBetSum / len;
-            const nBetList = [];
-            for (let i = 0; i < len; i++) {
-                nBetList.push(nBetItem)
-            }
-            // 行
-            const line_count = Config.line_count;
-            const col_count = Config.col_count;
-            // 生成图案数量
-            const cardsNumber = line_count * col_count;
-            // 图案
-            const cards = Config.cards;
-            // 图案下标对应的权重值
-            const weight_two_array = Config.weight_two_array;
-            // 图案倍数
-            const icon_mul = Config.icon_mul;
-            // 免费图案
-            const freeCard = Config.free_card;
-            // 中普通图案出现的最少次数
-            const nGameLineWinLowerLimitCardNumber = Config.line_win_lower_limit;
-            // 中jackpot出现的最少次数
-            const jackpotCardLowerLimit = Config.icon_jackpot_lower_limit;
-            // jackpot图案
-            const jackpotCard = Config.jackpot_card;
-            // 空白图案
-            const blankCard = -1;
-            // 万能图案
-            const nGameMagicCardIndex = Config.nGameMagicCard;
-            // 游戏奖池比例
-            const jackpotRatio = Config.jackpot_ratio;
-            // 玩家下注
-            const jackpotLevelMoney = Config.jackpot_level_money;
-            // 奖池挡位
-            const jackpotLevelProb = Config.jackpot_level_prob;
-            //
-            const betJackpotLevelBet = Config.bet_jackpot_level_bet;
-            //
-            const betJackpotLevelIndex = Config.bet_jackpot_level_index;
-            //
-            const jackpotPayLevel = Config.jackpot_pay_level;
-            // 配牌器开关
-            const iconBindSwitch = Config.icon_bind_switch;
-            // 配牌
-            const iconTypeBind = redisIconTypeBind ? redisIconTypeBind : Config.icon_type_bind;
-            // 免费次数[]
-            const iconFreeTimes = Config.free_times;
-            // 线的判断方向
-            const nGameLineDirection = Config.line_direction;
-            // 双向判断的情况下，如果两个方向都中奖，取大值或者取小值（True：取大值；False：取小值）
-            const bGameLineRule = Config.line_rule;
-            // 中奖图案角标
-            const nGameLines = Config.nGameLines;
-            //
-            const target_rtp_start_position = 10;
-            // 免费卡对应次数
-            let freeTimes = 0;
-            if(freeCard){
-                freeTimes = iconFreeTimes[freeCard];
-            }
-
-            //用户金币
-            const score_before = this.userList[userId].getScore();
-            //获取免费次数
-            const sourceFreeCount = this.userList[userId].getFreeCount();
-            const GamblingBalanceLevelBigWin = this.A.getGamblingBalanceLevelBigWin();
-            // 水位
-            const nGamblingWaterLevelGold = GamblingBalanceLevelBigWin.nGamblingWaterLevelGold;
-            // 大奖幸运等级
-            const nGamblingBigWinLevel = GamblingBalanceLevelBigWin.nGamblingBigWinLevel;
-            // 大奖幸运概率
-            const nGamblingBigWinLuck = GamblingBalanceLevelBigWin.nGamblingBigWinLuck;
-            // 幸运大奖
-            const is_luck = false;
-            // 目标RTP
-            const expectRTP = GamblingBalanceLevelBigWin.expectRTP;
-
-            // 进入奖池的钱
-            const addJackpot = nBetSum * parseInt(nGamblingWaterLevelGold) / 100;
-            // 进入库存的钱
-            const addBalance = nBetSum - addJackpot;
-            // 增加库存和奖池ll
-            this.A.addGamblingBalanceGold(addBalance, addJackpot);
-
-            let bFreeTimeFlag = false;
-            if(sourceFreeCount > 0){
-                bFreeTimeFlag = true;
-            }
-
-            let nHandCards = [];
-            let win = 0;
-            let winJackpot = 0;
-            let fin_value = 0;
-            let source_rtp = 0;
-            // 生成图案，分析结果（结果不满意继续）
-            while (true) {
-                //# 处理结果初始化
-                var dictAnalyseResult = {
-                    code: 2,
-                    nHandCards: [],    //# 结果手牌
-                    nAllWinLines: [],  //# 中奖的线数的检索
-                    nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
-                    nWinDetail: [],       //# 每条线中多少钱
-                    nBet: nBetSum,        // # 下注总额
-                    win: 0,  //# 中奖总额
-                    nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
-                    nWinCards_top: [],
-                    getOpenBox: {
-                        bFlag: false,
-                        nWinOpenBox: 0
-                    },
-                    getFreeTime: {
-                        bFlag: false,
-                        nFreeTime: 0,
-                        nIndex: 0
-                    },
-                    fMultiple: 1,
-                    nBetTime: Number(new Date())
-                };
-
-                if(jackpotCard){
-                    // 分析jackpot
-                    winJackpot = LABA.JackpotAnalyse(gameJackpot, nBetSum, jackpotRatio, jackpotLevelMoney , jackpotLevelProb,betJackpotLevelBet, betJackpotLevelIndex, jackpotPayLevel);
-                }
-                // 生成图案
-                nHandCards = LABA.createHandCards(cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, iconBindSwitch, iconTypeBind, winJackpot, blankCard);
-
-                //添加
-                let col1 = [nHandCards[0], nHandCards[6], nHandCards[12], nHandCards[18], nHandCards[24], nHandCards[30]];
-                let col2 = [nHandCards[1], nHandCards[7], nHandCards[13], nHandCards[19], nHandCards[25], nHandCards[31]];
-                let col3 = [nHandCards[2], nHandCards[8], nHandCards[14], nHandCards[20], nHandCards[26], nHandCards[32]];
-                let col4 = [nHandCards[3], nHandCards[9], nHandCards[15], nHandCards[21], nHandCards[27], nHandCards[33]];
-                let col5 = [nHandCards[4], nHandCards[10], nHandCards[16], nHandCards[22], nHandCards[28], nHandCards[34]];
-                let col6 = [nHandCards[5], nHandCards[11], nHandCards[17], nHandCards[23], nHandCards[29], nHandCards[35]];
-
-                //随机转换多格的牌型
-                let superCardList = {};
-                let superCardDetailList = {};
-                let sId = 1;
-
-                let addSpecialCard = (arr, colNum) => {
-                    let r1 = RandomNumBoth(0, 3);//出现几组
-                    let card = RandomNumBoth(0, 11);//哪张牌
-                    switch (r1) {
-                        case 0:
-                            break;
-                        case 1:
-                            let p = RandomNumBoth(1, arr.length - 1);
-                            let len = RandomNumBoth(2, p + 1 > 4 ? 4 : p + 1);
-                            len = card === gameConfig.GAME_FREE_TIMES_CARD_DIAMOND ? 2 : len;
-                            let bt = RandomNumBoth(1, 2);//1有  2没有
-                            let ls = 2;//1金  2银  3万能
-                            let pos = [];
-                            let drl = {r: card + 1, bt: bt, ls: ls};
-                            for (let i = 0; i < len; i++) {
-                                arr[p - i] = card;
-                                pos.push(colNum + 6 * (p - i));
-                                nHandCards[colNum + 6 * (p - i)] = card;
-                            }
-                            pos.sort((a, b) => {
-                                return a - b;
-                            });
-                            superCardList["" + sId] = pos;
-                            superCardDetailList["" + sId] = drl;
-                            sId++;
-                            break;
-                        case 2:
-                            let list = RandomNumForList(gameConfig.CARD_ORDERING);
-                            for (let i = 0; i < list.length; i++) {
-                                card = RandomNumBoth(0, 11);//哪张牌
-                                if (card === gameConfig.GAME_FREE_TIMES_CARD_DIAMOND) {
-                                    let r2 = RandomNumBoth(0, 5);
-                                    list = gameConfig.CARD_ORDERING[r2];
-                                }
-                                let pos2 = [];
-                                let bt2 = RandomNumBoth(1, 2);//1有  2没有
-                                let ls2 = 2;//1金  2银  3万能
-                                let drl2 = {r: card + 1, bt: bt2, ls: ls2};
-                                for (let j = 0; j < list[i].length; j++) {
-                                    arr[list[i][j]] = card;
-                                    pos2.push(colNum + 6 * list[i][j]);
-                                    nHandCards[colNum + 6 * list[i][j]] = card;
-                                }
-                                pos2.sort((a, b) => {
-                                    return a - b;
-                                });
-                                superCardList["" + sId] = pos2;
-                                superCardDetailList["" + sId] = drl2;
-                                sId++;
-                            }
-                            break;
-                        case 3:
-                            let list2 = [[0, 1], [2, 3], [4, 5]];
-                            for (let i = 0; i < list2.length; i++) {
-                                card = RandomNumBoth(0, 11);//哪张牌
-                                let pos3 = [];
-                                let bt3 = RandomNumBoth(1, 2);//1有  2没有
-                                let ls3 = 2;//1金  2银  3万能
-                                let drl3 = {r: card + 1, bt: bt3, ls: ls3};
-                                for (let j = 0; j < list2[i].length; j++) {
-                                    arr[list2[i][j]] = card;
-                                    pos3.push(colNum + 6 * list2[i][j]);
-                                    nHandCards[colNum + 6 * list2[i][j]] = card;
-                                }
-                                pos3.sort((a, b) => {
-                                    return a - b;
-                                });
-                                superCardList["" + sId] = pos3;
-                                superCardDetailList["" + sId] = drl3;
-                                sId++;
-                            }
-                            break;
-                    }
-                    return arr;
-                };
-
-                col2 = addSpecialCard(col2, 1);
-                col3 = addSpecialCard(col3, 2);
-                col4 = addSpecialCard(col4, 3);
-                col5 = addSpecialCard(col5, 4);
-
-                console.log(col2, col3, col4, col5);
-
-                // //免费牌每列只许出现一张
-                // if (list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col1) > 1 ||
-                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col2) > 1 ||
-                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col3) > 1 ||
-                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col4) > 1 ||
-                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col5) > 1 ||
-                //     list_one_count(gameConfig.GAME_FREE_TIMES_CARD_DIAMOND, col6) > 1) {
-                //     continue;
-                // }
-
-                for (var i = 0; i < gameConfig.GAME_HAND_CARDS_NUMBER_DIAMOND; i++) {
-                    dictAnalyseResult["nWinCards"].push(false);
-                }
-
-                var bet_num = parseInt(nBetSum / gameConfig.GAME_GOLD_Single);
-
-                //# 获取处理结果
-                dictAnalyseResult = this.A.newAnalyse(
-                    dictAnalyseResult, nHandCards,
-                    gameConfig.GAME_MAGIC_CARD_DIAMOND,
-                    gameConfig.GAME_FREE_TIMES_CARD_DIAMOND,
-                    gameConfig.GAME_HAND_CARDS_LowerLimit,
-                    gameConfig.GAME_HAND_CARDS_Column, bet_num,
-                    gameConfig.GAME_COMBINATIONS_DIAMOND,
-                    gameConfig.GAME_GOLD_Single);
-
-                dictAnalyseResult["sr"] = superCardList;
-                dictAnalyseResult["srd"] = superCardDetailList;
-                //# 判断是否进入免费模式
-                var getFreeTime = {"bFlag": false, "nFreeTime": 0};
-                var getOpenBox = {bFlag: false, nWinOpenBox: 0, win: 0};
-
-                if (bFreeTimeFlag) {
-                    dictAnalyseResult["win"] *= freeMul;
-                    dictAnalyseResult["fMultiple"] = freeMul;
-                }
-
-                var res_dict_list = [];
-                var new_hand_card = [];
-                for (let i in nHandCards) {
-                    new_hand_card.push(parseInt(nHandCards[i]) + 1)
-                }
-                dictAnalyseResult["nHandCards"] = new_hand_card;
-                res_dict_list.push(JSON.parse(JSON.stringify(dictAnalyseResult)));
-
-                var combo_num = 0;
-                var all_win = 0;
-                var box_win = 0;
-                while (true) {
-                    if (dictAnalyseResult["win"] > 0) { // 中奖了
-                        all_win += dictAnalyseResult["win"];
-                        combo_num += 1;
-                        var win_lines_index = [];
-                        for (let nwldi in dictAnalyseResult["nWinLinesDetail"]) {
-                            for (let nwldii in dictAnalyseResult["nWinLinesDetail"][nwldi]) {
-                                win_lines_index.push(dictAnalyseResult["nWinLinesDetail"][nwldi][nwldii])
-                            }
-                        }
-                        win_lines_index = es6_set(win_lines_index);
-                        win_lines_index.sort(function (a, b) {
-                            return a - b
-                        });
-                        win_lines_index.reverse();
-                        //{r: card + 1, bt: bt, ls: ls};
-                        let typeList = {};
-                        for (let wlii in win_lines_index) {
-                            let x = parseInt(win_lines_index[wlii]);
-                            if (x < nHandCards.length) {
-                                let isFind = false;
-                                for (let si in superCardList) {
-                                    if (superCardList[si].indexOf(x) > -1) {
-                                        if (superCardDetailList[si].bt === 1) {//有框的需要替换
-                                            isFind = true;
-                                            if (superCardDetailList[si].ls === 1) {//金框变万能
-                                                typeList[si] = 3;
-                                                nHandCards[x] = gameConfig.GAME_MAGIC_CARD_DIAMOND;
-                                            } else if (superCardDetailList[si].ls === 2) {//银框变金框，并随机新的元素
-                                                typeList[si] = 2;
-                                            }
-                                        } else if (superCardDetailList[si].ls === 3 && superCardDetailList[si].nt > 1) {//如果是万能
-                                            typeList[si] = 4;
-                                            isFind = true;
-                                        } else {//没框的需要删除
-                                            typeList[si] = 1;
-                                            isFind = false;
-                                        }
-
-                                        break;
-                                    }
-                                }
-                                if (!isFind) {
-                                    nHandCards[x] = -1;
-                                }
-                            }
-                        }
-                        console.log("typeList:" + JSON.stringify(typeList));
-                        //整合需要替换的卡牌
-                        for (let i in typeList) {
-                            if (typeList[i] === 1) {
-                                delete superCardList[i];
-                                delete superCardDetailList[i];
-                            } else if (typeList[i] === 2) {
-                                let newCard = gameConfig.GAME_COLORS_DIAMOND[RandomNumBoth(0, 10)];
-                                superCardDetailList[i].r = newCard + 1;
-                                superCardDetailList[i].bt = 1;
-                                superCardDetailList[i].ls = 1;
-                                for (let j in superCardList[i]) {
-                                    nHandCards[superCardList[i][j]] = newCard;
-                                }
-                            } else if (typeList[i] === 3) {//转化为万能
-                                let newCard = gameConfig.GAME_MAGIC_CARD_DIAMOND;
-                                superCardDetailList[i].r = newCard + 1;
-                                superCardDetailList[i].bt = 2;
-                                superCardDetailList[i].ls = 3;
-                                superCardDetailList[i].nt = superCardList[i].length;
-                                for (let j in superCardList[i]) {
-                                    nHandCards[superCardList[i][j]] = newCard;
-                                }
-                            } else if (typeList[i] === 4) {//消除万能
-                                superCardDetailList[i].nt -= 1;
-                            }
-                        }
-                        //重新调整长牌的位置
-                        for (let i in superCardList) {
-                            let lastCard = superCardList[i][superCardList[i].length - 1];
-                            let dn = 0;
-                            if (lastCard + 6 < 36 && nHandCards[lastCard + 6] === -1) {
-                                dn += 1;
-                            }
-                            if (lastCard + 12 < 36 && nHandCards[lastCard + 12] === -1) {
-                                dn += 1;
-                            }
-                            if (lastCard + 18 < 36 && nHandCards[lastCard + 18] === -1) {
-                                dn += 1;
-                            }
-                            if (lastCard + 24 < 36 && nHandCards[lastCard + 24] === -1) {
-                                dn += 1;
-                            }
-                            for (let j in superCardList[i]) {
-                                superCardList[i][j] += 6 * dn;
-                            }
-                        }
-
-                        nHandCards.reverse();
-                        if (!bFreeTimeFlag) {
-                            for (let n_h_i in nHandCards) {
-                                if (nHandCards[n_h_i] === -1) {
-                                    if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
-                                        nHandCards[parseInt(n_h_i) + 6] = -1;
-                                    } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
-                                        nHandCards[parseInt(n_h_i) + 12] = -1;
-                                    } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
-                                        nHandCards[parseInt(n_h_i) + 18] = -1;
-                                    } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
-                                        nHandCards[parseInt(n_h_i) + 24] = -1;
-                                    } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
-                                        nHandCards[parseInt(n_h_i) + 30] = -1;
-                                    } else {
-                                        nHandCards[n_h_i] = gameConfig.GAME_COLORS_DIAMOND[RandomNumBoth(0, gameConfig.GAME_COLORS_DIAMOND.length - 1)];
-                                    }
-                                }
-                            }
-                        } else {
-                            for (let n_h_i in nHandCards) {
-                                if (nHandCards[n_h_i] === -1) {
-                                    if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
-                                        nHandCards[parseInt(n_h_i) + 6] = -1;
-                                    } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
-                                        nHandCards[parseInt(n_h_i) + 12] = -1;
-                                    } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
-                                        nHandCards[parseInt(n_h_i) + 18] = -1;
-                                    } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
-                                        nHandCards[parseInt(n_h_i) + 24] = -1;
-                                    } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
-                                        nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
-                                        nHandCards[parseInt(n_h_i) + 30] = -1;
-                                    } else {
-                                        nHandCards[n_h_i] = gameConfig.Free_GAME_COLORS_DIAMOND[RandomNumBoth(0, gameConfig.Free_GAME_COLORS_DIAMOND.length - 1)];
-                                    }
-                                }
-                            }
-
-                        }
-                        nHandCards.reverse();
-
-
-
-
-                        dictAnalyseResult = {
-                            code: 2,
-                            nHandCards: [],    //# 结果手牌
-                            nAllWinLines: [],  //# 中奖的线数的检索
-                            nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
-                            nWinDetail: [],       //# 每条线中多少钱
-                            nBet: 0,            // # 下注总额
-                            win: 0,             //# 中奖总额
-                            nWinCards: [],      //# 位数与手牌数相同，中奖的为True，没中奖的为False
-                            nWinCards_top: [],
-                            getOpenBox: {
-                                bFlag: false,
-                                nWinOpenBox: 0
-                            },
-                            getFreeTime: {
-                                bFlag: false,
-                                nFreeTime: 0,
-                                nIndex: 0
-                            },
-                            fMultiple: 1,
-                            nBetTime: Number(new Date())
-                        };
-                        //# 获取处理结果
-                        dictAnalyseResult = this.A.newAnalyse(
-                            dictAnalyseResult, nHandCards,
-                            gameConfig.GAME_MAGIC_CARD_DIAMOND,
-                            gameConfig.GAME_FREE_TIMES_CARD_DIAMOND,
-                            gameConfig.GAME_HAND_CARDS_LowerLimit,
-                            gameConfig.GAME_HAND_CARDS_Column, bet_num,
-                            gameConfig.GAME_COMBINATIONS_DIAMOND,
-                            gameConfig.GAME_GOLD_Single);
-
-                        new_hand_card = [];
-                        for (var i in nHandCards) {
-                            new_hand_card.push(parseInt(nHandCards[i]) + 1);
-                        }
-                        dictAnalyseResult["nHandCards"] = new_hand_card;
-                        dictAnalyseResult["combo_num"] = combo_num;
-
-                        dictAnalyseResult["sr"] = superCardList;
-                        dictAnalyseResult["srd"] = superCardDetailList;
-
-                        res_dict_list.push(JSON.parse(JSON.stringify(dictAnalyseResult)));
-                    } else {
-                        break;
-                    }
-                }
-                // 开了配牌器
-                if(iconTypeBind && iconTypeBind.length > 0){
-                    break;
-                }
-                // 库存上限控制
-                if(GamblingBalanceLevelBigWin.nGamblingBalanceGold < win){
-                    continue;
-                }
-                break
-            }
-
-            // 减少库存和奖池
-            const winscore = parseInt(dictAnalyseResult["win"]) + winJackpot;
-            if (winscore > 0) {
-                this.A.subGamblingBalanceGold(winscore, winJackpot);
-            }
-            // 结果处理
-            const user = this.userList[userId];
-            const freeCount = dictAnalyseResult["getFreeTime"]["nFreeTime"];
-            const resultArray = analyse_result.build(dictAnalyseResult, gameConfig.gameName, nHandCards, userId, nBetSum, winscore, freeCount, GamblingBalanceLevelBigWin, user, gameConfig.sendMessage_mul);
-            // 剩余免费次数
-            const resFreeCount = user.getFreeCount();
-            const score_current = user.getScore();
-            // 日志记录
-            lottery_record.record(this._Csocket, 46656, gameConfig.serverId, gameConfig.gameId, userId, nBetSum, winscore, score_before, score_current, freeCount, sourceFreeCount,
-                resFreeCount, gameConfig.logflag, this.lotteryLogList, this.score_changeLogList, resultArray);
-            // 摇奖次数统计
-            this.lotteryTimes(lotteryResult, winscore, nBetSum, fin_value);
-            // 返回结果
-            return analyse_result.lotteryReturn(score_current, winscore, freeCount, resFreeCount, res_dict_list, 0);
         };
 
         this.lotteryTimes = function (lotteryResult, winscore, nBetSum, fin_value) {
@@ -656,40 +136,54 @@ var GameInfo = function () {
             this.userList[_userInfo.userid] = new User(_userInfo, socket);
         };
 
+        // 更新用户
         this.updateUser = function (userInfo) {
-            //console.log("update")
-            if (!this.userList[userInfo._userId]) return;
-            let result = {};
-            //已经断线
-            if (this.userList[userInfo._userId]._isLeave) {
-                result = {ResultCode: 0, userId: userInfo._userId};
-                this._Csocket.emit("userDisconnect", result);
-                delete this.userList[userInfo._userId];
+            const userId = userInfo.userId;
+            if (!this.userList[userId]) {
+                log.err(userId + '用户不在线')
                 return;
             }
-            this.userList[userInfo._userId].update(userInfo);
+            let result = {};
+            //已经断线
+            if (this.userList[userId]._isLeave) {
+                log.info(userId + '用户已经断线')
+                result = {ResultCode: 0, userId: userId};
+                this._Csocket.emit("userDisconnect", result);
+                delete this.userList[userId];
+                return;
+            }
 
-            this.LoginGame(userInfo._userId, this.serverId);
-            ++this.onlinePlayerCount;
+            this.userList[userId].update(userInfo);
 
-            let GamblingBalanceLevelBigWin = this.A.getGamblingBalanceLevelBigWin();
-            let nGamblingWinPool = GamblingBalanceLevelBigWin.nGamblingWinPool;
-            nGamblingWinPool = nGamblingWinPool > 0 ? nGamblingWinPool : 0;
-            let resultObj = {
-                account: this.userList[userInfo._userId]._account,
-                id: this.userList[userInfo._userId]._userId,
-                nickname: this.userList[userInfo._userId]._nickname,
-                score: this.userList[userInfo._userId]._score,
-                nGamblingWinPool: nGamblingWinPool + this.ranScore
-            };
-            result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-            this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
+            this.LoginGame(userInfo.userId, this.serverId);
 
+            CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
+                try {
+                    let resultObj = {
+                        account: userInfo.account,
+                        id: userInfo.userId,
+                        nickname: userInfo.nickname,
+                        score: userInfo.score,
+                        jackpot: {
+                            gameJackpot: gameJackpot,
+                            grand_jackpot: grandJackpot,
+                            major_jackpot: majorJackpot,
+                            minor_jackpot: minorJackpot,
+                            mini_jackpot: miniJackpot
+                        }
+                    };
+                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                    this.userList[userId]._socket.emit('loginGameResult', result);
+                }catch (e){
+                    log.err('给用户回应登录结果:' + e)
+                }
+            })
         };
 
         //获得在线人数
         this.getOnlinePlayerCount = function () {
-            return this.onlinePlayerCount;
+            return Object.keys(this.userList).length;
         };
 
         //在线所有人
@@ -715,6 +209,7 @@ var GameInfo = function () {
             }
             if (saveListTemp.length > 0) {
                 this._Csocket.emit("score_changeLog", saveListTemp);
+                //gameDao.score_changeLog(saveListTemp);
             }
         };
 
@@ -752,29 +247,32 @@ var GameInfo = function () {
 
         //删除用户
         this.deleteUser = function (_socket) {
-            if (_socket.userId) {
-                //存免费次数
-                var info = {
-                    userId: _socket.userId,
-                    freeCount: this.userList[_socket.userId].getFreeCount(),
-                    LotteryCount: this.userList[_socket.userId].getLotteryCount()
-                };
-                gameDao.saveFree(info, function (result) {
-                    if (!result)
-                        logInfo.error("存免费次数:" + _userinfo.userId + "失败!")
-                });
-                this._Csocket.emit("lineOut", {
-                    signCode: gameConfig.LoginServeSign,
-                    state: 0,
-                    gameId: gameConfig.gameId,
-                    serverId: gameConfig.serverId,
-                    userId: _socket.userId,
-                    tableId: -1,
-                    seatId: -1
-                });
-                this.sever.LogoutRoom(this.userList[_socket.userId], _socket);
-                delete this.userList[_socket.userId];
-                --this.onlinePlayerCount;
+            let userId = _socket.userId;
+            const self = this;
+            if (userId) {
+                CacheUtil.getFreeCount(userId).then(freeCount =>{
+                    //存免费次数
+                    const info = {
+                        userId: userId,
+                        freeCount: freeCount,
+                        LotteryCount: 0
+                    };
+                    gameDao.saveFree(info, function (result) {
+                        log.info(userId + '保存免费次数' + info.freeCount);
+                        self._Csocket.emit("lineOut", {
+                            signCode: gameConfig.LoginServeSign,
+                            state: 0,
+                            gameId: gameConfig.gameId,
+                            serverId: gameConfig.serverId,
+                            userId: userId,
+                            tableId: -1,
+                            seatId: -1
+                        });
+                        delete self.userList[userId];
+                        log.info(userId + '离开游戏,移除用户,当前游戏人数:' + self.getOnlinePlayerCount())
+                        userId = null;
+                    });
+                })
             }
         };
 
@@ -783,8 +281,11 @@ var GameInfo = function () {
             if (_userId) {
                 var socketItem = this.userList[_userId]._socket;
                 result = {resultid: 0, msg: msg};
+                log.info(_userId + '给用户回应登录结果' + result)
                 socketItem.emit('loginGameResult', result);
                 delete this.userList[_userId];
+            }else{
+                log.err('非法的用户')
             }
         };
 
@@ -819,13 +320,13 @@ var GameInfo = function () {
         //获得用户当前分数
         this.getPlayerScore = function (_userId) {
             if (!_userId) {	//传输ID错误
-                console.log("查询分数,参数错误");
+                log.info('==========================查询分数,参数错误"');
                 return -1;
             }
             if (this.userList[_userId]) {//未找到用户
-                //console.log("查询在线,未找到" + _userId + "用户");
                 return this.userList[_userId].getScore();
             } else {
+                log.info('=============================用户不在线');
                 return -1;
             }
         };
@@ -841,10 +342,9 @@ var GameInfo = function () {
                 console.log("加分,未登录");
                 return 0
             } else {
-                console.log(score);
                 if (this.userList[_userId].addgold(score)) {
-                    console.log(this.userList[_userId].getScore());
-                    console.log("加分成功!");
+                    log.info('游戏内增加金币:' + score + '当前金币:' + this.userList[_userId].getScore())
+
                     var tablestring = "table" + this.userList[_userId].getTable();
                     this._io.sockets.in(tablestring).emit('addgoldResult', {
                         userId: _userId,
@@ -859,12 +359,31 @@ var GameInfo = function () {
             }
         };
 
+
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 5 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
+
         //保存库存 奖池
         this.saveGamblingBalanceGold = function () {
             //获得库存奖池
-            var dict = this.A.getGamblingBalanceGold();
-
-            gameDao.Update_GamblingBalanceGold(dict.nGamblingBalanceGold, function (Result) {
+            const dict = this.A.getGamblingBalanceGold();
+            gameDao.Update_GamblingBalanceGold(dict.nGamblingBalanceGold, dict.nSysBalanceGold, function (Result) {
             })
         };
 
@@ -901,9 +420,6 @@ var GameInfo = function () {
         //进入游戏
         this.LoginGame = function (_userId, gametype) {
             if (!this.userList[_userId]) return;
-            //用户添加游戏ID
-            //console.log(_userId)
-            //console.log("用户进入游戏" + gametype);
             this.userList[_userId].loginGame(gametype);
         };
 
@@ -914,7 +430,7 @@ var GameInfo = function () {
 
 
             if (!this.userList[_userId].getGameId()) {
-                console.log("用户" + _userId + ",没有进入任何游戏,进入房间")
+                console.log("用户" + _userId + ",没有进入任何游戏,进入房间");
                 return;
             }
 
@@ -964,9 +480,9 @@ var GameInfo = function () {
             gameDao.getFreeCount(_userId, function (ResultCode, Result) {
                 //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
-                Result.Id = _userId;
+                Result.Id = _userId
                 self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
 
                 var ResultData = {
                     TableId: LoginResult.tableId,
@@ -979,6 +495,7 @@ var GameInfo = function () {
 
                 if (!linemsg.Result) {
                     var tablestring = "table" + LoginResult.tableId;
+
                     _socket.broadcast.to(tablestring).emit('playEnter', {
                         ResultCode: 1,
                         ResultData: {
@@ -994,7 +511,6 @@ var GameInfo = function () {
                 }
 
             })
-
         };
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
@@ -1002,12 +518,11 @@ var GameInfo = function () {
             gameDao.getFreeCount(_userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
-                self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
+                CacheUtil.setFreeCount(_userId, Result.freeCount)
                 _socket.emit("LoginfreeCountResult", {ResultCode: 1, freeCount: Result.freeCount});
             })
-        };
-
+        }
 
         //断线保存
         this.lineOutSet = function (_info) {
@@ -1061,8 +576,8 @@ var GameInfo = function () {
         };
 
         this.disconnectAllUser = function () {
-            for (let item in this.userList) {
-                this.userList[item]._socket.disconnect();
+            for (var itme in this.userList) {
+                this.userList[itme]._socket.disconnect();
             }
             console.log("服务器开启维护，已经全部离线");
         };
@@ -1080,37 +595,8 @@ var GameInfo = function () {
         return {getInstand: _gameinfo}
     }
 
-}
-();
+}();
 
-function RandomNumForList(arr) {
-    //从指定数组中选取随机值
-    return arr[Math.floor((Math.random() * arr.length))]
-}
-
-function RandomNumBoth(Min, Max) {
-    //生成指定范围内随机整数
-    var Range = Max - Min;
-    var Rand = Math.random();
-    var num = Min + Math.round(Rand * Range); //四舍五入
-    return num;
-}
-
-function list_one_count(x, list) {
-    //数组中指定值出现次数
-    var count = 0;
-    for (var i in list) {
-        if (list[i] == x) {
-            count++
-        }
-    }
-    return count;
-}
-
-function es6_set(arr) {
-    //es6 数组去重
-    return Array.from(new Set(arr));
-}
 
 
 module.exports = GameInfo;

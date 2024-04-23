@@ -36,9 +36,9 @@ const emailCodeLongExpireSecond = 800; // 过期校验过期时间
 
 const gameConfig = {
     gameConfigKey: 'gameConfig',
+    handCardsKey: 'handCards',
     iconValueKey: 'iconValue',
     controlAwardKey: 'controlAward',
-    handCardsKey: 'handCards',
     base: 'base',
     nGameLines: 'nGameLines',
     iconInfos: 'iconInfos',
@@ -467,8 +467,8 @@ exports.addPlayGameCount = function (userId){
             // 幸运活动增加玩游戏次数
             RedisUtil.hget(everydayLuckyCoin, userId).then(ret =>{
                 const d = JSON.parse(ret);
-                const doLuckyCoinTask = d.doLuckyCoinTask === undefined ? 0 : parseInt(d.doLuckyCoinTask);
                 if(d){
+                    const doLuckyCoinTask = d.doLuckyCoinTask === undefined ? 0 : parseInt(d.doLuckyCoinTask);
                     d.doLuckyCoinTask = doLuckyCoinTask + 1;
                     if(StringUtil.compareNumbers(doLuckyCoinTask, d.luckyCoinTask)){
                         RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(d));
@@ -1024,26 +1024,31 @@ exports.getGamblingWaterLevelGold = function(){
 
 
 
-exports.getNewbierPartMul = function(userId){
+exports.getNewbierPartMulByUserId = function(userId){
     return RedisUtil.hget(newbierPartKey, userId).then(newbierPart =>{
+        //if(!newbierPart || JSON.parse(newbierPart).length === 0){
         if(!newbierPart){
             return this.getNewhandProtectConfig().then(c =>{
                 const item = c.newbierPart[0];
-                const removedItem = c.newbierPart.shift();
+                const mulIndex = c.newbierPart.shift();
                 return RedisUtil.hmset(newbierPartKey, userId, JSON.stringify(c.newbierPart)).then(r =>{
-                    return removedItem;
+                    return mulIndex;
                 });
             })
         }else{
             const part = JSON.parse(newbierPart);
-            const removedItem = part.shift();
+            const mulIndex = part.shift();
             return RedisUtil.hmset(newbierPartKey, userId, JSON.stringify(part)).then(r =>{
-                return removedItem;
+                return mulIndex;
             });
         }
     });
 }
-
+exports.getNewbierPartLengthByUserId = function(userId){
+    return RedisUtil.hget(newbierPartKey, userId).then(newbierPart =>{
+        return newbierPart ? JSON.parse(newbierPart).length : null;
+    });
+}
 
 
 exports.setControlAward = function(map){
@@ -1055,11 +1060,11 @@ exports.getControlAwardByRtp = function(rtp){
         const rtpMap = new Map(JSON.parse(jsonString));
         const rtpArr = [...rtpMap.keys()];
         for(let i = 0; i < rtpArr.length; i++) {
-            if(i === 0 && rtp <= rtpArr[i]){
+            if(i === 0 && rtpArr[i].length === 1 && rtp <= rtpArr[i][0]){  // 第一项 数组只有一个元素
                 return rtpMap.get(rtpArr[i])
-            }else if(i === rtpArr.length - 1 && rtp > rtpArr[i]){
+            }else if(i === rtpArr.length - 1 && rtpArr[i].length === 1 && rtp >= rtpArr[i][0]){  // 最后一项 数组只有一个元素
                 return rtpMap.get(rtpArr[i]);
-            }else{
+            }else if(rtpArr[i].length === 2){ // 数组两个元素
                 const [min, max] = rtpArr[i];
                 if(rtp > min && rtp < max){
                     return rtpMap.get(rtpArr[i]);
@@ -1073,12 +1078,8 @@ exports.getIconValue = function(){
     return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.iconValueKey).then(r => JSON.parse(r));
 }
 
-// 钻石游戏手牌
-exports.setHandCards = function(gameId, mulCardsMap){
-    return RedisUtil.hmset(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, mulCardsMap);
-}
 
-// 钻石游戏手牌
+// 通过一个倍数获取多个图案组合
 exports.getHandCardsByMul = function(gameId, mul){
     return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
         const storedMap = new Map(JSON.parse(jsonString));
@@ -1089,11 +1090,42 @@ exports.getHandCardsByMul = function(gameId, mul){
     })
 }
 
-// 钻石游戏手牌倍数数组
+
+// 通过多个倍数获取多个图案组合
+exports.getHandCardsByMuls = function(gameId, muls){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
+        const storedMap = new Map(JSON.parse(jsonString));
+        let mergedArray = [];
+        for(const i in muls){
+            if(storedMap.has(muls[i])){
+                const subArray = storedMap.get(muls[i])
+                mergedArray = mergedArray.concat(subArray);
+            }
+        }
+        return mergedArray;
+    })
+}
+
+// 通过多个倍数获取多个图案组合
+exports.getHandCardsByMuls = function(gameId, muls){
+    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
+        const storedMap = new Map(JSON.parse(jsonString));
+        // 获取指定键对应的二维数组，并合并到一个二维数组中
+        return muls.reduce((acc, key) => {
+            const array = storedMap.get(key);
+            if (array) {
+                return acc.concat(array);
+            }
+            return acc;
+        }, []);
+    })
+}
+
+// 获取
 exports.getHandCardsMuls = function(gameId){
     return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
         const storedMap = new Map(JSON.parse(jsonString));
-        return Array.from(storedMap.keys());
+        return Array.from(storedMap.keys()).sort((a, b) => a - b);
     })
 }
 

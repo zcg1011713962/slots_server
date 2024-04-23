@@ -644,7 +644,7 @@ var GameInfo = function () {
                         }
                     } catch (e) {
                         log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        callback(ErrorCode.FAILED.code, '购买商品下购买订单调用接口返回数据异常')
                     }
                 })
             }else{
@@ -672,7 +672,7 @@ var GameInfo = function () {
                         }
                     } catch (e) {
                         log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        callback(ErrorCode.FAILED.code, '购买商品下购买订单调用接口返回数据异常')
                     }
                 })
             }
@@ -685,7 +685,6 @@ var GameInfo = function () {
             const self = this;
             // 下购买订单
             self.getVipLevel(userId, vipLevel => {
-                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, ret => {
                 // 记录订单详情s
                 dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.OrderType.betcatpay,ret => {
                     log.info(userId + '测试购买订单记录' + orderId)
@@ -715,6 +714,8 @@ var GameInfo = function () {
                 })
             })
         }
+
+
 
 
         this.intervalSearchOrder = function (userId, orderId, payType){
@@ -749,55 +750,68 @@ var GameInfo = function () {
 
         this.searchOrderUpdate = function (userId, orderId, payType, callback){
             const self = this;
-
-            PayAPI.searchOrder(orderId, payType).then(res =>{
-                //log.info(userId + '查询订单结果:' +  res);
+            PayAPI.searchOrder(orderId, payType).then(result =>{
                 /*res = {
-                    "code": 200,
-                    "msg": "success",
-                    "data": {
-                        "orderStatus": 2,
-                        "orderNo": "0d3dcc8ebc634aa6b5a50757011cc840",
-                        "merOrderNo": "1713422734281400",
-                        "amount": 4,
-                        "currency": "BRL",
-                        "cime": 1713422766423,
-                        "updateTime": 1713422767506,
-                        "sign": "fc7fed77bb92b1ad139f3f09991d37073ebbb8282edeafd0ec915d0342c95080"
-                    }
-                }*/
-                if(res && res.code === 200 && res.data){
-                    const orderStatus = res.data.orderStatus;
-                    // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
-                    if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
-                        || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
-                        || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
+               "code": 200,
+               "msg": "success",
+               "data": {
+                   "orderStatus": 2,
+                   "orderNo": "0d3dcc8ebc634aa6b5a50757011cc840",
+                   "merOrderNo": "1713422734281400",
+                   "amount": 4,
+                   "currency": "BRL",
+                   "cime": 1713422766423,
+                   "updateTime": 1713422767506,
+                   "sign": "fc7fed77bb92b1ad139f3f09991d37073ebbb8282edeafd0ec915d0342c95080"
+               }
+               }*/
+                if(StringUtil.isJson(result)){
+                    const res = JSON.parse(result);
+                    // log.info(userId + '查询订单结果:' +  res);
+                    try{
+                        if(res && res.code === 200 && res.data){
+                            const orderStatus = res.data.orderStatus;
+                            // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
+                            if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
+                                || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
+                                || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
 
-                        if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
-                            log.info(userId + '订单支付成功:' +  res);
-                            self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
-                                // 回调socket
-                                if (serverId === 0) { // 大厅
-                                    self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
-                                } else if (serverId !== 0) { // 游戏内
-                                    self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                                if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
+                                    log.info(userId + '订单支付成功:' +  res);
+                                    self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
+                                        // 回调socket
+                                        if (serverId === 0) { // 大厅
+                                            self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                                        } else if (serverId !== 0) { // 游戏内
+                                            self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                                        }
+                                        callback(1)
+                                    });
+                                }else{
+                                    dao.updateOrder(userId, orderId, orderStatus, ret=>{
+                                        log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
+                                        callback(1)
+                                    })
                                 }
-                                callback(1)
-                            });
+                            }else{
+                                callback(0)
+                            }
                         }else{
-                            dao.updateOrder(userId, orderId, orderStatus, ret=>{
-                                log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
-                                callback(1)
-                            })
+                            log.info(userId + '查询订单'+ orderId + '结果:' +  JSON.stringify(res));
+                            if(res.code === 400){
+                                dao.updateOrder(userId, orderId, TypeEnum.OrderStatus.orderNotExist, ret=>{
+                                    log.info(userId + '订单' + orderId + '订单状态:' + TypeEnum.OrderStatus.orderNotExist)
+                                    callback(1)
+                                })
+                            }else{
+                                callback(0)
+                            }
                         }
-                    }else{
-                        callback(0)
+                    }catch (e){
+                        log.err(userId + '查询订单异常' + e)
                     }
                 }else{
-                    if(res && res.code){
-                        log.info(userId + '查询订单结果:' +  res);
-                    }
-                    callback(0)
+                    log.err(userId + '查询订单格式异常,查询订单结果:' + result)
                 }
             });
         }
@@ -2895,6 +2909,7 @@ var GameInfo = function () {
                     self.intervalSearchOrder(userId, orderId, payType);
                 }
             })
+            // self.intervalSearchOrder(10051, "1713752627131557", 0);
         }
 
         // 更新账户信息
@@ -3390,21 +3405,23 @@ var GameInfo = function () {
         // 查询订单记录
         this.orderRecord = function (socket) {
             // 支付成功的订单
-            dao.searchAllOrder(socket.userId, TypeEnum.PayStatus.success, (rows) =>{
+            dao.searchAllOrder(socket.userId, [TypeEnum.OrderStatus.payedNotify, TypeEnum.OrderStatus.payedUnNotify], (rows) =>{
 
                 if(rows){
                     rows = rows.map(row =>{
                         let goodsType = '';
                         if(row.group === TypeEnum.ShopGroupType.rechargeGift){
-                            goodsType = '首充'
+                            goodsType = ErrorCode.SHOP_FIRST_RECHARGE.code;
                         }else if(row.goodsType === TypeEnum.GoodsType.gold){
-                            goodsType = '金币'
+                            goodsType = ErrorCode.SHOP_GLOD_COIN.code;
                         }else if(row.goodsType === TypeEnum.GoodsType.prop){
-                            goodsType = '道具'
+                            goodsType = ErrorCode.SHOP_PROP.code;
                         }else if(row.goodsType === TypeEnum.GoodsType.monthCard){
-                            goodsType = '月卡'
+                            goodsType = ErrorCode.SHOP_MONTHCARD.code;
                         }else if(row.goodsType === TypeEnum.GoodsType.turntableTicket){
-                            goodsType = '免费转盘门票'
+                            goodsType = ErrorCode.SHOP_FREE_TURNTABLE_TICKET.code;
+                        }else if(row.goodsType === TypeEnum.GoodsType.diamond){
+                            goodsType = ErrorCode.SHOP_DIAMOND.code;
                         }
                         return {
                             userId: row.userId,
@@ -3897,11 +3914,14 @@ var GameInfo = function () {
                         log.info(userId + '查询提现页面,总充值:' + totalRecharge + '已提现金额充值额度:' + submittedRecharge)
                     }
                     CacheUtil.getVipConfig().then(config => {
-                        let withdrawRatio = config.find(it => it.level === this.userList[userId].vip_level).withdraw_ratio;
-                        withdrawRatio = parseInt(withdrawRatio) === 0 ? 0 : withdrawRatio;
+                        let withdrawRatio = config.find(it => it.level === self.userList[userId].vip_level).withdraw_ratio
+                        withdrawRatio = withdrawRatio ? withdrawRatio : 0;
                         // 获取提现额度
-                        const withdrawLimit = StringUtil.rideNumbers(StringUtil.reduceNumbers(totalRecharge, submittedRecharge) , withdrawRatio / 100, 2);
+                        withdrawRatio = StringUtil.divNumbers(withdrawRatio , 100, 2)
+                        const recharge = StringUtil.reduceNumbers(totalRecharge, submittedRecharge);
+                        const withdrawLimit = StringUtil.rideNumbers(recharge, withdrawRatio, 2);
                         log.info(userId + '查询提现页面,总充值:' + totalRecharge + '已提现金额充值额度:' + submittedRecharge + '提现额度:' + withdrawLimit + 'withdrawRatio:' + withdrawRatio)
+                        // 获取银行卡
                         dao.getBank(userId, (code, rows) => {
                             if (!code) {
                                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
@@ -3909,40 +3929,42 @@ var GameInfo = function () {
                             }
                             let cards = []
                             if (rows.length > 0) {
-                                cards = rows.map(it => {
+                                cards = rows.map(row => {
                                     return {
-                                        withdrawChannel: it.bankType,
-                                        num: it.account
+                                        withdrawChannel: row.bankType,
+                                        account: row.account,
+                                        cpf: row.cpf,
+                                        name: row.name
                                     }
                                 })
                             }
-                            CacheUtil.getBankTransferConfig().then(config => {
-                                const withdrawWard = config.withdrawWard;
-                                const withdrawChannel = config.withdrawChannel;
-                                // 提现手续费
-                                const withdrawalCommission = config.withdrawal_commission;
-                                const withdrawProportion = config.withdraw_proportion;
-                                log.info(userId + '获取提现额度:' + withdrawLimit + '提现手续费:' + withdrawalCommission + 'withdrawChannel:' + withdrawChannel);
+                            CacheUtil.getGoldCoin(userId).then(goldCoin =>{
+                                CacheUtil.getBankTransferConfig().then(config => {
+                                    const withdrawWard = config.withdrawWard;
+                                    const withdrawChannel = config.withdrawChannel;
+                                    // 提现手续费
+                                    const withdrawalCommission = config.withdrawal_commission;
+                                    const withdrawProportion = config.withdraw_proportion;
+                                    log.info(userId + '获取提现额度:' + withdrawLimit + '提现手续费:' + withdrawalCommission + 'withdrawChannel:' + withdrawChannel);
 
-                                const data = {
-                                    withdrawLimit: withdrawLimit,
-                                    currencyType: "BRL",
-                                    withdrawWard: withdrawWard,
-                                    withdrawChannel: withdrawChannel,
-                                    cards: cards,
-                                    withdrawalCommission: withdrawalCommission,
-                                    withdrawLimitGoldCoin: StringUtil.rideNumbers(withdrawLimit, withdrawProportion)
-                                }
-                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                    const data = {
+                                        withdrawLimit: withdrawLimit, // 提现额度
+                                        currencyType: "BRL", // 货币类型
+                                        withdrawWard: withdrawWard, // 提现金额挡位
+                                        withdrawChannel: withdrawChannel, // 提现渠道方式
+                                        cards: cards, //卡信息
+                                        withdrawalCommission: withdrawalCommission, // 提现手续费百分比
+                                        withdrawLimitGoldCoin: StringUtil.rideNumbers(withdrawLimit, withdrawProportion, 2), // 提现金币上限
+                                        canWithdrawGoldCoin: StringUtil.divNumbers(goldCoin, withdrawProportion,2 ), // 玩家金币对应的提现金额
+                                        goldCoin: goldCoin, // 金币
+                                        withdrawProportion: withdrawProportion // 提现率
+                                    }
+                                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                })
                             })
                         })
                     })
                 });
-               /* CacheUtil.getBankTransferConfig().then(config => {
-                    // 银行积分兑换成BRL 提现比率 withdrawProportion：1
-                    const withdrawProportion = config.withdraw_proportion;
-
-                })*/
             } catch (e) {
                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
             }
@@ -3955,7 +3977,7 @@ var GameInfo = function () {
                     const hallUrl = config.hallUrl ? config.hallUrl : '';
                     dao.getBank(userId, (code, cards) => {
                         if (!code || cards.length === 0) {
-                            callback(ErrorCode.FAILED.code, '卡号信息错误')
+                            callback(ErrorCode.WITHDRAW_CARDS_ERROR.code, ErrorCode.WITHDRAW_CARDS_ERROR.msg)
                             return;
                         }
                         const card = cards[0];
@@ -3972,7 +3994,7 @@ var GameInfo = function () {
                             const withdrawalCommission = config.withdrawal_commission;
                             // 判断是否有提现权限
                             if (this.userList[userId].vip_level < withdrawVipLevel) {
-                                callback(ErrorCode.FAILED.code, 'VIP等级不够')
+                                callback(ErrorCode.TRANS_ERROR_VIP_LEVEL.code, ErrorCode.TRANS_ERROR_VIP_LEVEL.msg)
                                 return;
                             }
 
@@ -3987,67 +4009,54 @@ var GameInfo = function () {
                                 CacheUtil.getVipConfig().then(config => {
                                     const withdrawRatio = config.find(it => it.level === this.userList[userId].vip_level).withdraw_ratio;
                                     // 获取提现额度
-                                    const withdrawLimit = StringUtil.rideNumbers(StringUtil.reduceNumbers(totalRecharge,submittedRecharge), withdrawRatio / 100, 2);
+                                    const withdrawLimit = StringUtil.rideNumbers(StringUtil.reduceNumbers(totalRecharge, submittedRecharge), withdrawRatio / 100, 2);
+                                    // 加上提现手续费后的金额
+                                    const fee = StringUtil.rideNumbers(amount, withdrawalCommission / 100);
+                                    const totalAmount = StringUtil.addNumbers(amount, fee)
+                                    log.info(userId + '发起提现,提现比例:' + withdrawProportion + '可提现额度:' + withdrawLimit + 'submittedRecharge:' + submittedRecharge)
 
-                                    // 判断金额是否正确
-                                    dao.searchUserMoney(userId, (row) => {
-                                        if (row) {
-                                            const bankScore = row.bankScore;
+                                    if (amount > withdrawLimit) {
+                                        callback(ErrorCode.WITHDRAW_LIMIT.code, ErrorCode.WITHDRAW_LIMIT.msg)
+                                        return;
+                                    }
 
-                                            const currAmount = StringUtil.divNumbers(bankScore, withdrawProportion);
-                                            // 加上提现手续费后的金额
-                                            const fee = StringUtil.rideNumbers(amount, withdrawalCommission / 100);
-                                            const totalAmount = StringUtil.addNumbers(amount, fee)
-                                            log.info(userId + '发起提现,当前银行金币:' + bankScore + '提现比例:' + withdrawProportion + '当前可提现:' + currAmount + '可提现额度:' + withdrawLimit + 'submittedRecharge:' + submittedRecharge)
+                                    // 校验银行密码
+                                    dao.getBankPwdById(userId, (code, bankPwd) => {
+                                        if (code && bankPwd && Number(bankPwd) === Number(pwd)) {
+                                            // 锁定银行积分
+                                            const lockBankScore = StringUtil.rideNumbers(amount, withdrawProportion);
+                                            // 锁定提现额度
+                                            const lockWithdrawLimit = amount
 
-                                            if (currAmount < totalAmount) {
-                                                callback(ErrorCode.FAILED.code, '金额不足')
-                                                return;
-                                            }
-                                            if (amount > withdrawLimit) {
-                                                callback(ErrorCode.FAILED.code, '超出提现额度')
-                                                return;
-                                            }
-
-                                            // 校验银行密码
-                                            dao.getBankPwdById(userId, (code, bankPwd) => {
-                                                if (code && bankPwd && Number(bankPwd) === Number(pwd)) {
-                                                    // 锁定银行积分
-                                                    const lockBankScore = StringUtil.rideNumbers(amount, withdrawProportion);
-                                                    // 锁定提现额度
-                                                    const lockWithdrawLimit = amount
-
-                                                    dao.lockBankScore(userId, lockBankScore, lockWithdrawLimit, ret => {
-                                                        log.info(userId + '锁定银行积分:' + lockBankScore + '锁定提现额度:' + lockWithdrawLimit + 'ret:' + ret);
-                                                        // 扣手续费
-                                                        this.userList[userId].bankScore = StringUtil.reduceNumbers(this.userList[userId].bankScore, StringUtil.rideNumbers(fee, withdrawProportion));
-                                                        // 锁定积分
-                                                        this.userList[userId].bankScore = StringUtil.reduceNumbers(this.userList[userId].bankScore, lockBankScore);
+                                            dao.lockBankScore(userId, lockBankScore, lockWithdrawLimit, ret => {
+                                                log.info(userId + '锁定银行积分:' + lockBankScore + '锁定提现额度:' + lockWithdrawLimit + 'ret:' + ret);
+                                                // 扣手续费
+                                                this.userList[userId].bankScore = StringUtil.reduceNumbers(this.userList[userId].bankScore, StringUtil.rideNumbers(fee, withdrawProportion));
+                                                // 锁定积分
+                                                this.userList[userId].bankScore = StringUtil.reduceNumbers(this.userList[userId].bankScore, lockBankScore);
+                                                if (ret) {
+                                                    const orderId = StringUtil.generateOrderId();
+                                                    const callbackUrl = hallUrl + '/withdrawCallBack?userId=' + userId + '&orderId=' + orderId;
+                                                    // 生成提现订单
+                                                    dao.withdrawApplyRecord(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, ret => {
                                                         if (ret) {
-                                                            const orderId = StringUtil.generateOrderId();
-                                                            const callbackUrl = hallUrl + '/withdrawCallBack?userId=' + userId + '&orderId=' + orderId;
-                                                            // 生成提现订单
-                                                            dao.withdrawApplyRecord(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, ret => {
-                                                                if (ret) {
-                                                                    dao.submittedRecharge(userId,  StringUtil.divNumbers(amount, withdrawRatio / 100, 2), ret =>{
-                                                                        const currWithdrawLimit = withdrawLimit - amount;
-                                                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, {currWithdrawLimit: currWithdrawLimit})
-                                                                    });
-                                                                } else {
-                                                                    callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
-                                                                }
-                                                            })
+                                                            dao.submittedRecharge(userId,  StringUtil.divNumbers(amount, withdrawRatio / 100, 2), ret =>{
+                                                                const currWithdrawLimit = withdrawLimit - amount;
+                                                                callback(ErrorCode.WITHDRAW_SUCCESS.code, ErrorCode.WITHDRAW_SUCCESS.msg, {currWithdrawLimit: currWithdrawLimit})
+                                                            });
                                                         } else {
                                                             callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                                         }
-                                                    });
-
+                                                    })
                                                 } else {
-                                                    callback(ErrorCode.FAILED.code, '密码错误')
+                                                    callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                                 }
-                                            })
+                                            });
+                                        } else {
+                                            callback(ErrorCode.BANK_PWD_INUPT_ERROR_MAX.code, ErrorCode.BANK_PWD_INUPT_ERROR_MAX.msg)
                                         }
-                                    });
+                                    })
+
                                 })
                             })
                         })

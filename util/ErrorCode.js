@@ -39,8 +39,25 @@ class ErrorCode {
     static get LOGIN_ACCOUNT_NOT_FOUND() { return { code: 'L405', msg: '账户不存在', langCode: 'languageId_338' }; }
     static get LOGIN_ERROR() { return { code: 'L406', msg: '登录错误' , langCode: 'languageId_339'}; }
     static get LOGIN_TOKEN_NOT_FOUND() { return { code: 'L407', msg: 'token过期', langCode: 'languageId_340' }; }
+    static get WITHDRAW_SUCCESS() { return { code: 'W200', msg: '提现请求已提交，请等待审核', langCode: 'languageId_341' }; }
+    static get WITHDRAW_TIMES_OUT() { return { code: 'W401', msg: '今日提现次数已用完', langCode: 'languageId_342' }; }
+    static get WITHDRAW_LIMIT() { return { code: 'W402', msg: '您输入的金额超过自身提现金额，请重新输入', langCode: 'languageId_343' }; }
+    static get WITHDRAW_BASE() { return { code: 'W403', msg: '您需要累计充值${}才能提现', langCode: 'languageId_344' }; }
+    static get WITHDRAW_CARDS_ERROR() { return { code: 'W404', msg: '请确保您的账户信息是正确的，我们不承担您的填写错误而造成的责任', langCode: 'languageId_345' }; }
+    static get BANK_PWD_INUPT_ERROR_MAX() { return { code: 'W405', msg: '密码输入错误${}次', langCode: 'languageId_346' }; }
+    static get TRANS_ERROR_CALL_CENTER() { return { code: 'W406', msg: '您的账号无法交易请联系客服', langCode: 'languageId_347' }; }
+    static get TRANS_ERROR_VIP_LEVEL() { return { code: 'W407', msg: 'VIP等级不够', langCode: 'languageId_348' }; }
+    static get SHOP_FIRST_RECHARGE() { return { code: 'S0001', msg: '首充', langCode: 'languageId_349' }; }
+    static get SHOP_GLOD_COIN() { return { code: 'S0002', msg: ' 金币', langCode: 'languageId_314' }; }
+    static get SHOP_DIAMOND() { return { code: 'S0005', msg: '钻石', langCode: 'languageId_315' }; }
+    static get SHOP_PROP() { return { code: 'S0003', msg: '道具', langCode: 'languageId_350' }; }
+    static get SHOP_MONTHCARD() { return { code: 'S0004', msg: '月卡', langCode: 'languageId_351' }; }
+    static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0005', msg: '免费转盘门票', langCode: 'languageId_352' }; }
 
 
 }
+
+
+
 
 module.exports = ErrorCode;

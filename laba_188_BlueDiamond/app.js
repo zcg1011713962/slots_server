@@ -8,7 +8,6 @@ const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
-const Config = require('./config/read_config').getInstand;
 const CacheUtil = require('../util/cache_util');
 const SampleUtil = require('../util/sample_util');
 
@@ -34,7 +33,6 @@ Csocket.on('GameServerConnectResult', function (msg) {
         console.log("连接成功");
     }
 });
-
 
 Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
@@ -65,17 +63,6 @@ Csocket.on('gameForward', function (msg) {
 });
 
 
-Csocket.on('getgold', function (msg) {
-    if (!msg) {
-        return;
-    }
-
-    //console.log(msg);
-    var score = gameInfo.getPlayerScore(msg.userid);
-    Csocket.emit('getgoldResult', {Result: 1, score: score});
-
-});
-
 Csocket.on('disconnectUser', function (msg) {
     //console.log("disconnectUser" + msg.userId);
     var list = gameInfo.getOnlinePlayer();
@@ -86,11 +73,6 @@ Csocket.on('disconnectUser', function (msg) {
         var result = {ResultCode: 0, userId: msg.userId};
         Csocket.emit("userDisconnect", result);
     }
-});
-
-
-Csocket.on('applyMatchResult', function (_info) {
-    gameInfo.addRankUserList(_info);
 });
 
 
@@ -224,15 +206,14 @@ io.on('connection', function (socket) {
     })
 });
 
-
+SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
 
 app.set('port', process.env.PORT || gameConfig.port);
-
 const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
 });
 
-SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
+
 log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
 

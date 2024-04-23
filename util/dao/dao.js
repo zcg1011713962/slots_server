@@ -922,7 +922,6 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, callback) {
     const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
@@ -944,6 +943,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(buyContinueRewardDiamond);
     values.push(buyContinueDays);
     values.push(payChannel);
+    values.push(payType);
 
 
     pool.getConnection(function (err, connection) {
@@ -1038,10 +1038,12 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
     });
 };// 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, create_time createTime FROM pay_order where status = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, create_time createTime FROM pay_order where userId = ? and status = ? or status = ?';
     let values = [];
-    values.push(parseInt(payStatus));
     values.push(userId);
+    values.push(payStatus[0]);
+    values.push(payStatus[1]);
+
 
 
     pool.getConnection(function (err, connection) {
@@ -1133,7 +1135,6 @@ exports.getVipLevel = function getVipLevel(userId, callback) {
 exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
     const sql = 'select totalRecharge,submittedRecharge subRecharge,housecard,score_flow from newuseraccounts where Id=?';
     let values = [];
-    log.info('查询累计充值')
     values.push(userId);
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1149,9 +1150,7 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
             } else {
                 if (rows.length === 0) {
                     callback(0);
-                    log.info('查询累计充值为空')
                 } else {
-                    log.info('查询累计充值' + rows[0].subRecharge)
                     callback(1, rows[0]);
                 }
             }

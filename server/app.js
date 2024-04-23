@@ -772,7 +772,7 @@ io.on('connection', function (socket) {
         if (ret) {
             gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
-                if(code){
+                if(ErrorCode.WITHDRAW_SUCCESS.code === code){
                     socket.emit('withdrawResult', {code: code, msg: msg, data: data});
                     log.info(userId + '发起提现申请成功:' + data);
                 }else{

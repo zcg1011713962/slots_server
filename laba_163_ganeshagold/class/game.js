@@ -1,18 +1,18 @@
-﻿var User = require("./User");
-var gameDao = require("../dao/gameDao");
-var arithmetic = require("./arithmetic");
-var sever = require("./sever");
-var schedule = require("node-schedule");
-var gameConfig = require("../config/gameConfig");
-var redis_send_and_listen = require("../../util/redis_send_and_listen");
+﻿const User = require("./User");
+const gameDao = require("./../dao/gameDao");
+const arithmetic = require("./arithmetic");
+const sever = require("./sever");
+const schedule = require("node-schedule");
+const gameConfig = require("./../config/gameConfig");
+const http_bc = require("./../../util/http_broadcast");
+const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
-const {getInstand: log} = require("../../CClass/class/loginfo");
 const LABA = require("../../util/laba");
-const lottery_record = require("../../util/lottery_record");
 const analyse_result = require("../../util/lottery_analyse_result");
+const lottery_record = require("../../util/lottery_record");
 const CacheUtil = require("../../util/cache_util");
 const dao = require('../../util/dao/dao');
-
+const {getInstand: log} = require("../../CClass/class/loginfo");
 
 var GameInfo = function () {
 
@@ -39,8 +39,6 @@ var GameInfo = function () {
             this.initAlgorithm(0);
             //初始化用户列表
             this.userList = {};
-            //在线人数为0
-            this.onlinePlayerCount = 0;
             //统计
             this.winTotal = 0;
             this.lotteryCount = 0;
@@ -62,7 +60,7 @@ var GameInfo = function () {
                 times.push(i);
             }
             rule.second = times;
-            let self = this;
+            var self = this;
             schedule.scheduleJob(rule, function () {
                 if (gameConfig.maintain) {
                     --gameConfig.maintainTime;
@@ -74,30 +72,31 @@ var GameInfo = function () {
 
                 self.score_changeLog();
                 self.lotteryLog();
-                let nowDate = new Date();
-                let minute = nowDate.getMinutes();
-                let second = nowDate.getSeconds();
+                var nowDate = new Date();
+                var minute = nowDate.getMinutes();
+                var second = nowDate.getSeconds();
                 if (second === 25) {
                     self.saveGamblingBalanceGold();
-                    console.log("保存库存和奖池");
+                    log.info("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
                         server_id: gameConfig.serverId,
-                        online_num: self.onlinePlayerCount
+                        online_num: self.getOnlinePlayerCount()
                     });
                 }
 
                 //推送奖池给玩家
                 if (second % 10 === 0) {
-                    // 奖池推送
                     CacheUtil.pushGameJackpot(self.userList);
                 }
             });
         };
 
-        this.lotteryTimes = function (lotteryResult, winscore, nBetSum) {
+        this.lotteryTimes = function (lotteryResult, winscore, nBetSum, fin_value) {
             // 服务器统计
             ++this.lotteryCount;
             ++this.hourlotteryCount;
+            this.totalBet += nBetSum;
+            this.totalBackBet += fin_value;
             if (lotteryResult === 1) {
                 // 使用金币
                 this.winTotal += (winscore - nBetSum);
@@ -136,40 +135,54 @@ var GameInfo = function () {
             this.userList[_userInfo.userid] = new User(_userInfo, socket);
         };
 
+        // 更新用户
         this.updateUser = function (userInfo) {
-            if (!this.userList[userInfo._userId]) return;
-            let result = {};
-            //已经断线
-            if (this.userList[userInfo._userId]._isLeave) {
-                result = {ResultCode: 0, userId: userInfo._userId};
-                this._Csocket.emit("userDisconnect", result);
-                delete this.userList[userInfo._userId];
+            const userId = userInfo.userId;
+            if (!this.userList[userId]) {
+                log.err(userId + '用户不在线')
                 return;
             }
-            this.userList[userInfo._userId].update(userInfo);
+            let result = {};
+            //已经断线
+            if (this.userList[userId]._isLeave) {
+                log.info(userId + '用户已经断线')
+                result = {ResultCode: 0, userId: userId};
+                this._Csocket.emit("userDisconnect", result);
+                delete this.userList[userId];
+                return;
+            }
 
-            this.LoginGame(userInfo._userId, this.serverId);
-            ++this.onlinePlayerCount;
+            this.userList[userId].update(userInfo);
 
-            let GamblingBalanceLevelBigWin = this.A.getGamblingBalanceLevelBigWin();
-            let nGamblingWinPool = GamblingBalanceLevelBigWin.nGamblingWinPool;
-            nGamblingWinPool = nGamblingWinPool > 0 ? nGamblingWinPool : 0;
-            let resultObj = {
-                account: this.userList[userInfo._userId]._account,
-                id: this.userList[userInfo._userId]._userId,
-                nickname: this.userList[userInfo._userId]._nickname,
-                score: this.userList[userInfo._userId]._score,
-                nGamblingWinPool: nGamblingWinPool + this.ranScore
-            };
-            result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-            log.info(userInfo._userId + '给用户回应登录结果' + JSON.stringify(result))
-            this.userList[userInfo._userId]._socket.emit('loginGameResult', result);
+            this.LoginGame(userInfo.userId, this.serverId);
 
+            CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
+                try {
+                    let resultObj = {
+                        account: userInfo.account,
+                        id: userInfo.userId,
+                        nickname: userInfo.nickname,
+                        score: userInfo.score,
+                        jackpot: {
+                            gameJackpot: gameJackpot,
+                            grand_jackpot: grandJackpot,
+                            major_jackpot: majorJackpot,
+                            minor_jackpot: minorJackpot,
+                            mini_jackpot: miniJackpot
+                        }
+                    };
+                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                    this.userList[userId]._socket.emit('loginGameResult', result);
+                }catch (e){
+                    log.err('给用户回应登录结果:' + e)
+                }
+            })
         };
 
         //获得在线人数
         this.getOnlinePlayerCount = function () {
-            return this.onlinePlayerCount;
+            return Object.keys(this.userList).length;
         };
 
         //在线所有人
@@ -233,29 +246,32 @@ var GameInfo = function () {
 
         //删除用户
         this.deleteUser = function (_socket) {
-            if (_socket.userId) {
-                //存免费次数
-                var info = {
-                    userId: _socket.userId,
-                    freeCount: this.userList[_socket.userId].getFreeCount(),
-                    LotteryCount: this.userList[_socket.userId].getLotteryCount()
-                };
-                gameDao.saveFree(info, function (result) {
-                    if (!result)
-                        logInfo.error("存免费次数:" + _userinfo.userId + "失败!")
-                });
-                this._Csocket.emit("lineOut", {
-                    signCode: gameConfig.LoginServeSign,
-                    state: 0,
-                    gameId: gameConfig.gameId,
-                    serverId: gameConfig.serverId,
-                    userId: _socket.userId,
-                    tableId: -1,
-                    seatId: -1
-                });
-                this.sever.LogoutRoom(this.userList[_socket.userId], _socket);
-                delete this.userList[_socket.userId];
-                --this.onlinePlayerCount;
+            let userId = _socket.userId;
+            const self = this;
+            if (userId) {
+                CacheUtil.getFreeCount(userId).then(freeCount =>{
+                    //存免费次数
+                    const info = {
+                        userId: userId,
+                        freeCount: freeCount,
+                        LotteryCount: 0
+                    };
+                    gameDao.saveFree(info, function (result) {
+                        log.info(userId + '保存免费次数' + info.freeCount);
+                        self._Csocket.emit("lineOut", {
+                            signCode: gameConfig.LoginServeSign,
+                            state: 0,
+                            gameId: gameConfig.gameId,
+                            serverId: gameConfig.serverId,
+                            userId: userId,
+                            tableId: -1,
+                            seatId: -1
+                        });
+                        delete self.userList[userId];
+                        log.info(userId + '离开游戏,移除用户,当前游戏人数:' + self.getOnlinePlayerCount())
+                        userId = null;
+                    });
+                })
             }
         };
 
@@ -264,8 +280,11 @@ var GameInfo = function () {
             if (_userId) {
                 var socketItem = this.userList[_userId]._socket;
                 result = {resultid: 0, msg: msg};
+                log.info(_userId + '给用户回应登录结果' + result)
                 socketItem.emit('loginGameResult', result);
                 delete this.userList[_userId];
+            }else{
+                log.err('非法的用户')
             }
         };
 
@@ -300,13 +319,13 @@ var GameInfo = function () {
         //获得用户当前分数
         this.getPlayerScore = function (_userId) {
             if (!_userId) {	//传输ID错误
-                console.log("查询分数,参数错误");
+                log.info('==========================查询分数,参数错误"');
                 return -1;
             }
             if (this.userList[_userId]) {//未找到用户
-                //console.log("查询在线,未找到" + _userId + "用户");
                 return this.userList[_userId].getScore();
             } else {
+                log.info('=============================用户不在线');
                 return -1;
             }
         };
@@ -339,20 +358,25 @@ var GameInfo = function () {
             }
         };
 
-        //保存时间段输赢状况
-        this.saveSocrePool = function () {
-            //获得虚拟池
-            var Virtualpool = this.A.getVirtualScorePool();
-            //获得实际池
-            var poollist = this.A.getScorePoolList();
 
-            //var poollistLength = this.A.getScorePoolListLength();
-
-            var poollistId = this.A.getScoreId();
-
-            gameDao.Update_score_pool(poollist, Virtualpool, poollistId, function (Result) {
-            })
-        };
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 5 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
 
         //保存库存 奖池
         this.saveGamblingBalanceGold = function () {
@@ -395,9 +419,6 @@ var GameInfo = function () {
         //进入游戏
         this.LoginGame = function (_userId, gametype) {
             if (!this.userList[_userId]) return;
-            //用户添加游戏ID
-            //console.log(_userId)
-            //console.log("用户进入游戏" + gametype);
             this.userList[_userId].loginGame(gametype);
         };
 
@@ -408,7 +429,7 @@ var GameInfo = function () {
 
 
             if (!this.userList[_userId].getGameId()) {
-                console.log("用户" + _userId + ",没有进入任何游戏,进入房间")
+                console.log("用户" + _userId + ",没有进入任何游戏,进入房间");
                 return;
             }
 
@@ -458,9 +479,9 @@ var GameInfo = function () {
             gameDao.getFreeCount(_userId, function (ResultCode, Result) {
                 //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
-                Result.Id = _userId;
+                Result.Id = _userId
                 self.userList[_userId].updateFreeGame(Result);
-                console.log("从数据库里获得免费次数" + Result.freeCount);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
 
                 var ResultData = {
                     TableId: LoginResult.tableId,
@@ -473,6 +494,7 @@ var GameInfo = function () {
 
                 if (!linemsg.Result) {
                     var tablestring = "table" + LoginResult.tableId;
+
                     _socket.broadcast.to(tablestring).emit('playEnter', {
                         ResultCode: 1,
                         ResultData: {
@@ -490,39 +512,19 @@ var GameInfo = function () {
             })
 
         };
-
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
             var self = this;
             gameDao.getFreeCount(_userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
-                self.userList[_userId].updateFreeGame(Result);
                 log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
+                CacheUtil.setFreeCount(_userId, Result.freeCount)
                 _socket.emit("LoginfreeCountResult", {ResultCode: 1, freeCount: Result.freeCount});
             })
         };
 
 
-
-        this.batchUpdateOnLineAccount = function () {
-            let saveList = [];
-            for (const k in this.userList) {
-                saveList.push(this.userList[k]);
-            }
-            if (saveList.length < 1) {
-                return;
-            }
-            dao.batchUpdateAccount(saveList, function (users) {
-                const seconds = new Date().getSeconds()
-                if(users){
-                    for (let i = 0; i < users.length; ++i) {
-                        if(seconds % 2 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
-                    }
-                }
-                saveList = [];
-            });
-        }
         //断线保存
         this.lineOutSet = function (_info) {
             if (_info.state == 1) {
@@ -575,8 +577,8 @@ var GameInfo = function () {
         };
 
         this.disconnectAllUser = function () {
-            for (let item in this.userList) {
-                this.userList[item]._socket.disconnect();
+            for (var itme in this.userList) {
+                this.userList[itme]._socket.disconnect();
             }
             console.log("服务器开启维护，已经全部离线");
         };
@@ -596,29 +598,6 @@ var GameInfo = function () {
 
 }();
 
-function RandomNumForList(arr) {
-    //从指定数组中选取随机值
-    return arr[Math.floor((Math.random() * arr.length))]
-}
-
-function RandomNumBoth(Min, Max) {
-    //生成指定范围内随机整数
-    var Range = Max - Min;
-    var Rand = Math.random();
-    var num = Min + Math.round(Rand * Range); //四舍五入
-    return num;
-}
-
-function list_one_count(x, list) {
-    //数组中指定值出现次数
-    var count = 0;
-    for (var i in list) {
-        if (list[i] == x) {
-            count++
-        }
-    }
-    return count;
-}
 
 
 module.exports = GameInfo;
