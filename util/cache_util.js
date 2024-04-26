@@ -29,6 +29,7 @@ const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
 const buyCallBackSwitchKey  = 'buyCallBackSwitch';
 const paySwitchKey  = 'paySwitch';
 const nGamblingWaterLevelGoldKey = 'nGamblingWaterLevelGold';
+const recordHandCardKey = 'recordHandCards';
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -102,7 +103,7 @@ exports.DecrJackpot  = function (val) {
 };
 
 // 获取奖池
-exports.getJackpot  = function get_redis_win_pool() {
+exports.getJackpot  = function () {
     return RedisUtil.get(redisJackpotKey);
 };
 
@@ -488,13 +489,13 @@ exports.getPlayGameCount  = function (userId){
 }
 
 
-// 增加玩家摇奖次数
+// 增加玩家下注回报
 exports.updatePlayGameBetRecord  = function (userId, v){
     RedisUtil.hmset(playGameBetRecord, userId, v).then(r =>{});
 }
 
 
-// 获取玩家摇奖次数
+// 获取玩家下注回报
 exports.getPlayGameBetRecord  = function (userId){
     return RedisUtil.hget(playGameBetRecord, userId).then(it => JSON.parse(it));
 }
@@ -696,7 +697,8 @@ exports.setUserInfo = function(userId, userInfo){
         nickname : userInfo.nickname,
         score : userInfo.score,
         diamond : userInfo.diamond,
-        sign: userInfo.sign
+        sign: userInfo.sign,
+        newHandFlag: userInfo.newHandFlag,
     }
     return RedisUtil.client.hmset(`${userInfoKey}:${userId}`, obj)
 }
@@ -940,27 +942,32 @@ exports.getNewHandGuideFlowKey = function(userId, firstRecharge, callback){
 
 // 设置限时折扣
 exports.userDiscountLimited  = function (userId, callback){
+    const key = userDiscountLimitedKey + '_' + userId;
     this.getDiscountLimitedConfig().then(config =>{
         const expire = config[0].Discount_time * 60;
-        const key = userDiscountLimitedKey + '_' + userId;
-        const currTime = new Date().getTime();
-        const endTime = currTime + expire * 60;
-
-        RedisUtil.set(key, currTime).then(r =>{
-            if(r){
-                RedisUtil.expire(key, expire).then(o =>{
-                    if(r && o){
-                        callback(1, currTime, endTime)
+        RedisUtil.get(key).then(startTime =>{
+            if(startTime){
+                const endTime = startTime + expire * 60;
+                callback(1, startTime, endTime)
+            }else{
+                const startTime = new Date().getTime();
+                const endTime = startTime + expire * 60;
+                RedisUtil.set(key, startTime).then(r =>{
+                    if(r){
+                        RedisUtil.expire(key, expire).then(o =>{
+                            if(r && o){
+                                callback(1, startTime, endTime)
+                            }else{
+                                callback(0)
+                            }
+                        });
                     }else{
                         callback(0)
                     }
-                });
-            }else{
-                callback(0)
+                })
             }
         })
     })
-
 }
 
 // 获取限时折扣
@@ -1026,7 +1033,6 @@ exports.getGamblingWaterLevelGold = function(){
 
 exports.getNewbierPartMulByUserId = function(userId){
     return RedisUtil.hget(newbierPartKey, userId).then(newbierPart =>{
-        //if(!newbierPart || JSON.parse(newbierPart).length === 0){
         if(!newbierPart){
             return this.getNewhandProtectConfig().then(c =>{
                 const item = c.newbierPart[0];
@@ -1046,7 +1052,7 @@ exports.getNewbierPartMulByUserId = function(userId){
 }
 exports.getNewbierPartLengthByUserId = function(userId){
     return RedisUtil.hget(newbierPartKey, userId).then(newbierPart =>{
-        return newbierPart ? JSON.parse(newbierPart).length : null;
+        return newbierPart ? JSON.parse(newbierPart).length : -1; // -1说明没有玩过游戏
     });
 }
 
@@ -1121,7 +1127,7 @@ exports.getHandCardsByMuls = function(gameId, muls){
     })
 }
 
-// 获取
+// 获取所有倍数
 exports.getHandCardsMuls = function(gameId){
     return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
         const storedMap = new Map(JSON.parse(jsonString));
@@ -1130,7 +1136,50 @@ exports.getHandCardsMuls = function(gameId){
 }
 
 
-// 钻石游戏手牌
+// 设置游戏图案数组
 exports.setHandCards = function(gameId, mulCardsMap){
-    return RedisUtil.hmset(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, mulCardsMap);
+    return RedisUtil.client.hdel(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, function(err, keys) {
+        return RedisUtil.hmset(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId, mulCardsMap);
+    });
+}
+
+
+// 记录用户出过的图案组合
+exports.recordUserHandCards = function(gameId, userId, cards){
+    const num = cards[0]
+    const card = [...cards];
+    card.shift();
+    const key = recordHandCardKey + '_' + gameId + '_' + userId;
+    RedisUtil.hmset(key, num, JSON.stringify(card))
+}
+
+
+// 获取用户出过的图案组合
+exports.getRecordUserHandCards = function(gameId, userId, callback){
+    const key = recordHandCardKey + '_' + gameId + '_' + userId;
+    return RedisUtil.client.hkeys(key, function(err, keys) {
+        if (err) {
+            callback([])
+            return;
+        }
+        callback(keys.map(str => parseInt(str)))
+    });
+}
+
+// 获取用户出过的图案组合
+exports.delRecordUserHandCards = function(gameId, userId, cardNums){
+    const key = recordHandCardKey + '_' + gameId + '_' + userId;
+    return RedisUtil.client.hdel(key, cardNums, function(err, keys) {
+        log.info('已初始化图案编号' + cardNums)
+    });
+}
+
+// 更新为非新手
+exports.updateNewHandFlag = function(userId, newHandFlag){
+    return RedisUtil.hmset(`${userInfoKey}:${userId}`, 'newHandFlag', newHandFlag);
+}
+
+// 获取是否新手
+exports.getNewHandFlag = function(userId){
+    return RedisUtil.hget(`${userInfoKey}:${userId}`, 'newHandFlag');
 }

@@ -66,7 +66,7 @@ exports.build  = function (userId, nickname, gameName, nBetSum, currFreeCount, c
 }
 
 
-exports.lotteryReturn = function (currGoldCoin, winscore, freeCount, resFreeCount, dictAnalyseResult, resDictList){
+exports.lotteryReturn = function (currGoldCoin, winscore, freeCount, resFreeCount, dictAnalyseResult, resDictList, newHandFlag){
     if(resDictList.length > 0){ // 足球
         return {
             ResultCode: TypeEnum.LotteryResultCode.normal,
@@ -76,7 +76,8 @@ exports.lotteryReturn = function (currGoldCoin, winscore, freeCount, resFreeCoun
                 viewarray: resDictList,
                 freeCount: freeCount,
                 getFreeTime: resFreeCount,
-                dictAnalyseResult: dictAnalyseResult
+                dictAnalyseResult: dictAnalyseResult,
+                newHandFlag: newHandFlag
             }
         }
     }

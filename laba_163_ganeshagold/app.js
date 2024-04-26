@@ -9,6 +9,7 @@ const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const Lottery = require("../util/lottery");
 const CacheUtil = require("../util/cache_util");
+const SampleUtil = require("../util/sample_util");
 const Config =  require("./config/read_config").getInstand;
 
 
@@ -233,10 +234,11 @@ io.on('connection', function (socket) {
 });
 
 
-app.set('port', process.env.PORT || gameConfig.port);
+/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/
 
-var server = http.listen(app.get('port'), function () {
+app.set('port', process.env.PORT || gameConfig.port);
+const server = http.listen(app.get('port'), function () {
     console.log('start at port:' + server.address().port);
 });
 
-console.log("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");

@@ -49,10 +49,10 @@ class ErrorCode {
     static get TRANS_ERROR_VIP_LEVEL() { return { code: 'W407', msg: 'VIP等级不够', langCode: 'languageId_348' }; }
     static get SHOP_FIRST_RECHARGE() { return { code: 'S0001', msg: '首充', langCode: 'languageId_349' }; }
     static get SHOP_GLOD_COIN() { return { code: 'S0002', msg: ' 金币', langCode: 'languageId_314' }; }
-    static get SHOP_DIAMOND() { return { code: 'S0005', msg: '钻石', langCode: 'languageId_315' }; }
-    static get SHOP_PROP() { return { code: 'S0003', msg: '道具', langCode: 'languageId_350' }; }
-    static get SHOP_MONTHCARD() { return { code: 'S0004', msg: '月卡', langCode: 'languageId_351' }; }
-    static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0005', msg: '免费转盘门票', langCode: 'languageId_352' }; }
+    static get SHOP_DIAMOND() { return { code: 'S0003', msg: '钻石', langCode: 'languageId_315' }; }
+    static get SHOP_PROP() { return { code: 'S0004', msg: '道具', langCode: 'languageId_350' }; }
+    static get SHOP_MONTHCARD() { return { code: 'S0005', msg: '月卡', langCode: 'languageId_351' }; }
+    static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0006', msg: '免费转盘门票', langCode: 'languageId_352' }; }
 
 
 }

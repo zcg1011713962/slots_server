@@ -48,7 +48,9 @@ const UndoEvenType ={
     vipDailyGet: 1, // VIP每日奖励领取
     bindPromote: 2, // 推广
     currSignIn: 3, // 签到
-    vipMonthlyGet: 4 // VIP每月奖励领取
+    vipMonthlyGet: 4, // VIP每月奖励领取
+    gameCountGet: 5, // 完成游戏局数红点推送
+    freeCoinGet: 6 // 免费金币到时间领取
 }
 
 
@@ -164,9 +166,9 @@ const pushFirstRechargeType = {
 
 
 
-const OrderType = {
-    betcatpay: 0, // betcatpay支付
-    fatpag: 1 // fatpag支付
+const PayType = {
+    betcatpay: 0, // pix betcatpay支付
+    fatpag: 1 // fastPay fatpag支付
 };
 
 module.exports = {
@@ -192,4 +194,4 @@ module.exports = {
     pushFirstRechargeType,
     LotteryResultCode,
  	OrderStatus,
-    OrderType};
+    PayType};

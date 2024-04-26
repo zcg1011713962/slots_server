@@ -55,9 +55,9 @@ exports.searchOrder  = async function searchOrder(orderId, payType) {
             merOrderNo: orderId
         };
         let url = '';
-        if(TypeEnum.OrderType.fatpag === payType){
+        if(TypeEnum.PayType.fatpag === payType){
             url = 'http://pay.pokerslotgame.com/api/fatpagpay/queryPaymentOrder';
-        }else if(TypeEnum.OrderType.betcatpay === payType){
+        }else if(TypeEnum.PayType.betcatpay === payType){
             url = 'http://pay.pokerslotgame.com/api/betcatpay/queryPaymentOrder';
         }
         const body = JSON.stringify(params);

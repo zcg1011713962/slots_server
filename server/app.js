@@ -103,13 +103,13 @@ app.get('/devcodesearch', function (req, res) {
 
 // 获取游戏线注
 app.get('/betsJackpot', function (req, res) {
-    //验证版本
     const gameId = req.query.gameId;
-    log.info(gameId + '获取游戏线注')
+    const userId = req.query.userId;
+    log.info(userId + '获取游戏'+ gameId +'线注')
     if(gameId === undefined || isNaN(gameId)){
         return;
     }
-    gameInfo.betsJackpot(gameId, row =>{
+    gameInfo.betsJackpot(userId, gameId, row =>{
         if(row){
             res.send({code: 1, data: row});
         }else{
@@ -118,6 +118,38 @@ app.get('/betsJackpot', function (req, res) {
     });
 });
 
+// 查询金币排行榜
+app.get('/searchCoinRank', function (req, res) {
+    gameInfo.searchCoinRank(data =>{
+        if(data){
+            res.send({code: 1, data: data});
+        }else{
+            res.send({code: 0, data: []});
+        }
+    });
+});
+
+// 查询金币排行榜
+app.get('/searchRechargeRank', function (req, res) {
+    gameInfo.searchRechargeRank(data =>{
+        if(data){
+            res.send({code: 1, data: data});
+        }else{
+            res.send({code: 0, data: []});
+        }
+    });
+});
+
+// 查询今日大赢家
+app.get('/searchBigWinToday', function (req, res) {
+    gameInfo.searchBigWinToday(data =>{
+        if(data){
+            res.send({code: 1, data: data});
+        }else{
+            res.send({code: 0, data: []});
+        }
+    });
+});
 
 // 保存新手指引步数
 app.get('/saveGuideStep', function (req, res) {
@@ -132,6 +164,37 @@ app.get('/saveGuideStep', function (req, res) {
     }
     gameInfo.saveGuideStep(userId, step, (code, msg) =>{
         res.send({code: code, msg: msg});
+    });
+});
+
+// 保存银行指引步数
+app.get('/saveBankStep', function (req, res) {
+    //验证版本
+    const userId = req.query.userId ? parseInt( req.query.userId) : 0;
+    const step = req.query.step;
+    log.info('保存银行指引步数' + userId + 'step:' + step)
+
+    if(step === '' || step === undefined) {
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return
+    }
+    gameInfo.saveBankGuideStep(userId, step, (code, msg) =>{
+        res.send({code: code, msg: msg});
+    });
+});
+
+
+// 查询订单记录
+app.get('/searchOrderRecord', function (req, res) {
+    const userId = req.query.userId;
+    log.info( userId + '查询订单记录')
+    if(userId === undefined || userId === ''){
+        log.info(userId + '查询订单记录失败')
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return;
+    }
+    gameInfo.orderRecord(userId, (data) =>{
+        res.send({code: 1, data: data});
     });
 });
 
@@ -224,6 +287,7 @@ app.get('/shoppingCallBack', function (req, res) {
                 log.info('线上环境不支持回调' + userId + '订单' + orderId)
                 res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
             }else{
+                log.info('测试环境回调' + userId + '订单' + orderId)
                 const ret = await CacheUtil.recordUserProtocol(userId, "shoppingCallBack")
                 if (ret) {
                     gameInfo.shoppingCallBack(userId, orderId, TypeEnum.OrderStatus.payedNotify,(code, msg, data, shopType, service, serverId) => {
@@ -544,6 +608,7 @@ io.on('connection', function (socket) {
                         luckObject.luckyRushStartTime = ret.luckyRushStartTime;
                         luckObject.luckyRushEndTime = ret.luckyRushEndTime;
                         luckObject.luckyCoinGetStatus = ret.luckyCoinGetStatus;
+                        luckObject.luckyCoinTaskGetStatus = ret.luckyCoinTaskGetStatus;
                     }
                     gameInfo.loginUserInfo(userId, luckObject, userInfo=>{
                         socket.emit('UserInfoResult', {code: 1, data: userInfo});
@@ -1325,7 +1390,9 @@ io.on('connection', function (socket) {
     // 查询订单记录
     socket.on("orderRecord", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.orderRecord(socket);
+            gameInfo.orderRecord(socket.userId, (data) =>{
+                socket.emit('orderRecordResult', {code: 1, data: data})
+            });
         }
     });
 

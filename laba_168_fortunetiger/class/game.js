@@ -4,15 +4,9 @@ const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("./../config/gameConfig");
-const LABA = require("./../../util/laba");
-const Config = require("../config/read_config").getInstand;
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const log = require("../../CClass/class/loginfo").getInstand;
-const {get_redis_win_pool} = require("../../util/redis_laba_win_pool");
-const analyse_result = require("../../util/lottery_analyse_result");
-const lottery_record = require("../../util/lottery_record");
 const CacheUtil = require("../../util/cache_util");
-const StringUtil = require("../../util/string_util");
 const dao = require('../../util/dao/dao');
 
 var GameInfo = function () {
@@ -576,13 +570,6 @@ var GameInfo = function () {
         return {getInstand: _gameinfo}
     }
 }();
-
-function generateRandomEvent(probabilityThreshold) {
-    // 生成一个在 [0, 1) 范围内的随机数
-    const randomValue = Math.random();
-    return randomValue < probabilityThreshold;
-}
-
 
 module.exports = GameInfo;
 

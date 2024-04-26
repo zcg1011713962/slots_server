@@ -806,6 +806,40 @@ exports.updateBankPwdById = function updateBankPwdById(pwd, userid, callback) {
 };
 
 
+
+
+//更新新手标识
+exports.updateNewHandFlag = function (userId, newHandFlag, callback) {
+    let sql = 'update userinfo set newHandFlag= ? where userId = ?';
+    let values = [];
+    values.push(newHandFlag);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("更新新手标识");
+                log.err(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(1);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
 exports.checkNickName = function checkNickName(userId, callback) {
     const sql = 'select nickname from newuseraccounts where Id=?';
     let values = [];
@@ -1038,7 +1072,7 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
     });
 };// 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, create_time createTime FROM pay_order where userId = ? and status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, create_time createTime FROM pay_order where userId = ? and status = ? or status = ?';
     let values = [];
     values.push(userId);
     values.push(payStatus[0]);
@@ -2555,7 +2589,7 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
                 callback(0);
             } else {
                 if(rows && rows.length > 0){
-                    callback(rows[0][0]);
+                    callback(rows[0]);
                 }else{
                     callback(0);
                 }
@@ -2785,6 +2819,88 @@ exports.unlockBankScore = function unlockBankScore(userId, bankScore, withdrawLi
 }
 
 
+// 金币排行
+exports.searchCoinRank = function (callback) {
+    const sql = "SELECT u.userId, ut.nickname ,ut.headimgurl, u.score + u.bankScore AS totalCoin FROM userinfo_imp u JOIN newuseraccounts ut ON u.userId = ut.Id  ORDER BY totalCoin DESC";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查金币排行' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 充值排行
+exports.searchRechargeRank = function (callback) {
+    const sql = "select Id userId, nickname , headimgurl , totalRecharge  from gameaccount.newuseraccounts order by totalRecharge desc";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查充值排行' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 大赢家排行
+exports.searchBigWinToday = function (callback) {
+    const sql = "select u.userid ,ut.nickname ,ut.headimgurl , u.score_change winCoin FROM score_changelog u left JOIN newuseraccounts ut ON u.userId = ut.Id  WHERE u.change_type = 10 and DATE(u.change_time) = CURRENT_DATE order by u.score_change desc; \n";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查大赢家排行' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
 // 更新新手指引步数
 exports.updateGuideStep = function (userId, step, callback) {
     const sql = "update newuseraccounts set step = ? where Id = ?";
@@ -2814,6 +2930,70 @@ exports.updateGuideStep = function (userId, step, callback) {
         values = [];
     });
 }
+
+
+// 更新银行指引步数
+exports.saveBankGuideStep = function (userId, step, callback) {
+    const sql = "update newuseraccounts set bankGuideStep = ? where Id = ?";
+    let values = [];
+    values.push(step);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('更新银行指引步数' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 查询银行指引步数
+exports.searchBankGuideStep = function (userId, step, callback) {
+    const sql = "select bankGuideStep from  newuseraccounts where Id = ?";
+    let values = [];
+    values.push(step);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询银行指引步数' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0].bankGuideStep);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
 
 exports.updateWinScorePopFirstRecharge = function (userId, callback) {
     const sql = "update userinfo set winScorePopFirstRecharge = 1 where userId = ?";

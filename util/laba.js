@@ -1297,8 +1297,10 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
                 var win_num = 0;
                 if (nFreeCard) { //# 免费倍数
                     win_num = iconMul[card][x.length - nLowerLimit] * nBet
+                    result.dictAnalyseResult["nMultiple"] = parseInt( result.dictAnalyseResult["nMultiple"]) + parseInt(iconMul[card][x.length - nLowerLimit]);
                 } else {
                     win_num = iconMul[card][x.length - nLowerLimit] * nBet;
+                    result.dictAnalyseResult["nMultiple"] = parseInt( result.dictAnalyseResult["nMultiple"]) + parseInt(iconMul[card][x.length - nLowerLimit]);
                 }
                 AllWinNum += win_num;
                 var win_line = [];

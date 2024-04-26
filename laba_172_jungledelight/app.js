@@ -11,6 +11,7 @@ const {getInstand: Config} = require("./config/read_config");
 const Lottery = require("../util/lottery");
 const StringUtil = require("../util/string_util");
 const CacheUtil = require('../util/cache_util');
+const SampleUtil = require("../util/sample_util");
 
 var Csocket = Cio(Urls.hall_url);
 Csocket.on('disconnect', function (data) {
@@ -233,12 +234,12 @@ io.on('connection', function (socket) {
 
 });
 
+SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
 
 app.set('port', process.env.PORT || gameConfig.port);
-
-var server = http.listen(app.get('port'), function () {
+const server = http.listen(app.get('port'), function () {
     console.log('start at port:' + server.address().port);
 });
 
-console.log("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 

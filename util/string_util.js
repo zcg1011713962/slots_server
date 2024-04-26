@@ -227,13 +227,16 @@ exports.RandomNum = function RandomNum(min, max) {
         return 0;
     }
     // 生成指定范围内随机整数
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log([min,max] + '范围内随机整数:' + randomNum)
+    return randomNum;
 }
 
 
 exports.luckRandom = function (min, max, val) {
     // 生成指定范围内随机整数
     const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log([min,max] + '范围内随机整数:' + randomNum + '输入整数:' + val)
     return randomNum < val;
 }
 
@@ -281,8 +284,11 @@ exports.currDateTime = function currDateTime() {
 }
 
 
-exports.appendValue = function appendValue(map , key, value) {
+exports.appendValue = function (map , key, value, config) {
     if (map.has(key)) {
+        if(map.get(key).length > 2000 && config.gameId === 272 || config.gameId === 263){
+            return;
+        }
         map.get(key).push(value);
     } else {
         map.set(key, [value]);
@@ -292,4 +298,12 @@ exports.appendValue = function appendValue(map , key, value) {
 exports.es6_set = function es6_set(arr) {
     //es6 数组去重
     return Array.from(new Set(arr));
+}
+
+exports.shuffleArray = function (array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 生成一个随机索引 j，其中 0 <= j <= i
+        [array[i], array[j]] = [array[j], array[i]]; // 交换索引为 i 和 j 的元素
+    }
+    return array;
 }
