@@ -722,7 +722,7 @@ var GameInfo = function () {
                     // 定时5秒执行操作
                     const interval = setInterval(() => {
                       self.searchOrderUpdate(userId, orderId, payType, (code) =>{
-                          const timeOut = elapsedTime >= 10 * 60;
+                          const timeOut = elapsedTime >= 60 * 60;
                           if (code || timeOut) {
                               // 条件满足时清除定时器
                               clearInterval(interval);
@@ -762,45 +762,49 @@ var GameInfo = function () {
                         "sign": "fc7fed77bb92b1ad139f3f09991d37073ebbb8282edeafd0ec915d0342c95080"
                     }
                 }*/
-                if(res && res.code === 200 && res.data){
-                    const orderStatus = res.data.orderStatus;
-                    const amount = res.data.amount;
-                    // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
-                    if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
-                        || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
-                        || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
+                if(StringUtil.isJson(res)){
+                    res = JSON.parse(res);
+                    if(res && res.code === 200 && res.data){
+                        const orderStatus = res.data.orderStatus;
+                        const amount = res.data.amount;
+                        // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
+                        if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
+                            || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
+                            || orderStatus === TypeEnum.OrderStatus.payReturn || orderStatus === TypeEnum.OrderStatus.payExcept){
 
-                        if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
-                            log.info(userId + '订单支付成功,金额:' + amount + '响应:' +  res);
-                            self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
-                                self.dot(userId, TypeEnum.dotEnum.af_purchase, '', '', '', amount, ret =>{
-                                    if(ret){
-                                        log.info(userId + '订单支付成功，充值打点成功');
-                                    }else{
-                                        log.info(userId + '订单支付成功，充值打点失败');
+                            if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
+                                log.info(userId + '订单支付成功,金额:' + amount + '响应:' +  res);
+                                self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
+                                    self.dot(userId, TypeEnum.dotEnum.af_purchase, '', '', '', amount, ret =>{
+                                        if(ret){
+                                            log.info(userId + '订单支付成功，充值打点成功');
+                                        }else{
+                                            log.info(userId + '订单支付成功，充值打点失败');
+                                        }
+                                    })
+                                    // 回调socket
+                                    if (serverId === 0) { // 大厅
+                                        self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                                    } else if (serverId !== 0) { // 游戏内
+                                        self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
                                     }
+                                    callback(1)
+                                });
+                            }else{
+                                dao.updateOrder(userId, orderId, orderStatus, ret=>{
+                                    log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
+                                    callback(1)
                                 })
-                                // 回调socket
-                                if (serverId === 0) { // 大厅
-                                    self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
-                                } else if (serverId !== 0) { // 游戏内
-                                    self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
-                                }
-                                callback(1)
-                            });
+                            }
                         }else{
-                            dao.updateOrder(userId, orderId, orderStatus, ret=>{
-                                log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
-                                callback(1)
-                            })
+                            callback(0)
                         }
                     }else{
+                        log.info(userId + '查询订单'+ orderId + '结果:' +  res);
                         callback(0)
                     }
                 }else{
-                    if(res && res.code){
-                        log.info(userId + '查询订单结果:' +  res);
-                    }
+                    log.info(userId + '查询订单'+ orderId + '结果:' +  res);
                     callback(0)
                 }
             });
