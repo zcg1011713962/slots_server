@@ -152,6 +152,7 @@ var GameInfo = function () {
                             luckyRushStartTime: 0,
                             luckyRushEndTime: 0,
                             luckyCoinGetStatus: 0,
+                            luckyCoinTaskGetStatus: 0,
                             currCoinCount: 0
                         }
                         if (luckyDetail) {
@@ -407,8 +408,8 @@ var GameInfo = function () {
                                                         luckyRushStartTime: luckObject.luckyRushStartTime, // 幸运金币刷新开始时间
                                                         luckyRushEndTime: luckObject.luckyRushEndTime, // 幸运金币刷新结束时间
                                                         luckyCoin: luckObject.luckyCoin,// 幸运金币数量
-                                                        luckyCoinTaskGetStatus: luckObject.luckyCoinTaskGetStatus, // 幸运金币可领取状态
-                                                        luckyCoinTaskStatus: luckObject.luckyCoinTaskStatus, // 幸运任务可领取状态
+                                                        luckyCoinGetStatus: luckObject.luckyCoinGetStatus, // 幸运金币可领取状态
+                                                        luckyCoinTaskGetStatus: luckObject.luckyCoinTaskGetStatus, // 幸运任务可领取状态
                                                         p: user._p, // king
                                                         step: user.step, // 新手指引步数
                                                         bankGuideStep: user.bankGuideStep, // 银行指引步数
@@ -3090,16 +3091,17 @@ var GameInfo = function () {
 
         // 限时折扣
         this.discountLimited = function (userId, callback) {
-            CacheUtil.userDiscountLimited(userId, (ret, currTime, endTime) => {
+            CacheUtil.userDiscountLimited(userId, (ret, startTime, endTime) => {
                 if (!ret) {
                     callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                     return;
                 }
                 CacheUtil.getDiscountLimitedConfig().then(config => {
                     const ret = {
-                        currTime: currTime,
+                        startTime: startTime,
                         endTime: endTime,
-                        product: config
+                        product: config,
+                        currTime: new Date().getTime()
                     }
                     if (config) {
                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, ret)
@@ -3108,6 +3110,11 @@ var GameInfo = function () {
                     }
                 })
             })
+        }
+
+
+        this.userDiscountLimitedResTime = function (userId, callback){
+            CacheUtil.userDiscountLimitedResTime(userId, callback)
         }
 
         // 全服跑马灯通知

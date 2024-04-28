@@ -970,6 +970,25 @@ exports.userDiscountLimited  = function (userId, callback){
     })
 }
 
+// 限时折扣剩余时间
+exports.userDiscountLimitedResTime  = function (userId, callback){
+    const key = userDiscountLimitedKey + '_' + userId;
+    this.getDiscountLimitedConfig().then(config => {
+        const expire = config[0].Discount_time * 60;
+        RedisUtil.get(key).then(startTime => {
+            if (startTime) {
+                const endTime = startTime + expire * 60;
+                callback(startTime, endTime, new Date().getTime())
+            } else {
+                callback(0, 0, new Date().getTime())
+            }
+        })
+    })
+
+}
+
+
+
 // 获取限时折扣
 exports.getUserDiscountLimited  = function (userId){
     const key = userDiscountLimitedKey + '_' + userId;
@@ -1168,10 +1187,11 @@ exports.getRecordUserHandCards = function(gameId, userId, callback){
 
 // 获取用户出过的图案组合
 exports.delRecordUserHandCards = function(gameId, userId, cardNums){
+    const stringArray = cardNums.map(num => num.toString());
     const key = recordHandCardKey + '_' + gameId + '_' + userId;
-    return RedisUtil.client.hdel(key, cardNums, function(err, keys) {
-        log.info('已初始化图案编号' + cardNums)
-    });
+    return RedisUtil.hashdelAsync(key, ...stringArray).then(k =>{
+        log.info('已初始化图案编号' + key + ' ' + stringArray)
+    })
 }
 
 // 更新为非新手

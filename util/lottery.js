@@ -399,7 +399,7 @@ function Lottery(config, gameInfo, callback) {
                         if(freeCount === 1){
                             hitFree = true;
                             log.info('出一个免费,可选倍数区间:' + JSON.stringify(expectMulSection)  + '可选倍数:' + JSON.stringify(muls))
-                            if(expectMulSection.length === 1 && expectMulSection[0] === Math.min(...currGameMuls)){
+                            if(expectMulSection.length === 1 && expectMulSection[0] <= Math.min(...currGameMuls)){
                                 // 出了一张免费牌 预期倍数为当前游戏最低倍时 直接中（否者钻石游戏出两个免费会找不到合适的结果）
                                 muls = currGameMuls.filter(mul => mul <= expectMulSection[1] && mul >= expectMulSection[0])
                             }
@@ -411,9 +411,8 @@ function Lottery(config, gameInfo, callback) {
                             log.info('出三个免费,可选倍数区间:' + JSON.stringify(expectMulSection) + '可选倍数:' + JSON.stringify(muls))
                             hitFree = false;
                         }
-                        if(muls.length === 0){
-                            muls = []
-                        }
+                        muls = muls.length > 0 ? muls : [currGameMuls[0]];
+
                         // 通过多个倍数获取多个图案组合
                         CacheUtil.getHandCardsByMuls(config.gameId, muls).then(cards =>{
                             try{
@@ -421,34 +420,30 @@ function Lottery(config, gameInfo, callback) {
                                     log.err(config.userId + '区间倍数图案数组为空,取最小倍数图案组合')
                                     cards = minMulCards;
                                 }
-                                const tMin = expectMulSection[0];
+                                const tMin = expectMulSection[0] ;
                                 log.info(config.userId + '免费局最少还需发的倍数:' + tMin)
                                 if(tMin > 0) {
+                                    // 为了找免费的
                                     for(let j = 0; j < lastHandCard.length; j++) {
                                         if(config.freeCards.includes(lastHandCard[j])) {
-                                            const c = cards.filter(subArray => {
-                                                const a = subArray[j] === lastHandCard[j];
-                                                const freeCount = subArray.filter(element => element === lastHandCard[j]).length;
-                                                return a && freeCount === subArray.length - 1;
+                                            cards = cards.filter(subArray => {
+                                                return subArray.some((element, index) => {
+                                                    return index >= 1 &&  config.freeCards.includes(element) &&  index === j
+                                                })
                                             });
-                                            if(c.length > 0){
-                                                cards = c;
-                                            }
                                         }
                                     }
+                                    console.log(JSON.stringify(cards))
                                 }else{
+                                    // 为了找两个免费+
                                     for(let j = 0; j < lastHandCard.length; j++){
-                                        if(config.freeCards.includes(lastHandCard[j])){
-                                            const c = cards.filter(subArray => {
-                                                return subArray[j] === lastHandCard[j];
-                                            });
-                                            if(c.length > 0){
-                                                cards = c;
-                                            }
-                                        }
+                                        cards = cards.filter(subArray => {
+                                            return subArray.some((element, index) => index >= 1 &&  config.freeCards.includes(element) &&  index === j)
+                                        });
                                     }
+                                    console.log(JSON.stringify(cards))
                                 }
-                                nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex)
+                                nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config)
                                 cardsHandle(config, nHandCards, result, gameInfo.userList[config.userId])
                                 afterLottery(config, nHandCards, gameInfo, result, callback);
                             }catch (e){
@@ -488,7 +483,7 @@ function Lottery(config, gameInfo, callback) {
                             // 倍数数组内的图案组合
                             CacheUtil.getHandCardsByMuls(config.gameId, muls).then(cards =>{
                                 try{
-                                    nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex)
+                                    nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config)
                                     cardsHandle(config, nHandCards, result, gameInfo.userList[config.userId])
                                     afterLottery(config, nHandCards, gameInfo, result, callback);
                                 }catch (e){
@@ -506,7 +501,7 @@ function Lottery(config, gameInfo, callback) {
                             // 库存不足 倍数内随机获取图案组合
                             try{
                                 result.expectMulSection = [currGameMuls[0]];
-                                nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, minMulCards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex)
+                                nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, minMulCards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config)
                                 cardsHandle(config, nHandCards, result, user)
                                 afterLottery(config, nHandCards, gameInfo, result, callback);
                             }catch (e){
@@ -544,7 +539,7 @@ function Lottery(config, gameInfo, callback) {
                                     // 倍数数组内的图案组合
                                     CacheUtil.getHandCardsByMuls(config.gameId, muls).then(cards =>{
                                         try{
-                                            nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex)
+                                            nHandCards = isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config)
                                             cardsHandle(config, nHandCards, result, user)
                                             afterLottery(config, nHandCards, gameInfo, result, callback);
                                         }catch (e){
@@ -609,7 +604,7 @@ function lastTimeRecord(user, free, nHandCards, nGameLines, freeCards, actualMul
     user.setLastTimeRecord({free: free, lastHandCard: nHandCards , actualMul: actualMul, expectMulSection: expectMulSection,  nWinLinesDetail: nWinLinesDetail });
 }
 
-function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, cardNums, newHandFlag, result,  nWinLinesDetail, nGameMagicCardIndex){
+function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, cardNums, newHandFlag, result,  nWinLinesDetail, nGameMagicCardIndex, config){
 
     if(cards === null || cards.length === 0){
         throw new CustomException('图案数组为空，请检查倍数区间内是否存在图案组合')
@@ -680,7 +675,7 @@ function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, ja
     }
 
     // 过滤出过的线
-    if(nWinLinesDetail.length > 0 && conf){
+    if(config.gameId === 268 && nWinLinesDetail && nWinLinesDetail.length > 0){
         let c = [...cards]
         for(const it in nWinLinesDetail){
             const nWinLine = nWinLinesDetail[it];
@@ -694,7 +689,7 @@ function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, ja
     }
 
     if(cardNums.length > 0){
-        const c = cards.filter(subArray => subArray.every((element, index) => index === 0 || !cardNums.includes(element)));
+        const c = cards.filter(subArray => subArray.every((element, index) => index === 0 && !cardNums.includes(element)));
         if(c.length > 0) {
             cards = c
             log.info(userId +'过滤掉出过的图案组合，还有剩余组合,正常出奖')

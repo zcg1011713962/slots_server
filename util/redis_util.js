@@ -23,6 +23,7 @@ class RedisUtil {
             this.incrAsync = promisify(this.client.incrby).bind(this.client);
             this.incrbyfloatAsync = promisify(this.client.incrbyfloat).bind(this.client);
             this.setnxAsync = promisify(this.client.setnx).bind(this.client);
+            this.hdelAsync = promisify(this.client.hdel).bind(this.client);
 
             // Handle errors
             this.client.on('error', (err) => {
@@ -90,6 +91,12 @@ class RedisUtil {
     async setNxAsync(key, value) {
         return this.setnxAsync(key, value);
     }
+
+    async hashdelAsync(key, ...fields) {
+        return this.hdelAsync(key, ...fields);
+    }
+
+
 
     async disconnect() {
         this.client.quit();

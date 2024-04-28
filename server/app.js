@@ -239,6 +239,24 @@ app.get('/discountLimited', function (req, res) {
     });
 });
 
+// 获取限时折扣剩余时间
+app.get('/discountLimitedResTime', function (req, res) {
+    const userId = req.query.userId;
+    log.info(userId + '获取限时折扣剩余时间')
+    if(userId === undefined || userId === ''){
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return;
+    }
+    gameInfo.userDiscountLimitedResTime(parseInt(userId), (startTime, endTime, currTime) =>{
+        res.send({code: 1, data: {
+                startTime: startTime,
+                endTime: endTime,
+                currTime: currTime
+        }});
+    });
+});
+
+
 // 购买商品
 app.get('/Shopping', async function (req, res) {
     const userId = req.query.userId;
