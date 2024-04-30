@@ -577,6 +577,7 @@ function afterLottery(config, nHandCards, gameInfo, result, callback){
 
     // 换图案
     replaceCards(config, nHandCards, gameInfo.userList[config.userId], dictAnalyseResult)
+
     // 记录这把实际倍数和预期倍数
     lastTimeRecord(gameInfo.userList[config.userId], dictAnalyseResult.getFreeTime['bFlag'], nHandCards, config.nGameLines, config.freeCards, dictAnalyseResult.nMultiple, result.expectMulSection, dictAnalyseResult.nWinLinesDetail)
 
@@ -648,7 +649,12 @@ function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, ja
     }
 
     if(hitBonus){
-        const c = cards.filter(subArray => subArray.some((element, index) => index >= 1 &&  openBoxCard === element));
+        let c;
+        if(openBoxCard > -1){
+            c = cards.filter(subArray => subArray.some((element, index) => index >= 1 &&  openBoxCard === element));
+        }else if(blankCard > -1){
+            c = cards.filter(subArray => subArray.some((element, index) => index >= 1 &&  blankCard === element));
+        }
         if(c.length > 0){
             cards = c;
             log.info(userId + '中了hitBonus')
@@ -763,6 +769,8 @@ function filterTwoDimensionalArray(array, nWinLine, nGameMagicCardIndex) {
 
 function cardsHandle (config, nHandCards, result, user){
 
+    specialPlayMethBefore(nHandCards, config, result)
+
     // 按类型类型进行图案分析
     switch(config.gameType){
         case TypeEum.GameType.laba_sequence:
@@ -792,8 +800,8 @@ function cardsHandle (config, nHandCards, result, user){
             payJpIndex: config.payJpIndex
         }
     }
-    // 特殊玩法
-    specialPlayMeth(nHandCards, config, result);
+
+    specialPlayMethAfter(nHandCards, config, result);
 
     // 图案连线奖
     result.winItem.win = result.dictAnalyseResult["win"];
@@ -804,11 +812,24 @@ function cardsHandle (config, nHandCards, result, user){
 
 }
 
-function specialPlayMeth(nHandCards, config, result){
+function specialPlayMethBefore(nHandCards, config, result){
+    if(config.gameName === 'fortunetiger' && nHandCards.includes(config.blankCard)){
+        // 老虎特殊bouns
+        LABA.tigerOpenBox(result.dictAnalyseResult, nHandCards, config);
+    }
+}
+
+function specialPlayMethAfter(nHandCards, config, result){
+    const resList = [];
     if (config.gameName === 'fortunetiger') {
-        if(nHandCards.includes(config.blankCard)){
-            // 老虎特殊bouns
-            LABA.tigerOpenBox(result.dictAnalyseResult, nHandCards, config.openBoxCard, config.nBetSum,  result.expectMulSection);
+        if(result.dictAnalyseResult["getBigWin"].bFlag && result.dictAnalyseResult["getBigWin"].isStart){
+            let newHandCard = [];
+            for (let i in nHandCards) {
+                newHandCard.push(parseInt(nHandCards[i]) + 1);
+            }
+            result.dictAnalyseResult["nHandCards"] = newHandCard;
+            resList.push(JSON.parse(JSON.stringify(result.dictAnalyseResult)))
+            result.dictAnalyseResult["getBigWin"].res_list = resList;
         }
         // 老虎全屏
         LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);

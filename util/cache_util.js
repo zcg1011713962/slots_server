@@ -1192,8 +1192,7 @@ exports.getRecordUserHandCards = function(gameId, userId, callback){
 exports.delRecordUserHandCards = function(gameId, userId, cardNums){
     try{
         const stringArray = cardNums.map(num => num.toString());
-        console.log('stringArray' + stringArray)
-        if(stringArray.length === 0){
+        if(stringArray.length === 0 || stringArray.length === ''){
             return;
         }
         const key = recordHandCardKey + '_' + gameId + '_' + userId;

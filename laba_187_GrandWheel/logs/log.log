@@ -20933,3 +20933,10 @@
 2024-04-30T11:36:37.892 [INFO ] default - 10149给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024043011073704","id":"10149","nickname":"USER4401705","score":"330.00","jackpot":{"gameJackpot":426.03,"grand_jackpot":276.91,"major_jackpot":85.2,"minor_jackpot":42.6,"mini_jackpot":21.3}}}
 2024-04-30T11:36:37.939 [INFO ] default - 从数据库里获得免费次数0
 2024-04-30T11:36:45.683 [WARN ] default - 未更新用户数据离开
+2024-04-30T14:40:33.164 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#hM28fLwiz0WZ_fydAAAG现socket：/#yvsSg8WfnfOEV3tFAAAH
+2024-04-30T14:40:33.165 [INFO ] default - 10149用户登录游戏服务，游戏请求大厅服务,当前游戏人数:3游戏socket[object Object]
+2024-04-30T14:40:33.169 [INFO ] default - GrandWheel登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10149","account":"abc2024043011073704","nickname":"USER4401705","score":"540.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"0","freeCount":"4"}}
+2024-04-30T14:40:33.173 [INFO ] default - 10149给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024043011073704","id":"10149","nickname":"USER4401705","score":"540.00","jackpot":{"gameJackpot":451.2,"grand_jackpot":293.28,"major_jackpot":90.24,"minor_jackpot":45.12,"mini_jackpot":22.56}}}
+2024-04-30T14:40:33.187 [INFO ] default - 从数据库里获得免费次数0
+2024-04-30T14:42:40.370 [WARN ] default - 未更新用户数据离开
+2024-04-30T15:47:40.782 [INFO ] default - 拉霸_287_GrandWheel服务器启动

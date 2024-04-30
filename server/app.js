@@ -199,7 +199,6 @@ app.get('/saveGuideStep', function (req, res) {
 
 // 保存银行指引步数
 app.get('/saveBankStep', function (req, res) {
-    //验证版本
     const userId = req.query.userId ? parseInt( req.query.userId) : 0;
     const step = req.query.step;
     log.info('保存银行指引步数' + userId + 'step:' + step)
@@ -382,7 +381,6 @@ app.get('/withdrawCallBack', async function (req, res) {
 
 // 判断用户是否破产
 app.get('/bankrupt', function (req, res) {
-    //验证版本
     const userId = req.query.userId ;
     const serverId = req.query.serverId ? req.query.serverId : 0;
     log.info('判断用户是否破产' + userId + 'serverId:' + serverId)

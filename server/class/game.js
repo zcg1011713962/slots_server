@@ -3467,7 +3467,7 @@ var GameInfo = function () {
                     if(rows){
                         let totalPromoteWithdrawLimit = 0;
                         let totalReCharge = 0;
-                        let num = 1;
+                        let num = rows.length;
                         rows = rows.map(row =>{
                             let goodsType = '';
                             if(row.group === TypeEnum.ShopGroupType.rechargeGift){
@@ -3486,7 +3486,7 @@ var GameInfo = function () {
                             totalPromoteWithdrawLimit += Math.floor(row.promoteWithdrawLimit)
                             totalReCharge += Math.floor(row.amount)
                             return {
-                                num:  num ++, // 编号
+                                num:  num --, // 编号
                                 userId: row.userId, // 用户ID
                                 orderId: row.orderId, //订单ID
                                 amount: row.amount, // 金额
@@ -3513,12 +3513,12 @@ var GameInfo = function () {
                     if(rows){
                         let totalBet = 0;
                         let totalPromoteWithdrawLimit = 0;
-                        let num = 1;
+                        let num = rows.length;
                         rows = rows.map(row =>{
                             totalBet += Number(row.betSum)
                             totalPromoteWithdrawLimit += Number(row.promoteWithdrawLimit)
                             return {
-                                num:  num ++, // 编号
+                                num:  num --, // 编号
                                 gameId: row.gameId, //游戏ID
                                 gameName: row.gameName, // 游戏名称
                                 betSum: row.betSum, // 下注
@@ -4142,7 +4142,7 @@ var GameInfo = function () {
         // 查询提现记录
         this.withdrawRecord = function (userId, callback) {
             dao.searchWithdrawApplyRecord(userId, (rows) => {
-                if (rows && rows > 0) {
+                if (rows && rows.length > 0) {
                     callback(rows)
                 } else {
                     callback([])

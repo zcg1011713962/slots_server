@@ -731,12 +731,41 @@ module.exports.tigerFullScreen = function (dictAnalyseResult, nGameLines) {
     }
 }
 
-module.exports.tigerOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
-    //开宝箱
-   /* dictAnalyseResult.getOpenBox = {
-        bFlag: true,
-        nWinOpenBox: 10
-    }*/
+module.exports.tigerOpenBox = function (dictAnalyseResult, nHandCards, config){
+    let chooseNum = RandomNumBoth(0, config.cards.length - 1);//随机选一张牌,如果是万能牌就触发缩小
+     if(chooseNum === config.nGameMagicCardIndex){
+         //开宝箱
+         dictAnalyseResult["getBigWin"] = {
+             bFlag: true,
+             isStart: false
+         }
+     }else{
+         let startNum = RandomNumBoth(3, 8);
+         // startNum = 9;
+         let finalList = [];
+         let startList = [];
+         nHandCards = [config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard];
+         for (let i = 0; i < startNum; i++) {
+             let a = RandomNumBoth(0, nHandCards.length - 1);
+             if (nHandCards[a] !== chooseNum && nHandCards[a] !== config.jackpotCard) {
+                 nHandCards[a] = chooseNum;
+                 startList.push(a);
+             } else {
+                 i--;
+             }
+         }
+         startList.sort(function (a, b) {
+             return a - b;
+         });
+         finalList.push(startList.concat());
+         dictAnalyseResult["getBigWin"] = {
+             bFlag: true,
+             isStart: true,
+             list: finalList,
+             card: chooseNum + 1,
+             res_list: []
+         }
+     }
 }
 
 
