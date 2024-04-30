@@ -115,7 +115,9 @@ const ScoreChangeType = {
     turntable: 14, // 大厅免费转盘获得
     bankIntoHallGold: 15, // 银行取出金币到大厅
     hallGoldIntoBank: 16, // 大厅金币存入银行
-    firstRechargeContinueReward: 17  // 首充持续奖励
+    firstRechargeContinueReward: 17,  // 首充持续奖励
+    withdrawApply: 18,  // 提现申请扣减
+    withdrawApplyBack: 19  // 提现申请不通过,退回
 };
 
 const DiamondChangeType = {

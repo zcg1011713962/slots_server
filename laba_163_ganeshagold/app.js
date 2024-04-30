@@ -233,12 +233,11 @@ io.on('connection', function (socket) {
 
 });
 
-
-/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/
-
 app.set('port', process.env.PORT || gameConfig.port);
 const server = http.listen(app.get('port'), function () {
-    console.log('start at port:' + server.address().port);
+    log.info('start at port:' + server.address().port);
 });
 
 log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+
+SampleUtil.init(gameConfig.gameName, gameConfig.gameId);

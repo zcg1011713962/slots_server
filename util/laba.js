@@ -401,7 +401,8 @@ exports.getMulByIndex = function (mulArr, index) {
 
 
 exports.getMulByWeight = function (mulArr, weights) {
-    if(weights === undefined) throw new Error('权重配置有误')
+    if(mulArr === undefined) throw new Error('iconValue配置有误')
+    if(weights === undefined) throw new Error('controlAward权重配置有误')
 
     // 根据权重出
     const totalWeight = weights.reduce((sum, ws) => sum + ws, 0);
@@ -730,6 +731,23 @@ module.exports.tigerFullScreen = function (dictAnalyseResult, nGameLines) {
     }
 }
 
+module.exports.tigerOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
+    //开宝箱
+   /* dictAnalyseResult.getOpenBox = {
+        bFlag: true,
+        nWinOpenBox: 10
+    }*/
+}
+
+
+
+module.exports.ganeshagoldOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
+    //开宝箱
+    /* dictAnalyseResult.getOpenBox = {
+         bFlag: true,
+         nWinOpenBox: 10
+     }*/
+}
 
 module.exports.grandWheelOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
     expectMulSection = expectMulSection.length === 1 ? [expectMulSection[0],expectMulSection[0]] : expectMulSection;
@@ -1314,10 +1332,6 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
                     }
                 }
                 WinLinesList.push({"win_num": win_num, "win_line": win_line});
-                if (card === nFreeCard) {
-                    bIsFree = true;
-                    nFreeNum = 10
-                }
             }
         }
 
@@ -1330,10 +1344,22 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
                 var o = nWinLineDetail[o_idx];
                 AllWinLinesList[o] = true
             }
-
         }
     }
-
+    // 免费次数
+    const times = nHandCards.filter(card => card === nFreeCard).length
+    if (times &&  times > 0) {
+        bIsFree = true;
+        if(times === 1){
+            nFreeNum = 1
+        }else if(times === 3){
+            nFreeNum = 12
+        }else if(times === 4){
+            nFreeNum = 15
+        }else if(times === 5){
+            nFreeNum = 20
+        }
+    }
     result.dictAnalyseResult["nHandCards"] = nHandCards;  //# 手牌
     result.dictAnalyseResult["nAllWinLines"] = WinLinesList; //# 获胜线具体
     result.dictAnalyseResult["nWinLinesDetail"] = nWinLines; //# 获胜线
@@ -1344,6 +1370,8 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
 
     result.dictAnalyseResult["getOpenBox"] = {"bFlag": false, "nWinOpenBox": 0, "win": 0}; //# 开箱子
     result.dictAnalyseResult["getFreeTime"] = {"bFlag": bIsFree, "nFreeTime": nFreeNum};  //# 免费次数
+
+
 
 };
 

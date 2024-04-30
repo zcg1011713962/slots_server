@@ -2,6 +2,7 @@ const CacheUtil =  require("../util/cache_util");
 const StringUtil =  require("../util/string_util");
 const LABA = require("./laba");
 const analyse_result = require("./lottery_analyse_result");
+const log = require('../CClass/class/loginfo').getInstand
 
 
 exports.init = function (gameName, gameId){
@@ -9,6 +10,7 @@ exports.init = function (gameName, gameId){
         const config = {}
 
         config.gameName = gameConfig.gameName;
+        config.gameId = gameConfig.gameId;
         config.nBetSum = 5;
 
         // 多线情况下 每条线下注的金额
@@ -280,7 +282,7 @@ function ganeshagold(config){
         LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, 0, config.icon_mul, result);
 
         const mul = result.dictAnalyseResult['nMultiple'];
-        console.log(num + '倍数' + mul)
+        log.info(num + '倍数' + mul)
         nHandCards.unshift(num ++)
         StringUtil.appendValue(map, mul, nHandCards, config)
         result = {};

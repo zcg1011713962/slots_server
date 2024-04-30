@@ -118,38 +118,68 @@ app.get('/betsJackpot', function (req, res) {
     });
 });
 
-// 查询金币排行榜
-app.get('/searchCoinRank', function (req, res) {
-    gameInfo.searchCoinRank(data =>{
-        if(data){
-            res.send({code: 1, data: data});
-        }else{
-            res.send({code: 0, data: []});
-        }
-    });
+// 查询排行榜
+app.get('/searchRank', function (req, res) {
+    const userId = req.query.userId ? parseInt(req.query.userId) : 0;
+
+    CacheUtil.getRankJackpot((coinRankJackpot, rechargeRankJackpot, bigWinJackpot) =>{
+        CacheUtil.getRankTime((coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankStartEndTime, rechargeRankStartEndTime, bigWinStartEndTime) =>{
+            // 金币排行
+            gameInfo.searchCoinRank(coinRank =>{
+                let coinRankorder = 1;
+                coinRank = coinRank.map(item =>{
+                    item.order = coinRankorder ++;
+                    return item;
+                });
+                const currUserCoinRank = coinRank.filter(item => {
+                    return item.userId === userId
+                });
+                // 充值排行
+                gameInfo.searchRechargeRank(rechargeRank =>{
+                    let currRechargeRankOrder = 1;
+                    rechargeRank = rechargeRank.map(item =>{
+                        item.order = currRechargeRankOrder ++;
+                        return item;
+                    });
+                    const currRechargeRank = rechargeRank.filter(item => {
+                        return item.userId === userId
+                    });
+                    // 赢金币排行
+                    gameInfo.searchBigWinToday(bigWinTodayRank =>{
+                        let bigWinTodayRankOrder = 1;
+                        bigWinTodayRank = bigWinTodayRank.map(item =>{
+                            item.order = bigWinTodayRankOrder ++;
+                            return item;
+                        });
+                        const currBigWinTodayRank = bigWinTodayRank.filter(item => {
+                            return item.userId === userId
+                        });
+                        res.send({code: 1, data: {
+                                coinRank: coinRank.slice(0, 50),  // 金币排行
+                                currUserCoinRank: currUserCoinRank, // 当前用户金币排行
+                                rechargeRank: rechargeRank.slice(0, 50), // 充值排行
+                                currRechargeRank: currRechargeRank, // 当前用户充值排行
+                                bigWinTodayRank: bigWinTodayRank.slice(0, 50), // 大富豪排行
+                                currBigWinTodayRank: currBigWinTodayRank, // 当前用户大富排行
+                                coinRankJackpot: coinRankJackpot, // 金币排行奖池
+                                rechargeRankJackpot: rechargeRankJackpot, // 充值排行奖池
+                                bigWinJackpot: bigWinJackpot, // 大富豪排行奖池
+                                coinRankStartTime: coinRankStartTime, // 金币排行开始时间（时间戳）
+                                rechargeRankStartTime: rechargeRankStartTime, // 充值排行开始时间
+                                bigWinStartTime: bigWinStartTime, // 大富豪排行开始时间
+                                coinRankStartEndTime: coinRankStartEndTime, // 金币排行结束时间
+                                rechargeRankStartEndTime: rechargeRankStartEndTime, // 充值排行结束时间
+                                bigWinStartEndTime: bigWinStartEndTime, // 大富豪排行结束时间
+                                currTime: new Date().getTime()
+                            }});
+                    });
+                });
+            });
+        })
+    })
+
 });
 
-// 查询金币排行榜
-app.get('/searchRechargeRank', function (req, res) {
-    gameInfo.searchRechargeRank(data =>{
-        if(data){
-            res.send({code: 1, data: data});
-        }else{
-            res.send({code: 0, data: []});
-        }
-    });
-});
-
-// 查询今日大赢家
-app.get('/searchBigWinToday', function (req, res) {
-    gameInfo.searchBigWinToday(data =>{
-        if(data){
-            res.send({code: 1, data: data});
-        }else{
-            res.send({code: 0, data: []});
-        }
-    });
-});
 
 // 保存新手指引步数
 app.get('/saveGuideStep', function (req, res) {
@@ -856,13 +886,12 @@ io.on('connection', function (socket) {
             gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(ErrorCode.WITHDRAW_SUCCESS.code === code){
-                    socket.emit('withdrawResult', {code: code, msg: msg, data: data});
                     log.info(userId + '发起提现申请成功:' + data);
+                    socket.emit('withdrawResult', {code: code, msg: msg, data: data});
                 }else{
                    log.info(userId + '发起提现申请失败:' + msg);
                    socket.emit('withdrawResult', {code: code, msg: msg});
                 }
-
             });
         }
     })
@@ -870,12 +899,8 @@ io.on('connection', function (socket) {
     // 提现记录查询
     socket.on('withdrawRecord', function () {
         const userId = socket.userId;
-        gameInfo.withdrawRecord(userId, (code, msg, data) => {
-            if(code){
-                socket.emit('withdrawRecordResult', {code: code, data: data});
-            }else{
-                socket.emit('withdrawRecordResult', {code: code, msg: msg});
-            }
+        gameInfo.withdrawRecord(userId, (rows) => {
+            socket.emit('withdrawRecordResult', {code: 1, data: {rows : rows} });
         });
     })
 
@@ -1407,6 +1432,7 @@ io.on('connection', function (socket) {
 
     // 查询订单记录
     socket.on("orderRecord", function () {
+        log.info(socket.userId + '查询订单记录')
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.orderRecord(socket.userId, (data) =>{
                 socket.emit('orderRecordResult', {code: 1, data: data})
@@ -1414,6 +1440,16 @@ io.on('connection', function (socket) {
         }
     });
 
+
+    // 查询流水记录
+    socket.on("gameFlowRecord", function () {
+        log.info(socket.userId + '查询流水记录')
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.serachBetRecord(socket.userId, (data) =>{
+                socket.emit('gameFlowRecordResult', {code: 1, data: data})
+            });
+        }
+    });
 
 
     // 游戏结算
@@ -1507,21 +1543,7 @@ io.on('connection', function (socket) {
     });
 
 
-    //获得金币排行榜
-    socket.on("getCoinRank", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getCoinRank(socket);
-        }
-    });
-    //获得钻石排行榜
-    socket.on("getDiamondRank", function () {
-        if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.getDiamondRank(socket);
-        }
-    });
-
-
-    //游戏服务器的排行
+    //游戏服务器
     socket.on("setServerRank", function (_info) {
         try {
             var data = JSON.parse(_info);

@@ -956,8 +956,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function (userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
@@ -978,6 +978,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
     values.push(buyContinueDays);
     values.push(payChannel);
     values.push(payType);
+    values.push(promoteWithdrawLimit);
 
 
     pool.getConnection(function (err, connection) {
@@ -1007,7 +1008,7 @@ exports.orderRecord = function orderRecord(userId, orderId, amount, currencyType
 
 // 查询未支付的指定订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status = ? or status = ? and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status in(?,?) and orderId = ? and userId = ?';
     let values = [];
     values.push(TypeEnum.OrderStatus.create);
     values.push(TypeEnum.OrderStatus.paying);
@@ -1070,9 +1071,11 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
         });
         values = [];
     });
-};// 查询所有订单
+};
+
+// 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, create_time createTime FROM pay_order where userId = ? and status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
     let values = [];
     values.push(userId);
     values.push(payStatus[0]);
@@ -1102,8 +1105,72 @@ exports.searchAllOrder = function (userId, payStatus, callback) {
         });
         values = [];
     });
+}
+
+// 查询下注记录
+exports.searchBetRecord = function (userId, callback) {
+    const sql = 'SELECT b.id, b.userId , b.gameId, b.gameName, b.betSum, b.promoteWithdrawLimit, b.create_time, b.update_time, n.headimgurl, n.nickname  FROM bet_record b left join newuseraccounts n on b.userId  = n.Id where b.userId = ?';
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询下注记录");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
 };
 
+
+// 插入下注记录
+exports.betRecord = function (userId,gameId,gameName,betSum,promoteWithdrawLimit, callback) {
+    const sql = 'INSERT INTO bet_record (gameId, gameName, betSum, promoteWithdrawLimit, userId) VALUES(?, ?, ?, ?, ?)';
+    let values = [];
+    values.push(gameId);
+    values.push(gameName);
+    values.push(betSum);
+    values.push(promoteWithdrawLimit);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询下注记录");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
 
 // 更新订单
 exports.updateOrder = function updateOrder(userId, orderId, payStatus, callback) {
@@ -1192,38 +1259,6 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
         values = [];
     });
 };
-
-
-//已经提现金额记录
-exports.submittedRecharge = function submittedRecharge(userId, submittedRecharge, callback) {
-    const sql = 'update newuseraccounts set submittedRecharge = submittedRecharge + ? where Id=?';
-    let values = [];
-    values.push(submittedRecharge);
-    values.push(userId);
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err("submittedRecharge" + err);
-                callback(0);
-            } else {
-                if (rows) {
-                    callback(1);
-                } else {
-                    callback(0);
-                }
-            }
-        });
-        values = [];
-    });
-};
-
-
 
 // 查询提现额度
 exports.searchWithdrawLimit = function searchWithdrawLimit(userId, callback) {
@@ -1855,7 +1890,7 @@ exports.getBank = function getBank(_userId, callback) {
         });
         values = [];
     });
-};
+}
 
 
 
@@ -3094,13 +3129,12 @@ exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(use
 
 
 
-// 通过订单查询提现申请记录
-exports.searchTotalWithdraw = function searchTotalWithdraw(userId, orderId, callback) {
-    const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus,lockBankScore FROM withdraw_record WHERE userId = ? and orderId = ?";
-
+// 查询提现总额度
+exports.searchTotalWithdraw = function (userId, callback) {
+    const sql = "SELECT SUM(withdrawLimit) AS totalWithdrawLimit FROM ( select sum(promoteWithdrawLimit) withdrawLimit from pay_order po where userId = ? UNION ALL select sum(promoteWithdrawLimit) withdrawLimit from bet_record po where userId = ?) AS withdrawLimit";
     let values = [];
     values.push(userId);
-    values.push(orderId);
+    values.push(userId);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -3110,19 +3144,106 @@ exports.searchTotalWithdraw = function searchTotalWithdraw(userId, orderId, call
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                log.err('通过订单查询提现申请记录' + err);
+                log.err('查询提现总额度' + err);
                 callback(0)
                 return;
             }
-            if(rows && rows.length > 0){
-                callback(1, rows[0])
+            if(rows && rows.length > 0 && rows[0].totalWithdrawLimit){
+                callback(Number(rows[0].totalWithdrawLimit))
             }else{
                 callback(0)
             }
         });
         values = [];
     });
-};
+}
+
+// 提现额度使用
+exports.AddUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback) {
+    const sql = "update userinfo_imp set usedWithdrawLimit = usedWithdrawLimit + ? where userId = ?";
+    let values = [];
+    values.push(usedWithdrawLimit);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('已使用提现额度累加' + err);
+                callback(0)
+                return;
+            }
+            if(rows){
+                callback(1)
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 归还已使用额度
+exports.ReduceUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback) {
+    const sql = "update userinfo_imp set usedWithdrawLimit = usedWithdrawLimit - ? where userId = ?";
+    let values = [];
+    values.push(usedWithdrawLimit);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('归还已使用额度' + err);
+                callback(0)
+                return;
+            }
+            if(rows){
+                callback(1)
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+}
+
+// 查询已使用提现额度
+exports.searchUsedWithdrawLimit = function (userId, callback) {
+    const sql = "select usedWithdrawLimit from userinfo_imp where userId = ?";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询已使用提现额度' + err);
+                callback(0)
+                return;
+            }
+            if(rows && rows.length > 0 && rows[0].usedWithdrawLimit){
+                callback(Number(rows[0].usedWithdrawLimit))
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+}
 
 // 查询提现申请记录
 exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, callback) {
@@ -3144,9 +3265,9 @@ exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, c
                 return;
             }
             if(rows && rows.length > 0){
-                callback(1, rows)
+                callback(rows)
             }else{
-                callback(1, [])
+                callback([])
             }
         });
         values = [];

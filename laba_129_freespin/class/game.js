@@ -158,22 +158,28 @@ var GameInfo = function () {
 
             CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
                 try {
-                    let resultObj = {
-                        account: userInfo.account,
-                        id: userInfo.userId,
-                        nickname: userInfo.nickname,
-                        score: userInfo.score,
-                        jackpot: {
-                            gameJackpot: gameJackpot,
-                            grand_jackpot: grandJackpot,
-                            major_jackpot: majorJackpot,
-                            minor_jackpot: minorJackpot,
-                            mini_jackpot: miniJackpot
-                        }
-                    };
-                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
-                    this.userList[userId]._socket.emit('loginGameResult', result);
+                    CacheUtil.getGameConfig(this.gameName, this.gameId).then(config => {
+                        const icon_mul = config.icon_mul.reduce((acc, curr) => {
+                            return acc.concat(curr);
+                        }, []);
+                        let resultObj = {
+                            account: userInfo.account,
+                            id: userInfo.userId,
+                            nickname: userInfo.nickname,
+                            score: userInfo.score,
+                            priceList: icon_mul,
+                            jackpot: {
+                                gameJackpot: gameJackpot,
+                                grand_jackpot: grandJackpot,
+                                major_jackpot: majorJackpot,
+                                minor_jackpot: minorJackpot,
+                                mini_jackpot: miniJackpot
+                            }
+                        };
+                        result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                        log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                        this.userList[userId]._socket.emit('loginGameResult', result);
+                    })
                 }catch (e){
                     log.err('给用户回应登录结果:' + e)
                 }

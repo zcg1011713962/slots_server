@@ -72,7 +72,8 @@ const hallConfig = {
     score_config : 'score_config',
     bankrupt_config: 'bankrupt_config',
     turntable_config: 'turntable_config',
-    discountLimited_config: 'discountLimited_config'
+    discountLimited_config: 'discountLimited_config',
+    rank_config: 'rank_config'
 }
 
 
@@ -195,6 +196,7 @@ exports.getDiscountLimitedConfig = async function(){
         log.err('getDiscountLimitedConfig');
     }
 }
+
 
 exports.getTurntableConfig = async function(){
     try{
@@ -944,10 +946,10 @@ exports.getNewHandGuideFlowKey = function(userId, firstRecharge, callback){
 exports.userDiscountLimited  = function (userId, callback){
     const key = userDiscountLimitedKey + '_' + userId;
     this.getDiscountLimitedConfig().then(config =>{
-        const expire = config[0].Discount_time * 60;
+        const expire = parseInt(config[0].Discount_time * 60);
         RedisUtil.get(key).then(startTime =>{
             if(startTime){
-                const endTime = startTime + expire * 60;
+                const endTime = parseInt(startTime) + expire * 60;
                 callback(1, startTime, endTime)
             }else{
                 const startTime = new Date().getTime();
@@ -969,15 +971,21 @@ exports.userDiscountLimited  = function (userId, callback){
         })
     })
 }
+// 删除限时折扣
+exports.delUserDiscountLimited  = function (userId){
+    const key = userDiscountLimitedKey + '_' + userId;
+    return RedisUtil.del(key);
+}
+
 
 // 限时折扣剩余时间
 exports.userDiscountLimitedResTime  = function (userId, callback){
     const key = userDiscountLimitedKey + '_' + userId;
     this.getDiscountLimitedConfig().then(config => {
-        const expire = config[0].Discount_time * 60;
+        const expire = parseInt(config[0].Discount_time * 60);
         RedisUtil.get(key).then(startTime => {
             if (startTime) {
-                const endTime = startTime + expire * 60;
+                const endTime = parseInt(startTime) + expire * 60;
                 callback(startTime, endTime, new Date().getTime())
             } else {
                 callback(0, 0, new Date().getTime())
@@ -986,7 +994,6 @@ exports.userDiscountLimitedResTime  = function (userId, callback){
     })
 
 }
-
 
 
 // 获取限时折扣
@@ -1091,16 +1098,12 @@ exports.getControlAwardByRtp = function(rtp){
                 return rtpMap.get(rtpArr[i]);
             }else if(rtpArr[i].length === 2){ // 数组两个元素
                 const [min, max] = rtpArr[i];
-                if(rtp > min && rtp < max){
+                if(rtp >= min && rtp < max){
                     return rtpMap.get(rtpArr[i]);
                 }
             }
         }
     })
-}
-
-exports.getIconValue = function(){
-    return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.iconValueKey).then(r => JSON.parse(r));
 }
 
 
@@ -1187,11 +1190,17 @@ exports.getRecordUserHandCards = function(gameId, userId, callback){
 
 // 获取用户出过的图案组合
 exports.delRecordUserHandCards = function(gameId, userId, cardNums){
-    const stringArray = cardNums.map(num => num.toString());
-    const key = recordHandCardKey + '_' + gameId + '_' + userId;
-    return RedisUtil.hashdelAsync(key, ...stringArray).then(k =>{
-        log.info('已初始化图案编号' + key + ' ' + stringArray)
-    })
+    try{
+        const stringArray = cardNums.map(num => num.toString());
+        console.log('stringArray' + stringArray)
+        if(stringArray.length === 0){
+            return;
+        }
+        const key = recordHandCardKey + '_' + gameId + '_' + userId;
+        RedisUtil.hashdelAsync(key, ...stringArray).then(ret =>{});
+    }catch (e){
+        log.err(e)
+    }
 }
 
 // 更新为非新手
@@ -1202,4 +1211,47 @@ exports.updateNewHandFlag = function(userId, newHandFlag){
 // 获取是否新手
 exports.getNewHandFlag = function(userId){
     return RedisUtil.hget(`${userInfoKey}:${userId}`, 'newHandFlag');
+}
+
+
+
+exports.getRankConfig = function(userId){
+    return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.rank_config).then(config => JSON.parse(config))
+}
+
+exports.getRankJackpot = function(callback){
+    const self = this;
+    self.getActivityJackpot(activityJackpot =>{
+        self.getRankConfig().then(config =>{
+            const rankJackpot = StringUtil.rideNumbers(activityJackpot, config.rankRatio / 100, 2 );
+            const coinRankWeight = config.rankRatioWeight.coinRankWeight;
+            const rechargeRankWeight = config.rankRatioWeight.rechargeRankWeight;
+            const bigWinWeight = config.rankRatioWeight.bigWinWeight;
+            const total = StringUtil.addTNumbers(coinRankWeight, rechargeRankWeight, bigWinWeight)
+
+            const coinRankJackpot =  StringUtil.rideNumbers(activityJackpot, coinRankWeight / total, 2 );
+            const rechargeRankJackpot =  StringUtil.rideNumbers(activityJackpot, rechargeRankWeight / total, 2 );
+            const bigWinJackpot =  StringUtil.rideNumbers(activityJackpot, bigWinWeight / total, 2 );
+            callback(coinRankJackpot, rechargeRankJackpot, bigWinJackpot);
+        })
+    })
+}
+
+exports.getRankTime = function(callback){
+    const self = this;
+    self.getRankConfig().then(config =>{
+        const coinRankflushTime = parseInt(config.rankRatioTimes.coinRankflushTime);
+        const rechargeRankflushTime = parseInt(config.rankRatioTimes.rechargeRankflushTime);
+        const bigWinflushTime = parseInt(config.rankRatioTimes.bigWinflushTime);
+
+        const coinRankStartTime = parseInt(config.rankRatioStartTimes.coinRankStartTime);
+        const rechargeRankStartTime = parseInt(config.rankRatioStartTimes.rechargeRankStartTime);
+        const bigWinStartTime = parseInt(config.rankRatioStartTimes.bigWinStartTime);
+
+        const coinRankStartEndTime = coinRankStartTime  + coinRankflushTime * 60 * 60 * 60 * 1000;
+        const rechargeRankStartEndTime = rechargeRankStartTime + rechargeRankflushTime * 60 * 60 * 60 * 1000;
+        const bigWinStartEndTime = bigWinStartTime + bigWinflushTime * 60 * 60 * 60 * 1000;
+
+        callback(coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankStartEndTime, rechargeRankStartEndTime, bigWinStartEndTime)
+    })
 }

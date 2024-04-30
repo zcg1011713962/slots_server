@@ -286,7 +286,10 @@ exports.currDateTime = function currDateTime() {
 
 exports.appendValue = function (map , key, value, config) {
     if (map.has(key)) {
-        if(map.get(key).length > 2000 && config.gameId === 272 || config.gameId === 263){
+        if(map.get(key).length > 500 && config.gameId === 272){
+            return;
+        }
+        if(map.get(key).length > 20 && config.gameId === 263){
             return;
         }
         map.get(key).push(value);
