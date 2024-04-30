@@ -309,6 +309,17 @@ app.get('/Shopping', async function (req, res) {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 log.info(userId + '购买商品下单成功');
+                CacheUtil.paySwitch().then(ok =>{
+                    if(ok){
+                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
+                            if(ret){
+                                log.info(userId + '充值下单打点成功');
+                            }
+                        })
+                    }else{
+                        log.info(userId + '测试环境不支持打点')
+                    }
+                })
                 res.send({code: code, data: data});
             }else{
                 log.info(userId + '购买商品下单失败:' + msg);
@@ -945,7 +956,7 @@ io.on('connection', function (socket) {
             gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(ErrorCode.WITHDRAW_SUCCESS.code === code){
-                    log.info(userId + '发起提现申请成功:' + data);
+                    log.info(userId + '发起提现申请成功');
                     socket.emit('withdrawResult', {code: code, msg: msg, data: data});
                 }else{
                    log.info(userId + '发起提现申请失败:' + msg);

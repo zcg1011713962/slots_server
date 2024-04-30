@@ -778,6 +778,7 @@ var GameInfo = function () {
                     try{
                         if(res && res.code === 200 && res.data){
                             const orderStatus = res.data.orderStatus;
+                            const amount = res.data.amount;
                             // 支付未通知 支付已通知  交易失败 交易过期 交易退还 交易异常 交易结束
                             if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify
                                 || orderStatus === TypeEnum.OrderStatus.payFailed || orderStatus === TypeEnum.OrderStatus.payExpired
@@ -794,6 +795,10 @@ var GameInfo = function () {
                                         }
                                         callback(1)
                                     });
+                                    // 充值成功打点
+                                    self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,code =>{
+                                        log.info(userId + '充值成功打点,充值金额:' + amount)
+                                    })
                                 }else{
                                     dao.updateOrder(userId, orderId, orderStatus, ret=>{
                                         log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
@@ -2502,6 +2507,7 @@ var GameInfo = function () {
             dao.searchAccountByDeviceCode(deviceCode, callback);
         }
 
+
         // 存储打点数据
         this.saveDot = function (userId, adid, gps, apptoken, callback) {
             dao.saveDot(userId, adid, gps, apptoken, callback);
@@ -2524,6 +2530,7 @@ var GameInfo = function () {
                     dot.dotRequest(gps, adid, apptoken, key, money).then(data =>{
                         const d = JSON.parse(data);
                         if(d.status === "OK"){
+                            log.info(userId + '打点成功key:' + key )
                             callback(1)
                         }else{
                             callback(0)
@@ -4127,8 +4134,18 @@ var GameInfo = function () {
                                         dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, callbackUrl, orderId, 0, currencyType, ret => {
                                             if (ret) {
                                                 const withdrawGlodCoin = StringUtil.rideNumbers( withdrawAmount, withdrawProportion, 2);
-                                                CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply,ret =>{} )
-                                                dao.AddUsedWithdrawLimit(userId, withdrawAmount, ret =>{})
+                                                CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply,ret =>{
+                                                    dao.AddUsedWithdrawLimit(userId, withdrawAmount, ret =>{
+                                                        // 获取玩家当前金币
+                                                        CacheUtil.getGoldCoin(userId).then(goldCoin =>{
+                                                            self.getWithdrawLimtByVipWithdrawRatio(userId, (wLimit) =>{
+                                                                self.getCanWithdrawLimit(userId, goldCoin, withdrawProportion, wLimit,  (canWithdrawLimit) =>{
+                                                                    callback(ErrorCode.WITHDRAW_SUCCESS.code, ErrorCode.WITHDRAW_SUCCESS.msg, {canWithdrawGoldCoin: canWithdrawLimit, withdrawLimit: wLimit})
+                                                                })
+                                                            })
+                                                        })
+                                                    })
+                                                })
                                             } else {
                                                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                             }
