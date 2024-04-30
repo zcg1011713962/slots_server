@@ -814,6 +814,7 @@ function cardsHandle (config, nHandCards, result, user){
 
 function specialPlayMethBefore(nHandCards, config, result){
     if(config.gameName === 'fortunetiger' && nHandCards.includes(config.blankCard)){
+        log.info('specialPlayMethBefore')
         // 老虎特殊bouns
         LABA.tigerOpenBox(result.dictAnalyseResult, nHandCards, config);
     }
@@ -823,6 +824,7 @@ function specialPlayMethAfter(nHandCards, config, result){
     const resList = [];
     if (config.gameName === 'fortunetiger') {
         if(result.dictAnalyseResult["getBigWin"].bFlag && result.dictAnalyseResult["getBigWin"].isStart){
+            log.info('specialPlayMethAfter')
             let newHandCard = [];
             for (let i in nHandCards) {
                 newHandCard.push(parseInt(nHandCards[i]) + 1);
