@@ -26,6 +26,7 @@ exports.dotRequest  = async function dotRequest(gps, adid, apptoken, key, money)
             });
             url = `http://server.pokerslotgame.com/adjust?${params}`;
         }
+        log.info('打点请求' + url)
         return await HTTPRequest.sendRequest(url, 'GET', null, null);
     } catch (error) {
         log.err('打点请求Error:'+ error);

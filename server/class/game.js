@@ -775,9 +775,9 @@ var GameInfo = function () {
                             if(orderStatus === TypeEnum.OrderStatus.payedNotify || orderStatus === TypeEnum.OrderStatus.payedUnNotify){
                                 log.info(userId + '订单支付成功,金额:' + amount + '响应:' +  res);
                                 self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
-                                    self.dot(userId, TypeEnum.dotEnum.af_purchase, '', '', '', amount, ret =>{
+                                    self.dot(userId, TypeEnum.dotEnum.recharge_arrive, '', '', '', amount, ret =>{
                                         if(ret){
-                                            log.info(userId + '订单支付成功，充值打点成功');
+                                            log.info(userId + '订单支付成功，充值打点成功,金额:' + amount);
                                         }else{
                                             log.info(userId + '订单支付成功，充值打点失败');
                                         }
@@ -800,7 +800,7 @@ var GameInfo = function () {
                             callback(0)
                         }
                     }else{
-                        log.info(userId + '查询订单'+ orderId + '结果:' +  res);
+                        log.info(userId + '查询订单'+ orderId + '结果:' +  JSON.stringify(res));
                         callback(0)
                     }
                 }else{
@@ -2510,8 +2510,10 @@ var GameInfo = function () {
                     dot.dotRequest(gps, adid, apptoken, key, money).then(data =>{
                         const d = JSON.parse(data);
                         if(d.status === "OK"){
+                            log.info(userId + '打点成功key:' + key)
                             callback(1)
                         }else{
+                            log.info(userId + '打点失败key:' + key + '打点响应:' + data)
                             callback(0)
                         }
                     });
