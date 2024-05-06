@@ -956,12 +956,13 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function (userId, orderId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function (userId, orderId, productId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, productId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
 
     let values = [];
     values.push(orderId);
     values.push(userId);
+    values.push(productId);
     values.push(amount);
     values.push(currencyType);
     values.push(vipLevel);
@@ -1010,11 +1011,10 @@ exports.orderRecord = function (userId, orderId, amount, currencyType, vipLevel,
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
     const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status in(?,?) and orderId = ? and userId = ?';
     let values = [];
-    values.push(TypeEnum.OrderStatus.create);
-    values.push(TypeEnum.OrderStatus.paying);
     values.push(orderId);
     values.push(userId);
-
+    values.push(TypeEnum.OrderStatus.create);
+    values.push(TypeEnum.OrderStatus.paying);
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
