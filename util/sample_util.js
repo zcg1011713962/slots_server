@@ -209,8 +209,13 @@ function freeSpin(config){
         const result = {}
         result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
         LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
-
-        const mul = result.dictAnalyseResult['nMultiple'];
+        let mul = result.dictAnalyseResult['nMultiple'];
+        if(mul === 0 && config.freeCards.includes(nHandCards[0])){
+            mul = 1;
+        }
+        if(mul === 0 && config.jackpotCard === nHandCards[0]){
+            mul = 10000;
+        }
         nHandCards.unshift(num ++)
         StringUtil.appendValue(map, mul, nHandCards, config)
     }

@@ -8,8 +8,6 @@ const StringUtil =  require("../util/string_util");
 const dao = require('../util/dao/dao');
 const CommonEven = require("./event_util");
 const TypeEnum = require("./enum/type");
-const CustomException = require("../util/CustomException");
-const {getPlayGameCount} = require("./cache_util");
 
 exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
     const userId = socket.userId;
@@ -53,7 +51,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
                             // 判断玩家是否破产
                             CacheUtil.isBankrupt(currScore, currBankScore, (bankrupt, bustBonus, bustTimes) =>{
                                 // 扣费
-                                CacheUtil.feeCost(userId, nBetSum, TypeEnum.ScoreChangeType.gameGlodCoin ,(feeSuccess, beforeFreeCount, beforeGoldCoin) =>{
+                                CacheUtil.feeCost(gameConfig.gameId, userId, nBetSum, TypeEnum.ScoreChangeType.gameGlodCoin ,(feeSuccess, beforeFreeCount, beforeGoldCoin) =>{
                                     // 获取水位
                                     CacheUtil.getGamblingWaterLevelGold().then(nGamblingWaterLevelGold =>{
                                         // 摇奖前参数获取
@@ -66,7 +64,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
                                         if(!feeSuccess){
                                             log.info(config.userId + '金币数量不足,当前金币数量:' + beforeGoldCoin + '下注:' + config.nBetSum);
                                             if(config.bankrupt){
-                                                log.info(config.userId + "破产了领救济金:" + config.nBetSum);
+                                                log.info(config.userId + "破产了可以领救济金");
                                                 socket.emit('lotteryResult', {ResultCode: TypeEnum.LotteryResultCode.popDiscount});
                                                 return;
                                             }
@@ -122,6 +120,7 @@ function recordBetFlow(config, dao){
         CacheUtil.getVConfig().then(c =>{
             const bet = StringUtil.divNumbers(config.nBetSum, score_amount_ratio, 2)
             const promoteWithdrawLimit =  StringUtil.rideNumbers( bet, parseInt(c.flow_vip_socre_percentage) / 100, 2)
+            log.info(config.userId + '单笔投注:'+ config.nBetSum +'提升提现额度:' + promoteWithdrawLimit)
             dao.betRecord(config.userId, config.gameId, config.gameName, config.nBetSum, promoteWithdrawLimit, ret =>{})
         })
     })
@@ -198,9 +197,9 @@ function newhandProtectControl (userId, totalRecharge, callback) {
             const newHandCurrCount = (newbierPart.length - length);
             if(totalRecharge > recharge || length === 0){  // 充值大于30或者玩的局数大于新手局数
                 newHandFlag = 0;
-                log.info('---------------------------------------' + userId + '本局为非新手,总充值:'+ totalRecharge + '剩余新手局数:' + length + '---------------------------------------')
+                log.info('---------------------------------------' + userId + '本局为非新手用户,总充值:'+ totalRecharge + '剩余新手局数:' + length + '---------------------------------------')
             }else{
-               log.info('---------------------------------------' + userId + '新手保护,总充值:'+ totalRecharge+ '新手当前局数:'+ (newHandCurrCount + 1) + '剩余新手局数:' + (length -1) + '---------------------------------------')
+               log.info('---------------------------------------' + userId + '本局为新手用户,总充值:'+ totalRecharge + '非新手需要充值大于' + recharge + '或者新手局数不足，当前配置局数:'+ (newHandCurrCount + 1) + '剩余新手局数:' + (length -1) + '---------------------------------------')
                 // 未脱离新手保护 不计下注与返奖
                 CacheUtil.updatePlayGameBetRecord(userId, JSON.stringify({
                    totalBet: 0,
@@ -592,7 +591,7 @@ function afterLottery(config, nHandCards, gameInfo, result, callback){
             const currGoldCoin = StringUtil.addNumbers(winscore, user.score);
             // 增减金币和免费次数
             CacheUtil.addGoldCoin(config.userId, winscore, TypeEnum.ScoreChangeType.gameGlodCoin, (c) => {
-                CacheUtil.addFreeCount(config.userId, freeCount,   (ret) =>{
+                CacheUtil.addFreeCount(config.gameId, config.userId, freeCount,   (ret) =>{
                     const resultArray = analyse_result.build(config.userId, user.nickname, config.gameName, config.nBetSum, currFreeCount, currGoldCoin, dictAnalyseResult, config.sendMessage_mul);
                     // 日志记录
                     lottery_record.record(gameInfo._Csocket, config.nGameLines.length, config.serverId, config.gameId,

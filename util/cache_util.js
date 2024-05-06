@@ -5,6 +5,7 @@ const ErrorCode = require("./ErrorCode");
 const StringUtil = require("./string_util");
 const TypeEnum = require("./enum/type");
 const dao = require("./dao/dao");
+const gameDao = require("./dao/gameDao");
 
 const gamblingBalanceGold= 'gamblingBalanceGold';
 const sysBalanceGold= 'sysBalanceGold';
@@ -557,9 +558,9 @@ exports.cacheEmailCode  = function (verificationCode, toEmail, callback){
 
 // 邮箱验证码-校验
 exports.verifyEmailCode  = function (code, email, callback){
-    callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
+    // callback(ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.code, ErrorCode.EMAIL_CODE_VERIFY_SUCCESS.msg);
     // 是否过期存储
-   /* RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
+    RedisUtil.get(sendEmailExpireKey + email).then(expireCode => {
         RedisUtil.get(sendEmailKey + email).then(verificationCode => {
             try {
                 if (parseInt(verificationCode) === parseInt(code)) {
@@ -578,7 +579,7 @@ exports.verifyEmailCode  = function (code, email, callback){
                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg);
             }
         });
-    });*/
+    });
 }
 
 
@@ -587,7 +588,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
     try {
         const key = protocol + '_' + userId;
         const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
-        log.info('协议被调用:' + key + 'code:' + setResult)
+        log.info('协议调用:' + key + '状态:' + setResult)
         if (setResult === 1) {
             // 如果设置成功，则设置过期时间
             await RedisUtil.expire(key, userSocketProtocolExpireSecond);
@@ -601,7 +602,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
 // 删除用户调用协议记录
 exports.delUserProtocol  = async function (userId, protocol){
     const key = protocol + '_' + userId;
-    log.info('协议被释放:' + key)
+    log.info('协议释放:' + key)
     await RedisUtil.del(key);
 }
 
@@ -728,19 +729,21 @@ exports.getFreeCount = function(userId){
 }
 
 // 扣免费次数
-exports.reduceFreeCount = function(userId, reduceFreeCount, callback){
+exports.reduceFreeCount = function(gameId, userId, reduceFreeCount, callback){
     this.getFreeCount(userId).then(freeCount =>{
         if(freeCount >= reduceFreeCount){
-            RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', -reduceFreeCount, (err, currFreeCount) => {
-                if (err) {
-                    log.err(userId + '扣免费次数' + err);
-                    callback(0)
-                } else {
-                    log.info(userId + '扣免费次数' + reduceFreeCount + '成功,当前免费次数:' + currFreeCount);
-                    const beforeFreeCount = freeCount;
-                    callback(1, beforeFreeCount, currFreeCount)
-                }
-            });
+            gameDao.reduceFreeCount(gameId, userId, r =>{
+                RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', -reduceFreeCount, (err, currFreeCount) => {
+                    if (err) {
+                        log.err(userId + '扣免费次数' + err);
+                        callback(0)
+                    } else {
+                        log.info(userId + '扣免费次数' + reduceFreeCount + '成功,当前免费次数:' + currFreeCount);
+                        const beforeFreeCount = freeCount;
+                        callback(1, beforeFreeCount, currFreeCount)
+                    }
+                });
+            })
         }else{
             callback(0)
         }
@@ -748,17 +751,19 @@ exports.reduceFreeCount = function(userId, reduceFreeCount, callback){
 }
 
 // 给用户加免费次数
-exports.addFreeCount = function(userId, freeCount, callback){
+exports.addFreeCount = function(gameId, userId, freeCount, callback){
     if(freeCount > 0){
-        RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', freeCount, (err, currFreeCount) => {
-            if (err) {
-                log.err(userId + '增加免费次数' + err);
-                callback(0)
-            } else {
-                log.info(userId + '增加免费次数' + freeCount + '成功,当前免费次数:' + currFreeCount);
-                callback(1)
-            }
-        });
+        gameDao.addFreeCount(gameId, userId, freeCount, ret =>{
+            RedisUtil.client.hincrby(`${userInfoKey}:${userId}`, 'freeCount', freeCount, (err, currFreeCount) => {
+                if (err) {
+                    log.err(userId + '增加免费次数' + err);
+                    callback(0)
+                } else {
+                    log.info(userId + '增加免费次数' + freeCount + '成功,当前免费次数:' + currFreeCount);
+                    callback(1)
+                }
+            });
+        })
     }else{
         callback(1)
     }
@@ -854,14 +859,14 @@ exports.reduceGoldCoin = function(userId, coinsToReduce, type, callback){
 }
 
 // 扣费用
-exports.feeCost = function(userId, nBetSum, type, callback){
+exports.feeCost = function(gameId, userId, nBetSum, type, callback){
     const self = this;
     self.getFreeCount(userId).then(freeCount =>{
         freeCount = freeCount == null ? 0 : parseInt(freeCount)
         self.getGoldCoin(userId).then(goldCoin =>{
             if(freeCount > 0){
                 // 扣免费次数
-                self.reduceFreeCount(userId, 1, (ret) =>{
+                self.reduceFreeCount(gameId, userId, 1, (ret) =>{
                     if(ret){
                         callback(1, freeCount, goldCoin)
                     }else{
@@ -1239,19 +1244,20 @@ exports.getRankJackpot = function(callback){
 exports.getRankTime = function(callback){
     const self = this;
     self.getRankConfig().then(config =>{
+        // 刷新时间/天
         const coinRankflushTime = parseInt(config.rankRatioTimes.coinRankflushTime);
         const rechargeRankflushTime = parseInt(config.rankRatioTimes.rechargeRankflushTime);
         const bigWinflushTime = parseInt(config.rankRatioTimes.bigWinflushTime);
-
+        // 刷新开始时间戳
         const coinRankStartTime = parseInt(config.rankRatioStartTimes.coinRankStartTime);
         const rechargeRankStartTime = parseInt(config.rankRatioStartTimes.rechargeRankStartTime);
         const bigWinStartTime = parseInt(config.rankRatioStartTimes.bigWinStartTime);
+        // 刷新结束时间戳
+        const coinRankEndTime = coinRankStartTime  + coinRankflushTime * 24 * 60 * 60 * 1000;
+        const rechargeRankEndTime = rechargeRankStartTime + rechargeRankflushTime * 24 * 60 * 60 * 1000;
+        const bigWinEndTime = bigWinStartTime + bigWinflushTime * 24 * 60 * 60 * 1000;
 
-        const coinRankStartEndTime = coinRankStartTime  + coinRankflushTime * 60 * 60 * 60 * 1000;
-        const rechargeRankStartEndTime = rechargeRankStartTime + rechargeRankflushTime * 60 * 60 * 60 * 1000;
-        const bigWinStartEndTime = bigWinStartTime + bigWinflushTime * 60 * 60 * 60 * 1000;
-
-        callback(coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankStartEndTime, rechargeRankStartEndTime, bigWinStartEndTime)
+        callback(coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankEndTime, rechargeRankEndTime, bigWinEndTime)
     })
 }
 

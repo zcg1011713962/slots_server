@@ -1,5 +1,5 @@
 ﻿const User = require("./User");
-const gameDao = require("./../dao/gameDao");
+const gameDao = require("../../util/dao/gameDao");
 const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
@@ -214,7 +214,6 @@ var GameInfo = function () {
             }
             if (saveListTemp.length > 0) {
                 this._Csocket.emit("score_changeLog", saveListTemp);
-                //gameDao.score_changeLog(saveListTemp);
             }
         };
 
@@ -235,7 +234,7 @@ var GameInfo = function () {
                 }
             }
             if (saveListLotteryLogTemp.length > 0) {
-                gameDao.lotteryLog(saveListLotteryLogTemp);
+                gameDao.lotteryLog(gameConfig.gameId, saveListLotteryLogTemp);
             }
         };
 
@@ -262,7 +261,7 @@ var GameInfo = function () {
                         freeCount: freeCount,
                         LotteryCount: 0
                     };
-                    gameDao.saveFree(info, function (result) {
+                    gameDao.saveFree(gameConfig.gameId, info, function (result) {
                         log.info(userId + '保存免费次数' + info.freeCount);
                         self._Csocket.emit("lineOut", {
                             signCode: gameConfig.LoginServeSign,
@@ -482,7 +481,7 @@ var GameInfo = function () {
             //发送场景消息
             //检查自己下注情况,效准玩家金额
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId,  (ResultCode, Result) => {
                 //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId
@@ -494,7 +493,7 @@ var GameInfo = function () {
                     seatId: LoginResult.seatId,
                     userList: tableUserList,
                     freeCount: self.userList[_userId].getFreeCount(),
-                    score_pool: self.A.getVirtualScorePool()
+                    score_pool: 0
                 };
                 _socket.emit("LoginRoomResult", {ResultCode: 1, ResultData: ResultData});
 
@@ -521,7 +520,7 @@ var GameInfo = function () {
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
                 log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);

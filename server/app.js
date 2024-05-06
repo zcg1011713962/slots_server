@@ -123,7 +123,7 @@ app.get('/searchRank', function (req, res) {
     const userId = req.query.userId ? parseInt(req.query.userId) : 0;
 
     CacheUtil.getRankJackpot((coinRankJackpot, rechargeRankJackpot, bigWinJackpot) =>{
-        CacheUtil.getRankTime((coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankStartEndTime, rechargeRankStartEndTime, bigWinStartEndTime) =>{
+        CacheUtil.getRankTime((coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankEndTime, rechargeRankEndTime, bigWinEndTime) =>{
             // 金币排行
             gameInfo.searchCoinRank(coinRank =>{
                 let coinRankorder = 1;
@@ -167,10 +167,10 @@ app.get('/searchRank', function (req, res) {
                                 coinRankStartTime: coinRankStartTime, // 金币排行开始时间（时间戳）
                                 rechargeRankStartTime: rechargeRankStartTime, // 充值排行开始时间
                                 bigWinStartTime: bigWinStartTime, // 大富豪排行开始时间
-                                coinRankStartEndTime: coinRankStartEndTime, // 金币排行结束时间
-                                rechargeRankStartEndTime: rechargeRankStartEndTime, // 充值排行结束时间
-                                bigWinStartEndTime: bigWinStartEndTime, // 大富豪排行结束时间
-                                currTime: new Date().getTime()
+                                coinRankStartEndTime: coinRankEndTime, // 金币排行结束时间
+                                rechargeRankStartEndTime: rechargeRankEndTime, // 充值排行结束时间
+                                bigWinStartEndTime: bigWinEndTime, // 大富豪排行结束时间
+                                currTime: new Date().getTime() // 系统当前时间
                             }});
                     });
                 });
@@ -353,9 +353,9 @@ app.get('/shoppingCallBack', function (req, res) {
                         // 响应
                         res.send({code: code, msg: msg});
                         // 回调socket
-                        if (serverId === 0) { // 大厅
+                        if (code && serverId === 0) { // 大厅
                             gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
-                        } else if (serverId !== 0) { // 游戏内
+                        } else if (code && serverId !== 0) { // 游戏内
                             gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
                         }
                     });

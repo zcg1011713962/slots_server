@@ -727,8 +727,8 @@ var GameInfo = function () {
                             const promoteWithdrawLimit = StringUtil.rideNumbers(amount, parseInt(config.recharge_vip_socre_percentage) / 100, 2);
                             // 记录订单详情
                             dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.PayType.betcatpay, promoteWithdrawLimit, ret => {
-                                log.info(userId + '测试购买订单记录' + orderId)
                                 if (ret) {
+                                    log.info(userId + '测试购买下订单成功' + orderId)
                                     const orderResult = {
                                         "code": 1,
                                         "data": {
@@ -819,9 +819,9 @@ var GameInfo = function () {
                                     self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
                                         // 回调socket
                                         if (serverId === 0) { // 大厅
-                                            self.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                                            self.sendHallShopCallBack(userId, shopType, serverId, msg, data)
                                         } else if (serverId !== 0) { // 游戏内
-                                            self.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                                            self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
                                         }
                                         callback(1)
                                     });
@@ -1188,7 +1188,7 @@ var GameInfo = function () {
                         // 游戏有效投注获得VIP积分百分比
                         const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                         // 增加VIP积分(VIP点数)
-                        let addVipPoint = Number(amount * recharge_vip_socre_percentage / 100);
+                        let addVipPoint =  StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
 
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
@@ -1953,11 +1953,11 @@ var GameInfo = function () {
                                     dictAnalyseResult['maxTurntableGameAddRate'] = maxTurntableGameAddRate;
                                     dictAnalyseResult['maxBuyMul'] = maxBuyMul;
                                 }
-                                // 计算转盘奖池基础倍数(向下取整) = 当前奖池/转盘最大倍数/VIP加成/购买倍数最大值
-                                const val = turntableJackpot / turntableMaxMul / maxTurntableGameAddRate / maxBuyMul;
+                                // 计算转盘奖池基础倍数(向下取整) = 转盘奖池/转盘最大倍数
+                                const val = turntableJackpot / turntableMaxMul;
                                 // 基础倍数
                                 const baseMul = StringUtil.toFixed(val, 2)
-                                log.info('计算转盘基础倍数 活动奖池:' + activityJackpot + '转盘奖池:', turntableJackpot, '转盘最大倍数:', turntableMaxMul, 'VIP最大加成:', maxTurntableGameAddRate, '购买倍数最大值:', maxBuyMul, '未取向下取整前', val, '基础倍数', baseMul)
+                                log.info(userId + '计算转盘基础倍数 活动奖池:' + activityJackpot + '转盘奖池:' + turntableJackpot + '转盘最大倍数:'+ turntableMaxMul + '基础倍数:' + baseMul)
                                 callback(baseMul);
                             })
                         });

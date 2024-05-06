@@ -1,11 +1,15 @@
 ﻿const User = require("./User");
-const gameDao = require("./../dao/gameDao");
+const gameDao = require("../../util/dao/gameDao");
 const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("./../config/gameConfig");
+const http_bc = require("./../../util/http_broadcast");
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
 const {getInstand: Config} = require("../config/read_config");
+const LABA = require("../../util/laba");
+const analyse_result = require("../../util/lottery_analyse_result");
+const lottery_record = require("../../util/lottery_record");
 const CacheUtil = require("../../util/cache_util");
 const dao = require('../../util/dao/dao');
 const {getInstand: log} = require("../../CClass/class/loginfo");
@@ -154,22 +158,28 @@ var GameInfo = function () {
 
             CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
                 try {
-                    let resultObj = {
-                        account: userInfo.account,
-                        id: userInfo.userId,
-                        nickname: userInfo.nickname,
-                        score: userInfo.score,
-                        jackpot: {
-                            gameJackpot: gameJackpot,
-                            grand_jackpot: grandJackpot,
-                            major_jackpot: majorJackpot,
-                            minor_jackpot: minorJackpot,
-                            mini_jackpot: miniJackpot
-                        }
-                    };
-                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
-                    this.userList[userId]._socket.emit('loginGameResult', result);
+                    CacheUtil.getGameConfig(this.gameName, this.gameId).then(config => {
+                        const icon_mul = config.icon_mul.reduce((acc, curr) => {
+                            return acc.concat(curr);
+                        }, []);
+                        let resultObj = {
+                            account: userInfo.account,
+                            id: userInfo.userId,
+                            nickname: userInfo.nickname,
+                            score: userInfo.score,
+                            priceList: icon_mul,
+                            jackpot: {
+                                gameJackpot: gameJackpot,
+                                grand_jackpot: grandJackpot,
+                                major_jackpot: majorJackpot,
+                                minor_jackpot: minorJackpot,
+                                mini_jackpot: miniJackpot
+                            }
+                        };
+                        result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                        log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                        this.userList[userId]._socket.emit('loginGameResult', result);
+                    })
                 }catch (e){
                     log.err('给用户回应登录结果:' + e)
                 }
@@ -204,7 +214,6 @@ var GameInfo = function () {
             }
             if (saveListTemp.length > 0) {
                 this._Csocket.emit("score_changeLog", saveListTemp);
-                //gameDao.score_changeLog(saveListTemp);
             }
         };
 
@@ -225,7 +234,7 @@ var GameInfo = function () {
                 }
             }
             if (saveListLotteryLogTemp.length > 0) {
-                gameDao.lotteryLog(saveListLotteryLogTemp);
+                gameDao.lotteryLog(gameConfig.gameId, saveListLotteryLogTemp);
             }
         };
 
@@ -252,7 +261,7 @@ var GameInfo = function () {
                         freeCount: freeCount,
                         LotteryCount: 0
                     };
-                    gameDao.saveFree(info, function (result) {
+                    gameDao.saveFree(gameConfig.gameId, info, function (result) {
                         log.info(userId + '保存免费次数' + info.freeCount);
                         self._Csocket.emit("lineOut", {
                             signCode: gameConfig.LoginServeSign,
@@ -472,7 +481,7 @@ var GameInfo = function () {
             //发送场景消息
             //检查自己下注情况,效准玩家金额
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId,  (ResultCode, Result) => {
                 //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId
@@ -484,7 +493,7 @@ var GameInfo = function () {
                     seatId: LoginResult.seatId,
                     userList: tableUserList,
                     freeCount: self.userList[_userId].getFreeCount(),
-                    score_pool: self.A.getVirtualScorePool()
+                    score_pool: 0
                 };
                 _socket.emit("LoginRoomResult", {ResultCode: 1, ResultData: ResultData});
 
@@ -511,7 +520,7 @@ var GameInfo = function () {
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
                 log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);

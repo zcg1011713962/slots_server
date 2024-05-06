@@ -1,9 +1,8 @@
-const mysql = require('mysql2');
-const async = require('async');
-const gameConfig = require("./../config/gameConfig");
-const mysql_config = require("./../../util/config/mysql_config");
+var mysql = require('mysql2');
+var async = require('async');
+var mysql_config = require("./../../util/config/mysql_config");
 
-const pool = mysql.createPool({
+var pool = mysql.createPool({
     connectionLimit: 10000,
     host: mysql_config.host,
     user: mysql_config.user,
@@ -14,12 +13,12 @@ const pool = mysql.createPool({
 
 
 //获得免费次数
-exports.getFreeCount = function getFreeCount(userInfo, callback_c) {
+exports.getFreeCount = function (gameId, userInfo, callback_c) {
 
     pool.getConnection(function (err, connection) {
 
         var values = [];
-        values.push(parseInt(gameConfig.gameId.toString() + userInfo.toString()));
+        values.push(parseInt(gameId.toString() + userInfo.toString()));
 
         async.waterfall([
             function (callback) {
@@ -56,8 +55,6 @@ exports.getFreeCount = function getFreeCount(userInfo, callback_c) {
 
             }
         ], function (err, result) {
-            // result now equals 'done'
-            //console.log(result)
             if (err) {
                 console.log(err);
                 console.log(result);
@@ -65,8 +62,6 @@ exports.getFreeCount = function getFreeCount(userInfo, callback_c) {
             } else {
                 callback_c(1, result);
             }
-            //console.log("1end");
-
             connection.release();
             values = [];
         });
@@ -74,37 +69,74 @@ exports.getFreeCount = function getFreeCount(userInfo, callback_c) {
 };
 
 //保存免费次数
-exports.saveFree = function saveFree(userInfo, callback) {
+exports.saveFree = function saveFree(gameId, userInfo, callback) {
 
     var sql = "UPDATE useraccounts SET freeCount=?,LotteryCount=? WHERE Id =?";
     var values = [];
 
     values.push(userInfo.freeCount);
     values.push(userInfo.LotteryCount);
-    values.push(parseInt(gameConfig.gameId.toString() + userInfo.userId.toString()));
+    values.push(parseInt(gameId.toString() + userInfo.userId.toString()));
     pool.getConnection(function (err, connection) {
-        if(connection){
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                if (err) {
-                    console.log(err);
-                    callback(0);
-                } else {
-                    callback(1);
-                }
-            });
 
-            connection.release();
-        }else{
-            callback(0);
-        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            if (err) {
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+
+        connection.release();
+        values = [];
+
+    });
+};
+
+//增加免费次数
+exports.addFreeCount = function (gameId, userId, freeCount, callback) {
+    const sql = "UPDATE useraccounts SET freeCount= freeCount + ? WHERE Id =?";
+    let values = [];
+    values.push(freeCount);
+    values.push(parseInt(gameId.toString() + userId.toString()));
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            if (err) {
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        connection.release();
+        values = [];
+    });
+}
+
+//增加减少免费次数
+exports.reduceFreeCount = function (gameId, userId, callback) {
+    const sql = "UPDATE useraccounts SET freeCount = freeCount - 1 WHERE Id =?";
+    let values = [];
+    values.push(parseInt(gameId.toString() + userId.toString()));
+    pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            if (err) {
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        connection.release();
         values = [];
     });
 };
 
 
 //摇奖记录
-exports.lotteryLog = function lotteryLog(userInfo, callback) {
-    var sql = `INSERT INTO lotterylog_${gameConfig.gameId}(userid,bet,line_s,score_before,score_linescore,score_win,score_current,free_count_before,free_count_win,free_count_current,result_array,mark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`;
+exports.lotteryLog = function lotteryLog(gameId, userInfo, callback) {
+    var sql = `INSERT INTO lotterylog_${gameId}(userid,bet,line_s,score_before,score_linescore,score_win,score_current,free_count_before,free_count_win,free_count_current,result_array,mark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`;
     var values = [];
 
     pool.getConnection(function (err, connection) {
@@ -144,11 +176,60 @@ exports.lotteryLog = function lotteryLog(userInfo, callback) {
 
 };
 
-exports.getLotteryLog = function getLotteryLog(userid, callback) {
+//奖池记录
+exports.Update_score_pool = function Update_score_pool(poollist, Virtualpool, poollistId, callback) {
+    var sql = "UPDATE score_pool SET score_pool=? WHERE id = ?";
 
-    var sql = `SELECT * FROM lotterylog_${gameConfig.gameId} WHERE userid = ?`;
+    pool.getConnection(function (err, connection) {
+        for (var i = 0; i <= poollistId.length; ++i) {
+            var values = [];
+            if (i != poollistId.length) {
+                values.push(poollist[i]);
+                values.push(poollistId[i]);
+            } else {
+                values.push(Virtualpool);
+                values.push(0);
+            }
+            connection.query({sql: sql, values: values}, function (err, rows) {
+                if (err) {
+                    console.log(err);
+                }
+            })
+        }
+        connection.release();
+    });
+};
+
+//获得奖池最新记录
+exports.getScore_pools = function getScore_pools(callback) {
+    var sql = "SELECT * FROM score_pool";
+    pool.getConnection(function (err, connection) {
+
+        connection.query({sql: sql}, function (err, rows) {
+            if (err) {
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows.length == 0) {
+                    callback(0);
+                } else {
+                    callback(rows);
+                }
+            }
+        });
+        connection.release();
+
+    });
+};
+
+
+//===========================================================================================================================================================
+//获得拉霸水位和库存 奖池最新记录
+exports.getGamblingGame = function getGamblingGame(callback) {
+
+    var sql = "SELECT * FROM gambling_game_list WHERE nGameID = ?";
     var values = [];
-    values.push(userid);
+    values.push(gameConfig.gameId);
     pool.getConnection(function (err, connection) {
 
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -168,106 +249,22 @@ exports.getLotteryLog = function getLotteryLog(userid, callback) {
     });
 };
 
-//金币记录
-exports.score_changeLog = function score_changeLog(userInfo) {
-    var sql = "INSERT INTO gameaccount.score_changelog(userid,score_before,score_change,score_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
-    var values = [];
+//保存库存奖池
+exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, nSysBalanceGold, callback) {
+    var sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?,nSysBalanceGold= ?  WHERE nGameID = ?";
 
-    pool.getConnection(function (err, connection) {
-        for (var i = 0; i < userInfo.length; i++) {
-            values.push(userInfo[i].userid);
-            values.push(userInfo[i].score_before);
-            values.push(userInfo[i].score_change);
-            values.push(userInfo[i].score_current);
-            values.push(userInfo[i].change_type);
-            values.push(userInfo[i].isOnline);
-
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                if (err) {
-                    console.log("score_changeLog");
-                    console.log(err);
-                }
-            });
-            values = [];
-        }
-
-
-        connection.release();
-        values = [];
-
-    });
-};
-
-
-//奖池记录
-exports.Update_score_pool = function Update_score_pool(poollist, Virtualpool, poollistId, callback) {
-    var sql = "UPDATE score_pool SET score_pool=? WHERE id = ?";
-
-    pool.getConnection(function (err, connection) {
-        for (var i = 0; i <= poollistId.length; ++i) {
-            var values = [];
-            if (i != poollistId.length) {
-                values.push(poollist[i]);
-                values.push(poollistId[i]);
-            } else {
-                values.push(Virtualpool);
-                values.push(0);
-            }
-
-            console.log(values);
-
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                if (err) {
-                    console.log(err);
-                }
-
-            })
-
-        }
-        //callback();
-        connection.release();
-
-    });
-};
-
-
-
-//===========================================================================================================================================================
-//获得拉霸水位和库存 奖池最新记录
-exports.getGamblingGame = function getGamblingGame(callback) {
-    const sql = "SELECT * FROM gambling_game_list WHERE nGameID = ?";
-    const values = [];
-    values.push(gameConfig.gameId);
-
-    pool.getConnection(function (err, connection) {
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            if (err) {
-                callback(0);
-            } else {
-                if (rows.length === 0) {
-                    callback(0);
-                } else {
-                    callback(rows);
-                }
-            }
-        });
-        connection.release();
-    });
-};
-
-// 保存库存
-exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, nSysBalanceGold) {
-    const sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?, nSysBalanceGold=? WHERE nGameID = ?";
     pool.getConnection(function (err, connection) {
         const values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
-        console.log("保存用户库存 系统库存 游戏ID");
+        console.log("库存 id");
         console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {
                 console.log(err);
             }
         });
+
         connection.release();
+
     });
 };
 

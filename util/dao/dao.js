@@ -1009,7 +1009,7 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
 
 // 查询未支付的指定订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where status in(?,?) and orderId = ? and userId = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
     let values = [];
     values.push(orderId);
     values.push(userId);

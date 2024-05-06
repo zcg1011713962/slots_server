@@ -1,21 +1,18 @@
 ﻿const User = require("./User");
-const gameDao = require("./../dao/gameDao");
+const gameDao = require("../../util/dao/gameDao");
 const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
 const gameConfig = require("./../config/gameConfig");
 const http_bc = require("./../../util/http_broadcast");
 const redis_send_and_listen = require("./../../util/redis_send_and_listen");
-const {getInstand: log} = require("../../CClass/class/loginfo");
 const {getInstand: Config} = require("../config/read_config");
 const LABA = require("../../util/laba");
 const analyse_result = require("../../util/lottery_analyse_result");
 const lottery_record = require("../../util/lottery_record");
-const redis_laba_win_pool = require("../../util/redis_laba_win_pool");
-const laba_config = require("../../util/config/laba_config");
 const CacheUtil = require("../../util/cache_util");
 const dao = require('../../util/dao/dao');
-
+const {getInstand: log} = require("../../CClass/class/loginfo");
 
 var GameInfo = function () {
 
@@ -54,7 +51,6 @@ var GameInfo = function () {
             //维护模式
             this.maintain = false;
 
-
             this.sever = new sever();
 
             this.ranScore = Math.floor(Math.random() * 900000000 + 100000000);
@@ -81,7 +77,7 @@ var GameInfo = function () {
                 var second = nowDate.getSeconds();
                 if (second === 25) {
                     self.saveGamblingBalanceGold();
-                    console.log("保存库存和奖池");
+                    log.info("保存库存和奖池");
                     redis_send_and_listen.send_msg("OnlineUserMsg", {
                         server_id: gameConfig.serverId,
                         online_num: self.getOnlinePlayerCount()
@@ -162,22 +158,28 @@ var GameInfo = function () {
 
             CacheUtil.getGameJackpot((gameJackpot, grandJackpot, majorJackpot, minorJackpot, miniJackpot, jackpotConfig) =>{
                 try {
-                    let resultObj = {
-                        account: userInfo.account,
-                        id: userInfo.userId,
-                        nickname: userInfo.nickname,
-                        score: userInfo.score,
-                        jackpot: {
-                            gameJackpot: gameJackpot,
-                            grand_jackpot: grandJackpot,
-                            major_jackpot: majorJackpot,
-                            minor_jackpot: minorJackpot,
-                            mini_jackpot: miniJackpot
-                        }
-                    };
-                    result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
-                    log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
-                    this.userList[userId]._socket.emit('loginGameResult', result);
+                    CacheUtil.getGameConfig(this.gameName, this.gameId).then(config => {
+                        const icon_mul = config.icon_mul.reduce((acc, curr) => {
+                            return acc.concat(curr);
+                        }, []);
+                        let resultObj = {
+                            account: userInfo.account,
+                            id: userInfo.userId,
+                            nickname: userInfo.nickname,
+                            score: userInfo.score,
+                            priceList: icon_mul,
+                            jackpot: {
+                                gameJackpot: gameJackpot,
+                                grand_jackpot: grandJackpot,
+                                major_jackpot: majorJackpot,
+                                minor_jackpot: minorJackpot,
+                                mini_jackpot: miniJackpot
+                            }
+                        };
+                        result = {resultid: '1', msg: 'login lineserver succeed!', Obj: resultObj};
+                        log.info(userId + '给用户回应登录结果' + JSON.stringify(result))
+                        this.userList[userId]._socket.emit('loginGameResult', result);
+                    })
                 }catch (e){
                     log.err('给用户回应登录结果:' + e)
                 }
@@ -212,7 +214,6 @@ var GameInfo = function () {
             }
             if (saveListTemp.length > 0) {
                 this._Csocket.emit("score_changeLog", saveListTemp);
-                //gameDao.score_changeLog(saveListTemp);
             }
         };
 
@@ -233,7 +234,7 @@ var GameInfo = function () {
                 }
             }
             if (saveListLotteryLogTemp.length > 0) {
-                gameDao.lotteryLog(saveListLotteryLogTemp);
+                gameDao.lotteryLog(gameConfig.gameId, saveListLotteryLogTemp);
             }
         };
 
@@ -260,7 +261,7 @@ var GameInfo = function () {
                         freeCount: freeCount,
                         LotteryCount: 0
                     };
-                    gameDao.saveFree(info, function (result) {
+                    gameDao.saveFree(gameConfig.gameId, info, function (result) {
                         log.info(userId + '保存免费次数' + info.freeCount);
                         self._Csocket.emit("lineOut", {
                             signCode: gameConfig.LoginServeSign,
@@ -277,15 +278,18 @@ var GameInfo = function () {
                     });
                 })
             }
-        }
+        };
 
         //删除用户
         this.deleteUserById = function (_userId, msg) {
             if (_userId) {
                 var socketItem = this.userList[_userId]._socket;
                 result = {resultid: 0, msg: msg};
+                log.info(_userId + '给用户回应登录结果' + result)
                 socketItem.emit('loginGameResult', result);
                 delete this.userList[_userId];
+            }else{
+                log.err('非法的用户')
             }
         };
 
@@ -320,13 +324,13 @@ var GameInfo = function () {
         //获得用户当前分数
         this.getPlayerScore = function (_userId) {
             if (!_userId) {	//传输ID错误
-                console.log("查询分数,参数错误");
+                log.info('==========================查询分数,参数错误"');
                 return -1;
             }
             if (this.userList[_userId]) {//未找到用户
-                //console.log("查询在线,未找到" + _userId + "用户");
                 return this.userList[_userId].getScore();
             } else {
+                log.info('=============================用户不在线');
                 return -1;
             }
         };
@@ -359,20 +363,25 @@ var GameInfo = function () {
             }
         };
 
-        //保存时间段输赢状况
-        this.saveSocrePool = function () {
-            //获得虚拟池
-            var Virtualpool = this.A.getVirtualScorePool();
-            //获得实际池
-            var poollist = this.A.getScorePoolList();
 
-            //var poollistLength = this.A.getScorePoolListLength();
-
-            var poollistId = this.A.getScoreId();
-
-            gameDao.Update_score_pool(poollist, Virtualpool, poollistId, function (Result) {
-            })
-        };
+        this.batchUpdateOnLineAccount = function () {
+            let saveList = [];
+            for (const k in this.userList) {
+                saveList.push(this.userList[k]);
+            }
+            if (saveList.length < 1) {
+                return;
+            }
+            dao.batchUpdateAccount(saveList, function (users) {
+                const seconds = new Date().getSeconds()
+                if(users){
+                    for (let i = 0; i < users.length; ++i) {
+                        if(seconds % 5 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
+                    }
+                }
+                saveList = [];
+            });
+        }
 
         //保存库存 奖池
         this.saveGamblingBalanceGold = function () {
@@ -415,9 +424,6 @@ var GameInfo = function () {
         //进入游戏
         this.LoginGame = function (_userId, gametype) {
             if (!this.userList[_userId]) return;
-            //用户添加游戏ID
-            //console.log(_userId)
-            //console.log("用户进入游戏" + gametype);
             this.userList[_userId].loginGame(gametype);
         };
 
@@ -475,7 +481,7 @@ var GameInfo = function () {
             //发送场景消息
             //检查自己下注情况,效准玩家金额
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId,  (ResultCode, Result) => {
                 //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId
@@ -487,7 +493,7 @@ var GameInfo = function () {
                     seatId: LoginResult.seatId,
                     userList: tableUserList,
                     freeCount: self.userList[_userId].getFreeCount(),
-                    score_pool: self.A.getVirtualScorePool()
+                    score_pool: 0
                 };
                 _socket.emit("LoginRoomResult", {ResultCode: 1, ResultData: ResultData});
 
@@ -511,35 +517,14 @@ var GameInfo = function () {
             })
 
         };
-
-
-        this.batchUpdateOnLineAccount = function () {
-            let saveList = [];
-            for (const k in this.userList) {
-                saveList.push(this.userList[k]);
-            }
-            if (saveList.length < 1) {
-                return;
-            }
-            dao.batchUpdateAccount(saveList, function (users) {
-                const seconds = new Date().getSeconds()
-                if(users){
-                    for (let i = 0; i < users.length; ++i) {
-                        if(seconds % 2 === 0)  log.info("成功保存在线用户信息" + users[i].id + '金币:' + users[i].score);
-                    }
-                }
-                saveList = [];
-            });
-        }
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
             var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            gameDao.getFreeCount(gameConfig.gameId, _userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
-                //self.userList[_userId].updateFreeGame(Result);
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
                 CacheUtil.setFreeCount(_userId, Result.freeCount)
-                log.info("从数据库里获得免费次数" + Result.freeCount);
                 _socket.emit("LoginfreeCountResult", {ResultCode: 1, freeCount: Result.freeCount});
             })
         };
@@ -618,18 +603,6 @@ var GameInfo = function () {
 
 }();
 
-
-
-function list_one_count(x, list) {
-    //数组中指定值出现次数
-    var count = 0;
-    for (var i in list) {
-        if (list[i] == x) {
-            count++
-        }
-    }
-    return count;
-}
 
 
 module.exports = GameInfo;
