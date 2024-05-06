@@ -1,2 +1,5 @@
 *.log
 /**/**/log.log
+/laba_187_GrandWheel/logs/*.log
+/laba_163_ganeshagold/logs/*.log
+/laba_129_freespin/logs/*.log
