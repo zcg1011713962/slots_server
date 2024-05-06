@@ -27,7 +27,7 @@ const userDiscountLimitedKey = 'userDiscountLimited';
 const firstRechargeContinueRewardKey = 'firstRechargeContinueReward';
 const buyCallBackSwitchKey  = 'buyCallBackSwitch';
 const paySwitchKey  = 'paySwitch';
-
+const orderCacheKey  = 'orderCache';
 
 const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
@@ -994,5 +994,29 @@ exports.paySwitch = function(){
             return 0;
         }
     });
+}
+
+
+// 订单缓存
+exports.orderCache = function(userId, productId, amount, orderType, v){
+    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    const expireSecond = 10 * 60;
+    RedisUtil.set(key, JSON.stringify(v)).then(r =>{
+        RedisUtil.expire(key, expireSecond).then(ok =>{})
+    })
+}
+
+// 订单缓存查询
+exports.searchOrderCache = function(userId, productId, amount, orderType){
+    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    return RedisUtil.get(key).then(v => JSON.parse(v));
+}
+
+
+
+// 删除订单缓存
+exports.delOrderCache = function(userId, productId, amount, orderType){
+    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    return RedisUtil.del(key);
 }
 

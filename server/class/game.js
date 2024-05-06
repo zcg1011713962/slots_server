@@ -616,63 +616,77 @@ var GameInfo = function () {
         this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, goods) {
             const self = this;
             const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
-            if(goods){
-                // 下购买订单
-                PayAPI.fastBuyOrder(userId, productId, orderId, amount, currencyType, goods, callbackUrl).then(res => {
-                    try {
-                        log.info(userId + '下购买订单' + res)
-                        const orderResult = JSON.parse(res);
-                        if (orderResult && orderResult.code === 200) {
-                            self.getVipLevel(userId, vipLevel => {
-                                // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.fatpag,ret => {
-                                    if (ret) {
-                                        this.intervalSearchOrder(userId, orderId, TypeEnum.OrderType.fatpag);
-                                        orderResult.data.switch = nSwitch;
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                    } else {
-                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                    }
-                                })
-                            })
-                        } else {
-                            log.err(userId + '购买商品下购买订单失败')
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
-                    } catch (e) {
-                        log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+            const orderType = goods ? TypeEnum.OrderType.fatpag : TypeEnum.OrderType.betcatpay;
+            // 查询是否重复订单
+            CacheUtil.searchOrderCache(userId, productId, amount, orderType).then(orderInfo =>{
+                if(orderInfo){
+                    log.info(userId + '已经存在的订单,使用存在的订单:' + orderInfo)
+                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderInfo)
+                }else{
+                    if(orderType === TypeEnum.OrderType.fatpag){
+                        // 下购买订单
+                        PayAPI.fastBuyOrder(userId, productId, orderId, amount, currencyType, goods, callbackUrl).then(res => {
+                            try {
+                                log.info(userId + '下购买订单' + res)
+                                const orderResult = JSON.parse(res);
+                                if (orderResult && orderResult.code === 200) {
+                                    orderResult.data.switch = nSwitch;
+                                    // 缓存订单
+                                    CacheUtil.orderCache(userId, productId, amount, TypeEnum.OrderType.fatpag, orderResult.data)
+                                    self.getVipLevel(userId, vipLevel => {
+                                        // 记录订单详情
+                                        dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.fatpag,ret => {
+                                            if (ret) {
+                                                this.intervalSearchOrder(userId, orderId, TypeEnum.OrderType.fatpag);
+                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            } else {
+                                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                            }
+                                        })
+                                    })
+                                } else {
+                                    log.err(userId + '购买商品下购买订单失败')
+                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                }
+                            } catch (e) {
+                                log.err(userId + '购买商品下购买订单异常' + e)
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            }
+                        })
+                    }else{
+                        // 下购买订单
+                        PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
+                            try {
+                                log.info(userId + '下购买订单' + res)
+                                const orderResult = JSON.parse(res);
+                                if (orderResult && orderResult.code === 200) {
+                                    orderResult.data.switch = nSwitch;
+                                    // 缓存订单
+                                    CacheUtil.orderCache(userId, productId, amount, TypeEnum.OrderType.betcatpay, orderResult.data)
+                                    self.getVipLevel(userId, vipLevel => {
+                                        // 记录订单详情
+                                        dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.betcatpay, ret => {
+                                            if (ret) {
+                                                this.intervalSearchOrder(userId, orderId, TypeEnum.OrderType.betcatpay);
+                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                                            } else {
+                                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                            }
+                                        })
+                                    })
+                                } else {
+                                    log.err(userId + '购买商品下购买订单失败')
+                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                }
+                            } catch (e) {
+                                log.err(userId + '购买商品下购买订单异常' + e)
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            }
+                        })
                     }
-                })
-            }else{
-                // 下购买订单
-                PayAPI.buyOrder(userId, productId, orderId, amount, currencyType, callbackUrl).then(res => {
-                    try {
-                        log.info(userId + '下购买订单' + res)
-                        const orderResult = JSON.parse(res);
-                        if (orderResult && orderResult.code === 200) {
-                            self.getVipLevel(userId, vipLevel => {
-                                // 记录订单详情
-                                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.betcatpay, ret => {
-                                    if (ret) {
-                                        this.intervalSearchOrder(userId, orderId,  TypeEnum.OrderType.betcatpay);
-                                        orderResult.data.switch = nSwitch;
-                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                                    } else {
-                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                                    }
-                                })
-                            })
-                        } else {
-                            log.err(userId + '购买商品下购买订单失败')
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                        }
-                    } catch (e) {
-                        log.err(userId + '购买商品下购买订单异常' + e)
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                    }
-                })
-            }
+                }
+            })
+
 
         }
 
@@ -680,35 +694,44 @@ var GameInfo = function () {
         this.TestPlaceOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) {
             const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
             const self = this;
-            // 下购买订单
-            self.getVipLevel(userId, vipLevel => {
-                // 记录订单详情s
-                dao.orderRecord(parseInt(userId), orderId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.betcatpay,ret => {
-                    log.info(userId + '测试购买订单记录' + orderId)
-                    if (ret) {
-                        const orderResult = {
-                            "code": 1,
-                            "data": {
-                                "orderStatus": 1,
-                                "orderNo": "77158f8f87b444b2ac7ec5b3db9baecc",
-                                "merOrderNo": orderId,
-                                "amount": 0,
-                                "currency": "BRL",
-                                "createTime": 0,
-                                "updateTime": 0,
-                                "sign": "",
-                                "params": {
-                                    "qrcode": "",
-                                    "url": ""
-                                },
-                                "switch": 1
+            CacheUtil.searchOrderCache(userId, productId, amount, TypeEnum.OrderType.betcatpay).then(orderInfo =>{
+                if(orderInfo){
+                    log.info(userId + '已经存在的订单,使用存在的订单:' + orderInfo)
+                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderInfo)
+                }else{
+                    // 下购买订单
+                    self.getVipLevel(userId, vipLevel => {
+                        // 记录订单详情s
+                        dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.OrderType.betcatpay,ret => {
+                            log.info(userId + '测试购买订单记录' + orderId)
+                            if (ret) {
+                                const orderResult = {
+                                    "code": 1,
+                                    "data": {
+                                        "orderStatus": 1,
+                                        "orderNo": "77158f8f87b444b2ac7ec5b3db9baecc",
+                                        "merOrderNo": orderId,
+                                        "amount": 0,
+                                        "currency": "BRL",
+                                        "createTime": 0,
+                                        "updateTime": 0,
+                                        "sign": "",
+                                        "params": {
+                                            "qrcode": "",
+                                            "url": ""
+                                        },
+                                        "switch": 1
+                                    }
+                                }
+                                // 缓存订单
+                                CacheUtil.orderCache(userId, productId, amount, TypeEnum.OrderType.betcatpay, orderResult.data)
+                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
+                            } else {
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                             }
-                        }
-                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
-                    } else {
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
-                    }
-                })
+                        })
+                    })
+                }
             })
         }
 
@@ -726,13 +749,20 @@ var GameInfo = function () {
                           if (code || timeOut) {
                               // 条件满足时清除定时器
                               clearInterval(interval);
-                              if(timeOut){
-                                  dao.updateOrder(userId, orderId, TypeEnum.OrderStatus.payTimeOut, ret =>{
-                                      log.info(userId + '订单超时结束orderId:' + orderId);
-                                  });
-                              }else{
-                                  log.info(userId + '订单完成orderId:' + orderId);
-                              }
+                              dao.searchOrder(userId, orderId, row =>{
+                                  const amount = row.amount;
+                                  const orderType = row.payType;
+                                  const productId = row.productId;
+                                  if(timeOut){
+                                      dao.updateOrder(userId, orderId, TypeEnum.OrderStatus.payTimeOut, ret =>{
+                                          log.info(userId + '订单超时结束，移除缓存订单orderId:' + orderId);
+                                          CacheUtil.delOrderCache(userId, productId, amount, orderType).then(r =>{})
+                                      });
+                                  }else{
+                                      log.info(userId + '订单完成,移除缓存订单orderId:' + orderId);
+                                      CacheUtil.delOrderCache(userId, productId, amount, orderType).then(r =>{})
+                                  }
+                              })
                           }
                       })
                         elapsedTime += 5; // 每次操作后增加5秒
