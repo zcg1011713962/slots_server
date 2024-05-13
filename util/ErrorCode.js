@@ -6,25 +6,32 @@ class ErrorCode {
 
     static get CDK_EXPIRE() { return { code: 'E501', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_12' }; }
     static get CDK_USERED_ERROR() { return { code: 'E500', msg: '该兑换码已被他人使用，无法再次兑换', langCode: 'languageId_13' }; }
+    static get BANK_TRANSFER_TITLE() { return { code: 'c0001', msg: '银行转账邮件标题' , langCode: 'languageId_318' }; }
     static get BANK_TRANSFER_CONTENT() { return { code: 'c0002', msg: '银行转账邮件内容' , langCode: 'languageId_52' }; }
+    static get NEW_HAND_BIND_TITLE() { return { code: 'c0003', msg: '新手绑定邮件标题' , langCode: 'languageId_319' }; }
     static get NEW_HAND_BIND_CONTENT() { return { code: 'c0004', msg: '新手绑定邮件内容' , langCode: 'languageId_53' }; }
+    static get MONTH_CARD_CONTINUE_AWARD_TITLE() { return { code: 'c0005', msg: '月卡持续奖励标题' , langCode: 'languageId_353' }; }
+    static get MONTH_CARD_CONTINUE_AWARD_CONTENT() { return { code: 'c0006', msg: '月卡持续奖励内容' , langCode: 'languageId_54' }; }
+    static get RECHAGE_RANK_AWARD_TITLE() { return { code: 'c0007', msg: '充值排行榜奖励标题' , langCode: 'languageId_354' }; }
+    static get RECHAGE_RANK_AWARD_CONTENT() { return { code: 'c0008', msg: '充值排行榜奖励内容' , langCode: 'languageId_55' }; }
+    static get COIN_RANK_AWARD_TITLE() { return { code: 'c0009', msg: '金币排行榜奖励标题' , langCode: 'languageId_355' }; }
+    static get COIN_RANK_AWARD_CONTENT() { return { code: 'c0010', msg: '金币排行榜奖励内容' , langCode: 'languageId_56' }; }
+    static get BIGWIN_RANK_AWARD_TITLE() { return { code: 'c0011', msg: '大富豪排行榜奖励标题' , langCode: 'languageId_356' }; }
+    static get BIGWIN_RANK_AWARD_CONTENT() { return { code: 'c0012', msg: '大富豪排行榜奖励内容' , langCode: 'languageId_57' }; }
     static get EMAIL_CODE_FAILED() { return { code: 'E403', msg: '输入的验证码不正确，请重新输入', langCode: 'languageId_210' }; }
     static get EMAIL_CODE_EXPIRED() { return { code: 'E402', msg: '验证码已失效，请重新获取', langCode: 'languageId_211' }; }
     static get EMAIL_BINDED() { return { code: 'E405', msg: '此邮箱地址已被其他账号绑定，请使用不同的邮箱进行绑定。', langCode: 'languageId_261'}; }
     static get ERROR_INVITE_CODE() { return { code: 'E502', msg: '错误的邀请码', langCode: 'languageId_316' } ; }
     static get SELF_INVITE_CODE() { return { code: 'E503', msg: '自己的邀请码' , langCode: 'languageId_317' }; }
-    static get BANK_TRANSFER_TITLE() { return { code: 'c0001', msg: '银行转账邮件' , langCode: 'languageId_318' }; }
-    static get NEW_HAND_BIND_TITLE() { return { code: 'c0003', msg: '新手绑定邮件' , langCode: 'languageId_319' }; }
+
     static get VIP_ENTER_HALL_NOTIFY() { return { code: 'p0001', msg: 'VIP进大厅跑马灯' , langCode: 'languageId_320' }; }
     static get VIP_UPGRADE_NOTIFY() { return { code: 'p0002', msg: '发送VIP升级通知' , langCode: 'languageId_321' }; }
-    static get BANK_TRANSFER_NOTIFY() { return { code: 'p0002', msg: '转账消息通知' , langCode: 'languageId_52' }; }
+    static get BANK_TRANSFER_NOTIFY() { return { code: 'p0003', msg: '转账消息通知' , langCode: 'languageId_52' }; }
     static get PWD_ILLEGAL() { return { code: 'E504', msg: '密码长度非法' , langCode: 'languageId_322' }; }
     static get ACCOUNT_EXCEPTION() { return { code: 'E505', msg: '您的账号暂时无法交易，请联系客服' , langCode: 'languageId_323' }; }
     static get EXIST_PWD() { return { code: 'E506', msg: '存在密码请修改密码' , langCode: 'languageId_324' }; }
     static get TWO_TIME_PWD_DIFFER() { return { code: 'E507', msg: '两次密码不一致' , langCode: 'languageId_325' }; }
     static get SELF_INVITE_SELF() { return { code: 'E507', msg: '不能相互绑定' , langCode: 'languageId_326' }; }
-
-
     static get USER_OFFLINE() { return { code: 'E100', msg: '用户不在线', langCode: 'languageId_327' }; }
     static get REGISTER_SUCCESS() { return { code: 'R200', msg: '注册成功', langCode: 'languageId_328' }; }
     static get ACCOUNT_REGISTERED_ERROR() { return { code: 'R400', msg: '账号已注册', langCode: 'languageId_329' }; }
@@ -53,8 +60,13 @@ class ErrorCode {
     static get SHOP_PROP() { return { code: 'S0004', msg: '道具', langCode: 'languageId_350' }; }
     static get SHOP_MONTHCARD() { return { code: 'S0005', msg: '月卡', langCode: 'languageId_351' }; }
     static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0006', msg: '免费转盘门票', langCode: 'languageId_352' }; }
-
-
+    static get HIT_JACKPOT_NOTIFY() { return { code: 'p0004', msg: '击中奖池跑马灯' , langCode: 'languageId_357' }; }
+    static get BIG_WIN_NOTIFY() { return { code: 'p0005', msg: '赢分大于配置，侧边栏动画' , langCode: 'languageId_358' }; }
+    static get WITHDRAW_NOTIFY() { return { code: 'p0006', msg: '提现申请成功跑马灯' , langCode: 'languageId_359' }; }
+    static get WITHDRAW_APPLY_TITLE() { return { code: 'c0013', msg: '提现申请邮件标题' , langCode: 'languageId_360' }; }
+    static get WITHDRAW_APPLY_CONTENT() { return { code: 'c0014', msg: '提现申请邮件内容' , langCode: 'languageId_361' }; }
+    static get WITHDRAW_FAILED_TITLE() { return { code: 'c0015', msg: '提现被拒邮件标题' , langCode: 'languageId_362' }; }
+    static get WITHDRAW_FAILED_CONTENT() { return { code: 'c0016', msg: '提现被拒邮件内容' , langCode: 'languageId_363' }; }
 }
 
 

@@ -1,5 +1,6 @@
 const laba_config = require("./config/laba_config");
 const StringUtil = require("./string_util");
+const gameDao = require("./dao/gameDao");
 const log = require("../CClass/class/loginfo").getInstand;
 
 module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_type_bind, winJackpot, blankCard) {
@@ -16,34 +17,34 @@ module.exports.JackpotAnalyse = function (jackpot, nBetSum, jackpot_ratio, jackp
         return 0;
     }
 
+    let hitJackpot = false;
     if(iconTypeBind && iconTypeBind.length > 0 && StringUtil.findElementCount(iconTypeBind, jackpotCard) >= jackpotCardLowerLimit){
-        const winJackpot = parseInt(jackpot / 10);
-        log.info('配牌器winJackpot:' + winJackpot)
-        return winJackpot;
+        hitJackpot = true;
     }
 
     try{
         const minJackpot = jackpot_level_money.reduce((min, current) => Math.min(min, current), Infinity);
-        if(jackpot < minJackpot){
+        if(!hitJackpot && jackpot < minJackpot){
             log.info('当前奖池小于配置最低奖池直接跳过奖池，当前奖池:'+ jackpot + '最低配置:' + minJackpot)
             return 0;
         }
         // 中的概率
         let prop = 0;
         for(let i = 0;  i < jackpot_level_money.length; i++){
-            if(jackpot_level_money[i] < jackpot){
+            if(jackpot_level_money[i] <= jackpot){
                 prop = jackpot_level_prob[i];
             }
         }
         const num = Math.floor(Math.random() * 100);
         log.info('奖池概率:' + prop + '随机数:' + num)
-        if(prop > num){
+        if(prop > num || hitJackpot){
             // 有中jackpot的机会
             // 判断下注对应的奖池种类
             let jpIndex = 0;
             for(let i = 0;  i < bet_jackpot_level_bet.length; i++){
-                if(bet_jackpot_level_bet[i] < nBetSum){
+                if(bet_jackpot_level_bet[i] <= nBetSum){
                     jpIndex = bet_jackpot_level_index[i];
+                    config.jackpotIndex = jpIndex;
                 }
             }
             // 下注对应的奖池的概率数组
@@ -113,7 +114,7 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
             if (nGameLineDirection && (nGameLineDirection === laba_config.GAME_SLOT_LEFT_TO_RIGHT || nGameLineDirection === laba_config.GAME_SLOT_BOTH_WAY)) {
                 //单条线分析
                 dict1 = Sort(nLine, temp, nGameMagicCardIndex, nGameLineWinLowerLimitCardNumber, nGameCombinations, bGameLineRule);
-                if (dict1["nNumber"] >= nGameLineWinLowerLimitCardNumber) {
+                if (dict1["nNumber"] >= nGameLineWinLowerLimitCardNumber && dict1["nColor"] !== 99) {
                     let bFlag = true;
                     for (var n in dict1["nCardsIndex"]) {
                         if (dict1["nCardsIndex"][n] != nLine[n]) {
@@ -731,33 +732,51 @@ module.exports.tigerFullScreen = function (dictAnalyseResult, nGameLines) {
     }
 }
 
-module.exports.tigerOpenBox = function (dictAnalyseResult, nHandCards, config){
+module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
      try{
-         let chooseNum = RandomNumBoth(0, config.cards.length - 1);//随机选一张牌,如果是万能牌就触发缩小
-         let startNum = RandomNumBoth(3, 8);
-         // startNum = 9;
-         let finalList = [];
-         let startList = [];
-         nHandCards = [config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard, config.blankCard];
-         for (let i = 0; i < startNum; i++) {
-             let a = RandomNumBoth(0, nHandCards.length - 1);
-             if (nHandCards[a] !== chooseNum && nHandCards[a] !== config.jackpotCard) {
-                 nHandCards[a] = chooseNum;
-                 startList.push(a);
-             } else {
-                 i--;
+         let chooseNum = result.chooseNum > -1 ? result.chooseNum : RandomNumBoth(0, 6);
+         if(result.startList &&  result.startList.length > 0){
+             for (let i = 0; i < result.nHandCards.length; i++) {
+                 if(result.startList.length === 9){
+                     break;
+                 }
+                 let c = RandomNumBoth(0, 6);
+                 if ((c === chooseNum && result.nHandCards[i] !== c && result.nHandCards[i] !== config.jackpotCard)) {
+                     result.nHandCards[i] = chooseNum;
+                     result.startList.push(i);
+                 } else if (c === config.nGameMagicCardIndex && result.nHandCards[i] !== chooseNum && result.nHandCards[i] !== config.nGameMagicCardIndex && result.nHandCards[i] !== config.jackpotCard) {
+                     result.nHandCards[i] = config.nGameMagicCardIndex;
+                     result.startList.push(i);
+                 }
              }
-         }
-         startList.sort(function (a, b) {
-             return a - b;
-         });
-         finalList.push(startList.concat());
-         dictAnalyseResult["getBigWin"] = {
-             bFlag: true,
-             isStart: true,
-             list: finalList,
-             card: chooseNum + 1,
-             res_list: []
+             result.startList.sort(function (a, b) {
+                 return a - b;
+             });
+             result.finalList.push(result.startList.concat());
+         }else{
+             let startNum = RandomNumBoth(3, 6);
+             // startNum = 9;
+             let finalList = [];
+             let startList = [];
+             result.nHandCards = [config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard];
+             for (let i = 0; i < startNum; i++) {
+                 let a = RandomNumBoth(0, 6);
+                 if (result.nHandCards[a] !== chooseNum) {
+                     result.nHandCards[a] = chooseNum;
+                     startList.push(a);
+                 } else {
+                     i--;
+                 }
+             }
+             startList.sort(function (a, b) {
+                 return a - b;
+             });
+             finalList.push(startList.concat());
+
+             result.chooseNum = chooseNum;
+             result.startList = startList;
+             result.finalList = finalList;
+             result.resList = [];
          }
      }catch (e){
          log.err(e)
@@ -765,13 +784,96 @@ module.exports.tigerOpenBox = function (dictAnalyseResult, nHandCards, config){
 }
 
 
+/*module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
+    try{
+        if(result.startList &&  result.startList.length > 0){
+            for (let i = 0; i < result.nHandCards.length; i++) {
+                if(result.startList.length === 9){
+                    break;
+                }
+                result.nHandCards = [1, 1, 1, 7, 1, 1, 7, 7, 7]
+            }
+            result.startList.sort(function (a, b) {
+                return a - b;
+            });
+            result.finalList.push(result.startList.concat());
+        }else{
+           /!* let startNum = RandomNumBoth(3, 6);
+            // startNum = 9;
+            let finalList = [];
+            let startList = [];
+            result.nHandCards = [config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard];
+            for (let i = 0; i < startNum; i++) {
+                let a = RandomNumBoth(0, 6);
+                if (result.nHandCards[a] !== chooseNum) {
+                    result.nHandCards[a] = chooseNum;
+                    startList.push(a);
+                } else {
+                    i--;
+                }
+            }*!/
+            gameDao.syncHandCardsByMuls(config.gameId, result.muls , false, true, 0).then(cardRow =>{
+                let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
+                cards = cards.filter(card =>{
+                    // 除了特殊卡，所有图案都相同
+                    const c = card.filter(element => element !== config.openBoxCard);
+                    // 选择的卡
+                    result.chooseNum = c[0];
+                    const allSame = c.every((element, index, array) => {
+                        return element === array[0];
+                    });
+                    if(allSame){
+                        return card;
+                    }
+                })
+                console.log(cards);
+                const index = StringUtil.RandomNum(0, cards.length - 1)
+                const card = cards[index];
+                let finalList = [];
+                /!*for(let i = 0 ; i < card.length; i++){
+                    if(card[i] === result.chooseNum){
+                        startList.push(i);
+                    }
+                }*!/
 
-module.exports.ganeshagoldOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
+                let startList = [0,1,2];
+                startList.sort(function (a, b) {
+                    return a - b;
+                });
+                finalList.push(startList.concat());
+                result.nHandCards = [1, 1, 1, 7, 7, 7, 7, 7, 7];
+                result.chooseNum = 1;
+                result.startList = [0,1,2];
+                result.finalList = finalList;
+                result.resList = []
+            })
+
+
+
+            startList.sort(function (a, b) {
+                return a - b;
+            });
+            finalList.push(startList.concat());
+
+            result.chooseNum = chooseNum;
+            result.startList = startList;
+            result.finalList = finalList;
+            result.resList = [];
+        }
+
+    }catch (e){
+        log.err(e)
+    }
+}*/
+
+module.exports.ganeshagoldOpenBox = function (result){
+
     //开宝箱
-    /* dictAnalyseResult.getOpenBox = {
-         bFlag: true,
-         nWinOpenBox: 10
-     }*/
+     result.dictAnalyseResult.getOpenBox = {
+         "bFlag": true,
+         "nWinOpenBox": 0,
+         "win": 0
+     }
 }
 
 module.exports.grandWheelOpenBox = function (dictAnalyseResult, nHandCards, openBoxCard, nBetSum,  expectMulSection){
@@ -1202,7 +1304,7 @@ module.exports.HandCardsAnalyse_Single_Simple = function(nHandCards, cards, nGam
  * @returns {{}}
  * @constructor
  */
-module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards, freeTimes, nLowerLimit, nColumnNumber, nBet, winJackpot, iconMul, result) {
+/*module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards, freeTimes, nLowerLimit, nColumnNumber, nBet, winJackpot, iconMul, result) {
     const nFreeCard = nFreeCards.length === 0 ? -1 : nFreeCards[0];
     var now_time = Number(new Date());
     //# 校验手牌是否满足列数
@@ -1247,7 +1349,7 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
                         nWinLineCards.push(nHandCards[n])
                     }
                     // # 用nWinLine的最后一位和 column中的角标比较，如果值相等的话将角标添加到nWinLine中
-                    if (nWinLineCards.indexOf(nHandCards[i]) > -1 || nHandCards[i] == nMagicCard) {
+                    if (nWinLineCards.indexOf(nHandCards[i]) > -1 || nHandCards[i] === nMagicCard) {
                         var temp = [];
                         //# 复制出当前的nWinLine
                         for (var m in nWinLine) {
@@ -1398,7 +1500,202 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
 
 
 
-};
+};*/
+module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards, freeTimes, nLowerLimit, nColumnNumber, nBet, winJackpot, iconMul, result) {
+    /*
+        列数判断型拉把算法
+        :param nHandCards: 手牌
+        :param nMagicCard: 万能牌的值
+        :param nLowerLimit: 一条线上最少连线的数量
+        :param nColumnNumber: 手牌总共多少列
+        :param nBet: 下注倍数
+        :param game_odds: 花色对应赔率
+        :param free_num: 免费次数
+        :param free_multiple:免费倍数
+     */
+    const nFreeCard = nFreeCards.length === 0 ? -1 : nFreeCards[0];
+    const is_free = false;
+    var now_time = Number(new Date());
+    //# 校验手牌是否满足列数
+    //# 生成列的结合
+    var i = 0;
+    var columns = [];
+    while (i < nColumnNumber) {
+        var column = [];
+        for (var str_j in nHandCards) {
+            var j = parseInt(str_j);
+            if (j % nColumnNumber === i) {
+                column.push(j);
+            }
+        }
+        columns.push(column);
+        i++;
+    }
+    //# 可以连接的列
+    var nWinLines = [];
+    var nIndex = 0;
+    for (var column_index in columns) {
+        var column = columns[parseInt(column_index)];
+        nIndex++;
+        //# 初始化为第一列
+        if (nWinLines.length == 0) {
+            for (var i_idx in column) {
+                var nWinLine = [];
+                nWinLine.push(column[parseInt(i_idx)]);
+                nWinLines.push(nWinLine)
+            }
+        } else {
+            //# 遍历nWinLines 和 column 判断是否可以连线
+            for (var i_idx in column) {
+                var i = column[parseInt(i_idx)];
+                for (var w_l_idx in nWinLines) {
+                    var nWinLine = nWinLines[parseInt(w_l_idx)];
+                    //# 存放中奖线的牌的花色
+                    var nWinLineCards = [];
+                    for (var n_idx in nWinLine) {
+                        var n = nWinLine[parseInt(n_idx)];
+                        nWinLineCards.push(nHandCards[n])
+                    }
+                    // # 用nWinLine的最后一位和 column中的角标比较，如果值相等的话将角标添加到nWinLine中
+                    if (nWinLineCards.indexOf(nHandCards[i]) > -1 || nHandCards[i] == nMagicCard) {
+                        var temp = [];
+                        //# 复制出当前的nWinLine
+                        for (var m in nWinLine) {
+                            temp.push(nWinLine[parseInt(m)]);
+                        }
+                        //# 如果nWinLine的长度比列数少一位则满足条件，将角标i添加到新的nWinLine中，然后将nWinLine添加到列表nWinLine中
+                        if (temp.indexOf(i) == -1 && nWinLine.length + 1 == nIndex) {
+                            temp.push(i);
+                            nWinLines.push(temp);
+
+                        }
+                    }
+                }
+
+            }
+        }
+
+    }
+    //# 遍历nWinLines，将包含于其他线中的线（之前判断的老线）和长度不满足最短连线要求的线删除
+    var bFlage = true;
+    while (bFlage) {
+        bFlage = false;
+        for (var w_l_idx in nWinLines) {
+            var nWinLine = nWinLines[parseInt(w_l_idx)];
+            for (var wl_idx in nWinLines) {
+                var line = nWinLines[parseInt(wl_idx)];
+                if (es6_set(nWinLine).length < es6_set(line).length || nWinLine.length < nLowerLimit) {
+                    // nWinLines.remove(nWinLine)
+                    list_remove(nWinLine, nWinLines);
+                    bFlage = true;
+                    break
+                }
+            }
+        }
+    }
+    //# 根据下注倍数计算每条线
+    var bIsFree = false;  //# 是否免费
+    var nFreeNum = 0;  //# 免费次数
+    var AllWinNum = 0;  //# 赢钱总数
+    var WinLinesList = [];  //# 获奖线和金额
+    var AllWinLinesList = [];  //# 所有中奖位置
+
+    //# 判断赢线里有没有免费牌中奖 有没有万能牌代替免费牌 有的话删除中奖线
+    // console.log("nWinLines----------------------0")
+    // console.log(nWinLines)
+    if (nWinLines.length > 0) {
+        for (var i_idx in nWinLines) {
+            var i = parseInt(i_idx);
+            var x = nWinLines[i_idx];
+            var is_free_card = false;
+            var is_magic_card = false;
+            for (var j_idx in nWinLines[i_idx]) {
+                var j = nWinLines[i_idx][j_idx];
+                if (nHandCards[j] == nFreeCard) {
+                    is_free_card = true;
+                } else if (nHandCards[j] == nMagicCard) {
+                    is_magic_card = true;
+                }
+            }
+            if (is_free_card && is_magic_card) {
+                if (nHandCards[nWinLines[i_idx][1]] == nMagicCard) {
+                    nWinLines[i_idx] = [];
+                } else if (nHandCards[nWinLines[i_idx][2]] == nMagicCard) {
+                    nWinLines[i_idx] = [];
+                } else if (nHandCards[nWinLines[i_idx][3]] == nMagicCard) {
+                    nWinLines[i_idx] = [nWinLines[i_idx][0], nWinLines[i_idx][1], nWinLines[i_idx][2]];
+                } else if (nHandCards[nWinLines[i_idx][4]] == nMagicCard) {
+                    nWinLines[i_idx] = [nWinLines[i_idx][0], nWinLines[i_idx][1], nWinLines[i_idx][2], nWinLines[i_idx][3]];
+                }
+
+            }
+        }
+        for (var x_idx in nWinLines) {
+            var x = nWinLines[parseInt(x_idx)];
+            if (!x) {
+                // nWinLines.remove(x)
+                list_remove(x, nWinLines);
+            }
+        }
+
+    }
+    if (nWinLines.length > 0) {
+        for (var x_idx in nWinLines) {
+            var x = nWinLines[parseInt(x_idx)];
+            var cards_index = x[0]
+            if (cards_index || cards_index == 0) {
+                var card = nHandCards[cards_index];
+                var win_num = 0;
+                if (is_free) { //# 免费倍数
+                    win_num = iconMul[card][x.length - nLowerLimit] * nBet
+                    result.dictAnalyseResult["nMultiple"] = StringUtil.addNumbers(result.dictAnalyseResult["nMultiple"], iconMul[card][x.length - nLowerLimit]);
+                } else {
+                    win_num = iconMul[card][x.length - nLowerLimit] * nBet;
+                    result.dictAnalyseResult["nMultiple"] = StringUtil.addNumbers(result.dictAnalyseResult["nMultiple"], iconMul[card][x.length - nLowerLimit]);
+                }
+                AllWinNum += win_num;
+                var win_line = [];
+                for (var i_idx in nHandCards) {
+                    var i = parseInt(i_idx);
+                    var j = nHandCards[i];
+                    if (x.indexOf(i) > -1) {
+                        win_line.push(true)
+                    } else {
+                        win_line.push(false)
+                    }
+                }
+                WinLinesList.push({"win_num": win_num, "win_line": win_line});
+                if (card == nFreeCard) {
+                    bIsFree = true;
+                    nFreeNum = 10
+                }
+            }
+        }
+
+        for (var i_idx in nHandCards) {
+            AllWinLinesList.push(false)
+        }
+        for (var i_idx in nWinLines) {
+            var nWinLineDetail = nWinLines[parseInt(i_idx)];
+            for (var o_idx in nWinLineDetail) {
+                var o = nWinLineDetail[o_idx];
+                AllWinLinesList[o] = true
+            }
+
+        }
+    }
+    result.dictAnalyseResult["nHandCards"] = nHandCards;  //# 手牌
+    result.dictAnalyseResult["nAllWinLines"] = WinLinesList; //# 获胜线具体
+    result.dictAnalyseResult["nWinLinesDetail"] = nWinLines; //# 获胜线
+    result.dictAnalyseResult["win"] = AllWinNum; //# 赢钱总数
+    result.dictAnalyseResult["nWinCards"] = AllWinLinesList; //# 总获胜线
+    result.dictAnalyseResult["nBetTime"] = now_time; //# 时间戳
+    result.dictAnalyseResult["getFreeTime"] = {"bFlag": bIsFree, "nFreeTime": nFreeNum};  //# 免费次数
+    return result;
+}
+
+
+
 
 function RandomNumForList(arr) {
     //从指定数组中选取随机值

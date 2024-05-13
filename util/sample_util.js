@@ -3,6 +3,7 @@ const StringUtil =  require("../util/string_util");
 const LABA = require("./laba");
 const analyse_result = require("./lottery_analyse_result");
 const log = require('../CClass/class/loginfo').getInstand
+const gameDao = require('../util/dao/gameDao')
 
 
 exports.init = function (gameName, gameId){
@@ -55,16 +56,11 @@ exports.init = function (gameName, gameId){
         config.jackpotCard  = -1;
         // 万能图案
         config.nGameMagicCardIndex  = -1;
-        // 空白图案
-        config.blankCard  = -1;
         // 开宝箱牌
         config.openBoxCard = -1;
         for (let i = 0; i < gameConfig.iconInfos.length; i++) {
             if(gameConfig.iconInfos[i].icon_s_type_WILD){
                 config.nGameMagicCardIndex = gameConfig.iconInfos[i].icon_type;
-            }
-            if(gameConfig.iconInfos[i].icon_s_type_blank){
-                config.blankCard = gameConfig.iconInfos[i].icon_type;
             }
             if(gameConfig.iconInfos[i].icon_s_type_free){
                 config.freeCards.push(gameConfig.iconInfos[i].icon_type)
@@ -96,17 +92,21 @@ exports.init = function (gameName, gameId){
                 map = tiger(config);
                 break;
             case 272:
-                // 老虎
+                // 熊
                 map = jungledelight(config);
                 break;
             case 263:
                 // 大象
                 map = ganeshagold(config);
                 break;
+            case 286:
+                // 挖矿
+                map = DigDigDigger(config);
+                break;
             default:
                 break;
         }
-        CacheUtil.setHandCards(gameId, JSON.stringify(Array.from(map.entries())))
+        // CacheUtil.setHandCards(gameId, JSON.stringify(Array.from(map.entries())))
     })
     // RTP对应的倍数区间权重
   /*  const m = new Map();
@@ -120,29 +120,55 @@ exports.init = function (gameName, gameId){
 }
 
 // 钻石样本
-function diamondSample(config){
-    let num = 0;
+async function diamondSample(config) {
     let map = new Map();
-    for(let i = 0; i < config.cards.length; i++){
-        const column1  = parseInt(config.cards[i]);
-        for(let j = 0; j < config.cards.length; j++){
-            const column2  = parseInt(config.cards[j]);
-            for(let k = 0; k < config.cards.length; k++){
-                const column3 = parseInt(config.cards[k]);
-                const nHandCards = [column1, column2, column3]
+    let num = 0;
 
-                const result = {}
-                result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
-                LABA.Diamond_Single(nHandCards, config.cards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nBetSum, config.cardsNumber, config.freeCards, config.freeTimes, result);
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
 
-                result.dictAnalyseResult.nHandCards = nHandCards;
-                const mul = result.dictAnalyseResult['nMultiple'];
-                const handCards =  result.dictAnalyseResult["nHandCards"];
-                handCards.unshift(num ++)
-                StringUtil.appendValue(map, mul, handCards, config)
+    const originalArray = [...config.cards];
+    const reversedArray = config.cards.reverse();
+    const twoDimensionalArray = [originalArray, reversedArray];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
+        //
+        let combinations = outputAllNCardCombinations(cards, 3);
+        combinations = StringUtil.shuffleArray(combinations)
+        let len = combinations.length;
+        for (let item in combinations) {
+            const nHandCards = combinations[item];
+
+            let result = {}
+            result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
+            LABA.Diamond_Single(nHandCards, config.cards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nBetSum, config.cardsNumber, config.freeCards, config.freeTimes, result);
+            const mul = result.dictAnalyseResult['nMultiple'];
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
             }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+            if (nHandCards.includes(config.openBoxCard)) {
+                openBox = 1;
+            }
+
+            // 将数据添加到批量数据数组中
+            batchData.push({nHandCards, mul, free, jackpot, openBox});
+            --len;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (batchData.length % batchSize === 0 || len === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
+            }
+            result = {};
         }
     }
+    console.log('图案初始化完毕')
     return map;
 }
 
@@ -150,149 +176,358 @@ function diamondSample(config){
 
 
 // 轮子样本
-function GrandWheelSample(config){
+async function GrandWheelSample(config) {
     let num = 0;
     let map = new Map();
-    for(let i = 0; i < config.cards.length; i++){
-        const column1  = parseInt(config.cards[i]);
-        for(let j = 0; j < config.cards.length; j++){
-            const column2  = parseInt(config.cards[j]);
-            for(let k = 0; k < config.cards.length; k++){
-                const column3 = parseInt(config.cards[k]);
-                const nHandCards = [column1, column2, column3]
+    let mul = 0;
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
 
-                const result = {}
-                result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
+    const originalArray = [...config.cards];
+    const reversedArray = config.cards.reverse();
+    const twoDimensionalArray = [originalArray, reversedArray];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
+        //
+        let combinations = outputAllNCardCombinations(cards, 3);
+        combinations = StringUtil.shuffleArray(combinations)
+        let cardsLen = combinations.length;
 
-                const len = nHandCards.filter(card => card === config.openBoxCard).length
-                if(len === 1){
-                    const a = [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 15, 18, 28, 30, 38];
-                    for(let item in a){
-                        const nHandCard = [...nHandCards];
-                        nHandCard.unshift(num ++)
-                        StringUtil.appendValue(map, parseInt(a[item]), nHandCard, config)
-                    }
-                }else if(len === 2){
-                    const b = [8, 10, 12, 15, 16, 18, 19, 20, 25, 28, 30, 36, 38, 40, 48, 50];
-                    for(let item in b){
-                        const nHandCard = [...nHandCards];
-                        nHandCard.unshift(num ++)
-                        StringUtil.appendValue(map, parseInt(b[item]), nHandCard, config)
-                    }
-                }else if(len === 3){
-                    const c = [20, 888, 25, 188, 58, 1000, 500, 35, 70, 30, 138, 55, 288, 60, 80, 50, 38, 88, 75, 68, 18, 28, 15];
-                    for(let item in c){
-                        const nHandCard = [...nHandCards];
-                        nHandCard.unshift(num ++)
-                        StringUtil.appendValue(map, parseInt(c[item]), nHandCard, config)
-                    }
-                }else{
-                    LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
-                    const mul = result.dictAnalyseResult['nMultiple'];
-                    nHandCards.unshift(num ++)
-                    StringUtil.appendValue(map, mul, nHandCards, config)
+        for (let item in combinations) {
+            const nHandCards = combinations[item];
+
+            const result = {}
+            result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
+
+            const len = nHandCards.filter(card => card === config.openBoxCard).length
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
+            }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+            if (nHandCards.includes(config.openBoxCard)) {
+                openBox = 1;
+            }
+
+            if (len === 1) {
+                const a = [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 15, 18, 28, 30, 38];
+                for (let item in a) {
+                    mul = a[item]
+                    // 将数据添加到批量数据数组中
+                    batchData.push({nHandCards, mul, free, jackpot, openBox});
                 }
-
+            } else if (len === 2) {
+                const b = [8, 10, 12, 15, 16, 18, 19, 20, 25, 28, 30, 36, 38, 40, 48, 50];
+                for (let item in b) {
+                    mul = b[item]
+                    // 将数据添加到批量数据数组中
+                    batchData.push({nHandCards, mul, free, jackpot, openBox});
+                }
+            } else if (len === 3) {
+                const c = [20, 888, 25, 188, 58, 1000, 500, 35, 70, 30, 138, 55, 288, 60, 80, 50, 38, 88, 75, 68, 18, 28, 15];
+                for (let item in c) {
+                    mul = c[item]
+                    // 将数据添加到批量数据数组中
+                    batchData.push({nHandCards, mul, free, jackpot, openBox});
+                }
+            } else {
+                LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
+                mul = result.dictAnalyseResult['nMultiple'];
+                // 将数据添加到批量数据数组中
+                batchData.push({nHandCards, mul, free, jackpot, openBox});
+            }
+            --cardsLen;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (cardsLen === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
             }
         }
     }
+    console.log('图案初始化完毕')
     return map;
 }
 
-function freeSpin(config){
-    let num = 0;
+async function freeSpin(config) {
     let map = new Map();
-    for(let i = 0; i < config.cards.length; i++){
-        const column1  = parseInt(config.cards[i]);
+    let num = 0;
+
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
+    let insertLen = 0; // 已插入长度
+    for (let i = 0; i < config.cards.length; i++) {
+        const column1 = parseInt(config.cards[i]);
         const nHandCards = [column1]
 
         const result = {}
         result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
         LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
         let mul = result.dictAnalyseResult['nMultiple'];
-        if(mul === 0 && config.freeCards.includes(nHandCards[0])){
-            mul = 1;
+
+        let free = 0;
+        let jackpot = 0;
+        let openBox = 0;
+        if (mul === 0 && config.freeCards.includes(nHandCards[0])) {
+            free = 1;
         }
-        if(mul === 0 && config.jackpotCard === nHandCards[0]){
-            mul = 10000;
+        if (mul === 0 && config.jackpotCard === nHandCards[0]) {
+            jackpot = 1;
         }
-        nHandCards.unshift(num ++)
-        StringUtil.appendValue(map, mul, nHandCards, config)
+        // 将数据添加到批量数据数组中
+        batchData.push({nHandCards, mul, free, jackpot, openBox});
+        // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+        await gameDao.insertBatchCards(batchData, config.gameId);
+        insertLen += batchData.length;
+        // 清空批量数据数组
+        batchData = [];
     }
+    console.log('图案初始化完毕')
     return map;
 }
 
-function tiger(config){
+async function tiger(config) {
     let map = new Map();
     let num = 0;
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
 
     const originalArray = [...config.cards];
     const reversedArray = config.cards.reverse();
     const twoDimensionalArray = [originalArray, reversedArray];
-    for(const i in twoDimensionalArray){
-        const cards  = twoDimensionalArray[i];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
         //
         let combinations = outputAllNCardCombinations(cards, 9);
         combinations = StringUtil.shuffleArray(combinations)
-
-        for(let item in combinations){
+        let len = combinations.length;
+        for (let item in combinations) {
             const nHandCards = combinations[item];
 
             let result = {}
             result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
-            LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes,config,  result);
+            LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
             // 老虎全屏
             LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);
 
-            const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'] , config.nGameLines.length, 1);
+            const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'], config.nGameLines.length, 1);
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
+            }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+            if (nHandCards.includes(config.openBoxCard)) {
+                openBox = 1;
+            }
 
-            nHandCards.unshift(num ++)
-            StringUtil.appendValue(map, mul, nHandCards, config)
+            // 将数据添加到批量数据数组中
+            batchData.push({nHandCards, mul, free, jackpot, openBox});
+            --len;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (batchData.length % batchSize === 0 || len === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
+            }
             result = {};
         }
     }
+    console.log('图案初始化完毕')
     return map;
 }
 
-function jungledelight(config){
+async function jungledelight(config) {
     let map = new Map();
     let num = 0;
-    // 测试
-    const combinations = outputAllNCardCombinations(config.cards, 15);
-    for(let item in combinations){
-        const nHandCards = combinations[item];
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
 
-        let result = {}
-        result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
-        LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes,config,  result);
-        const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'] , config.nGameLines.length, 1);
-        nHandCards.unshift(num ++)
-        StringUtil.appendValue(map, mul, nHandCards, config)
-        result = {};
+    const originalArray = [...config.cards];
+    const reversedArray = config.cards.reverse();
+    const twoDimensionalArray = [originalArray, reversedArray];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
+        //
+        let combinations = outputAllNCardCombinations(cards, 15);
+        combinations = StringUtil.shuffleArray(combinations)
+        let len = combinations.length;
+        for (let item in combinations) {
+            const nHandCards = combinations[item];
+            let result = {}
+            result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
+            LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
+
+            const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'], config.nGameLines.length, 1);
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
+            }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+            if (nHandCards.includes(config.openBoxCard)) {
+                openBox = 1;
+            }
+
+            // 将数据添加到批量数据数组中
+            batchData.push({nHandCards, mul, free, jackpot, openBox});
+            --len;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (batchData.length % batchSize === 0 || len === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
+            }
+            result = {};
+        }
     }
+    console.log('图案初始化完毕')
     return map;
 }
 
-function ganeshagold(config){
+async function ganeshagold(config) {
     let map = new Map();
     let num = 0;
-    // 测试
-    const combinations = outputAllNCardCombinations(config.cards, 15);
-    for(let item in combinations){
-        const nHandCards = combinations[item];
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
 
-        let result = {}
-        result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
+    const originalArray = [...config.cards];
+    const reversedArray = config.cards.reverse();
+    const twoDimensionalArray = [originalArray, reversedArray];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
+        //
+        let combinations = outputAllNCardCombinations(cards, 15);
+        combinations = StringUtil.shuffleArray(combinations)
+        let len = combinations.length;
+        for (let item in combinations) {
+            const nHandCards = combinations[item];
+            let result = {}
+            result.dictAnalyseResult = analyse_result.initResult(30);
+            LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, 0, config.icon_mul, result);
 
-        LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, 0, config.icon_mul, result);
+            // 免费牌每列只许出现一张
+            let col1 = [nHandCards[0], nHandCards[5], nHandCards[10]];
+            let col2 = [nHandCards[1], nHandCards[6], nHandCards[11]];
+            let col3 = [nHandCards[2], nHandCards[7], nHandCards[12]];
+            let col4 = [nHandCards[3], nHandCards[8], nHandCards[13]];
+            let col5 = [nHandCards[4], nHandCards[9], nHandCards[14]];
+            if (list_one_count(config.freeCards, col1) > 1 ||
+                list_one_count(config.freeCards, col2) > 1 ||
+                list_one_count(config.freeCards, col3) > 1 ||
+                list_one_count(config.freeCards, col4) > 1 ||
+                list_one_count(config.freeCards, col5) > 1) {
+                --len;
+                continue;
+            }
+            // wild符号仅出现在卷轴2，3，4
+            if (list_one_count(config.nGameMagicCardIndex, col1) > 0 ||
+                list_one_count(config.nGameMagicCardIndex, col5) > 0) {
+                --len;
+                continue;
+            }
 
-        const mul = result.dictAnalyseResult['nMultiple'];
-        log.info(num + '倍数' + mul)
-        nHandCards.unshift(num ++)
-        StringUtil.appendValue(map, mul, nHandCards, config)
-        result = {};
+            const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'], 30, 1);
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
+            }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+
+            const l = nHandCards.filter(card => card === config.freeCards[0]).length;
+            if (l > 3) {
+                openBox = 1;
+            }
+
+            // 将数据添加到批量数据数组中
+            batchData.push({nHandCards, mul, free, jackpot, openBox});
+            --len;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (batchData.length % batchSize === 0 || len === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
+            }
+            result = {};
+        }
     }
+    console.log('图案初始化完毕')
     return map;
+}
+
+async function DigDigDigger(config) {
+    let map = new Map();
+    let num = 0;
+    let batchSize = 10000; // 每次批量长度
+    let batchData = []; // 每次批量数据
+
+    const originalArray = [...config.cards];
+    const reversedArray = config.cards.reverse();
+    const twoDimensionalArray = [originalArray, reversedArray];
+    for (const i in twoDimensionalArray) {
+        const cards = twoDimensionalArray[i];
+        //
+        let combinations = outputAllNCardCombinations(cards, 15);
+        combinations = StringUtil.shuffleArray(combinations)
+        let len = combinations.length;
+        for (let item in combinations) {
+            const nHandCards = combinations[item];
+
+            let result = {}
+            result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
+            LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);
+            const mul = StringUtil.divNumbers(result.dictAnalyseResult['nMultiple'], config.nGameLines.length, 1);
+            let free = 0;
+            let jackpot = 0;
+            let openBox = 0;
+            if (nHandCards.includes(config.freeCards[0])) {
+                free = 1;
+            }
+            if (nHandCards.includes(config.jackpotCard)) {
+                jackpot = 1;
+            }
+            if (nHandCards.includes(config.openBoxCard)) {
+                openBox = 1;
+            }
+
+            // 将数据添加到批量数据数组中
+            batchData.push({nHandCards, mul, free, jackpot, openBox});
+            --len;
+            // 当批量数据数组的长度达到 batchSize 时执行批量插入操作
+            if (batchData.length % batchSize === 0 || len === 0) {
+                await gameDao.insertBatchCards(batchData, config.gameId);
+                // 清空批量数据数组
+                batchData = [];
+            }
+            result = {};
+        }
+    }
+    console.log('图案初始化完毕')
+    return map;
+}
+
+function getRandomSubarray(array, size) {
+    // 洗牌算法，打乱数组元素顺序
+    const shuffled = array.slice().sort(() => 0.5 - Math.random());
+    if(array.length < size){
+        return shuffled;
+    }
+    // 获取前 size 个元素作为结果
+    return shuffled.slice(0, size);
 }
 
 // 生成所有包含n张牌的组合
@@ -316,4 +551,14 @@ function outputAllNCardCombinations(cards, n) {
     const combinations = [];
     generatenCardCombinations(n, cards, 0, [], combinations);
     return combinations;
+}
+function list_one_count(x, list) {
+    //数组中指定值出现次数
+    let count = 0;
+    for (const i in list) {
+        if (list[i] === x) {
+            count++
+        }
+    }
+    return count;
 }

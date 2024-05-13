@@ -482,17 +482,15 @@ var GameInfo = function () {
             //检查自己下注情况,效准玩家金额
             var self = this;
             gameDao.getFreeCount(gameConfig.gameId, _userId,  (ResultCode, Result) => {
-                //console.log("**" + Result.Id);
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId
-                self.userList[_userId].updateFreeGame(Result);
                 log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
 
-                var ResultData = {
+                const ResultData = {
                     TableId: LoginResult.tableId,
                     seatId: LoginResult.seatId,
                     userList: tableUserList,
-                    freeCount: self.userList[_userId].getFreeCount(),
+                    freeCount: Result.freeCount,
                     score_pool: 0
                 };
                 _socket.emit("LoginRoomResult", {ResultCode: 1, ResultData: ResultData});

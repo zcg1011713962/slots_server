@@ -198,8 +198,8 @@ exports.toFixed  = function toFixed(num, decimalPlaces) {
     // 找到小数点的位置
     const decimalIndex = numString.indexOf('.');
     if (decimalIndex === -1) {
-        // 如果没有小数点，则直接返回原始数字
-        return parsedNum;
+        // 将截取后的字符串转换回数字
+        return parseFloat(this.formatNumber(parsedNum, decimalPlaces));
     } else {
         // 截取小数点后指定位数的字符串
         const truncatedString = numString.substring(0, decimalIndex + decimalPlaces + 1);
@@ -208,8 +208,29 @@ exports.toFixed  = function toFixed(num, decimalPlaces) {
     }
 }
 
+exports.formatNumber =  function (num, decimals) {
+    // 将数字转换为字符串
+    let strNum = num.toString();
 
-exports.RandomNumForList = function RandomNumForList(arr) {
+    // 如果没有小数点，则在末尾添加小数点和两个零
+    if (!strNum.includes('.')) {
+        strNum += '.';
+        for (let i = 0; i < decimals; i++) {
+            strNum += '0';
+        }
+    } else {
+        // 如果有小数点，则补齐小数点后的位数
+        const dotIndex = strNum.indexOf('.');
+        const diff = decimals - (strNum.length - dotIndex - 1);
+        for (let i = 0; i < diff; i++) {
+            strNum += '0';
+        }
+    }
+
+    return strNum;
+}
+
+exports.RandomNumForList = function (arr) {
     //从指定数组中选取随机值
     return arr[Math.floor((Math.random() * arr.length))]
 }
@@ -228,7 +249,6 @@ exports.RandomNum = function RandomNum(min, max) {
     }
     // 生成指定范围内随机整数
     const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log([min,max] + '范围内随机整数:' + randomNum)
     return randomNum;
 }
 
@@ -286,12 +306,6 @@ exports.currDateTime = function currDateTime() {
 
 exports.appendValue = function (map , key, value, config) {
     if (map.has(key)) {
-        if(map.get(key).length > 500 && config.gameId === 272){
-            return;
-        }
-        if(map.get(key).length > 20 && config.gameId === 263){
-            return;
-        }
         map.get(key).push(value);
     } else {
         map.set(key, [value]);

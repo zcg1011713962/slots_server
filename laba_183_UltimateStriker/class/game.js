@@ -1,5 +1,5 @@
 ﻿const User = require("./User");
-const gameDao = require("./../dao/gameDao");
+const gameDao = require("../../util/dao/gameDao");
 const arithmetic = require("./arithmetic");
 const sever = require("./sever");
 const schedule = require("node-schedule");
@@ -514,8 +514,8 @@ var GameInfo = function () {
         };
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
-            var self = this;
-            gameDao.getFreeCount(_userId, function (ResultCode, Result) {
+            const self = this;
+            gameDao.getFreeCount(gameConfig.gameId, _userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
                 log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);

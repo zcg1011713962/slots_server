@@ -1,4 +1,4 @@
-﻿const gameDao = require("./../dao/gameDao");
+﻿const gameDao = require("../../util/dao/gameDao");
 const redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
 const log = require("../../CClass/class/loginfo").getInstand;
 

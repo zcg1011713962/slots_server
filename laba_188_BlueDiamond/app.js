@@ -172,7 +172,7 @@ io.on('connection', function (socket) {
     //下注
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
-        const nBetSum = parseInt(data.nBetList[0]);
+        const nBetSum = Number(data.nBetList[0]);
         // 执行摇奖
         Lottery.doLottery(socket, nBetSum, gameInfo);
     });
@@ -206,8 +206,6 @@ io.on('connection', function (socket) {
     })
 });
 
-SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
-
 app.set('port', process.env.PORT || gameConfig.port);
 const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
@@ -215,5 +213,8 @@ const server = http.listen(app.get('port'), function () {
 
 
 log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+
+
+/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/
 
 

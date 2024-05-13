@@ -9,7 +9,6 @@ const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
 
 const Csocket = Cio(Urls.hall_url);
-
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -24,85 +23,15 @@ app.all('*', function (req, res, next) {
 });
 //增加消息相关
 app.post('/addMessage', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('addMessage-json');
-    }
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({result: 1}));
-    response.end();
-    gameInfo.addMessage(req.body);
-});
-//获取key相关
-app.post('/getTableKey', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('getTableKey-json');
-    }
-    let data = gameInfo.getTableKey(req.body);
-    console.log(data);
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({result: data}));
-    response.end();
-});
-
-app.post('/checkTableKey', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('checkTableKey-json');
-    }
-    let data = gameInfo.checkTableKey(req.body);
-    console.log(data);
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({result: data}));
-    response.end();
-});
-
-app.post('/updateTableKey', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('updateTableKey-json');
-    }
-    let data = gameInfo.updateTableKey(req.body);
-    // console.log(data);
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write(JSON.stringify({result: data}));
-    response.end();
-});
-
-//获取用户金币限额相关
-app.post('/getUserCtrl', function (req, response) {
-    try {
-        let data = {};
-        for (let key in req.body) {
-            data = JSON.parse(key);
-        }
-        req.body = data;
-    } catch (e) {
-        log.warn('getUserCtrl-json');
-    }
-    gameInfo.getUserCtrl(req.body, response);
-
+   try{
+       const data = req.body[0];
+       gameInfo.addMessage(data);
+   }catch (e){
+       log.err(e)
+   }
+   response.writeHead(200, {"Content-Type": "text/plain"});
+   response.write(JSON.stringify({result: 1}));
+   response.end();
 });
 
 

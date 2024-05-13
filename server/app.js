@@ -122,60 +122,83 @@ app.get('/betsJackpot', function (req, res) {
 app.get('/searchRank', function (req, res) {
     const userId = req.query.userId ? parseInt(req.query.userId) : 0;
 
-    CacheUtil.getRankJackpot((coinRankJackpot, rechargeRankJackpot, bigWinJackpot) =>{
-        CacheUtil.getRankTime((coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankEndTime, rechargeRankEndTime, bigWinEndTime) =>{
-            // 金币排行
-            gameInfo.searchCoinRank(coinRank =>{
-                let coinRankorder = 1;
-                coinRank = coinRank.map(item =>{
-                    item.order = coinRankorder ++;
+    CacheUtil.getRankTime((coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankEndTime, rechargeRankEndTime, bigWinEndTime) =>{
+        // 金币排行
+        gameInfo.searchCoinRank(coinRank =>{
+            let coinRankorder = 1;
+            coinRank = coinRank.map(item =>{
+                item.order = coinRankorder ++;
+                return item;
+            });
+            const currUserCoinRank = coinRank.filter(item => {
+                return item.userId === userId
+            });
+            // 充值排行
+            gameInfo.searchRechargeRank(rechargeRank =>{
+                let currRechargeRankOrder = 1;
+                rechargeRank = rechargeRank.map(item =>{
+                    item.order = currRechargeRankOrder ++;
                     return item;
                 });
-                const currUserCoinRank = coinRank.filter(item => {
+                const currRechargeRank = rechargeRank.filter(item => {
                     return item.userId === userId
                 });
-                // 充值排行
-                gameInfo.searchRechargeRank(rechargeRank =>{
-                    let currRechargeRankOrder = 1;
-                    rechargeRank = rechargeRank.map(item =>{
-                        item.order = currRechargeRankOrder ++;
+                // 赢金币排行
+                gameInfo.searchBigWinToday(bigWinTodayRank =>{
+                    let bigWinTodayRankOrder = 1;
+                    bigWinTodayRank = bigWinTodayRank.map(item =>{
+                        item.order = bigWinTodayRankOrder ++;
                         return item;
                     });
-                    const currRechargeRank = rechargeRank.filter(item => {
+                    const currBigWinTodayRank = bigWinTodayRank.filter(item => {
                         return item.userId === userId
                     });
-                    // 赢金币排行
-                    gameInfo.searchBigWinToday(bigWinTodayRank =>{
-                        let bigWinTodayRankOrder = 1;
-                        bigWinTodayRank = bigWinTodayRank.map(item =>{
-                            item.order = bigWinTodayRankOrder ++;
-                            return item;
-                        });
-                        const currBigWinTodayRank = bigWinTodayRank.filter(item => {
-                            return item.userId === userId
-                        });
+
+                    CacheUtil.getRankAwardConfig((coinRankJackpot, rechargeRankJackpot, bigWinRankJackpot, rankRatioList) =>{
+                        // 奖励人数
+                        const awardNum = rankRatioList.length;
+                        rankRatioList.sort((a, b) => b - a);
+                        const sum = rankRatioList.reduce((acc, val) => acc + val, 0);
+                        const percentages = rankRatioList.map(element => (element / sum));
+                        let coinAwards = [];
+                        let rechargeAwards = [];
+                        let bigWinAwards = [];
+                        for(let i = 0; i < awardNum; i++){
+                            const coinAward = StringUtil.rideNumbers(coinRankJackpot, percentages[i], 2)
+                            const rechargeAward = StringUtil.rideNumbers(rechargeRankJackpot, percentages[i], 2)
+                            const bigWinAward = StringUtil.rideNumbers(bigWinRankJackpot, percentages[i], 2)
+                            coinAwards.push(coinAward);
+                            rechargeAwards.push(rechargeAward);
+                            bigWinAwards.push(bigWinAward);
+                        }
+                        coinAwards.sort((a, b) => b - a);
+                        rechargeAwards.sort((a, b) => b - a);
+                        bigWinAwards.sort((a, b) => b - a);
                         res.send({code: 1, data: {
                                 coinRank: coinRank.slice(0, 50),  // 金币排行
-                                currUserCoinRank: currUserCoinRank, // 当前用户金币排行
+                                currUserCoinRank: currUserCoinRank[0], // 当前用户金币排行
                                 rechargeRank: rechargeRank.slice(0, 50), // 充值排行
-                                currRechargeRank: currRechargeRank, // 当前用户充值排行
+                                currRechargeRank: currRechargeRank[0], // 当前用户充值排行
                                 bigWinTodayRank: bigWinTodayRank.slice(0, 50), // 大富豪排行
-                                currBigWinTodayRank: currBigWinTodayRank, // 当前用户大富排行
+                                currBigWinTodayRank: currBigWinTodayRank[0], // 当前用户大富排行
                                 coinRankJackpot: coinRankJackpot, // 金币排行奖池
                                 rechargeRankJackpot: rechargeRankJackpot, // 充值排行奖池
-                                bigWinJackpot: bigWinJackpot, // 大富豪排行奖池
+                                bigWinJackpot: bigWinRankJackpot, // 大富豪排行奖池
                                 coinRankStartTime: coinRankStartTime, // 金币排行开始时间（时间戳）
                                 rechargeRankStartTime: rechargeRankStartTime, // 充值排行开始时间
                                 bigWinStartTime: bigWinStartTime, // 大富豪排行开始时间
                                 coinRankStartEndTime: coinRankEndTime, // 金币排行结束时间
                                 rechargeRankStartEndTime: rechargeRankEndTime, // 充值排行结束时间
                                 bigWinStartEndTime: bigWinEndTime, // 大富豪排行结束时间
-                                currTime: new Date().getTime() // 系统当前时间
+                                currTime: new Date().getTime(), // 系统当前时间
+                                coinAwards: coinAwards, // 金币排行奖励前几名金币数组(从大到小排序)
+                                rechargeAwards: rechargeAwards,  // 充值排行奖励前几名金币数组
+                                bigWinAwards: bigWinAwards  // 大富豪排行奖励前几名金币数组
                             }});
-                    });
+                    })
                 });
             });
-        })
+        });
     })
 
 });
@@ -251,6 +274,25 @@ app.get('/goodsList', function (req, res) {
 });
 
 
+// 获取兑换列表
+app.get('/exchangeList', function (req, res) {
+    log.info('获取兑换列表')
+    gameInfo.getExchangeGoods((code, msg, data) =>{
+        res.send({code: code, data: data});
+    });
+});
+
+// 兑换物品
+app.get('/exchangeGoods', function (req, res) {
+    const productId = req.query.productId;
+    const userId = req.query.userId;
+    log.info(userId+ '兑换物品' + productId)
+    gameInfo.shopExchangeGoods(productId, userId, (code, msg, data) =>{
+        res.send({code: code, data: data});
+    });
+});
+
+
 // 获取限时折扣物品
 app.get('/discountLimited', function (req, res) {
     const userId = req.query.userId;
@@ -268,6 +310,7 @@ app.get('/discountLimited', function (req, res) {
     });
 });
 
+
 // 获取限时折扣剩余时间
 app.get('/discountLimitedResTime', function (req, res) {
     const userId = req.query.userId;
@@ -284,6 +327,45 @@ app.get('/discountLimitedResTime', function (req, res) {
         }});
     });
 });
+
+
+// 获取解锁提现的商品
+app.get('/withdrawGoods', function (req, res) {
+    log.info('获取解锁提现的商品')
+    gameInfo.searchWithdrawGoods((code, msg, data) =>{
+        res.send({code: code, msg: msg, data: data});
+    });
+});
+
+
+
+// 获取首充礼包商品
+app.get('/firstRechargeGoods', function (req, res) {
+    const userId = req.query.userId;
+    log.info('获取首充礼包商品')
+    gameInfo.searchFirstRechargeGoods(userId,(code, msg, data) =>{
+        res.send({code: code, msg: msg, data: data});
+    });
+});
+
+
+// 获取月卡商品
+app.get('/monthCardGoods', function (req, res) {
+    log.info('获取获取月卡商品')
+    gameInfo.searchMonthCardGoods((code, msg, data) =>{
+        res.send({code: code, msg: msg, data: data});
+    });
+});
+
+// 查询提现页状态
+app.get('/searchWithdrawPageStatus', function (req, res) {
+    const userId = req.query.userId;
+    log.info(userId + '查询提现页状态')
+    gameInfo.searchWithdrawPageStatus(userId, (withdrawPageUnLock) =>{
+        res.send({code: 1, data: {withdrawPageUnLock: withdrawPageUnLock}});
+    })
+});
+
 
 
 // 购买商品
@@ -350,14 +432,21 @@ app.get('/shoppingCallBack', function (req, res) {
                 if (ret) {
                     gameInfo.shoppingCallBack(userId, orderId, TypeEnum.OrderStatus.payedNotify,(code, msg, data, shopType, service, serverId) => {
                         CacheUtil.delUserProtocol(userId, "shoppingCallBack")
-                        // 响应
-                        res.send({code: code, msg: msg});
-                        // 回调socket
-                        if (code && serverId === 0) { // 大厅
-                            gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
-                        } else if (code && serverId !== 0) { // 游戏内
-                            gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
-                        }
+                        dao.searchPayOrder(userId, orderId, (row) =>{
+                            const amount = row.amount;
+                            const orderType = row.payType;
+                            const productId = row.productId;
+                            log.info(userId + '回调订单:' + amount + 'orderType:' + orderType + 'productId:' + productId)
+                            CacheUtil.delOrderCache(userId, productId, amount, orderType)
+                            // 响应
+                            res.send({code: code, msg: msg});
+                            // 回调socket
+                            if (code && serverId === 0) { // 大厅
+                                gameInfo.sendHallShopCallBack(userId, shopType, serverId, code, msg, data)
+                            } else if (code && serverId !== 0) { // 游戏内
+                                gameInfo.sendGameShopCallBack(userId, shopType, serverId, code, msg, data)
+                            }
+                        })
                     });
                 } else {
                     res.send({code: ErrorCode.ERROR.code, msg: ErrorCode.ERROR.msg});
@@ -424,14 +513,7 @@ app.get('/dotBase', function (req, res) {
             log.info(userId + '客户端打点成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
         }else{
-            gameInfo.updateDot(userId, adid, gps, apptoken, ret =>{
-                if(ret){
-                    log.info(userId + '更新打点成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
-                    res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
-                }else{
-                    res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
-                }
-            })
+            log.info(userId + '客户端打点失败' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
         }
     });
 });
@@ -466,7 +548,12 @@ app.get('/dot', function (req, res) {
     })
 });
 
-
+// 查询跑马灯缓存20条
+app.get('/searchNotifyMsg', function (req, res) {
+    gameInfo.searchNotifyMsg().then(data =>{
+        res.send({code: 1, data: data});
+    });
+});
 
 
 var serverSign = "slel3@lsl334xx,deka";
@@ -477,7 +564,7 @@ io.on('connection', function (socket) {
     socket.emit('connected', 'connect server');
     //服务器进行连接
     socket.on('GameServerConnect', function (info) {
-        if (info.signCode == serverSign) {
+        if (info.signCode === serverSign) {
             log.info(info.serverName + "游戏Id:" + info.serverId + '与大厅建立连接成功');
             socket.emit('GameServerConnectResult', {resultCode: 1});
             if (info.serverId)  ServerInfo.setScoket(info.serverId, socket);
@@ -927,6 +1014,24 @@ io.on('connection', function (socket) {
     })
 
 
+
+    // 是否有权限打开提现页
+    socket.on('canOpenWithdrawPage', async function () {
+        const userId = socket.userId;
+        const ret = await CacheUtil.recordUserProtocol(userId, "canOpenWithdrawPage");
+        if (ret) {
+            gameInfo.canOpenWithdrawPage(userId, (code, msg, data) => {
+                CacheUtil.delUserProtocol(userId, "canOpenWithdrawPage")
+                if (code) {
+                    socket.emit('canOpenWithdrawPageResult', {code: code, data: data});
+                } else {
+                    socket.emit('canOpenWithdrawPageResult', {code: code, msg: msg});
+                }
+            });
+        }
+    })
+
+
     // 绑定银行卡
     socket.on('bindBankCard', function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
@@ -1230,7 +1335,26 @@ io.on('connection', function (socket) {
     // 邮件一键已读
     socket.on("setEmailAllRead", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
-            gameInfo.setEmailAllRead(socket);
+            gameInfo.setEmailAllRead(socket.userId, data =>{
+                socket.emit('setEmailAllReadResult', {code: 1, data: data});
+            });
+        }
+    });
+
+    // 邮件一键领取
+    socket.on("setEmailAllGet", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.setEmailAllGet(socket.userId, code =>{
+                socket.emit('setEmailAllGetResult', {code: code, data: []})
+            });
+        }
+    });
+
+
+    // 获取服务器时间戳
+    socket.on("serverCurrTime", function () {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            socket.emit('serverCurrTimeResult', {currTime: new Date().getTime()})
         }
     });
 
@@ -1245,6 +1369,13 @@ io.on('connection', function (socket) {
     socket.on("emailAllDel", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.emailAllDel(socket);
+        }
+    });
+
+    // 领取邮件奖励
+    socket.on("getEmailAward", function (data) {
+        if (gameInfo.IsPlayerOnline(socket.userId)) {
+            gameInfo.getEmailAward(socket, data);
         }
     });
 
@@ -1511,7 +1642,7 @@ io.on('connection', function (socket) {
     });
 
 
-    // 查询流水记录
+    // 查询流水记录（下注）
     socket.on("gameFlowRecord", function () {
         log.info(socket.userId + '查询流水记录')
         if (gameInfo.IsPlayerOnline(socket.userId)) {
@@ -1635,17 +1766,6 @@ io.on('connection', function (socket) {
     // 日志记录
     socket.on("pro_change", function (_info) {
         gameInfo.pro_change(_info);
-    });
-
-    //游戏服务器的排行
-    socket.on("getServerRank", function (_info) {
-        try {
-            var data = JSON.parse(_info);
-            _info = data;
-        } catch (e) {
-            log.warn('getServerRank-json');
-        }
-        gameInfo.getServerRank(socket, _info);
     });
 
     //喇叭说话

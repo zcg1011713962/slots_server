@@ -1,158 +1,110 @@
-﻿var schedule = require("node-schedule");
-var gameConfig = require("./../config/gameConfig");
-let dao = require("./../dao/dao");
+﻿const schedule = require("node-schedule");
+const gameConfig = require("./../config/gameConfig");
+const TypeEnum = require('../../util/enum/type')
+const CacheUtil = require('../../util/cache_util')
+const ErrorCode = require("../../util/ErrorCode");
+const http_bc = require("../../util/http_broadcast");
+const StringUtil = require('../../util/string_util')
 
-//读取文件包
-
-var GameInfo = function () {
-
-    var _gameinfo = "";
-
-    var Game = function () {
-
+const GameInfo = function () {
+    let _gameinfo = "";
+    const Game = function () {
         this.serverId = gameConfig.serverId;
-
         //初始化游戏
         this.init = function () {
             console.log('####init game!####');
-
             //初始化用户列表
             this.userList = {};
-
             this.messageList = [];
-            this.tableKeyList = {};
             //维护模式
             this.maintain = false;
 
-            var rule = new schedule.RecurrenceRule();
-            var times = [];
-            for (var i = 0; i < 60; i++) {
+            const rule = new schedule.RecurrenceRule();
+            const times = [];
+            for (let i = 0; i < 60; i++) {
                 times.push(i);
             }
+            let count = 0;
+            let lastTime = new Date().getTime();
+            let sendFlag = true;
+            // 记录上次打印时间的变量
             rule.second = times;
-            var self = this;
-            schedule.scheduleJob(rule, function () {
-                if (gameConfig.maintain) {
-                    --gameConfig.maintainTime;
-                    if (!gameConfig.maintainTime) {
-                        self.disconnectAllUser();
-                    }
-                }
+            const self = this;
+            let saveList = [];
+            CacheUtil.getBankTransferConfig().then(config =>{
+                schedule.scheduleJob(rule, function () {
+                    const nowDate = new Date();
+                    const second = nowDate.getSeconds();
 
-                var nowDate = new Date();
-                var second = nowDate.getSeconds();
-
-                if (second % 6 == 0) {
-                    if (self.messageList[0]) {
-                        // console.log(self.messageList[0]);
-                        self._io.sockets.emit("bigPriceMessage", {
-                            code: 1,
-                            data: self.messageList[0]
-                        });
-                        self.messageList.shift();
-                    }
-                }
-
-                if (self.messageList.length < 10) {
-                    let id = Math.ceil(Math.random() * 11000);
-                    let gameList = ["9线拉王", "麻将胡了", "水浒传", "吕布戏貂蝉", "五福临门", "玉蒲团", "水果小玛丽", "阿兹塔克", "双喜临门", "比翼双飞", "比翼双飞", "明星972023", "金财神"];
-                    let data = {
-                        userId: id,
-                        nickName: "玩家" + id,
-                        gameName: RandomNumForList(gameList),
-                        win: Math.floor(Math.random() * 100000) + 100000
-                    };
-                    self.messageList.push(data);
-                }
-
-            });
-        };
-
-        this.addMessage = function (_info) {
-            let data = {
-                userId: _info.userId,
-                nickName: _info.nickName,
-                gameName: _info.gameName,
-                win: _info.win
-            };
-            this.messageList.push(data);
-        };
-
-        this.getTableKey = function (_info) {
-            this.tableKeyList[_info.port] = new Array(_info.num);
-            for (let i = 0; i < _info.num; ++i) {
-                var table_key = "";
-                while (true) {
-                    let i_t_key = init_table_key();
-                    let findKey = false;
-                    for (let j in this.tableKeyList) {
-                        if (this.tableKeyList[j].indexOf(i_t_key) !== -1) {
-                            findKey = true;
-                            break;
+                    if (second % 3 === 0) {
+                        const msg = self.messageList[0]
+                        if (msg) {
+                            const type = msg.type;
+                            if(type === TypeEnum.notifyType.bigWin){
+                                // 全服通知栏消息
+                                self._io.sockets.emit("noticeBigWinMsg", msg.extend);
+                            }else if(type === TypeEnum.notifyType.hitJackpot){
+                                self._io.sockets.emit("noticeJackpotMsg", msg.extend);
+                            }else{
+                                // 全服发送跑马灯
+                                self._io.sockets.emit("noticeMsg", msg);
+                                if(saveList.length < 20){
+                                    saveList.push(msg)
+                                }else{
+                                    saveList.shift(); // 移除第一项
+                                    saveList.push(msg)
+                                }
+                                CacheUtil.saveNotifyMsg(saveList);
+                            }
+                            // 移除消息
+                            self.messageList.shift();
                         }
                     }
-                    if (!findKey) {
-                        table_key = i_t_key;
-                        break;
+
+                    if(sendFlag){
+                        const idx  = StringUtil.RandomNum(11, 19)
+                        if(idx % 3 === 0){
+                            const amounts = config.withdrawWard.map(it => it.val)
+                            const index  = StringUtil.RandomNum(0, amounts.length -1)
+                            let id =  StringUtil.RandomNum(100000, 999999);
+                            // 发送提现跑马灯
+                            const noticeMsg = [{
+                                type: TypeEnum.notifyType.withdraw, // 6
+                                content_id: ErrorCode.WITHDRAW_NOTIFY.code, // p0006
+                                extend: {
+                                    nickName: "USER" + id, // 昵称
+                                    withdrawAmount: amounts[index] ? amounts[index] : amounts, // 提现金额
+                                    userId: id
+                                }
+                            }]
+                            // 全服发送跑马灯
+                            self._io.sockets.emit("noticeMsg", noticeMsg[0]);
+                            count ++;
+                            if(count >= 2 && Date.now() - lastTime < 60000){
+                                sendFlag = false;
+                            }
+                            console.log(noticeMsg[0])
+                        }
                     }
-                }
-                this.tableKeyList[_info.port][i] = table_key;
-
-            }
-            return this.tableKeyList[_info.port];
-        };
-
-        this.checkTableKey = function (_info) {
-            let port = null;
-            for (let i in this.tableKeyList) {
-                if (this.tableKeyList[i].indexOf(_info.key) !== -1) {
-                    port = i;
-                    break;
-                }
-            }
-            return port;
-        };
-
-        this.updateTableKey = function (_info) {
-            let table_key = "";
-            while (true) {
-                let i_t_key = init_table_key();
-                let findKey = false;
-                for (let j in this.tableKeyList) {
-                    if (this.tableKeyList[j].indexOf(i_t_key) !== -1) {
-                        findKey = true;
-                        break;
+                    if(Date.now() - lastTime > 60000){
+                        lastTime = Date.now();
+                        sendFlag = true;
+                        console.log('一分钟重置')
                     }
-                }
-                if (!findKey) {
-                    table_key = i_t_key;
-                    break;
-                }
-            }
-            //给房间换个新密码
-            this.tableKeyList[_info.port][_info.tableId] = table_key;
-            return table_key;
+                });
+            })
         };
 
-        this.getUserCtrl = function (_info, response) {
 
-            dao.getUserCtrl(_info.userId, (code, res) => {
-                let data = {
-                    code: code,
-                    res: res
-                };
-                response.writeHead(200, {"Content-Type": "text/plain"});
-                response.write(JSON.stringify({result: data}));
-                response.end();
-            });
-
-        };
+        this.addMessage = function (noticeMsg) {
+            console.log('添加通知消息', noticeMsg)
+            this.messageList.push(noticeMsg);
+        }
 
         this.setIo = function (_io, _Csocket) {
             this._io = _io;
             this._Csocket = _Csocket;
         };
-
 
         this.Setmaintain = function () {
             gameConfig.maintain = true;
@@ -164,9 +116,8 @@ var GameInfo = function () {
 
         this.disconnectAllUser = function () {
             this._io.sockets.disconnect();
-            console.log("服务器开启维护，已经全部离线");
+            log.info("服务器开启维护，连接广播服务的玩家已经全部离线");
         };
-
         //运行初始化
         this.init();
     };
@@ -181,27 +132,6 @@ var GameInfo = function () {
     }
 
 }();
-
-function init_table_key() {
-    var key = "";
-    for (var i = 0; i < 6; i++) {
-        key += RandomNumBoth(0, 9)
-    }
-    return key
-}
-
-function RandomNumBoth(Min, Max) {
-    //生成指定范围内随机整数
-    var Range = Max - Min;
-    var Rand = Math.random();
-    var num = Min + Math.round(Rand * Range); //四舍五入
-    return num;
-}
-
-function RandomNumForList(arr) {
-    //从指定数组中选取随机值
-    return arr[Math.floor((Math.random() * arr.length))]
-}
 
 module.exports = GameInfo;
 

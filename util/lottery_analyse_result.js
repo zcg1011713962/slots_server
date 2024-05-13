@@ -3,6 +3,7 @@ const log = require("../CClass/class/loginfo").getInstand
 const CacheUtil = require('../util/cache_util')
 const TypeEnum = require('../util/enum/type')
 const StringUtil = require('../util/string_util')
+const ErrorCode = require("./ErrorCode");
 
 exports.initResult  = function (nBetSum) {
     // 初始化手牌结果
@@ -15,6 +16,7 @@ exports.initResult  = function (nBetSum) {
         nBet: nBetSum, // # 下注总额
         win: 0,  //# 中奖总额
         nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
+        goldWin: [], // DigDigDigger黄金牌
         getOpenBox: {   // 开宝箱
             bFlag: false,
             nWinOpenBox: 0
@@ -39,22 +41,53 @@ exports.initResult  = function (nBetSum) {
     };
 }
 
-exports.build  = function (userId, nickname, gameName, nBetSum, currFreeCount, currGoldCoin, dictAnalyseResult, sendMessage_mul){
+exports.winNoticeMsg  = function (config, user, dictAnalyseResult, result){
     try {
-        //判断是否需要发送中奖信息到通知服
-        if (http_bc && dictAnalyseResult["win"] >= nBetSum * sendMessage_mul) {
-            let data = {
-                userId: userId,
-                nickName: nickname,
-                gameName: gameName,
-                win: dictAnalyseResult["win"]
-            };
-            http_bc.send(data);
+        // 击中奖池跑马灯
+        if (http_bc && dictAnalyseResult['getJackpot'].bFlag) {
+            const noticeMsg = [{
+                type: TypeEnum.notifyType.hitJackpot, // 4
+                content_id: ErrorCode.HIT_JACKPOT_NOTIFY.code, // p0004
+                extend: {
+                    userId: config.userId,
+                    nickName: user.nickname,
+                    headimgurl: user.headimgurl,
+                    gameName: config.gameName,
+                    gameId: config.gameId,
+                    jackpot: dictAnalyseResult['getJackpot'].bVal,
+                    jackpotIndex: config.jackpotIndex
+                }
+            }]
+            http_bc.sendNoticeMsg(noticeMsg);
+            log.info(config.userId + '击中奖池,发送跑马灯')
         }
+        CacheUtil.getNoticeConfig().then(cf => {
+            const nSwitch = cf.noticeSystemControl ? Number(cf.noticeSystemControl) : 0;
+            const noticeSystemScore = cf.noticeSystemScore;
+            // 中奖大于配置，侧边栏展示
+            if(nSwitch === 1 && noticeSystemScore && Number(noticeSystemScore) < result.winItem.finVal){
+                const noticeMsg = [{
+                    type: TypeEnum.notifyType.bigWin, // 5
+                    content_id: ErrorCode.BIG_WIN_NOTIFY.code, // p0005
+                    extend: {
+                        userId: config.userId,
+                        nickName: user.nickname,
+                        headimgurl: user.headimgurl,
+                        gameName: config.gameName,
+                        gameId: config.gameId,
+                        bigWin: result.winItem.finVal
+                    }
+                }]
+                http_bc.sendNoticeMsg(noticeMsg);
+                log.info(config.userId + '中奖大于配置，侧边栏展示')
+            }
+        });
     }catch (e){
-        log.err('发送中奖信息到通知服' + e)
+        log.err('击中奖池跑马灯到通知服' + e)
     }
+}
 
+exports.analyseResultBuild = function (currFreeCount, currGoldCoin, dictAnalyseResult){
     if (currFreeCount) {
         dictAnalyseResult["is_free"] = true;
     } else {

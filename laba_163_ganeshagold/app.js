@@ -193,7 +193,7 @@ io.on('connection', function (socket) {
     //下注
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
-        const nBetSum = parseInt(data.nBetList[0]);
+        const nBetSum = Number(data.nBetList[0]);
         // 执行摇奖
         Lottery.doLottery(socket, nBetSum, gameInfo);
     });

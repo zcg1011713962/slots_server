@@ -1,8 +1,9 @@
-var mysql = require('mysql2');
-var async = require('async');
-var mysql_config = require("./../../util/config/mysql_config");
+const mysql = require('mysql2');
+const async = require('async');
+const mysql_config = require("./../../util/config/mysql_config");
+const {getInstand: log} = require("../../CClass/class/loginfo");
 
-var pool = mysql.createPool({
+const pool = mysql.createPool({
     connectionLimit: 10000,
     host: mysql_config.host,
     user: mysql_config.user,
@@ -136,11 +137,11 @@ exports.reduceFreeCount = function (gameId, userId, callback) {
 
 //摇奖记录
 exports.lotteryLog = function lotteryLog(gameId, userInfo, callback) {
-    var sql = `INSERT INTO lotterylog_${gameId}(userid,bet,line_s,score_before,score_linescore,score_win,score_current,free_count_before,free_count_win,free_count_current,result_array,mark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`;
-    var values = [];
+    const sql = `INSERT INTO lotterylog_${gameId}(userid,bet,line_s,score_before,score_linescore,score_win,score_current,free_count_before,free_count_win,free_count_current,result_array,mark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const values = [];
 
     pool.getConnection(function (err, connection) {
-        for (var i = 0; i < userInfo.length; i++) {
+        for (let i = 0; i < userInfo.length; i++) {
             values.push(userInfo[i].userid);
             values.push(userInfo[i].bet);
             values.push(userInfo[i].lines);
@@ -153,25 +154,23 @@ exports.lotteryLog = function lotteryLog(gameId, userInfo, callback) {
             values.push(userInfo[i].free_count_current);
             values.push(userInfo[i].result_array);
 
-            if (userInfo[i].free_count_before > 0 && userInfo[i].score_win == 0) {
+            if (userInfo[i].free_count_before > 0 && userInfo[i].score_win === 0) {
                 values.push(1);
             } else {
                 values.push(0);
             }
-
+        }
+        try{
             connection.query({sql: sql, values: values}, function (err, rows) {
                 if (err) {
-                    console.log("lotteryLog");
-                    console.log(err);
+                    log.err("lotteryLog");
+                    log.err(err);
                 }
+                connection.release();
             });
-            values = [];
+        }catch (e){
+            log.err(e);
         }
-
-
-        connection.release();
-        values = [];
-
     });
 
 };
@@ -255,7 +254,7 @@ exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGambli
 
     pool.getConnection(function (err, connection) {
         const values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
-        console.log("库存 id");
+        console.log("用户库存 系统库存 游戏ID");
         console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {
@@ -267,6 +266,173 @@ exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGambli
 
     });
 };
+
+
+
+// 插入图案组合
+exports.insertBatchCards = function (batchData, gameId) {
+    return new Promise((resolve, reject) => {
+        const sql = 'INSERT INTO cards_' + gameId + ' (card, mul, free, jackpot, openBox) VALUES ?';
+        const values = batchData.map(item => [JSON.stringify(item.nHandCards), item.mul, item.free, item.jackpot, item.openBox]);
+        pool.getConnection(function (err, connection) {
+            if(err){
+                log.err('插入图案组合' + err);
+                reject(err);
+                return;
+            }
+            connection.query({sql: sql, values: [values]}, function (err, rows) {
+                connection.release();
+                if (err) {
+                    log.err("插入图案组合" + err);
+                }
+                resolve(1);
+            })
+        });
+    })
+}
+
+
+exports.searchCardsGroupByMul = function (gameId, callback) {
+    const sql = 'SELECT mul,GROUP_CONCAT(card SEPARATOR \'|\') AS cards FROM cards_' + gameId + ' GROUP BY mul';
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询图案组合' + err);
+            return;
+        }
+        connection.query({sql: sql, values: []}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("查询图案组合" + err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
+}
+
+
+exports.handCardsMuls = function (gameId, callback) {
+    const sql = 'select DISTINCT mul from la_ba.cards_'+ gameId;
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('handCardsMuls' + err);
+            return;
+        }
+        connection.query({sql: sql, values: []}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("handCardsMuls" + err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+        })
+    });
+}
+
+exports.minMulCards = function (gameId, callback) {
+    pool.getConnection(function (err, connection) {
+        // 第一次查询，获取满足条件的最小 mul 值
+        connection.query('SELECT MIN(mul) AS min_mul FROM la_ba.cards_'+ gameId +' WHERE `free` = 0 AND jackpot = 0 AND openBox = 0', function (error, results, fields) {
+            if (error) {
+                connection.release();
+                callback(0);
+                return;
+            }
+            // 提取最小 mul 值
+            const minMul = results[0].min_mul;
+            // 第二次查询，根据最小 mul 值获取对应的记录
+            connection.query('SELECT * FROM la_ba.cards_'+ gameId +' WHERE `free` = 0 AND jackpot = 0 AND openBox = 0 AND mul = ?', [minMul], function (error, results, fields) {
+                connection.release();
+                if (error) {
+                    callback(0);
+                    return;
+                }
+                // 处理结果
+                callback(results);
+            });
+        });
+    })
+}
+
+
+
+exports.handCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot, callback) {
+    const sql = 'select card from  la_ba.cards_'+ gameId +' where mul in (?) and `free` = ? and jackpot = ? and openBox = ?';
+
+    let valuse = [];
+    valuse.push(muls)
+    valuse.push(hitFree ? 1 : 0)
+    valuse.push(winJackpot > 0 ? 1 : 0)
+    valuse.push(hitBonus ? 1 : 0)
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('handCardsByMuls' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: valuse}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("handCardsByMuls" + err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    callback(0);
+                }
+            }
+            valuse = [];
+        })
+    });
+}
+
+
+
+exports.syncHandCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot) {
+    return new Promise((resolve, reject) => {
+        const sql = 'select card from  la_ba.cards_' + gameId + ' where mul in (?) and `free` = ? and jackpot = ? and openBox = ?';
+
+        let valuse = [];
+        valuse.push(muls)
+        valuse.push(hitFree ? 1 : 0)
+        valuse.push(winJackpot > 0 ? 1 : 0)
+        valuse.push(hitBonus ? 1 : 0)
+
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                log.err('handCardsByMuls' + err);
+                reject(0);
+                return;
+            }
+            connection.query({sql: sql, values: valuse}, function (err, rows) {
+                connection.release();
+                if (err) {
+                    log.err("handCardsByMuls" + err);
+                    reject(0);
+                } else {
+                    if (rows && rows.length > 0) {
+                        resolve(rows);
+                    } else {
+                        resolve(0);
+                    }
+                }
+                valuse = [];
+            })
+        });
+    })
+}
 
 
 

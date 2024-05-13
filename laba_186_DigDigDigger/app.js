@@ -8,17 +8,18 @@ const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
-const Config = require('./config/read_config').getInstand;
 const CacheUtil = require('../util/cache_util');
+const SampleUtil = require("../util/sample_util");
 
 const Csocket = Cio(Urls.hall_url);
+
 Csocket.on('disconnect', function (data) {
     console.log("登录服务器被断开")
 });
 
 Csocket.on('connected', function (msg) {
     console.log("与登录服务器进行连接......");
-    const info = {
+    var info = {
         serverName: "拉霸游戏_" + (gameConfig.gameId) + "_" + gameConfig.gameName,
         serverId: gameConfig.serverId,
         signCode: "slel3@lsl334xx,deka"
@@ -32,12 +33,11 @@ Csocket.on('GameServerConnectResult', function (msg) {
     }
 });
 
-
 Csocket.on('LoginGameResult', function (msg) {
     if (!msg) {
         return;
     }
-    console.log(".登录" + gameConfig.gameName + "服务器回应" + JSON.stringify(msg));
+    log.info(gameConfig.gameName + "登录大厅回应" + JSON.stringify(msg));
     if (msg.ResultCode) {
         gameInfo.updateUser(msg.userInfo);
     } else {
@@ -46,32 +46,21 @@ Csocket.on('LoginGameResult', function (msg) {
 
 });
 
-Csocket.on('addgold', function (msg) {
+Csocket.on('gameForward', function (msg) {
     if (!msg) {
         return;
     }
-    //console.log(msg);
-    var result = gameInfo.addgold(msg.userid, msg.addgold);
-    Csocket.emit('addgoldResult', {Result: result});
-
-    //当前用户桌子广播
-    var User = gameInfo.getUser(msg.userid);
-    if (User) {
-        var tablestring = "table" + User.getTable();
-        io.sockets.in(tablestring).emit('userGoldUpdate', {userId: msg.userid, updateSocre: User.getScore()});
-    }
-});
-
-Csocket.on('getgold', function (msg) {
-    if (!msg) {
-        return;
+    const protocol = msg.protocol;
+    const data = msg.data;
+    const userId = msg.userId;
+    if(gameInfo.userList[userId]){
+        gameInfo.userList[userId]._socket.emit(protocol, data);
+    }else{
+        log.info('gameForward' + userId + '用户不在游戏内')
     }
 
-    //console.log(msg);
-    var score = gameInfo.getPlayerScore(msg.userid);
-    Csocket.emit('getgoldResult', {Result: 1, score: score});
-
 });
+
 
 Csocket.on('disconnectUser', function (msg) {
     //console.log("disconnectUser" + msg.userId);
@@ -83,13 +72,6 @@ Csocket.on('disconnectUser', function (msg) {
         var result = {ResultCode: 0, userId: msg.userId};
         Csocket.emit("userDisconnect", result);
     }
-});
-
-
-Csocket.on('applyMatchResult', function (_info) {
-    //console.log(_info);
-    gameInfo.addRankUserList(_info);
-    //gameInfo.fishShoot(socket,fishShootInfo);
 });
 
 
@@ -118,33 +100,36 @@ io.on('connection', function (socket) {
     //客户登录游戏
     socket.on('LoginGame', function (userInfo) {
         try {
-            userInfo = JSON.parse(userInfo);
+            var data = JSON.parse(userInfo);
+            userInfo = data;
         } catch (e) {
             log.warn('LoginGame-json');
         }
-
         if (!userInfo) {
             console.log("登录游戏,参数不正确!");
             return;
         }
 
         if (userInfo.sign) {
-            if (!gameInfo.getUser(userInfo.userid)) {
-                gameInfo.addUser(userInfo, socket);
-                const msg = {
-                    userid: userInfo.userid,
-                    sign: userInfo.sign,
-                    gameId: gameInfo.serverId,
-                    serverSign: signCode,
-                    serverId: gameConfig.serverId
-                };
-                Csocket.emit('LoginGame', msg);
-            } else {
-                console.log("用户已经在服务器了，无需重复登录");
+            const user = gameInfo.getUser(userInfo.userid);
+            if (user) {
+                log.info("用户已经在服务器了，覆盖登录,原socket:" + user._socket.id + '现socket：' + socket.id);
             }
-        }
 
-    });
+            const msg = {
+                userid: userInfo.userid,
+                sign: userInfo.sign,
+                gameId: gameInfo.serverId,
+                serverSign: signCode,
+                serverId: gameConfig.serverId
+            };
+
+            gameInfo.addUser(userInfo, socket);
+            log.info(userInfo.userid + '用户登录游戏服务，游戏请求大厅服务,当前游戏人数:' + gameInfo.getOnlinePlayerCount() + '游戏socket' + Csocket)
+            // 发送给大厅
+            Csocket.emit('LoginGame', msg);
+        }
+    })
 
     //然后再登录房间
     socket.on('LoginRoom', function (RoomInfo) {
@@ -171,15 +156,24 @@ io.on('connection', function (socket) {
         gameInfo.LoginfreeCount(socket.userId, socket);
     });
 
+    // 获取游戏内金币
+    socket.on('getGold', function () {
+        CacheUtil.getGoldCoin(socket.userId).then(coin =>{
+            socket.emit('getGoldResult', {code: 1, data: {gold: coin}})
+        });
+    });
+
+    //登录游戏获取免费游戏次数
+    socket.on('history', function () {
+        gameInfo.getHistory(socket.userId, socket);
+    });
 
     //下注
     socket.on('lottery', function (lottery) {
         const data = JSON.parse(lottery);
-        const nBetSum = parseInt(data.nBetList[0]);
-        // 游戏奖池划分
-        const jackpot_ratio = Config.jackpot_ratio;
+        const nBetSum = Number(data.nBetList[0]);
         // 执行摇奖
-        Lottery.doLottery(socket, nBetSum, jackpot_ratio, gameInfo);
+        Lottery.doLottery(socket, nBetSum, gameInfo);
     });
 
 
@@ -189,22 +183,18 @@ io.on('connection', function (socket) {
             return;
         }
         //通知登录服务器，已经下线存储游戏数据
-        //console.log(socket.userId)
         var userInfo = gameInfo.getUser(socket.userId);
         if (userInfo) {
             if (userInfo.Islogin()) {
                 gameInfo.deleteUser(socket);
-                var result = {
+                const result = {
                     ResultCode: 1,
                     userId: userInfo._userId,
                     userScore: userInfo._score,
                     gameId: gameConfig.serverId,
                     nolog: true
                 };
-                log.info('用户离开游戏,移除用户'+ socket.userId)
                 Csocket.emit("userDisconnect", result);
-                //断线存储相应数据(在新的数据库里存储,消耗子弹与收获金币)
-                socket.userId = null;
             } else {
                 userInfo._isLeave = true;
                 log.warn('未更新用户数据离开');
@@ -213,17 +203,14 @@ io.on('connection', function (socket) {
             console.log("用户未登录离开!")
         }
     })
-
-
 });
-
 
 app.set('port', process.env.PORT || gameConfig.port);
-
-var server = http.listen(app.get('port'), function () {
-    console.log('start at port:' + server.address().port);
+const server = http.listen(app.get('port'), function () {
+    log.info('start at port:' + server.address().port);
 });
 
 
-console.log("拉霸_" + (gameConfig.gameId + 1 - 100) + "_" + gameConfig.gameName + "服务器启动");
+log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
+/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/

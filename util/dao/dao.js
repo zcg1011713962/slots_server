@@ -1009,7 +1009,7 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
 
 // 查询未支付的指定订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -1041,9 +1041,43 @@ exports.searchOrder = function searchOrder(userId, orderId, callback) {
 
 
 
+// 查询已经支付的指定订单
+exports.searchPayOrder = function (userId, orderId, callback) {
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
+    let values = [];
+    values.push(orderId);
+    values.push(userId);
+    values.push(TypeEnum.OrderStatus.payedNotify);
+    values.push(TypeEnum.OrderStatus.payedUnNotify);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("查询已经支付的指定订单");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+
 // 查询所有未支付订单
 exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType FROM pay_order where status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where status = ? or status = ?';
     let values = [];
     values.push(TypeEnum.OrderStatus.create);
     values.push(TypeEnum.OrderStatus.paying);
@@ -1075,13 +1109,11 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
 
 // 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, productId, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
     let values = [];
     values.push(userId);
     values.push(payStatus[0]);
     values.push(payStatus[1]);
-
-
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -1172,6 +1204,97 @@ exports.betRecord = function (userId,gameId,gameName,betSum,promoteWithdrawLimit
     });
 };
 
+
+// 解锁提现页
+exports.unLockWithdrawPage = function (userId, callback) {
+    const sql = 'update userinfo set withdrawPageUnLock = 1  where  userId = ?';
+    let values = [];
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("解锁提现页");
+                console.log(err);
+                callback(0);
+            } else {
+                if (rows) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+// 查询提现页是否解锁
+exports.searchWithdrawPageStatus = function (userId, callback) {
+    const sql = 'select withdrawPageUnLock from userinfo where  userId = ?';
+    let values = [];
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("查询提现页是否解锁");
+                log.err(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(rows[0].withdrawPageUnLock);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+exports.searchFirstRechargeGoodsEndTime = function (userId, day,  callback) {
+    pool.getConnection(function (err, connection) {
+        // 先查询 userId 是否存在
+        connection.query('SELECT firstRechargeGoodsEndTime FROM userinfo WHERE userId = ?', [userId], function (error, results, fields) {
+            if (error) {
+                callback(0)
+                connection.release();
+                return;
+            }
+            // 如果 userId 存在，则更新数据
+            if (results.length > 0 && results[0].firstRechargeGoodsEndTime) {
+                callback(results[0].firstRechargeGoodsEndTime)
+            } else {
+                const currTime = new Date().getTime();
+                const endTime = currTime + day * 24 * 60 * 60 * 1000;
+                // 如果 userId 不存在，则插入新数据
+                connection.query('update userinfo set firstRechargeGoodsEndTime = ? where userId = ?', [endTime, userId], function (error, results, fields) {
+                    connection.release();
+                    if (error) {
+                        callback(0)
+                        return;
+                    }
+                    callback(endTime)
+                });
+            }
+        });
+    });
+}
+
 // 更新订单
 exports.updateOrder = function updateOrder(userId, orderId, payStatus, callback) {
     const sql = 'update pay_order set `status` = ?  where orderId = ? and userId = ?';
@@ -1233,7 +1356,7 @@ exports.getVipLevel = function getVipLevel(userId, callback) {
 };
 
 //查询累计充值
-exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
+exports.checkTotalCharge = function (userId, callback) {
     const sql = 'select totalRecharge,submittedRecharge subRecharge,housecard,score_flow from newuseraccounts where Id=?';
     let values = [];
     values.push(userId);
@@ -1261,7 +1384,7 @@ exports.checkTotalCharge = function checkTotalCharge(userId, callback) {
 };
 
 // 查询提现额度
-exports.searchWithdrawLimit = function searchWithdrawLimit(userId, callback) {
+exports.searchWithdrawLimit = function (userId, callback) {
     const sql = 'select withdrawLimit from userinfo_imp where userId = ?';
     let values = [];
 
@@ -1290,6 +1413,66 @@ exports.searchWithdrawLimit = function searchWithdrawLimit(userId, callback) {
     });
 };
 
+// 查询银币数量
+exports.searchSilverCoin = function (userId, callback) {
+    const sql = 'select silverCoin from userinfo_imp where userId = ?';
+    let values = [];
+
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("查询银币数量");
+                log.err(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(1, rows[0]);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 减少银币
+exports.reduceSilverCoin = function (userId, silverCoin, callback) {
+    const sql = 'update userinfo_imp set silverCoin = silverCoin - ? where userId = ?';
+    let values = [];
+    values.push(silverCoin);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("减少银币");
+                log.err(err);
+                callback(0);
+            } else {
+                if (rows && rows.length > 0) {
+                    callback(1);
+                } else {
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+};
 
 //修改累计充值
 exports.updateTotalCharge = function updateTotalCharge(userId, amount, callback) {
@@ -1445,7 +1628,7 @@ exports.searchBankTransferOutRecord = function searchBankTransferOutRecord(userI
 
 
 // 更新VIP积分
-exports.updateVipScore = function updateVipScore(userId, vipScore, callback) {
+exports.updateVipScore = function (userId, vipScore, callback) {
     const sql = 'update newuseraccounts set vip_score = ? where Id=?';
     let values = [];
 
@@ -1469,7 +1652,36 @@ exports.updateVipScore = function updateVipScore(userId, vipScore, callback) {
         });
         values = [];
     });
-};
+}
+
+
+
+// 增加VIP积分
+exports.addVipScore = function (userId, vipScore, callback) {
+    const sql = 'update newuseraccounts set vip_score = vip_score + ? where Id=?';
+    let values = [];
+
+    values.push(vipScore);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("增加VIP积分");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+}
 
 // 增加提现额度
 exports.addWithdrawLimit = function addWithdrawLimit(userId, withdrawLimit, callback) {
@@ -2637,34 +2849,38 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
 
 // 保存打点基础数据
 exports.saveDot = function (userId, adid, gps, apptoken, callback) {
-    const sql = "INSERT INTO dot_base_data (userId, adid, gps, apptoken) VALUES(?, ?, ?, ?)";
-    let values = [];
-    values.push(userId);
-    values.push(adid);
-    values.push(gps);
-    values.push(apptoken);
-
-
     pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('saveDot' + err);
-                callback(0);
+        // 先查询 userId 是否存在
+        connection.query('SELECT userId FROM dot_base_data WHERE userId = ?', [userId], function (error, results, fields) {
+            if (error) {
+                callback(0)
+                connection.release();
+                return;
+            }
+            // 如果 userId 存在，则更新数据
+            if (results.length > 0) {
+                connection.query('UPDATE dot_base_data SET adid = ?, gps = ?, apptoken = ? WHERE userId = ?', [adid, gps, apptoken, userId], function (error, results, fields) {
+                    connection.release();
+                    if (error) {
+                        callback(0)
+                        return;
+                    }
+                    log.info('userId 存在打点数据，更新成功')
+                    callback(1)
+                });
             } else {
-                if(rows){
-                    callback(1);
-                }else{
-                    callback(0);
-                }
+                // 如果 userId 不存在，则插入新数据
+                connection.query('INSERT INTO dot_base_data (userId, adid, gps, apptoken) VALUES (?, ?, ?, ?)', [userId, adid, gps, apptoken], function (error, results, fields) {
+                    connection.release();
+                    if (error) {
+                        callback(0)
+                        return;
+                    }
+                    log.info('userId 不存在打点数据，插入成功')
+                    callback(1)
+                });
             }
         });
-        values = [];
     });
 }
 
@@ -2982,7 +3198,7 @@ exports.searchCoinRank = function (callback) {
 
 // 充值排行
 exports.searchRechargeRank = function (callback) {
-    const sql = "select Id userId, nickname , headimgurl , totalRecharge  from gameaccount.newuseraccounts order by totalRecharge desc";
+    const sql = "select Id userId, nickname,headimgurl, totalRecharge  from newuseraccounts order by totalRecharge desc";
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
@@ -3010,28 +3226,39 @@ exports.searchRechargeRank = function (callback) {
 
 // 大赢家排行
 exports.searchBigWinToday = function (callback) {
-    const sql = "select u.userid ,ut.nickname ,ut.headimgurl , u.score_change winCoin FROM score_changelog u left JOIN newuseraccounts ut ON u.userId = ut.Id  WHERE u.change_type = 10 and DATE(u.change_time) = CURRENT_DATE order by u.score_change desc; \n";
     pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('查大赢家排行' + err);
-                callback(0);
-            } else {
-                if(rows && rows.length > 0){
-                    callback(rows);
-                }else{
-                    callback(0);
-                }
+        // 查询用户信息
+        connection.query('SELECT Id AS userId, nickname, headimgurl FROM newuseraccounts', function (error, users, fields) {
+            if (error){
+                callback(0)
+                connection.release();
+                return;
             }
+            // 查询最新的得分变化信息
+            connection.query('SELECT userid, COALESCE(MAX(score_change), 0) AS winCoin FROM score_changelog WHERE change_type = 10 AND DATE(change_time) = CURRENT_DATE GROUP BY userid', function (error, scores, fields) {
+                connection.release();
+                if (error) {
+                    callback(0)
+                    return;
+                }
+                // 将用户信息和最新的得分变化信息合并
+                const userScores = users.map(user => {
+                    const score = scores.find(score => score.userid === user.userId);
+                    return {
+                        userId: user.userId,
+                        nickname: user.nickname,
+                        headimgurl: user.headimgurl,
+                        winCoin: score ? score.winCoin : 0
+                    };
+                });
+                // 对合并后的结果进行排序
+                userScores.sort((a, b) => b.winCoin - a.winCoin);
+                callback(userScores);
+            });
         });
-        values = [];
-    });
+    })
+
+
 }
 
 // 更新新手指引步数
@@ -3315,6 +3542,39 @@ exports.ReduceUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback)
     });
 }
 
+// 提现失败记录
+exports.withdrawFailedRecord = function (userId, glodCoin, callback) {
+    const sql = "INSERT INTO gameaccount.withdraw_failed (userId, goldVal) values (?,?)";
+    let values = [];
+    values.push(userId);
+    values.push(glodCoin);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('withdrawFailedRecord' + err);
+                callback(0)
+                return;
+            }
+            if(rows){
+                const newUserId = rows.insertId;
+                callback(newUserId)
+            }else{
+                callback(0)
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+
 // 查询已使用提现额度
 exports.searchUsedWithdrawLimit = function (userId, callback) {
     const sql = "select usedWithdrawLimit from userinfo_imp where userId = ?";
@@ -3400,7 +3660,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
     });
 };
 
-//查询转账邮件记录
+//查询邮件记录
 exports.selectEmail = function selectEmail(types, userId, callback) {
     const sql = "call GetEmail(?,?)";
     let values = [];
@@ -3416,7 +3676,7 @@ exports.selectEmail = function selectEmail(types, userId, callback) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
-                log.err('查询转账邮件记录' + err);
+                log.err('查询邮件记录' + err);
             } else {
                 if (rows && rows.length > 0) {
                     callback(1, rows[0]);
@@ -3432,7 +3692,7 @@ exports.selectEmail = function selectEmail(types, userId, callback) {
 
 // 查询邮件类型
 exports.selectEmailTypes = function selectEmailTypes(userId, callback) {
-    const sql = "select `type` from email where to_userid = ? ";
+    const sql = "select DISTINCT `type` from email where to_userid = ? ";
     let values = [];
     values.push(userId);
 
@@ -3448,7 +3708,7 @@ exports.selectEmailTypes = function selectEmailTypes(userId, callback) {
                 log.err('查询邮件类型' + err);
             } else {
                 if (rows && rows.length > 0) {
-                    const types = rows.map(obj => obj.type).join(',');
+                    const types = rows.map(obj => Number(obj.type)).join(',');
                     callback(1, types);
                 } else {
                     callback(0);
@@ -3486,12 +3746,11 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
 };
 
 // 设置邮件为已读
-exports.setEmailisAlllReadByUserId = function setEmailisAlllReadByUserId(userId, callback) {
+exports.setEmailisAlllReadByUserId = function (userId, callback) {
     const sql = "update email set isRead = 1 where to_userid = ?";
     let values = [];
 
     values.push(userId);
-
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
@@ -3539,7 +3798,7 @@ exports.delEmailById = function delEmailById(id, callback) {
 };
 
 // 查询是否有未读邮件
-exports.searchUnReadEmail = function searchUnReadEmail(userId, callback) {
+exports.searchUnReadEmail = function (userId, callback) {
     const sql = "select * from email where isRead = 0 and to_userid = ?";
     let values = [];
     values.push(userId);
@@ -3566,7 +3825,213 @@ exports.searchUnReadEmail = function searchUnReadEmail(userId, callback) {
         });
         values = [];
     });
-};
+}
+
+
+
+// 查询邮件
+exports.searchUserEmailById = function (id, userId, callback) {
+    const sql = "select * from email where id = ? and to_userid = ?";
+    let values = [];
+    values.push(id);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询邮件' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询邮件' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+
+        });
+        values = [];
+    });
+}
+
+
+// 查询排行榜奖励类型邮件
+exports.searchEmailFirstRechargeAward = function (otherId, callback) {
+    const sql = "select  r.rewardGoldVal, r.rewardDiamondVal from email e left join first_recharge_award  r on e.otherId = r.id where e.otherId = ?";
+    let values = [];
+    values.push(otherId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询排行榜奖励类型邮件' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询排行榜奖励类型邮件' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+
+        });
+        values = [];
+    });
+}
+
+
+
+// 更新排行榜奖励领取状态
+exports.updateEmailRankAwardStatus = function (ids, callback) {
+    const sql = "update rank_award set status = 1 where id in (?) ";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('更新排行榜奖励领取状态' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: [ids]}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('更新排行榜奖励领取状态' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+    });
+}
+
+
+// 更新首充奖励奖励领取状态
+exports.updateFirstRechargeAwardStatus = function (ids, callback) {
+    const sql = "update first_recharge_award set status = 1 where id in (?) ";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('updateFirstRechargeAwardStatus' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: [ids]}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('updateFirstRechargeAwardStatus' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+    });
+}
+
+
+
+exports.selectEmailRankAwardByUser = function (userId, callback) {
+    const sql = "select * from rank_award where status = 0 and userId = ? ";
+    let values = [];
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('selectEmailRankAwardByUser' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('selectEmailRankAwardByUser' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+exports.updateEmailRankAwardStatusByUser = function (userId, type, callback) {
+    const sql = "update rank_award set status = 1 where type = ? and userId = ? ";
+    let values = [];
+    values.push(type);
+    values.push(userId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('updateEmailRankAwardStatusByUser' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('updateEmailRankAwardStatusByUser' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+// 查询首充持续奖励类型邮件
+exports.searchEmailRankAward = function (otherId, callback) {
+    const sql = "select r.`type` rankType ,r.val rewardGoldVal, r.status  from email e left join rank_award r on e.otherId = r.id where e.otherId = ?";
+    let values = [];
+    values.push(otherId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询首充持续奖励类型邮件' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询首充持续奖励类型邮件' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+
+        });
+        values = [];
+    });
+}
 
 // 删除全部已读邮件
 exports.delEmailisAlllReadByUserId = function delEmailisAlllReadByUserId(userId, callback) {
@@ -4117,3 +4582,134 @@ exports.bathchSearchUserInfo = function bathchSearchUserInfo(userIds, callback) 
         });
     });
 };
+
+
+
+//排行榜奖励记录
+exports.rankAwardRecord = function (userId, type, goodsType, val, rank_start_time, rank_end_time, rank, callback) {
+    const sql = 'INSERT INTO rank_award (userId, `type`, goods_type, val, rank_start_time, rank_end_time, rank) VALUES(?, ?, ?, ?, ?, ?, ?)';
+    let values = [];
+
+    values.push(userId);
+    values.push(type);
+    values.push(goodsType);
+    values.push(val);
+    values.push(new Date(rank_start_time));
+    values.push(new Date(rank_end_time));
+    values.push(rank);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("排行榜奖励记录" + err);
+                callback(0);
+            } else {
+                const newUserId = rows.insertId;
+                callback(newUserId);
+            }
+        })
+        values = [];
+    });
+}
+
+
+
+//首充持续奖励记录
+exports.firstRechargeAwardRecord = function (userId, rewardGoldVal, rewardDiamondVal, rewardDateTimestamp, callback) {
+    const sql = 'INSERT INTO first_recharge_award (userId, rewardGoldVal, rewardDiamondVal, rewardDate) VALUES(?, ?, ?, ?)';
+    let values = [];
+
+    values.push(userId);
+    values.push(rewardGoldVal);
+    values.push(rewardDiamondVal);
+    values.push(new Date(rewardDateTimestamp));
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("首充持续奖励记录" + err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        })
+        values = [];
+    });
+}
+
+
+
+// 查询当日应发的首充持续奖励
+exports.searchfirstRechargeAwardRecord = function (callback) {
+    const sql = 'select * from gameaccount.`first_recharge_award` where rewardDate = ? and status = 0';
+    let values = [];
+    const currentDate = new Date();
+    const currentDateTimestamp = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+    values.push(new Date(currentDateTimestamp));
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("查询当日应发的首充持续奖励" + err);
+                callback(0);
+            } else {
+               if(rows && rows.length > 0){
+                   callback(rows);
+               }else{
+                   callback(0);
+               }
+            }
+        })
+        values = [];
+    });
+}
+
+
+exports.searchfirstRechargeAwardRecordByUser = function (userId, callback) {
+    const sql = 'select * from gameaccount.`first_recharge_award` where userId = ? and status = 0 and rewardDate < ?';
+    let values = [];
+    values.push(userId);
+    values.push(new Date().getTime());
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("searchfirstRechargeAwardRecordByUser" + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        })
+        values = [];
+    });
+}
+
+

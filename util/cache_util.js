@@ -36,6 +36,8 @@ const userSocketProtocolExpireSecond = 30; // 用户协议过期时间
 const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
 const emailCodeLongExpireSecond = 800; // 过期校验过期时间
 
+const notifyMsgKey = 'notifyMsg';
+
 const gameConfig = {
     gameConfigKey: 'gameConfig',
     handCardsKey: 'handCards',
@@ -66,6 +68,9 @@ const hallConfig = {
     black_white_list_config: 'black_white_list_config',
     bank_transfer_config: 'bank_transfer_config',
     shop_config: 'shop_config',
+    first_recharge_config: 'first_recharge_config',
+    month_card_config: 'month_card_config',
+    exchange_config: 'exchange_config',
     lucky_coin_config: 'lucky_coin_config',
     sign_in_config: 'sign_in_config',
     invite_download_config: 'invite_download_config',
@@ -257,6 +262,34 @@ exports.getShopConfig = async function(){
     }
     catch(e){
         log.err('getShopConfig');
+    }
+}
+
+exports.getExchangeConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.exchange_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getExchangeConfig');
+    }
+}
+
+
+exports.getFirstRechargeConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.first_recharge_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getFirstRechargeConfig');
+    }
+}
+
+exports.getMonthCardConfig = async function(){
+    try{
+        return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.month_card_config).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getFirstRechargeConfig');
     }
 }
 
@@ -509,7 +542,7 @@ exports.getPlayGameBetRecord  = function (userId){
 exports.getPlayGameWinscore  = function getPlayGameWinscore(userId){
     return RedisUtil.hget(userPlayGameWinScore, userId).then(winscore =>{
         if(winscore){
-            return winscore;
+            return Number(winscore);
         }
         return 0;
     });
@@ -698,10 +731,11 @@ exports.setUserInfo = function(userId, userInfo){
         userId: userInfo.Id,
         account : userInfo.Account,
         nickname : userInfo.nickname,
+        headimgurl: userInfo.headimgurl,
         score : userInfo.score,
         diamond : userInfo.diamond,
         sign: userInfo.sign,
-        newHandFlag: userInfo.newHandFlag,
+        newHandFlag: userInfo.newHandFlag
     }
     return RedisUtil.client.hmset(`${userInfoKey}:${userId}`, obj)
 }
@@ -1008,25 +1042,6 @@ exports.getUserDiscountLimited  = function (userId){
 }
 
 
-
-// 设置购买首充持续奖励
-exports.setFirstRechargeContinueReward  = function (userId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, lastGetTime){
-    const obj = {
-        buyContinueRewardGold: buyContinueRewardGold,
-        buyContinueRewardDiamond: buyContinueRewardDiamond,
-        buyContinueDays: buyContinueDays,
-        lastGetTime: lastGetTime
-    }
-    return RedisUtil.hmset(firstRechargeContinueRewardKey, userId, JSON.stringify(obj));
-}
-
-
-// 获取购买首充持续奖励
-exports.getFirstRechargeContinueReward  = function (userId){
-    return RedisUtil.hget(firstRechargeContinueRewardKey, userId);
-}
-
-
 // 购买回调开关
 exports.buyCallBackSwitch = function(){
     return RedisUtil.get(buyCallBackSwitchKey).then(code =>{
@@ -1139,6 +1154,14 @@ exports.getHandCardsByMuls = function(gameId, muls){
     })
 }
 
+function getRandomSubarray(array, size) {
+    // 洗牌算法，打乱数组元素顺序
+    const shuffled = array.slice().sort(() => 0.5 - Math.random());
+
+    // 获取前 size 个元素作为结果
+    return shuffled.slice(0, size);
+}
+
 // 通过多个倍数获取多个图案组合
 exports.getHandCardsByMuls = function(gameId, muls){
     return RedisUtil.hget(gameConfig.gameConfigKey, gameConfig.handCardsKey + gameId).then(jsonString =>{
@@ -1216,12 +1239,41 @@ exports.updateNewHandFlag = function(userId, newHandFlag){
 exports.getNewHandFlag = function(userId){
     return RedisUtil.hget(`${userInfoKey}:${userId}`, 'newHandFlag');
 }
+// 更新排行榜配置
+exports.updateRankConfig = function(config){
+    return RedisUtil.hmset(hallConfig.hallConfigKey, hallConfig.rank_config, JSON.stringify(config))
+}
 
-
-
-exports.getRankConfig = function(userId){
+// 获取排行榜配置
+exports.getRankConfig = function(){
     return RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.rank_config).then(config => JSON.parse(config))
 }
+
+// 获取排行榜配置
+exports.getRankAwardConfig = function(callback){
+    RedisUtil.hget(hallConfig.hallConfigKey, hallConfig.rank_config).then(config => {
+        const cf = JSON.parse(config);
+        // 排行奖池比例
+        const rankRatio = cf.rankRatio;
+        // 每种排行奖池占比
+        const coinRankWeight = cf.rankRatioWeight.coinRankWeight;
+        const rechargeRankWeight = cf.rankRatioWeight.rechargeRankWeight;
+        const bigWinWeight = cf.rankRatioWeight.bigWinWeight;
+        const totalWeight = StringUtil.addTNumbers(coinRankWeight, rechargeRankWeight, bigWinWeight);
+        // 公用排行前几名奖池占比
+        const rankRatioList = cf.rankRatioList;
+        this.getActivityJackpot(activityJackpot =>{
+            const rankJackpot= StringUtil.rideNumbers(activityJackpot, rankRatio/100, 2)
+            // 每种奖池数量
+            const coinRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(coinRankWeight, totalWeight, 2), 2)
+            const rechargeRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(rechargeRankWeight, totalWeight, 2), 2)
+            const bigWinRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(bigWinWeight, totalWeight, 2), 2)
+            log.info('排行榜配置: 排行榜奖池:'+ rankJackpot+' 金币排行奖池:' + coinRankJackpot + '充值排行奖池:' + rechargeRankJackpot +'大富豪排行奖池:' + bigWinRankJackpot + '前几名奖池占比:' + rankRatioList)
+            callback(coinRankJackpot, rechargeRankJackpot, bigWinRankJackpot, rankRatioList)
+        })
+    })
+}
+
 
 exports.getRankJackpot = function(callback){
     const self = this;
@@ -1253,10 +1305,9 @@ exports.getRankTime = function(callback){
         const rechargeRankStartTime = parseInt(config.rankRatioStartTimes.rechargeRankStartTime);
         const bigWinStartTime = parseInt(config.rankRatioStartTimes.bigWinStartTime);
         // 刷新结束时间戳
-        const coinRankEndTime = coinRankStartTime  + coinRankflushTime * 24 * 60 * 60 * 1000;
-        const rechargeRankEndTime = rechargeRankStartTime + rechargeRankflushTime * 24 * 60 * 60 * 1000;
-        const bigWinEndTime = bigWinStartTime + bigWinflushTime * 24 * 60 * 60 * 1000;
-
+        const coinRankEndTime = coinRankStartTime === -1 ? -1 : coinRankStartTime  + (coinRankflushTime * 24 * 60 * 60 * 1000);
+        const rechargeRankEndTime = rechargeRankStartTime === -1 ? -1 : rechargeRankStartTime + (rechargeRankflushTime * 24 * 60 * 60 * 1000);
+        const bigWinEndTime =  bigWinStartTime === -1 ? -1 : bigWinStartTime + (bigWinflushTime * 24 * 60 * 60 * 1000);
         callback(coinRankStartTime, rechargeRankStartTime, bigWinStartTime, coinRankEndTime, rechargeRankEndTime, bigWinEndTime)
     })
 }
@@ -1264,7 +1315,7 @@ exports.getRankTime = function(callback){
 
 // 订单缓存
 exports.orderCache = function(userId, productId, amount, orderType, v){
-    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    const key = orderCacheKey + userId + '_' + productId + '_'  + StringUtil.toFixed(amount, 2).toString() + '_' + orderType;
     const expireSecond = 10 * 60;
     RedisUtil.set(key, JSON.stringify(v)).then(r =>{
         RedisUtil.expire(key, expireSecond).then(ok =>{})
@@ -1273,7 +1324,7 @@ exports.orderCache = function(userId, productId, amount, orderType, v){
 
 // 订单缓存查询
 exports.searchOrderCache = function(userId, productId, amount, orderType){
-    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    const key = orderCacheKey + userId + '_' + productId + '_'  + StringUtil.toFixed(amount, 2).toString() + '_' + orderType;
     return RedisUtil.get(key).then(v => JSON.parse(v));
 }
 
@@ -1281,6 +1332,20 @@ exports.searchOrderCache = function(userId, productId, amount, orderType){
 
 // 删除订单缓存
 exports.delOrderCache = function(userId, productId, amount, orderType){
-    const key = orderCacheKey + userId + '_' + productId + '_'  +amount + '_' + orderType;
+    const key = orderCacheKey + userId + '_' + productId + '_'  + StringUtil.toFixed(amount, 2).toString() + '_' + orderType;
     return RedisUtil.del(key);
+}
+
+
+// 跑马灯最后20条查询
+exports.getNotifyMsg = function(){
+    return RedisUtil.get(notifyMsgKey).then(v => JSON.parse(v));
+}
+
+
+
+// 跑马灯缓存
+exports.saveNotifyMsg = function(v){
+    RedisUtil.set(notifyMsgKey, JSON.stringify(v)).then(r =>{
+    })
 }

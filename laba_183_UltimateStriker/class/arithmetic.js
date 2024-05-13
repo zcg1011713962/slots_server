@@ -1,4 +1,4 @@
-﻿const gameDao = require("./../dao/gameDao");
+﻿const gameDao = require("../../util/dao/gameDao");
 const redis_laba_win_pool = require("./../../util/redis_laba_win_pool");
 const log = require("../../CClass/class/loginfo").getInstand;
 
@@ -16,14 +16,6 @@ arithmetic = function (_idx) {
     this.nGamblingBigWinLuck = [];
     // 期望RTP
     this.expectRTP = 90;
-
-    //获得实际奖池
-    this.getScorePoolList = function () {
-        return this.score_pool;
-    }
-    this.getScoreId = function () {
-        return betCount;
-    }
 
     this.getGamblingBalanceGold = function () {
         //获取库存 奖池

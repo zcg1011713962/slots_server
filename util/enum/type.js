@@ -9,7 +9,12 @@ const GoodsType = {
     diamond: 1, // 钻石
     prop: 2,    // 道具
     monthCard: 3, // 月卡
-    turntableTicket: 4 // 免费转盘门票
+    turntableTicket: 4, // 免费转盘门票
+    withdrawLimit: 5, // 提现额度
+    turntableTime: 6, // 转盘次数
+    vipScore: 7, // vip点数
+    withdrawTime: 8, // 提现次数
+    mixture: 99 // 混合
 };
 
 
@@ -26,12 +31,16 @@ const CurrencyType = {
 
 const EmailType = {
     transfer_inform: 0,    // 转账通知
-    agent_bind_inform: 1 // 新手绑定通知
+    agent_bind_inform: 1, // 新手绑定通知
+    first_recharge_continue_award: 2, // 首充持续奖励
+    rank_award: 3, // 排行榜奖励
+    withdraw: 4, // 提现申请成功
+    withdrawFailed: 5 // 提现失败被拒
 };
 
 
 const ShopGroupType = {
-    normal: 0, // 正常商品
+    normal: 0, // 普通商品
     rechargeGift: 1 // 首充礼包商品
 };
 
@@ -58,7 +67,10 @@ const notifyType = {
     normal: 0, // 普通消息
     vipUpgrade: 1, // VIP升级
     bankTransfer: 2,// 银行转账
-    vipEnterHall: 3 // VIP进大厅
+    vipEnterHall: 3, // VIP进大厅
+    hitJackpot: 4, // 击中奖池
+    bigWin: 5, // 一把赢的金币大于配置
+    withdraw: 6 // 提现申请成功
 };
 
 const AgentRebateType = {
@@ -117,7 +129,11 @@ const ScoreChangeType = {
     hallGoldIntoBank: 16, // 大厅金币存入银行
     firstRechargeContinueReward: 17,  // 首充持续奖励
     withdrawApply: 18,  // 提现申请扣减
-    withdrawApplyBack: 19  // 提现申请不通过,退回
+    withdrawApplyBack: 19,  // 提现申请不通过,退回
+    coinRankAward: 20,  // 金币排行榜奖励
+    rechargeRankAward: 21,  // 充值排行榜奖励
+    bigWinRankAward: 22,  // 大富豪排行榜奖励
+    withdrawGoodsBuy: 23  // 解锁提现商品
 };
 
 const DiamondChangeType = {
@@ -137,6 +153,9 @@ const ShopType = {
     free_turntable: 1, // 转盘活动
     discount_Limited: 2, // 限时折扣
     firstRecharge: 3, // 首充
+    withdraw_goods: 4, // 解锁提现商品
+    month_card_goods: 5, // 月卡商品
+    exchangeGoods: 6 // 兑换类商品
 };
 
 const NewHandGuideFlow = {
@@ -185,6 +204,12 @@ const dotEnum = {
     recharge_arrive: 'gg48nw' // 充值成功
 }
 
+const RankType = {
+    coin: 0, // 金币排行
+    recharge: 1, // 充值排行
+    bigwin: 2 // 大富豪排行
+};
+
 module.exports = {
     GoodsType,
     CurrencyType,
@@ -209,5 +234,6 @@ module.exports = {
     pushFirstRechargeType,
     LotteryResultCode,
  	OrderStatus,
-    PayType
+    PayType,
+    RankType
 };
