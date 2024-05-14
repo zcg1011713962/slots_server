@@ -34,6 +34,8 @@ exports.initResult  = function (nBetSum) {
             bFlag: false,
             bVal: 0
         },
+        fWildNum: 0, // 大象特殊玩法
+        fWildTotalNum: 0, // 大象特殊玩法
         nMultiple: 0,
         mul: 0,
         nWinCardsDetail: [],

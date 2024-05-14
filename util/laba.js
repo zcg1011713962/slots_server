@@ -1501,7 +1501,7 @@ module.exports.HandCardsAnalyse_Single_Simple = function(nHandCards, cards, nGam
 
 
 };*/
-module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards, freeTimes, nLowerLimit, nColumnNumber, nBet, winJackpot, iconMul, result) {
+module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards, freeTimes, nLowerLimit, nColumnNumber, nBet, winJackpot, iconMul, result, gameId) {
     /*
         列数判断型拉把算法
         :param nHandCards: 手牌
@@ -1667,7 +1667,6 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
                 WinLinesList.push({"win_num": win_num, "win_line": win_line});
                 if (card == nFreeCard) {
                     bIsFree = true;
-                    nFreeNum = 10
                 }
             }
         }
@@ -1690,6 +1689,24 @@ module.exports.AnalyseColumnSolt = function (nHandCards, nMagicCard, nFreeCards,
     result.dictAnalyseResult["win"] = AllWinNum; //# 赢钱总数
     result.dictAnalyseResult["nWinCards"] = AllWinLinesList; //# 总获胜线
     result.dictAnalyseResult["nBetTime"] = now_time; //# 时间戳
+
+    if(gameId === 263){
+        const len = nHandCards.filter(card => card === nFreeCard).length
+        if(len < 3){
+            bIsFree = false;
+            nFreeNum = 0;
+        }else if(len === 3){
+            bIsFree = true;
+            nFreeNum = 12
+        }else if(len === 4){
+            bIsFree = true;
+            nFreeNum = 15
+        }else if(len >= 5){
+            bIsFree = true;
+            nFreeNum = 20
+        }
+    }
+
     result.dictAnalyseResult["getFreeTime"] = {"bFlag": bIsFree, "nFreeTime": nFreeNum};  //# 免费次数
     return result;
 }

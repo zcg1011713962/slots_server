@@ -2916,7 +2916,12 @@ var GameInfo = function () {
             if (serverInfo) {
                 const gameName = serverInfo.GameName;
                 CacheUtil.getGameConfig(gameName, gameId).then(gameConfig => {
-                    callback(gameConfig.betsJackpot);
+                    try{
+                        const betsJackpot = gameConfig.betsJackpot;
+                        callback(betsJackpot);
+                    }catch (e){
+                        callback(0);
+                    }
                 })
             } else {
                 callback(0);

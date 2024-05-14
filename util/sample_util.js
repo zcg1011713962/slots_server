@@ -414,7 +414,7 @@ async function ganeshagold(config) {
             const nHandCards = combinations[item];
             let result = {}
             result.dictAnalyseResult = analyse_result.initResult(30);
-            LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, 0, config.icon_mul, result);
+            LABA.AnalyseColumnSolt(nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, config.nBetSum, 0, config.icon_mul, result, config.gameId);
 
             // 免费牌每列只许出现一张
             let col1 = [nHandCards[0], nHandCards[5], nHandCards[10]];

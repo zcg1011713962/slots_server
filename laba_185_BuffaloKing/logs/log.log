@@ -1,0 +1,657 @@
+2024-05-14T10:17:29.360 [INFO ] default - 拉霸_285_BuffaloKing服务器启动
+2024-05-14T10:17:29.364 [INFO ] default - start at port:15185
+2024-05-14T10:18:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T10:19:25.021 [INFO ] default - 保存库存和奖池
+2024-05-14T10:20:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T10:21:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T10:22:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T10:23:25.016 [INFO ] default - 保存库存和奖池
+2024-05-14T10:24:25.022 [INFO ] default - 保存库存和奖池
+2024-05-14T10:25:25.024 [INFO ] default - 保存库存和奖池
+2024-05-14T10:26:25.027 [INFO ] default - 保存库存和奖池
+2024-05-14T10:27:25.021 [INFO ] default - 保存库存和奖池
+2024-05-14T10:30:15.602 [INFO ] default - 拉霸_285_BuffaloKing服务器启动
+2024-05-14T10:30:15.606 [INFO ] default - start at port:15185
+2024-05-14T10:30:25.018 [INFO ] default - 保存库存和奖池
+2024-05-14T10:31:25.031 [INFO ] default - 保存库存和奖池
+2024-05-14T10:32:25.023 [INFO ] default - 保存库存和奖池
+2024-05-14T10:33:25.022 [INFO ] default - 保存库存和奖池
+2024-05-14T10:34:25.024 [INFO ] default - 保存库存和奖池
+2024-05-14T10:35:25.025 [INFO ] default - 保存库存和奖池
+2024-05-14T10:36:25.022 [INFO ] default - 保存库存和奖池
+2024-05-14T10:37:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T10:38:25.019 [INFO ] default - 保存库存和奖池
+2024-05-14T10:39:25.025 [INFO ] default - 保存库存和奖池
+2024-05-14T10:40:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T10:41:25.025 [INFO ] default - 保存库存和奖池
+2024-05-14T10:42:25.019 [INFO ] default - 保存库存和奖池
+2024-05-14T10:43:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T10:44:25.023 [INFO ] default - 保存库存和奖池
+2024-05-14T10:45:25.029 [INFO ] default - 保存库存和奖池
+2024-05-14T10:46:25.019 [INFO ] default - 保存库存和奖池
+2024-05-14T10:47:25.019 [INFO ] default - 保存库存和奖池
+2024-05-14T10:48:25.021 [INFO ] default - 保存库存和奖池
+2024-05-14T10:49:25.026 [INFO ] default - 保存库存和奖池
+2024-05-14T10:50:25.019 [INFO ] default - 保存库存和奖池
+2024-05-14T10:51:25.022 [INFO ] default - 保存库存和奖池
+2024-05-14T10:52:25.018 [INFO ] default - 保存库存和奖池
+2024-05-14T10:53:25.029 [INFO ] default - 保存库存和奖池
+2024-05-14T10:53:42.764 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T10:54:18.545 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:04:20.187 [INFO ] default - 拉霸_285_BuffaloKing服务器启动
+2024-05-14T11:04:20.192 [INFO ] default - start at port:15185
+2024-05-14T11:04:24.187 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:04:24.193 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:04:24.197 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.56,"grand_jackpot":2.31,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:04:24.226 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:04:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T11:05:14.629 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:05:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T11:06:09.066 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#Jej2XLuIldQATeU9AAAA现socket：/#_C9HUw6YtpCFPpx0AAAB
+2024-05-14T11:06:09.066 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:06:09.070 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:06:09.074 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.56,"grand_jackpot":2.31,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:06:09.084 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:06:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:06:51.243 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:07:00.950 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#_C9HUw6YtpCFPpx0AAAB现socket：/#04TeHBogqgbpqQbiAAAC
+2024-05-14T11:07:00.950 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:07:00.956 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:07:00.961 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.56,"grand_jackpot":2.31,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:07:00.969 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:07:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:07:31.818 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:07:37.989 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#04TeHBogqgbpqQbiAAAC现socket：/#Zz7ME3LezcExKfo1AAAD
+2024-05-14T11:07:37.989 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:07:37.996 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:07:38.001 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.57,"grand_jackpot":2.32,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:07:38.017 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:07:55.227 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:08:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T11:08:27.948 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#Zz7ME3LezcExKfo1AAAD现socket：/#UsGEUT2OB3YO9y6fAAAE
+2024-05-14T11:08:27.950 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:08:27.959 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:08:27.964 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.59,"grand_jackpot":2.33,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:08:27.978 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:08:55.129 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:09:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T11:10:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T11:11:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T11:12:11.884 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#UsGEUT2OB3YO9y6fAAAE现socket：/#i0NLTYgfNtwwrmt9AAAF
+2024-05-14T11:12:11.885 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:12:11.889 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:12:11.894 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.59,"grand_jackpot":2.33,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:12:11.903 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:12:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T11:12:36.403 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:13:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T11:13:34.597 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#i0NLTYgfNtwwrmt9AAAF现socket：/#_Cv5P10VpnJowThEAAAG
+2024-05-14T11:13:34.598 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:13:34.603 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:13:34.606 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.59,"grand_jackpot":2.33,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:13:34.615 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:14:00.465 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:14:11.205 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#_Cv5P10VpnJowThEAAAG现socket：/#VdMx-FqnNxcwsNw2AAAH
+2024-05-14T11:14:11.206 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:14:11.219 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:14:11.233 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.59,"grand_jackpot":2.33,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:14:11.245 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:14:24.739 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:14:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:14:37.339 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#VdMx-FqnNxcwsNw2AAAH现socket：/#FMg1cO_S6euBTVQPAAAI
+2024-05-14T11:14:37.340 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:14:37.344 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:14:37.348 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.59,"grand_jackpot":2.33,"major_jackpot":0.71,"minor_jackpot":0.35,"mini_jackpot":0.17}}}
+2024-05-14T11:14:37.355 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:15:02.854 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:15:08.255 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#FMg1cO_S6euBTVQPAAAI现socket：/#DxThN6fyXVUG1xFgAAAJ
+2024-05-14T11:15:08.255 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:15:08.259 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:15:08.264 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.6,"grand_jackpot":2.34,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:15:08.276 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:15:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T11:15:31.617 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:15:40.859 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#DxThN6fyXVUG1xFgAAAJ现socket：/#ilvROchWFQBLS-nWAAAK
+2024-05-14T11:15:40.860 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:15:40.864 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:15:40.869 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.6,"grand_jackpot":2.34,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:15:40.879 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:16:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T11:17:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T11:18:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T11:19:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T11:19:41.740 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:19:43.546 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#ilvROchWFQBLS-nWAAAK现socket：/#WXh5NNrMhjR2PQ8TAAAL
+2024-05-14T11:19:43.547 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:19:43.551 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:19:43.555 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.6,"grand_jackpot":2.34,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:19:43.567 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:20:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:20:52.711 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:20:56.677 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#WXh5NNrMhjR2PQ8TAAAL现socket：/#-fyCtaD4ajriNqdcAAAM
+2024-05-14T11:20:56.678 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:20:56.682 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:20:56.684 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.6,"grand_jackpot":2.34,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:20:56.690 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:21:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:22:14.500 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:22:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:22:36.456 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#-fyCtaD4ajriNqdcAAAM现socket：/#in4OIHKC2fHD9cJoAAAN
+2024-05-14T11:22:36.457 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:22:36.462 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:22:36.466 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.62,"grand_jackpot":2.35,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:22:36.476 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:23:16.280 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:23:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T11:24:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:25:21.756 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#in4OIHKC2fHD9cJoAAAN现socket：/#3jBmCvMWjEi-fM5eAAAO
+2024-05-14T11:25:21.756 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:25:21.761 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:25:21.764 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.62,"grand_jackpot":2.35,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:25:21.775 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:25:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T11:25:40.791 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:25:45.180 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#3jBmCvMWjEi-fM5eAAAO现socket：/#TeQ674P9pW1yBp_jAAAP
+2024-05-14T11:25:45.181 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:25:45.185 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:25:45.190 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.62,"grand_jackpot":2.35,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:25:45.216 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:26:08.762 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:26:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T11:26:49.850 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#TeQ674P9pW1yBp_jAAAP现socket：/#wIK0TwGbhKiBIquDAAAQ
+2024-05-14T11:26:49.851 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:26:49.856 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:26:49.860 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.62,"grand_jackpot":2.35,"major_jackpot":0.72,"minor_jackpot":0.36,"mini_jackpot":0.18}}}
+2024-05-14T11:26:49.867 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:27:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T11:28:01.227 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:28:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:29:25.021 [INFO ] default - 保存库存和奖池
+2024-05-14T11:30:22.479 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#wIK0TwGbhKiBIquDAAAQ现socket：/#TRfT_AbUcB4gp0SoAAAR
+2024-05-14T11:30:22.480 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:30:22.486 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:30:22.490 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.78,"grand_jackpot":2.45,"major_jackpot":0.75,"minor_jackpot":0.37,"mini_jackpot":0.18}}}
+2024-05-14T11:30:22.511 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:30:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:30:34.949 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:31:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T11:32:05.042 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#TRfT_AbUcB4gp0SoAAAR现socket：/#LZqEz-e-3QKHL3ftAAAS
+2024-05-14T11:32:05.043 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:32:05.048 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:32:05.051 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.8,"grand_jackpot":2.46,"major_jackpot":0.76,"minor_jackpot":0.38,"mini_jackpot":0.19}}}
+2024-05-14T11:32:05.059 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:32:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T11:33:17.565 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:33:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:33:26.646 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#LZqEz-e-3QKHL3ftAAAS现socket：/#1edASI1Pf1-42_NwAAAT
+2024-05-14T11:33:26.646 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:33:26.650 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:33:26.654 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.82,"grand_jackpot":2.48,"major_jackpot":0.76,"minor_jackpot":0.38,"mini_jackpot":0.19}}}
+2024-05-14T11:33:26.663 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:33:47.208 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:33:50.756 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#1edASI1Pf1-42_NwAAAT现socket：/#mtv4Buwj2oHP4Jc4AAAU
+2024-05-14T11:33:50.756 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:33:50.760 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:33:50.765 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.82,"grand_jackpot":2.48,"major_jackpot":0.76,"minor_jackpot":0.38,"mini_jackpot":0.19}}}
+2024-05-14T11:34:03.240 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#mtv4Buwj2oHP4Jc4AAAU现socket：/#Gt0qoJZfhP8c2w7JAAAV
+2024-05-14T11:34:03.241 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:34:03.247 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:34:03.251 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.82,"grand_jackpot":2.48,"major_jackpot":0.76,"minor_jackpot":0.38,"mini_jackpot":0.19}}}
+2024-05-14T11:34:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T11:35:15.770 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:35:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T11:35:28.246 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:35:51.383 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#Gt0qoJZfhP8c2w7JAAAV现socket：/#9N9FonGsDW0-i747AAAW
+2024-05-14T11:35:51.384 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:35:51.389 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:35:51.392 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.87,"grand_jackpot":2.51,"major_jackpot":0.77,"minor_jackpot":0.38,"mini_jackpot":0.19}}}
+2024-05-14T11:35:51.419 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:36:01.031 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:36:10.185 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#9N9FonGsDW0-i747AAAW现socket：/#d2EsTYVu85iUU5nCAAAX
+2024-05-14T11:36:10.185 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:36:10.190 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:36:10.195 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.9,"grand_jackpot":2.53,"major_jackpot":0.78,"minor_jackpot":0.39,"mini_jackpot":0.19}}}
+2024-05-14T11:36:10.206 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:36:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:36:47.398 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:36:51.842 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#d2EsTYVu85iUU5nCAAAX现socket：/#Zyc97Z-Y-IXpyNskAAAY
+2024-05-14T11:36:51.843 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:36:51.848 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:36:51.852 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.94,"grand_jackpot":2.56,"major_jackpot":0.78,"minor_jackpot":0.39,"mini_jackpot":0.19}}}
+2024-05-14T11:36:51.861 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:37:06.893 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:37:09.353 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#Zyc97Z-Y-IXpyNskAAAY现socket：/#5q3rl266ykz0XQn7AAAZ
+2024-05-14T11:37:09.354 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:37:09.359 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:37:09.362 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.94,"grand_jackpot":2.56,"major_jackpot":0.78,"minor_jackpot":0.39,"mini_jackpot":0.19}}}
+2024-05-14T11:37:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:37:34.899 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#5q3rl266ykz0XQn7AAAZ现socket：/#2TNu1eH2pXOrPEnnAAAa
+2024-05-14T11:37:34.900 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:37:34.906 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:37:34.910 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.94,"grand_jackpot":2.56,"major_jackpot":0.78,"minor_jackpot":0.39,"mini_jackpot":0.19}}}
+2024-05-14T11:38:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:38:34.363 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:38:59.909 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:39:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:39:37.657 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#2TNu1eH2pXOrPEnnAAAa现socket：/#HYOJtKOdS8BaW9K8AAAb
+2024-05-14T11:39:37.657 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:39:37.662 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:39:37.666 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":3.95,"grand_jackpot":2.56,"major_jackpot":0.79,"minor_jackpot":0.39,"mini_jackpot":0.19}}}
+2024-05-14T11:39:37.675 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:39:42.310 [WARN ] default - 未更新用户数据离开
+2024-05-14T11:40:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:41:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T11:42:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T11:43:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T11:44:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T11:45:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:46:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T11:46:30.205 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#HYOJtKOdS8BaW9K8AAAb现socket：/#gOqfONyYEG5M2WCPAAAc
+2024-05-14T11:46:30.206 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T11:46:30.210 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T11:46:30.214 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":4.12,"grand_jackpot":2.67,"major_jackpot":0.82,"minor_jackpot":0.41,"mini_jackpot":0.2}}}
+2024-05-14T11:46:30.233 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T11:47:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T11:48:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:49:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T11:50:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T11:51:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T11:52:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T11:53:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T11:54:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:55:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:56:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T11:57:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T11:58:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T11:59:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T12:00:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T12:01:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T12:02:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T12:03:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T12:04:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:05:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T12:06:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T12:07:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T12:08:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T12:09:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:10:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:11:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:12:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T12:13:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T12:14:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:15:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T12:16:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T12:17:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:18:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:19:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T12:20:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:21:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T12:22:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T12:23:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T12:24:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T12:25:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T12:26:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:27:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T12:28:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T12:29:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:30:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T12:31:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T12:32:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T12:33:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T12:34:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T12:35:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:36:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T12:37:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T12:38:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:39:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:40:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T12:41:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T12:42:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T12:43:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T12:44:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T12:45:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T12:46:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T12:47:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T12:48:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T12:49:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T12:50:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T12:51:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T12:52:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T12:53:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T12:54:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T12:55:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T12:56:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T12:57:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T12:58:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T12:59:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T13:00:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T13:01:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:02:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T13:03:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:04:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T13:05:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:06:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T13:07:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T13:08:25.016 [INFO ] default - 保存库存和奖池
+2024-05-14T13:09:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:10:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:11:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:12:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:13:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T13:14:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T13:15:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T13:16:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:17:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T13:18:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:19:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:20:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T13:21:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:22:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:23:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T13:24:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T13:25:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T13:26:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T13:27:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T13:28:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T13:29:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T13:30:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T13:31:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T13:32:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T13:33:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T13:34:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T13:35:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T13:36:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T13:37:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:38:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T13:39:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T13:40:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:41:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T13:42:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T13:43:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:44:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T13:45:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T13:46:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T13:47:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T13:48:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T13:49:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T13:50:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T13:51:25.000 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:23.524 [WARN ] default - 未更新用户数据离开
+2024-05-14T14:03:24.334 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#gOqfONyYEG5M2WCPAAAc现socket：/#xqdH6z2Bx9WRH8B7AAAd
+2024-05-14T14:03:24.335 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T14:03:24.520 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T14:03:24.608 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":4.14,"grand_jackpot":2.69,"major_jackpot":0.82,"minor_jackpot":0.41,"mini_jackpot":0.2}}}
+2024-05-14T14:03:24.726 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T14:03:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.027 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.031 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.042 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.046 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.057 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.061 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.073 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.077 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.091 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.095 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.103 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.107 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.113 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.117 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.132 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.141 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.167 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.171 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.183 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.187 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.204 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.207 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.211 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.214 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.228 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.231 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.237 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.241 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.258 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.263 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.274 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.277 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.285 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.288 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.292 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.295 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.312 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.316 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.329 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.332 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.340 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.343 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.350 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.353 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.359 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.362 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.368 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.372 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.385 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.388 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.392 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.395 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.408 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.411 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.417 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.421 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.432 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.436 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.443 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.446 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.453 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.456 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.462 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.466 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.473 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.477 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.486 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.490 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.504 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.506 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.519 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.522 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.534 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.537 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.546 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.550 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.556 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.561 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.573 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.575 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.579 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.582 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.588 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.590 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.594 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.596 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.604 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.607 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.614 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.617 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.626 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.629 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.638 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.643 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.652 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.656 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.668 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.674 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.702 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.711 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.724 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.728 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.748 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.755 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.779 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.791 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.801 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.808 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.841 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.850 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.865 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.868 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.873 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.880 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.906 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.918 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.948 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.954 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.969 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.972 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.981 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.985 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.993 [INFO ] default - 保存库存和奖池
+2024-05-14T14:03:25.997 [INFO ] default - 保存库存和奖池
+2024-05-14T14:04:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T14:05:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T14:06:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:07:22.061 [WARN ] default - 未更新用户数据离开
+2024-05-14T14:07:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:08:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T14:09:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:10:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T14:11:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T14:12:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T14:13:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:14:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T14:15:25.030 [INFO ] default - 保存库存和奖池
+2024-05-14T14:16:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T14:17:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T14:18:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T14:19:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T14:20:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T14:21:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:22:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:23:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:24:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:25:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T14:26:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T14:27:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:28:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T14:28:37.255 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#xqdH6z2Bx9WRH8B7AAAd现socket：/#OTHeigcKDddEFpGJAAAe
+2024-05-14T14:28:37.256 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T14:28:37.262 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T14:28:37.267 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":4.26,"grand_jackpot":2.76,"major_jackpot":0.85,"minor_jackpot":0.42,"mini_jackpot":0.21}}}
+2024-05-14T14:28:37.280 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T14:28:52.287 [WARN ] default - 未更新用户数据离开
+2024-05-14T14:29:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T14:30:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T14:31:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T14:32:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T14:33:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T14:34:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T14:35:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T14:36:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T14:37:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T14:38:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:39:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T14:40:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T14:41:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T14:42:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T14:43:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T14:44:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:45:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T14:46:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T14:47:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T14:48:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T14:48:36.818 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#OTHeigcKDddEFpGJAAAe现socket：/#kQcYYbqdTrKckIacAAAf
+2024-05-14T14:48:36.818 [INFO ] default - 10404用户登录游戏服务，游戏请求大厅服务,当前游戏人数:1游戏socket[object Object]
+2024-05-14T14:48:36.822 [INFO ] default - BuffaloKing登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10404","account":"abc2024051410461101","nickname":"USER4540602","headimgurl":"7","score":"0.00","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-14T14:48:36.826 [INFO ] default - 10404给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051410461101","id":"10404","nickname":"USER4540602","score":"0.00","priceList":[10,20,100,10,20,100,15,30,125,15,30,125,30,100,200,40,100,250,50,150,300,75,150,400,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":4.6,"grand_jackpot":2.98,"major_jackpot":0.91,"minor_jackpot":0.45,"mini_jackpot":0.22}}}
+2024-05-14T14:48:36.850 [INFO ] default - 10404从数据库里获得免费次数0
+2024-05-14T14:48:40.913 [INFO ] default - ---------------------------------------10404本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:1剩余新手局数:99---------------------------------------
+2024-05-14T14:48:40.913 [INFO ] default - 10404携带金币:0.00下注:0.3携带银行金币:0.00VIP等级:0
+2024-05-14T14:48:40.918 [INFO ] default - 10404金币数量不足,当前金币数量:0下注:0.3
+2024-05-14T14:48:40.919 [INFO ] default - 10404破产了可以领救济金
+2024-05-14T14:48:49.108 [INFO ] default - ---------------------------------------10404本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:1剩余新手局数:99---------------------------------------
+2024-05-14T14:48:49.108 [INFO ] default - 10404携带金币:2.00下注:0.3携带银行金币:0.00VIP等级:0
+2024-05-14T14:48:49.121 [INFO ] default - 10404减少金币:0.3类型:10当前金币:1.7
+2024-05-14T14:48:49.123 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:4.6最低配置:5000
+2024-05-14T14:48:49.125 [INFO ] default - 10404水位:5添加库存:0.285添加奖池:0.015当前库存:99944612.30000000056315912当前游戏奖池:4.6
+2024-05-14T14:48:49.227 [INFO ] default - 获取游戏所有倍数
+2024-05-14T14:48:49.366 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-14T14:48:49.368 [INFO ] default - 10404上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-14T14:48:49.368 [INFO ] default - 10404是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-14T14:48:49.370 [INFO ] default - 10404倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-14T14:48:49.371 [INFO ] default - 10404新手获取玩家当局的倍数区间:[0]
+2024-05-14T14:48:49.371 [INFO ] default - 10404满足条件的倍数数组:[0]
+2024-05-14T14:48:58.077 [INFO ] default - 图案排列结果
+2024-05-14T14:48:58.078 [INFO ] default - [ 7, 5, 5, 5, 5 ]
+2024-05-14T14:48:58.078 [INFO ] default - [ 4, 3, 3, 2, 1 ]
+2024-05-14T14:48:58.079 [INFO ] default - [ 1, 0, 0, 0, 0 ]
+2024-05-14T14:48:58.079 [INFO ] default - 10404下注:0.3赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-14T14:48:58.084 [INFO ] default - 10404摇奖结果{"ResultCode":1,"ResultData":{"userscore":1.7,"winscore":0,"viewarray":{"code":2,"nHandCards":[8,6,6,6,6,5,4,4,3,2,2,1,1,1,1],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.3,"win":0,"nWinCards":[],"goldWin":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715669335152,"nAllWinLines":[],"is_free":false,"user_score":1.7},"winfreeCount":0,"freeCount":0}}
+2024-05-14T14:48:58.085 [INFO ] default - 10404摇奖结束--------------------------------------------------------------------------
+2024-05-14T14:48:58.090 [INFO ] default - 10404单笔投注:0.3提升提现额度:0.03
+2024-05-14T14:49:25.000 [INFO ] default - 保存库存和奖池
+2024-05-14T14:49:25.350 [WARN ] default - 未更新用户数据离开
+2024-05-14T14:50:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:51:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T14:52:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T14:53:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T14:54:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T14:55:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T14:56:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T14:57:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T14:58:25.014 [INFO ] default - 保存库存和奖池
+2024-05-14T14:59:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T15:00:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T15:01:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:02:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:03:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T15:04:25.002 [INFO ] default - 保存库存和奖池
+2024-05-14T15:05:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T15:06:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T15:07:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:08:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:09:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T15:10:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T15:11:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T15:12:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T15:13:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T15:14:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T15:15:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T15:16:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T15:17:25.011 [INFO ] default - 保存库存和奖池
+2024-05-14T15:18:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T15:19:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T15:20:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T15:21:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T15:22:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T15:23:25.016 [INFO ] default - 保存库存和奖池
+2024-05-14T15:24:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T15:25:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T15:26:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:27:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T15:28:25.012 [INFO ] default - 保存库存和奖池
+2024-05-14T15:29:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T15:30:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T15:31:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T15:32:25.009 [INFO ] default - 保存库存和奖池
+2024-05-14T15:33:25.004 [INFO ] default - 保存库存和奖池
+2024-05-14T15:34:25.001 [INFO ] default - 保存库存和奖池
+2024-05-14T15:35:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T15:36:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T15:37:25.006 [INFO ] default - 保存库存和奖池
+2024-05-14T15:38:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T15:39:25.013 [INFO ] default - 保存库存和奖池
+2024-05-14T15:40:25.003 [INFO ] default - 保存库存和奖池
+2024-05-14T15:41:25.010 [INFO ] default - 保存库存和奖池
+2024-05-14T15:42:25.015 [INFO ] default - 保存库存和奖池
+2024-05-14T15:42:35.436 [INFO ] default - 拉霸_285_BuffaloKing服务器启动
+2024-05-14T15:42:35.439 [INFO ] default - start at port:15185
+2024-05-14T15:43:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T15:44:25.005 [INFO ] default - 保存库存和奖池
+2024-05-14T15:45:25.007 [INFO ] default - 保存库存和奖池
+2024-05-14T15:46:25.008 [INFO ] default - 保存库存和奖池
+2024-05-14T15:47:25.020 [INFO ] default - 保存库存和奖池
+2024-05-14T15:48:25.025 [INFO ] default - 保存库存和奖池
+2024-05-14T15:49:25.028 [INFO ] default - 保存库存和奖池
+2024-05-14T15:50:25.029 [INFO ] default - 保存库存和奖池
+2024-05-14T15:51:25.026 [INFO ] default - 保存库存和奖池
