@@ -16,7 +16,6 @@ exports.initResult  = function (nBetSum) {
         nBet: nBetSum, // # 下注总额
         win: 0,  //# 中奖总额
         nWinCards: [],  //# 位数与手牌数相同，中奖的为True，没中奖的为False
-        goldWin: [], // DigDigDigger黄金牌
         getOpenBox: {   // 开宝箱
             bFlag: false,
             nWinOpenBox: 0
@@ -24,18 +23,22 @@ exports.initResult  = function (nBetSum) {
         getFreeTime: { // 免费次数
             bFlag: false,
             nFreeTime: 0,
-            nIndex: 0
+            nIndex: 0,
+            card: [], // 挖矿游戏特殊玩法
+            cardList: []  // 挖矿游戏特殊玩法
         },
         bonusList: [null, null, null], // 轮子开宝箱
-        getBigWin: { // 空白图案-特殊奖
+        getBigWin: { // 老虎特殊玩法
             bFlag: false,
         },
         getJackpot:{  // jackpot奖
             bFlag: false,
             bVal: 0
         },
-        fWildNum: 0, // 大象特殊玩法
-        fWildTotalNum: 0, // 大象特殊玩法
+        fWildNum: 0, // 大象、公牛特殊玩法
+        fWildTotalNum: 0, // 大象、公牛特殊玩法
+        goldWin: [], // 挖矿游戏特殊玩法赢分
+        goldWinDetail: {}, // 挖矿游戏特殊玩法赢分详情
         nMultiple: 0,
         mul: 0,
         nWinCardsDetail: [],
@@ -96,6 +99,9 @@ exports.analyseResultBuild = function (currFreeCount, currGoldCoin, dictAnalyseR
         dictAnalyseResult["is_free"] = false;
     }
     dictAnalyseResult["user_score"] = currGoldCoin;
+    if(currFreeCount > 0){
+        dictAnalyseResult["getFreeTime"]['bFlag'] = true;
+    }
     dictAnalyseResult["getFreeTime"]["nFreeTime"] = currFreeCount;
     return JSON.stringify(dictAnalyseResult);
 }

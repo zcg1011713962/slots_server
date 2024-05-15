@@ -772,8 +772,8 @@ exports.reduceFreeCount = function(gameId, userId, reduceFreeCount, callback){
                         log.err(userId + '扣免费次数' + err);
                         callback(0)
                     } else {
-                        log.info(userId + '扣免费次数' + reduceFreeCount + '成功,当前免费次数:' + currFreeCount);
                         const beforeFreeCount = freeCount;
+                        log.info(userId + '扣免费次数' + reduceFreeCount + '成功,扣前次数:' + beforeFreeCount + '当前免费次数:' + currFreeCount);
                         callback(1, beforeFreeCount, currFreeCount)
                     }
                 });
@@ -900,9 +900,9 @@ exports.feeCost = function(gameId, userId, nBetSum, type, callback){
         self.getGoldCoin(userId).then(goldCoin =>{
             if(freeCount > 0){
                 // 扣免费次数
-                self.reduceFreeCount(gameId, userId, 1, (ret) =>{
+                self.reduceFreeCount(gameId, userId, 1, (ret, beforeFreeCount, currFreeCount) =>{
                     if(ret){
-                        callback(1, freeCount, goldCoin)
+                        callback(1, beforeFreeCount, currFreeCount, goldCoin)
                     }else{
                         callback(0, 0, 0)
                     }
@@ -912,7 +912,7 @@ exports.feeCost = function(gameId, userId, nBetSum, type, callback){
                 if(goldCoin > 0 && goldCoin >= nBetSum){
                     self.reduceGoldCoin(userId, nBetSum, type,(ret) =>{
                         if(ret){
-                            callback(1, freeCount, goldCoin)
+                            callback(1, freeCount, freeCount, goldCoin)
                         }else{
                             callback(0, 0, 0)
                         }

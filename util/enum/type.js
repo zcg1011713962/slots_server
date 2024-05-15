@@ -34,7 +34,7 @@ const EmailType = {
     agent_bind_inform: 1, // 新手绑定通知
     first_recharge_continue_award: 2, // 首充持续奖励
     rank_award: 3, // 排行榜奖励
-    withdraw: 4, // 提现申请成功
+    withdraw: 4, // 提现成功
     withdrawFailed: 5 // 提现失败被拒
 };
 
@@ -70,7 +70,7 @@ const notifyType = {
     vipEnterHall: 3, // VIP进大厅
     hitJackpot: 4, // 击中奖池
     bigWin: 5, // 一把赢的金币大于配置
-    withdraw: 6 // 提现申请成功
+    withdraw: 6 // 提现成功
 };
 
 const AgentRebateType = {
@@ -133,7 +133,8 @@ const ScoreChangeType = {
     coinRankAward: 20,  // 金币排行榜奖励
     rechargeRankAward: 21,  // 充值排行榜奖励
     bigWinRankAward: 22,  // 大富豪排行榜奖励
-    withdrawGoodsBuy: 23  // 解锁提现商品
+    withdrawGoodsBuy: 23,  // 解锁提现商品
+    exchange: 24  // 银币兑换金币
 };
 
 const DiamondChangeType = {

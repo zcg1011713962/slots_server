@@ -63,8 +63,8 @@ class ErrorCode {
     static get HIT_JACKPOT_NOTIFY() { return { code: 'p0004', msg: '击中奖池跑马灯' , langCode: 'languageId_357' }; }
     static get BIG_WIN_NOTIFY() { return { code: 'p0005', msg: '赢分大于配置，侧边栏动画' , langCode: 'languageId_358' }; }
     static get WITHDRAW_NOTIFY() { return { code: 'p0006', msg: '提现申请成功跑马灯' , langCode: 'languageId_359' }; }
-    static get WITHDRAW_APPLY_TITLE() { return { code: 'c0013', msg: '提现申请邮件标题' , langCode: 'languageId_360' }; }
-    static get WITHDRAW_APPLY_CONTENT() { return { code: 'c0014', msg: '提现申请邮件内容' , langCode: 'languageId_361' }; }
+    static get WITHDRAW_APPLY_TITLE() { return { code: 'c0013', msg: '提现成功邮件标题' , langCode: 'languageId_360' }; }
+    static get WITHDRAW_APPLY_CONTENT() { return { code: 'c0014', msg: '提现成功邮件内容' , langCode: 'languageId_361' }; }
     static get WITHDRAW_FAILED_TITLE() { return { code: 'c0015', msg: '提现被拒邮件标题' , langCode: 'languageId_362' }; }
     static get WITHDRAW_FAILED_CONTENT() { return { code: 'c0016', msg: '提现被拒邮件内容' , langCode: 'languageId_363' }; }
 }

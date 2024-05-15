@@ -1090,6 +1090,22 @@ var GameInfo = function () {
                                 log.info(userId + '订单:' + orderId + '已返还提现额度：' + withdrawAmount)
                             })
                         })
+                    }else if(status === 1){
+                        dao.searchUserById(userId, row =>{
+                            // 发送提现跑马灯
+                            const noticeMsg = [{
+                                type: TypeEnum.notifyType.withdraw, // 6
+                                content_id: ErrorCode.WITHDRAW_NOTIFY.code, // p0006
+                                extend: {
+                                    nickName: row.nickname ? row.nickname : '', // 昵称
+                                    withdrawAmount: withdrawAmount, // 提现金额
+                                    userId: userId
+                                }
+                            }]
+                            http_bc.sendNoticeMsg(noticeMsg);
+                            this.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
+                            log.info(userId + '提现成功，跑马灯通知')
+                        })
                     }
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg)
                 })
@@ -3472,45 +3488,55 @@ var GameInfo = function () {
             })
         }
 
-        this.shopExchangeGoods = function (callback, id, userId) {
+        this.shopExchangeGoods = function (productId, userId, callback) {
             CacheUtil.getExchangeConfig().then(config =>{
-                const exchangeItem = config.filter(it => it.id === id);
-                const goodsType = exchangeItem.goodsType; // 物品类型
-                const val = exchangeItem.val // 获得物品数量
-                const silverCoin  = exchangeItem.target_price // 花费银币
+                const exchangeItem = config.filter(it => it.id === productId);
+                const goodsType = parseInt(exchangeItem.goodsType); // 物品类型
+                const val = Number(exchangeItem.val) // 获得物品数量
+                const silverCoin  = Number(exchangeItem.target_price) // 花费银币
 
-                dao.searchSilverCoin(row =>{
+                dao.searchSilverCoin(userId,row =>{
                     if(row){
                         const currSilverCoin = row.silverCoin
                         if(silverCoin > -1 && currSilverCoin >= silverCoin){
                             // 扣银币
-                            dao.reduceSilverCoin(silverCoin, use)
-
-                            // 发货
-                            switch(goodsType){
-                                case TypeEnum.GoodsType.gold: //金币
-                                    break;
-                                case TypeEnum.GoodsType.withdrawLimit://提现额度
-                                    break;
-                                case TypeEnum.GoodsType.withdrawTime://提现次数
-                                    break;
-                                case TypeEnum.GoodsType.turntableTime://转盘次数
-                                    break;
-                                case TypeEnum.GoodsType.vipScore://VIP点数
-                                    break;
-                                default:
-                                    break;
-                            }
+                            dao.reduceSilverCoin(userId, silverCoin, code =>{
+                                if(code){
+                                    // 发货
+                                    switch(goodsType){
+                                        case TypeEnum.GoodsType.gold: //金币
+                                            // 发金币
+                                            CacheUtil.addGoldCoin(userId, val, TypeEnum.ScoreChangeType.exchange, ret =>{
+                                                log.info(userId + '兑换金币数量:' + val)
+                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            });
+                                            break;
+                                        case TypeEnum.GoodsType.withdrawLimit://提现额度
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            break;
+                                        case TypeEnum.GoodsType.withdrawTime://提现次数
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            break;
+                                        case TypeEnum.GoodsType.turntableTime://转盘次数
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            break;
+                                        case TypeEnum.GoodsType.vipScore://VIP点数
+                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            break;
+                                        default:
+                                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
+                                            break;
+                                    }
+                                }else{
+                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
+                                }
+                            })
+                        }else {
+                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
                         }
                     }
                 })
-
-
-
-
             })
-
-
         }
 
         // 限时折扣
@@ -3573,9 +3599,19 @@ var GameInfo = function () {
         }
 
         this.searchMonthCardGoods = function (callback){
-            CacheUtil.getMonthCardConfig().then(config => {
-                const goods = config.monthCardGoods;
-                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, goods)
+            CacheUtil.getVConfig().then(config => {
+                const ratio = config.recharge_vip_socre_percentage / 100;
+                let result = [];
+                CacheUtil.getMonthCardConfig().then(cf => {
+                    const monthCardGoods = cf.monthCardGoods;
+                    for (let i = 0; i < monthCardGoods.length; i++) {
+                        const item = monthCardGoods[i];
+                        item.vip_score = undefined;
+                        item.vip_score = StringUtil.rideNumbers(item.target_price, ratio, 2);
+                        result.push(item);
+                    }
+                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result)
+                })
             })
         }
 
@@ -4601,19 +4637,6 @@ var GameInfo = function () {
                                                         })
                                                     })
                                                 })
-                                                // 发送提现跑马灯
-                                                const noticeMsg = [{
-                                                    type: TypeEnum.notifyType.withdraw, // 6
-                                                    content_id: ErrorCode.WITHDRAW_NOTIFY.code, // p0006
-                                                    extend: {
-                                                        nickName: self.userList[userId]._nickname, // 昵称
-                                                        withdrawAmount: withdrawAmount, // 提现金额
-                                                        userId: userId
-                                                    }
-                                                }]
-                                                http_bc.sendNoticeMsg(noticeMsg);
-                                                this.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
-                                                log.info(userId + '提现申请成功，跑马灯通知')
                                             } else {
                                                 callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                             }

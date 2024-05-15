@@ -7,7 +7,7 @@ User = function(userInfo,_socket){
 	this.sign = "";             // 密钥
 	this._isLeave = true;
 	this._islogin = false;     // 是否登录过
-	this.lastTimeRecord = {free: false, lastHandCard: [], actualMul: 0, expectMulSection: [] }; // 免费标识,上次实际出的倍数,预期的倍数区间([-1, 2])当出免费，左边<0时 免费局可结束
+	this.lastTimeRecord = {free: false, openBox: false, openBoxBaseWin: 0, fWildTotalNum: 0, lastHandCard: [], actualMul: 0, expectMulSection: [] }; // 免费标识,上次实际出的倍数,预期的倍数区间([-1, 2])当出免费，左边<0时 免费局可结束
 
 	this.init = function (_userInfo, _socket) {
 		this._userId = _userInfo.userid;

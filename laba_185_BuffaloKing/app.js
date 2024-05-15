@@ -9,9 +9,9 @@ const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const CacheUtil = require('../util/cache_util');
+const SampleUtil = require("../util/sample_util");
 
 const Csocket = Cio(Urls.hall_url);
-
 Csocket.on('disconnect', function (data) {
     console.log("登录服务器被断开")
 });
@@ -212,4 +212,4 @@ const server = http.listen(app.get('port'), function () {
 
 log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 
-
+/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/

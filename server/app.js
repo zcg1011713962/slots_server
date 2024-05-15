@@ -459,12 +459,12 @@ app.get('/shoppingCallBack', function (req, res) {
     }
 });
 
-// 提现审核通过回调地址
+// 提现回调
 app.get('/withdrawCallBack', async function (req, res) {
     //验证版本
     const userId = req.query.userId ? Number(req.query.userId) : 0;
     const orderId = req.query.orderId ? req.query.orderId : null;
-    log.info('提现审核通过回调地址' + userId + '订单' + orderId)
+    log.info('提现回调' + userId + '订单' + orderId)
     if (userId === undefined || userId === '' || orderId === undefined || orderId === ''){
         res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         return;
