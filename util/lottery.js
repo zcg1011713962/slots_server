@@ -388,14 +388,16 @@ function Lottery(config, gameInfo, callback) {
             CacheUtil.getRecordUserHandCards(config.gameId, config.userId, (cardNums) =>{
                 const lastTimeRecord = user.getLastTimeRecord();
                 log.info(config.userId + '上局回顾,上局是否免费:' + lastTimeRecord.free + '上局是否击中特殊玩法' + lastTimeRecord.openBox + '上局实际倍数:' + lastTimeRecord.actualMul + '本局预期的倍数区间' + JSON.stringify(lastTimeRecord.expectMulSection) + '上局赢的线' + JSON.stringify(lastTimeRecord.nWinLinesDetail));
-                if((config.gameId === 263 || config.gameId === 285) && lastTimeRecord.openBox){ // 大象、公牛特殊玩法内不叠加特殊玩法
+                if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) && lastTimeRecord.openBox){ // 大象、公牛、挖矿 特殊玩法内不叠加特殊玩法
                     hitBonus = false;
-                }else if((config.gameId === 263 || config.gameId === 285) &&  hitBonus){ // 大象、公牛击中特殊玩法就是进入免费模式
+                }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
                     hitFree = true;
+                }
+                if(config.gameId === 272 && lastTimeRecord.free){ // 浣熊免费模式不叠加
+                    hitFree = false;
                 }
 
                 log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
-
                 if((config.newHandFlag && config.gameId === 288 && lastTimeRecord['free']) || (config.gameId === 288 && !config.newHandFlag && lastTimeRecord.free)) {  // 新手上局是免费的 || 新手转非新手 上局是免费的情况,这把不使用新手线路，选一个倍数 + 上局实际倍数 <= 预期倍数
                     // 钻石游戏需要单独处理免费模式
                     const lastHandCard = lastTimeRecord['lastHandCard'];
@@ -725,6 +727,12 @@ function specialPlayMethBefore(config, result, user){
         if(len >= 3 || parseInt(config.feeBeforeFreeCount) > 0){
             LABA.ganeshagoldOpenBox(result);
         }
+    }else if(config.gameId === 272){
+        // 浣熊特殊
+        const len = result.nHandCards.filter(card => card === config.freeCards[0]).length;
+        if(parseInt(config.feeBeforeFreeCount) > 0 || len >= 3){
+            LABA.jungledelightOpenBox(result);
+        }
     }else if(config.gameId === 285){
         // 公牛特殊bouns
         // 找出三个以上的免费
@@ -770,6 +778,25 @@ function specialPlayMethAfter(config, result, user){
         }else{
             // 老虎全屏
             LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);
+        }
+    }else if(config.gameId === 272){
+        // 浣熊特殊模式
+        const len = result.nHandCards.filter(card => card === config.freeCards[0]).length;
+        if (parseInt(config.feeBeforeFreeCount) < 1 && len >= 3) {
+            let num = 0;
+            switch (len) {
+                case 3:
+                    num = 8;
+                    break;
+                case 4:
+                    num = 10;
+                    break;
+                case 5:
+                    num = 15;
+                    break;
+
+            }
+            result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": num};
         }
     }else if(config.gameId === 285){
         // 公牛特殊模式

@@ -274,9 +274,9 @@ app.get('/goodsList', function (req, res) {
 });
 
 
-// 获取兑换列表
+// 获取商品兑换列表
 app.get('/exchangeList', function (req, res) {
-    log.info('获取兑换列表')
+    log.info('获取商品兑换列表')
     gameInfo.getExchangeGoods((code, msg, data) =>{
         res.send({code: code, data: data});
     });

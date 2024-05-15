@@ -210,6 +210,8 @@ module.exports.HandCardsAnalyse = function (nHandCards, nGameLines, nGameCombina
             result.dictAnalyseResult["getFreeTime"]["bFlag"] = true;
             result.dictAnalyseResult["getFreeTime"]["nFreeTime"] = 10;
         }
+    }else if(config.gameId === 272){ // 浣熊
+        // 浣熊特殊模式计算免费
     }else{
         if (freeCards && freeCards.length > 0 ) {
             result.dictAnalyseResult["getFreeTime"] = FreeTimeAnalyse(nHandCards, freeCards, freeTimes);
@@ -893,7 +895,14 @@ module.exports.BuffaloKingOpenBox = function (result){
         "win": 0
     }
 }
-
+module.exports.jungledelightOpenBox = function (result){
+    //开宝箱
+    result.dictAnalyseResult.getOpenBox = {
+        "bFlag": true,
+        "nWinOpenBox": 0,
+        "win": 0
+    }
+}
 
 module.exports.DigDigDiggerOpenBox = function (result){
     //开宝箱

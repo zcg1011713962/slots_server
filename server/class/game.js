@@ -3512,16 +3512,24 @@ var GameInfo = function () {
                                             });
                                             break;
                                         case TypeEnum.GoodsType.withdrawLimit://提现额度
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            dao.addWithdrawLimit(userId, val, ret =>{
+                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            })
                                             break;
                                         case TypeEnum.GoodsType.withdrawTime://提现次数
                                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
                                             break;
                                         case TypeEnum.GoodsType.turntableTime://转盘次数
+                                            CacheUtil.addTurntableCoin(userId, 5)
                                             callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
                                             break;
                                         case TypeEnum.GoodsType.vipScore://VIP点数
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            if(this.userList[userId]){
+                                                this.userList[userId].vip_score = StringUtil.addNumbers(this.userList[userId].vip_score, val);
+                                            }
+                                            dao.addVipScore(userId, val, ret =>{
+                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
+                                            })
                                             break;
                                         default:
                                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])

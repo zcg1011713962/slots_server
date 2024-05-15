@@ -461,6 +461,14 @@ exports.setActivityLuckyConfig = function (userId) {
 }
 
 
+exports.addTurntableCoin = function (userId, num) {
+    RedisUtil.hget(everydayLuckyCoin, userId).then(config =>{
+        config.turntableCoin = config.turntableCoin + num;
+        RedisUtil.hmset(everydayLuckyCoin, userId, JSON.stringify(config)).then(ok =>{})
+    })
+}
+
+
 // 更新用户幸运活动配置
 exports.updateActivityLuckyConfig  = function (userId, data){
     // 更新用户配置

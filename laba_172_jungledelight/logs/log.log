@@ -1785,3 +1785,411 @@
 2024-05-14T21:34:25.013 [INFO ] default - 保存库存和奖池
 2024-05-14T21:35:25.177 [INFO ] default - 保存库存和奖池
 2024-05-14T21:36:25.009 [INFO ] default - 保存库存和奖池
+2024-05-16T00:07:42.405 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:07:45.824 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:07:45.829 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"1.92","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"10"}}
+2024-05-16T00:07:45.833 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"1.92","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":193.93,"grand_jackpot":126.05,"major_jackpot":38.78,"minor_jackpot":19.39,"mini_jackpot":9.69}}}
+2024-05-16T00:07:45.894 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:08:25.011 [INFO ] default - 保存库存和奖池
+2024-05-16T00:09:25.016 [INFO ] default - 保存库存和奖池
+2024-05-16T00:10:25.004 [INFO ] default - 保存库存和奖池
+2024-05-16T00:10:35.911 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:4剩余新手局数:96---------------------------------------
+2024-05-16T00:10:35.912 [INFO ] default - 10448携带金币:1.92下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:10:35.925 [INFO ] default - 10448减少金币:0.1类型:10当前金币:1.82
+2024-05-16T00:10:35.929 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:193.93最低配置:5000
+2024-05-16T00:10:35.931 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933679.92500000323343556当前游戏奖池:193.93
+2024-05-16T00:10:36.093 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:10:36.530 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:10:36.533 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-16T00:10:36.534 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:10:36.537 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:10:36.538 [INFO ] default - 10448新手获取玩家当局的倍数区间:[11,30]
+2024-05-16T00:10:36.539 [INFO ] default - 10448满足条件的倍数数组:[23.4,22.2,20.6,20.3,28.7,11,27.7,16.5,24,24.4]
+2024-05-16T00:10:37.081 [INFO ] default - 图案排列结果
+2024-05-16T00:10:37.082 [INFO ] default - [ 0, 0, 0, 0, 0 ]
+2024-05-16T00:10:37.083 [INFO ] default - [ 0, 0, 0, 0, 0 ]
+2024-05-16T00:10:37.084 [INFO ] default - [ 0, 2, 3, 9, 9 ]
+2024-05-16T00:10:37.084 [INFO ] default - 10448下注:0.1赢:2.4win:2.4winJackpot:0openBoxCardWin:0
+2024-05-16T00:10:37.090 [INFO ] default - 10448增加金币2.4类型:10当前金币:4.22
+2024-05-16T00:10:37.092 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":4.22,"winscore":2.4,"viewarray":{"code":2,"nHandCards":[1,1,1,1,1,1,1,1,1,1,1,3,4,10,10],"nWinLines":[0,1,4,5,8,9,10,11,13,15,17,19],"nWinLinesDetail":[[5,6,7,8,9],[0,1,2,3,4],[10,6,2,8,14],[0,1,7,3,4],[5,1,2,3,9],[0,6,7,8,4],[10,6,7,8,14],[5,6,2,8,9],[5,1,7,3,9],[0,6,2,8,4],[0,1,7,13,14],[5,1,7,13,9]],"nWinDetail":[0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2],"nBet":0.1,"win":2.4,"nWinCards":[true,true,true,true,true,true,true,true,true,true,true,null,null,true,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":480,"mul":0,"nWinCardsDetail":[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,9],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,9],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,9,9],[0,0,0,9,0]],"nBetTime":1715789435928,"is_free":false,"user_score":4.22},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:10:37.092 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:10:37.097 [INFO ] default - 10448中奖大于配置，侧边栏展示
+2024-05-16T00:10:37.102 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:10:40.076 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:5剩余新手局数:95---------------------------------------
+2024-05-16T00:10:40.077 [INFO ] default - 10448携带金币:4.22下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:10:40.090 [INFO ] default - 10448减少金币:0.1类型:10当前金币:4.12
+2024-05-16T00:10:40.092 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:193.93最低配置:5000
+2024-05-16T00:10:40.093 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933677.62000000323314453当前游戏奖池:193.93
+2024-05-16T00:10:40.139 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:10:40.437 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:10:40.438 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:24本局预期的倍数区间[-13,6]上局赢的线[[5,6,7,8,9],[0,1,2,3,4],[10,6,2,8,14],[0,1,7,3,4],[5,1,2,3,9],[0,6,7,8,4],[10,6,7,8,14],[5,6,2,8,9],[5,1,7,3,9],[0,6,2,8,4],[0,1,7,13,14],[5,1,7,13,9]]
+2024-05-16T00:10:40.438 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:10:40.439 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:10:40.439 [INFO ] default - 10448新手获取玩家当局的倍数区间:[11,30]
+2024-05-16T00:10:40.440 [INFO ] default - 10448满足条件的倍数数组:[23.7,22.8,13.4,14.5,14.9,21.1,17.6,20.4,27.3,24.5]
+2024-05-16T00:10:40.798 [INFO ] default - 图案排列结果
+2024-05-16T00:10:40.798 [INFO ] default - [ 9, 9, 6, 6, 4 ]
+2024-05-16T00:10:40.799 [INFO ] default - [ 4, 4, 2, 2, 1 ]
+2024-05-16T00:10:40.800 [INFO ] default - [ 0, 0, 0, 0, 0 ]
+2024-05-16T00:10:40.801 [INFO ] default - 10448下注:0.1赢:1.76win:1.76winJackpot:0openBoxCardWin:0
+2024-05-16T00:10:40.807 [INFO ] default - 10448增加金币1.76类型:10当前金币:5.88
+2024-05-16T00:10:40.808 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":5.88,"winscore":1.76,"viewarray":{"code":2,"nHandCards":[10,10,7,7,5,5,5,3,3,2,1,1,1,1,1],"nWinLines":[1,2,5,17],"nWinLinesDetail":[[0,1,2,3],[10,11,12,13,14],[0,1,7],[0,1,7]],"nWinDetail":[1.5,0.2,0.03,0.03],"nBet":0.1,"win":1.76,"nWinCards":[true,true,true,true,null,null,null,true,null,null,true,true,true,true,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":352,"mul":0,"nWinCardsDetail":[[9,9,6,6,4],[0,0,0,0,0],[9,9,2,6,4],[9,9,2,0,0]],"nBetTime":1715789440091,"is_free":false,"user_score":5.88},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:10:40.809 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:10:40.813 [INFO ] default - 10448中奖大于配置，侧边栏展示
+2024-05-16T00:10:40.815 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:10:43.101 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:6剩余新手局数:94---------------------------------------
+2024-05-16T00:10:43.102 [INFO ] default - 10448携带金币:5.88下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:10:43.113 [INFO ] default - 10448减少金币:0.1类型:10当前金币:5.78
+2024-05-16T00:10:43.115 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:193.93最低配置:5000
+2024-05-16T00:10:43.117 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933675.95500000323227141当前游戏奖池:193.94
+2024-05-16T00:10:43.145 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:10:43.419 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:10:43.420 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:17.6本局预期的倍数区间[-6.600000000000001,12.399999999999999]上局赢的线[[0,1,2,3],[10,11,12,13,14],[0,1,7],[0,1,7]]
+2024-05-16T00:10:43.420 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:10:43.422 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:10:43.422 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:10:43.422 [INFO ] default - 10448满足条件的倍数数组:[0]
+2024-05-16T00:10:43.424 [INFO ] default - 图案排列结果
+2024-05-16T00:10:43.424 [INFO ] default - [ 6, 5, 5, 3, 3 ]
+2024-05-16T00:10:43.425 [INFO ] default - [ 3, 2, 2, 1, 1 ]
+2024-05-16T00:10:43.425 [INFO ] default - [ 1, 0, 0, 0, 0 ]
+2024-05-16T00:10:43.426 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:10:43.428 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":5.78,"winscore":0,"viewarray":{"code":2,"nHandCards":[7,6,6,4,4,4,3,3,2,2,2,1,1,1,1],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715789443115,"is_free":false,"user_score":5.78},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:10:43.429 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:10:43.431 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:10:45.642 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:7剩余新手局数:93---------------------------------------
+2024-05-16T00:10:45.643 [INFO ] default - 10448携带金币:5.78下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:10:45.657 [INFO ] default - 10448减少金币:0.1类型:10当前金币:5.68
+2024-05-16T00:10:45.660 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:193.94最低配置:5000
+2024-05-16T00:10:45.662 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.05000000323343556当前游戏奖池:193.94
+2024-05-16T00:10:45.665 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:10:45.814 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:10:45.815 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:0本局预期的倍数区间[0]上局赢的线[]
+2024-05-16T00:10:45.815 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:10:45.817 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:10:45.817 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:10:45.817 [INFO ] default - 10448满足条件的倍数数组:[0]
+2024-05-16T00:10:45.821 [INFO ] default - 图案排列结果
+2024-05-16T00:10:45.821 [INFO ] default - [ 6, 6, 5, 5, 4 ]
+2024-05-16T00:10:45.821 [INFO ] default - [ 4, 4, 1, 1, 1 ]
+2024-05-16T00:10:45.822 [INFO ] default - [ 1, 0, 0, 0, 0 ]
+2024-05-16T00:10:45.823 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:10:45.828 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":5.68,"winscore":0,"viewarray":{"code":2,"nHandCards":[7,7,6,6,5,5,5,2,2,2,2,1,1,1,1],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715789445659,"is_free":false,"user_score":5.68},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:10:45.828 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:10:45.830 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:11:25.011 [INFO ] default - 保存库存和奖池
+2024-05-16T00:11:42.391 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:8剩余新手局数:92---------------------------------------
+2024-05-16T00:11:42.391 [INFO ] default - 10448携带金币:5.68下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:11:42.404 [INFO ] default - 10448减少金币:0.1类型:10当前金币:5.58
+2024-05-16T00:11:42.406 [INFO ] default - 奖池概率:0随机数:46
+2024-05-16T00:11:42.407 [INFO ] default - 奖池概率:0奖池支付下标:0下注对应的奖池的概率数组:100,0,0,0
+2024-05-16T00:11:42.407 [INFO ] default - 碰中的奖池索引payJpIndex:0payProp:100随机数:93
+2024-05-16T00:11:42.407 [INFO ] default - 用户通过概率计算，中了jackpot:10奖池种类下标:0
+2024-05-16T00:11:42.410 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.14500000323459972当前游戏奖池:193.94
+2024-05-16T00:11:42.414 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:11:42.567 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:11:42.568 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:0本局预期的倍数区间[0]上局赢的线[]
+2024-05-16T00:11:42.569 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:10
+2024-05-16T00:11:42.570 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:11:42.570 [INFO ] default - 10448新手获取玩家当局的倍数区间:[11,30]
+2024-05-16T00:11:42.570 [INFO ] default - 10448满足条件的倍数数组:[18.6,13.1,20.5,21,23.1,25.4,12.4,11.8,11.3,23.4]
+2024-05-16T00:11:43.155 [INFO ] default - 配牌器开关已打开,配牌:[0,1,2,3,4,5,6,7,8,9,10,0,1,2,3]
+2024-05-16T00:11:43.157 [INFO ] default - 图案排列结果
+2024-05-16T00:11:43.157 [INFO ] default - [ 0, 1, 2, 3, 4 ]
+2024-05-16T00:11:43.158 [INFO ] default - [ 5, 6, 7, 8, 9 ]
+2024-05-16T00:11:43.159 [INFO ] default - [ 10, 0, 1, 2, 3 ]
+2024-05-16T00:11:43.159 [INFO ] default - 10448下注:0.1赢:10win:0winJackpot:10openBoxCardWin:0
+2024-05-16T00:11:43.164 [INFO ] default - 10448增加金币10类型:10当前金币:15.58
+2024-05-16T00:11:43.165 [INFO ] default - 10448击中奖池,发送跑马灯
+2024-05-16T00:11:43.166 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.58,"winscore":10,"viewarray":{"code":2,"nHandCards":[1,2,3,4,5,6,7,8,9,10,11,1,2,3,4],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":true,"bVal":"10","payJpIndex":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715789502406,"is_free":false,"user_score":15.58},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:11:43.166 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:11:43.169 [INFO ] default - 10448中奖大于配置，侧边栏展示
+2024-05-16T00:11:43.170 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:11:43.174 [INFO ] default - 10448中jackpot推首充礼包
+2024-05-16T00:12:25.009 [INFO ] default - 保存库存和奖池
+2024-05-16T00:12:30.710 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:9剩余新手局数:91---------------------------------------
+2024-05-16T00:12:30.710 [INFO ] default - 10448携带金币:15.58下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:12:30.721 [INFO ] default - 10448减少金币:0.1类型:10当前金币:15.48
+2024-05-16T00:12:30.726 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.24000000323576387当前游戏奖池:188.94
+2024-05-16T00:12:30.730 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:12:30.881 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:12:30.882 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:0本局预期的倍数区间[11,30]上局赢的线[]
+2024-05-16T00:12:30.882 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:12:30.883 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:12:30.884 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:12:30.884 [INFO ] default - 10448满足条件的倍数数组:[0]
+2024-05-16T00:12:30.885 [INFO ] default - 配牌器开关已打开,配牌:[0,1,2,3,4,5,6,7,8,8,8,0,1,2,3]
+2024-05-16T00:12:30.886 [INFO ] default - 图案排列结果
+2024-05-16T00:12:30.886 [INFO ] default - [ 0, 1, 2, 3, 4 ]
+2024-05-16T00:12:30.886 [INFO ] default - [ 5, 6, 7, 8, 8 ]
+2024-05-16T00:12:30.886 [INFO ] default - [ 8, 0, 1, 2, 3 ]
+2024-05-16T00:12:30.886 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:12:30.888 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.48,"winscore":0,"viewarray":{"code":2,"nHandCards":[1,2,3,4,5,6,7,8,9,9,9,1,2,3,4],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715789550723,"is_free":false,"user_score":15.48},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:12:30.889 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:12:30.894 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:13:25.004 [INFO ] default - 保存库存和奖池
+2024-05-16T00:13:30.518 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:10剩余新手局数:90---------------------------------------
+2024-05-16T00:13:30.519 [INFO ] default - 10448携带金币:15.48下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:13:30.535 [INFO ] default - 10448减少金币:0.1类型:10当前金币:15.38
+2024-05-16T00:13:30.539 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.33500000323692802当前游戏奖池:188.95
+2024-05-16T00:13:30.544 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:13:30.699 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:13:30.700 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:0本局预期的倍数区间[0]上局赢的线[]
+2024-05-16T00:13:30.700 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:13:30.701 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:13:30.702 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:13:30.702 [INFO ] default - 10448满足条件的倍数数组:[0]
+2024-05-16T00:13:30.703 [INFO ] default - 配牌器开关已打开,配牌:[0,1,2,3,4,5,6,7,7,7,7,0,1,2,3]
+2024-05-16T00:13:30.704 [INFO ] default - 图案排列结果
+2024-05-16T00:13:30.704 [INFO ] default - [ 0, 1, 2, 3, 4 ]
+2024-05-16T00:13:30.705 [INFO ] default - [ 5, 6, 7, 7, 7 ]
+2024-05-16T00:13:30.705 [INFO ] default - [ 7, 0, 1, 2, 3 ]
+2024-05-16T00:13:30.705 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:13:30.708 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.38,"winscore":0,"viewarray":{"code":2,"nHandCards":[1,2,3,4,5,6,7,8,8,8,8,1,2,3,4],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715789610537,"is_free":false,"user_score":15.38},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:13:30.709 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:13:30.712 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:14:25.004 [INFO ] default - 保存库存和奖池
+2024-05-16T00:16:57.422 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:16:59.123 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:16:59.128 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.38","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:16:59.132 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.38","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:16:59.143 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:17:25.060 [INFO ] default - 保存库存和奖池
+2024-05-16T00:18:25.001 [INFO ] default - 保存库存和奖池
+2024-05-16T00:19:25.003 [INFO ] default - 保存库存和奖池
+2024-05-16T00:20:25.016 [INFO ] default - 保存库存和奖池
+2024-05-16T00:21:17.568 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:21:18.547 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:21:18.552 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.38","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:21:18.556 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.38","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:21:18.566 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:21:25.041 [INFO ] default - 保存库存和奖池
+2024-05-16T00:22:25.023 [INFO ] default - 保存库存和奖池
+2024-05-16T00:23:25.031 [INFO ] default - 保存库存和奖池
+2024-05-16T00:24:25.023 [INFO ] default - 保存库存和奖池
+2024-05-16T00:25:25.016 [INFO ] default - 保存库存和奖池
+2024-05-16T00:26:23.069 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:26:25.019 [INFO ] default - 保存库存和奖池
+2024-05-16T00:26:26.303 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:26:26.308 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.38","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:26:26.314 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.38","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:26:26.320 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:27:25.025 [INFO ] default - 保存库存和奖池
+2024-05-16T00:28:25.029 [INFO ] default - 保存库存和奖池
+2024-05-16T00:29:25.019 [INFO ] default - 保存库存和奖池
+2024-05-16T00:30:25.005 [INFO ] default - 保存库存和奖池
+2024-05-16T00:31:25.024 [INFO ] default - 保存库存和奖池
+2024-05-16T00:32:25.020 [INFO ] default - 保存库存和奖池
+2024-05-16T00:32:48.544 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:11剩余新手局数:89---------------------------------------
+2024-05-16T00:32:48.545 [INFO ] default - 10448携带金币:15.38下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:32:48.557 [INFO ] default - 10448减少金币:0.1类型:10当前金币:15.28
+2024-05-16T00:32:48.561 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.43000000323809218当前游戏奖池:188.95
+2024-05-16T00:32:48.629 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:32:48.722 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:32:48.723 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-16T00:32:48.724 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:32:48.725 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:32:48.725 [INFO ] default - 10448新手获取玩家当局的倍数区间:[11,30]
+2024-05-16T00:32:48.726 [INFO ] default - 10448满足条件的倍数数组:[22.3,28.5,28.1,12.8,25.5,26.1,11,29.7,21.4,22.5]
+2024-05-16T00:32:48.772 [INFO ] default - 配牌器开关已打开,配牌:[0,1,2,3,4,5,6,7,7,7,7,0,1,2,3]
+2024-05-16T00:32:54.076 [INFO ] default - 图案排列结果
+2024-05-16T00:32:54.077 [INFO ] default - [ 0, 1, 2, 3, 4 ]
+2024-05-16T00:32:54.077 [INFO ] default - [ 5, 6, 7, 7, 7 ]
+2024-05-16T00:32:54.077 [INFO ] default - [ 7, 0, 1, 2, 3 ]
+2024-05-16T00:32:54.077 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:32:54.080 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.28,"winscore":0,"viewarray":{"code":2,"nHandCards":[1,2,3,4,5,6,7,8,8,8,8,1,2,3,4],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715790768559,"is_free":false,"user_score":15.28},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:32:54.081 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:32:54.084 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:33:25.025 [INFO ] default - 保存库存和奖池
+2024-05-16T00:34:25.024 [INFO ] default - 保存库存和奖池
+2024-05-16T00:35:25.021 [INFO ] default - 保存库存和奖池
+2024-05-16T00:36:03.327 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:36:03.676 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:36:03.687 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.28","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:36:03.695 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.28","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:36:03.708 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:36:25.020 [INFO ] default - 保存库存和奖池
+2024-05-16T00:36:35.698 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:12剩余新手局数:88---------------------------------------
+2024-05-16T00:36:35.699 [INFO ] default - 10448携带金币:15.28下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:36:35.710 [INFO ] default - 10448减少金币:0.1类型:10当前金币:15.18
+2024-05-16T00:36:35.716 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.52500000323925633当前游戏奖池:188.95
+2024-05-16T00:36:35.786 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:36:35.870 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:36:35.872 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-16T00:36:35.872 [INFO ] default - 10448是否击中免费:true是否击中bonus玩法:true是否击中jackpot:0
+2024-05-16T00:36:35.873 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:36:35.874 [INFO ] default - 10448新手获取玩家当局的倍数区间:[11,30]
+2024-05-16T00:36:35.874 [INFO ] default - 10448满足条件的倍数数组:[16.1,23.7,15.3,19.2,24,22.1,22.4,25.1,24.8,20.3]
+2024-05-16T00:36:35.921 [INFO ] default - 配牌器开关已打开,配牌:[0,1,2,3,4,5,6,7,7,7,7,0,1,2,3]
+2024-05-16T00:36:42.619 [INFO ] default - 图案排列结果
+2024-05-16T00:36:42.619 [INFO ] default - [ 0, 1, 2, 3, 4 ]
+2024-05-16T00:36:42.620 [INFO ] default - [ 5, 6, 7, 7, 7 ]
+2024-05-16T00:36:42.620 [INFO ] default - [ 7, 0, 1, 2, 3 ]
+2024-05-16T00:36:42.621 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:36:42.624 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.18,"winscore":0,"viewarray":{"code":2,"nHandCards":[1,2,3,4,5,6,7,8,8,8,8,1,2,3,4],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715790995713,"is_free":false,"user_score":15.18},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:36:42.624 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:36:42.628 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:37:16.720 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:13剩余新手局数:87---------------------------------------
+2024-05-16T00:37:16.720 [INFO ] default - 10448携带金币:15.18下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:37:16.732 [INFO ] default - 10448减少金币:0.1类型:10当前金币:15.08
+2024-05-16T00:37:16.735 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.95最低配置:5000
+2024-05-16T00:37:16.737 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.62000000324042048当前游戏奖池:188.95
+2024-05-16T00:37:16.809 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:37:16.899 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:37:16.900 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:0本局预期的倍数区间[11,30]上局赢的线[]
+2024-05-16T00:37:16.900 [INFO ] default - 10448是否击中免费:true是否击中bonus玩法:true是否击中jackpot:0
+2024-05-16T00:37:16.902 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:37:16.902 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:37:16.902 [INFO ] default - 10448满足条件的倍数数组:[0,0]
+2024-05-16T00:37:23.164 [INFO ] default - 图案排列结果
+2024-05-16T00:37:23.165 [INFO ] default - [ 1, 7, 4, 7, 3 ]
+2024-05-16T00:37:23.166 [INFO ] default - [ 6, 2, 7, 4, 3 ]
+2024-05-16T00:37:23.166 [INFO ] default - [ 0, 8, 5, 7, 7 ]
+2024-05-16T00:37:23.166 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:37:23.169 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":15.08,"winscore":0,"viewarray":{"code":2,"nHandCards":[2,8,5,8,4,7,3,8,5,4,1,9,6,8,8],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715791036735,"is_free":false,"user_score":15.08},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:37:23.169 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:37:23.171 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:37:25.022 [INFO ] default - 保存库存和奖池
+2024-05-16T00:38:25.031 [INFO ] default - 保存库存和奖池
+2024-05-16T00:39:25.028 [INFO ] default - 保存库存和奖池
+2024-05-16T00:40:25.018 [INFO ] default - 保存库存和奖池
+2024-05-16T00:41:25.020 [INFO ] default - 保存库存和奖池
+2024-05-16T00:42:07.712 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:42:08.503 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:42:08.507 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.08","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:42:08.512 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.08","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:42:08.520 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:42:25.030 [INFO ] default - 保存库存和奖池
+2024-05-16T00:42:30.222 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:42:30.892 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:42:30.897 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.08","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:42:30.903 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.08","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:42:30.910 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:43:25.006 [INFO ] default - 保存库存和奖池
+2024-05-16T00:44:13.144 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:44:13.363 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:44:13.371 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"15.08","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:44:13.378 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"15.08","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.95,"grand_jackpot":122.81,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:44:13.389 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:44:25.003 [INFO ] default - 保存库存和奖池
+2024-05-16T00:44:56.633 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:14剩余新手局数:86---------------------------------------
+2024-05-16T00:44:56.633 [INFO ] default - 10448携带金币:15.08下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:44:56.642 [INFO ] default - 10448减少金币:0.1类型:10当前金币:14.98
+2024-05-16T00:44:56.645 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.95最低配置:5000
+2024-05-16T00:44:56.647 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.71500000324158464当前游戏奖池:188.96
+2024-05-16T00:44:56.726 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:44:56.825 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:44:56.826 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-16T00:44:56.826 [INFO ] default - 10448是否击中免费:true是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:44:56.828 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:44:56.828 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:44:56.828 [INFO ] default - 10448满足条件的倍数数组:[0,0]
+2024-05-16T00:44:56.881 [INFO ] default - 图案排列结果
+2024-05-16T00:44:56.882 [INFO ] default - [ 5, 9, 1, 0, 8 ]
+2024-05-16T00:44:56.882 [INFO ] default - [ 3, 8, 1, 1, 1 ]
+2024-05-16T00:44:56.883 [INFO ] default - [ 8, 6, 2, 1, 4 ]
+2024-05-16T00:44:56.883 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:44:56.892 [INFO ] default - 10448增加免费次数8成功,当前免费次数:8
+2024-05-16T00:44:56.893 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":14.98,"winscore":0,"viewarray":{"code":2,"nHandCards":[6,10,2,1,9,4,9,2,2,2,9,7,3,2,5],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":true,"nWinOpenBox":0,"win":0},"getFreeTime":{"bFlag":true,"nFreeTime":8},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715791496644,"is_free":true,"user_score":14.98},"winfreeCount":8,"freeCount":8}}
+2024-05-16T00:44:56.893 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:44:56.896 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:45:06.447 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:15剩余新手局数:85---------------------------------------
+2024-05-16T00:45:06.448 [INFO ] default - 10448携带金币:14.98下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:45:06.455 [INFO ] default - 10448扣免费次数1成功,扣前次数:8当前免费次数:7
+2024-05-16T00:45:06.456 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.96最低配置:5000
+2024-05-16T00:45:06.458 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.81000000324274879当前游戏奖池:188.96
+2024-05-16T00:45:06.533 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:45:06.628 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:45:06.630 [INFO ] default - 10448上局回顾,上局是否免费:true上局是否击中特殊玩法true上局实际倍数:0本局预期的倍数区间[0]上局赢的线[]
+2024-05-16T00:45:06.630 [INFO ] default - 10448是否击中免费:true是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:45:06.631 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:45:06.632 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:45:06.632 [INFO ] default - 10448满足条件的倍数数组:[0,0]
+2024-05-16T00:45:06.684 [INFO ] default - 图案排列结果
+2024-05-16T00:45:06.684 [INFO ] default - [ 2, 4, 8, 9, 5 ]
+2024-05-16T00:45:06.684 [INFO ] default - [ 0, 8, 2, 8, 3 ]
+2024-05-16T00:45:06.685 [INFO ] default - [ 9, 5, 2, 6, 9 ]
+2024-05-16T00:45:06.685 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:45:06.687 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":14.98,"winscore":0,"viewarray":{"code":2,"nHandCards":[3,5,9,10,6,1,9,3,9,4,10,6,3,7,10],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":true,"nWinOpenBox":0,"win":0},"getFreeTime":{"bFlag":true,"nFreeTime":7,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715791506456,"is_free":true,"user_score":14.98},"winfreeCount":0,"freeCount":7}}
+2024-05-16T00:45:06.688 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:45:06.690 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:45:25.022 [INFO ] default - 保存库存和奖池
+2024-05-16T00:46:25.022 [INFO ] default - 保存库存和奖池
+2024-05-16T00:47:25.019 [INFO ] default - 保存库存和奖池
+2024-05-16T00:47:29.712 [INFO ] default - 拉霸_272_jungledelight服务器启动
+2024-05-16T00:47:30.048 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:47:30.056 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"14.98","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"7"}}
+2024-05-16T00:47:30.063 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"14.98","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.96,"grand_jackpot":122.82,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:47:30.082 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:47:34.417 [WARN ] default - 未更新用户数据离开
+2024-05-16T00:47:39.645 [INFO ] default - 用户已经在服务器了，覆盖登录,原socket:/#6c5Bo-HBc-kxG0dTAAAA现socket：/#Mu40vvKT8oh-gYU9AAAB
+2024-05-16T00:47:39.645 [INFO ] default - 10448用户登录游戏服务，游戏请求大厅服务
+2024-05-16T00:47:39.649 [INFO ] default - jungledelight登录大厅回应{"ResultCode":1,"userInfo":{"userId":"10448","account":"abc2024051600012001","nickname":"USER4560102","headimgurl":"3","score":"14.98","diamond":"0","sign":"d41d8cd98f00b204e9800998ecf8427e","newHandFlag":"1","freeCount":"0"}}
+2024-05-16T00:47:39.654 [INFO ] default - 10448给用户回应登录结果{"resultid":"1","msg":"login lineserver succeed!","Obj":{"account":"abc2024051600012001","id":"10448","nickname":"USER4560102","score":"14.98","priceList":[5,8,40,5,8,50,6,10,60,8,20,80,10,30,100,30,60,300,100,300,1000,0,0,0,0,0,0,0,0,0,0,0,0],"jackpot":{"gameJackpot":188.96,"grand_jackpot":122.82,"major_jackpot":37.79,"minor_jackpot":18.89,"mini_jackpot":9.44}}}
+2024-05-16T00:47:39.659 [INFO ] default - 10448从数据库里获得免费次数0
+2024-05-16T00:47:42.596 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:16剩余新手局数:84---------------------------------------
+2024-05-16T00:47:42.597 [INFO ] default - 10448携带金币:14.98下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:47:42.612 [INFO ] default - 10448减少金币:0.1类型:10当前金币:14.88
+2024-05-16T00:47:42.614 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.96最低配置:5000
+2024-05-16T00:47:42.616 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933676.90500000324391294当前游戏奖池:188.96
+2024-05-16T00:47:42.699 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:47:42.800 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:47:42.803 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法undefined上局实际倍数:0本局预期的倍数区间[]上局赢的线undefined
+2024-05-16T00:47:42.804 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:47:42.806 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:47:42.806 [INFO ] default - 10448新手获取玩家当局的倍数区间:[51,100]
+2024-05-16T00:47:42.806 [INFO ] default - 10448满足条件的倍数数组:[65.9,81.7,59.7,53.3,74.6,76.9,87,89.8,61,63.5]
+2024-05-16T00:47:42.862 [INFO ] default - 图案排列结果
+2024-05-16T00:47:42.863 [INFO ] default - [ 2, 0, 6, 9, 0 ]
+2024-05-16T00:47:42.863 [INFO ] default - [ 9, 6, 5, 6, 6 ]
+2024-05-16T00:47:42.864 [INFO ] default - [ 0, 9, 2, 5, 5 ]
+2024-05-16T00:47:42.864 [INFO ] default - 10448下注:0.1赢:5.33win:5.33winJackpot:0openBoxCardWin:0
+2024-05-16T00:47:42.875 [INFO ] default - 10448增加金币5.33类型:10当前金币:20.21
+2024-05-16T00:47:42.877 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":20.21,"winscore":5.33,"viewarray":{"code":2,"nHandCards":[3,1,7,10,1,10,7,6,7,7,1,10,3,6,6],"nWinLines":[7,11,14],"nWinLinesDetail":[[5,11,12],[5,6,2,8,9],[5,11,7,13]],"nWinDetail":[0.03,5,0.3],"nBet":0.1,"win":5.33,"nWinCards":[null,null,true,null,null,true,true,true,true,true,null,true,true,true],"getOpenBox":{"bFlag":false,"nWinOpenBox":0},"getFreeTime":{"bFlag":false,"nFreeTime":0,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":1066,"mul":0,"nWinCardsDetail":[[9,9,2,5,6],[9,6,6,6,6],[9,9,5,5,6]],"nBetTime":1715791662613,"is_free":false,"user_score":20.21},"winfreeCount":0,"freeCount":0}}
+2024-05-16T00:47:42.877 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:47:42.880 [INFO ] default - 10448中奖大于配置，侧边栏展示
+2024-05-16T00:47:42.883 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:48:10.185 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:17剩余新手局数:83---------------------------------------
+2024-05-16T00:48:10.185 [INFO ] default - 10448携带金币:20.21下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:48:10.199 [INFO ] default - 10448减少金币:0.1类型:10当前金币:20.11
+2024-05-16T00:48:10.202 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.96最低配置:5000
+2024-05-16T00:48:10.204 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933671.67000000324333087当前游戏奖池:188.96
+2024-05-16T00:48:10.288 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:48:10.393 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:48:10.394 [INFO ] default - 10448上局回顾,上局是否免费:false上局是否击中特殊玩法false上局实际倍数:53.3本局预期的倍数区间[-2.299999999999997,46.7]上局赢的线[[5,11,12],[5,6,2,8,9],[5,11,7,13]]
+2024-05-16T00:48:10.395 [INFO ] default - 10448是否击中免费:true是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:48:10.397 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:48:10.397 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:48:10.397 [INFO ] default - 10448满足条件的倍数数组:[0,0]
+2024-05-16T00:48:10.452 [INFO ] default - 图案排列结果
+2024-05-16T00:48:10.453 [INFO ] default - [ 2, 3, 4, 2, 5 ]
+2024-05-16T00:48:10.453 [INFO ] default - [ 8, 4, 8, 3, 0 ]
+2024-05-16T00:48:10.453 [INFO ] default - [ 0, 4, 4, 8, 5 ]
+2024-05-16T00:48:10.454 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:48:10.456 [INFO ] default - 10448增加免费次数8成功,当前免费次数:8
+2024-05-16T00:48:10.457 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":20.11,"winscore":0,"viewarray":{"code":2,"nHandCards":[3,4,5,3,6,9,5,9,4,1,1,5,5,9,6],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":true,"nWinOpenBox":0,"win":0},"getFreeTime":{"bFlag":true,"nFreeTime":8},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715791690201,"is_free":true,"user_score":20.11},"winfreeCount":8,"freeCount":8}}
+2024-05-16T00:48:10.458 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:48:10.460 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:48:20.009 [INFO ] default - ---------------------------------------10448本局为新手用户,总充值:0.00非新手需要充值大于30或者新手局数不足，当前配置局数:18剩余新手局数:82---------------------------------------
+2024-05-16T00:48:20.010 [INFO ] default - 10448携带金币:20.11下注:0.1携带银行金币:0.00VIP等级:0
+2024-05-16T00:48:20.015 [INFO ] default - 10448扣免费次数1成功,扣前次数:8当前免费次数:7
+2024-05-16T00:48:20.017 [INFO ] default - 当前奖池小于配置最低奖池直接跳过奖池，当前奖池:188.96最低配置:5000
+2024-05-16T00:48:20.019 [INFO ] default - 10448水位:5添加库存:0.095添加奖池:0.005当前库存:99933671.76500000324449502当前游戏奖池:188.97
+2024-05-16T00:48:20.096 [INFO ] default - 获取游戏所有倍数
+2024-05-16T00:48:20.193 [INFO ] default - 获取游戏最小倍数对应的图案组合
+2024-05-16T00:48:20.195 [INFO ] default - 10448上局回顾,上局是否免费:true上局是否击中特殊玩法true上局实际倍数:0本局预期的倍数区间[0]上局赢的线[]
+2024-05-16T00:48:20.195 [INFO ] default - 10448是否击中免费:false是否击中bonus玩法:false是否击中jackpot:0
+2024-05-16T00:48:20.196 [INFO ] default - 10448倍数区间二维数组:[[0],[1],[2,10],[11,30],[31,50],[51,100],[501,2000]]
+2024-05-16T00:48:20.197 [INFO ] default - 10448新手获取玩家当局的倍数区间:[0]
+2024-05-16T00:48:20.197 [INFO ] default - 10448满足条件的倍数数组:[0]
+2024-05-16T00:48:20.248 [INFO ] default - 图案排列结果
+2024-05-16T00:48:20.248 [INFO ] default - [ 5, 4, 5, 0, 3 ]
+2024-05-16T00:48:20.248 [INFO ] default - [ 6, 3, 6, 5, 5 ]
+2024-05-16T00:48:20.249 [INFO ] default - [ 6, 8, 2, 0, 8 ]
+2024-05-16T00:48:20.249 [INFO ] default - 10448下注:0.1赢:0win:0winJackpot:0openBoxCardWin:0
+2024-05-16T00:48:20.252 [INFO ] default - 10448摇奖结果{"ResultCode":1,"ResultData":{"userscore":20.11,"winscore":0,"viewarray":{"code":2,"nHandCards":[6,5,6,1,4,7,4,7,6,6,7,9,3,1,9],"nWinLines":[],"nWinLinesDetail":[],"nWinDetail":[],"nBet":0.1,"win":0,"nWinCards":[],"getOpenBox":{"bFlag":true,"nWinOpenBox":0,"win":0},"getFreeTime":{"bFlag":true,"nFreeTime":7,"nIndex":0,"card":[],"cardList":[]},"bonusList":[null,null,null],"getBigWin":{"bFlag":false},"getJackpot":{"bFlag":false,"bVal":0},"fWildNum":0,"fWildTotalNum":0,"goldWin":[],"goldWinDetail":{},"nMultiple":0,"mul":0,"nWinCardsDetail":[],"nBetTime":1715791700016,"is_free":true,"user_score":20.11},"winfreeCount":0,"freeCount":7}}
+2024-05-16T00:48:20.252 [INFO ] default - 10448摇奖结束--------------------------------------------------------------------------
+2024-05-16T00:48:20.254 [INFO ] default - 10448单笔投注:0.1提升提现额度:0.01
+2024-05-16T00:48:25.031 [INFO ] default - 保存库存和奖池
+2024-05-16T00:49:25.023 [INFO ] default - 保存库存和奖池
+2024-05-16T00:50:25.009 [INFO ] default - 保存库存和奖池
