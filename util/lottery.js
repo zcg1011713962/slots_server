@@ -350,7 +350,7 @@ function Lottery(config, gameInfo, callback) {
     const result = {
         nHandCards: [], // 图案
         winFlag: false, // 输赢标识
-        winItem:{       // 赢金币类型
+        winItem:{       // 赢金币类型(cardsHandle方法内赋值)
             win : 0,
             winJackpot: 0,
             openBoxCardWin: 0,
@@ -393,7 +393,7 @@ function Lottery(config, gameInfo, callback) {
                 }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
                     hitFree = true;
                 }
-                if(config.gameId === 272 && lastTimeRecord.free){ // 浣熊免费模式不叠加
+                if(config.gameId === 272 && parseInt(config.feeBeforeFreeCount) > 0){ // 浣熊免费模式不叠加
                     hitFree = false;
                 }
 
@@ -670,11 +670,11 @@ function cardsHandle (config, result, user){
             if(config.gameId === 285){
                 bet = StringUtil.divNumbers(config.nBetSum, 40, 2)
             }
-            // 列数判断型（大象,野牛）
+            // 列数判断型（大象,公牛）
             LABA.AnalyseColumnSolt(result.nHandCards, config.nGameMagicCardIndex, config.freeCards, config.freeTimes, config.nGameLineWinLowerLimitCardNumber, config.col_count, bet , result.winItem.winJackpot, config.icon_mul, result, config.gameId);
             break;
         case TypeEum.GameType.laba_normal:
-            // 普通判断型 (老虎，轮子，转盘)
+            // 普通判断型 (老虎，轮子，转盘,挖矿)
             LABA.HandCardsAnalyse(result.nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, result.winItem.winJackpot, config.freeCards, config.freeTimes, config, result);
             break;
         case TypeEum.GameType.laba_single:
@@ -746,6 +746,10 @@ function specialPlayMethBefore(config, result, user){
         if(parseInt(config.feeBeforeFreeCount) > 0 || len > 3){
             LABA.DigDigDiggerOpenBox(result);
         }
+        // 没有免费次数
+        if(parseInt(config.feeBeforeFreeCount) < 1){
+            user.setFreeSymbolList([]);
+        }
     }
 }
 
@@ -794,7 +798,8 @@ function specialPlayMethAfter(config, result, user){
                 case 5:
                     num = 15;
                     break;
-
+                default:
+                    break;
             }
             result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": num};
         }
@@ -813,7 +818,7 @@ function specialPlayMethAfter(config, result, user){
                 mul = 5
             }
             result.dictAnalyseResult["win"] *= mul;
-            log.info(config.userId + '公牛特殊模式,连线win:' + result.dictAnalyseResult["win"])
+            log.info(config.userId + '公牛特殊模式,百变数量:' + wildCount + '倍数:' + mul + '连线win:' + result.dictAnalyseResult["win"])
         }
     }else if(config.gameId === 287){
         // 轮子特殊bouns
@@ -841,14 +846,17 @@ function specialPlayMethAfter(config, result, user){
     }else if(config.gameId === 286){
         let freeNum = result.nHandCards.filter(card => card === config.nGameMagicCardIndex).length;
         // 挖矿游戏特殊玩法
-        if (freeNum >= 3) {
+        if (freeNum >= 3 && parseInt(config.feeBeforeFreeCount) < 1) {
             let ran = StringUtil.RandomNumBoth(0,8);
             let card = [ran + 1];
+
+            const cardList = [...user.getFreeSymbolList(), ...card];
+            log.info('挖出矿卡下标:' + (card -1) + '矿卡集合:' + cardList);
             result.dictAnalyseResult["getFreeTime"] = {
                 "bFlag": true,
                 "nFreeTime": 10,
                 "card": card,
-                "cardList": [...user.getFreeSymbolList(), ...card]
+                "cardList": cardList
             };
             //计算免费牌中奖
             let winline = [];
@@ -868,13 +876,18 @@ function specialPlayMethAfter(config, result, user){
                 case 5:
                     mul = 200;
                     break;
+                default:
+                    break;
             }
             result.dictAnalyseResult["nWinLinesDetail"].push(winline);
-            result.dictAnalyseResult["win"] += mul * config.nBetSum;
-            result.dictAnalyseResult["nWinDetail"].push(mul *  config.nBetSum);
+            const win = result.dictAnalyseResult["win"] ?  result.dictAnalyseResult["win"] : 0;
+            result.dictAnalyseResult["win"] = StringUtil.addNumbers(win, StringUtil.rideNumbers(mul, config.nBetSum, 2));
+            result.dictAnalyseResult["nWinDetail"].push(StringUtil.rideNumbers(mul, config.nBetSum, 2));
             for (let a in winline) {
                 result.dictAnalyseResult["nWinCards"][winline[a]] = true;
             }
+            // 合并数组
+            user.setFreeSymbolList(user.getFreeSymbolList().concat(result.dictAnalyseResult["getFreeTime"]["card"]));
         }
 
         //计算免费模式特殊牌中奖
@@ -942,9 +955,13 @@ function specialPlayMethAfter(config, result, user){
                         }
                         gWinLinesDetail.push(yl);
                         let nMultiple = config.icon_mul[parseInt(i) - 1][yl.length - config.nGameLineWinLowerLimitCardNumber];
-                        const bet = StringUtil.divNumbers(config.nBetSum, config.nGameLines.length)
-                        gWinDetail.push(bet * nMultiple);
-                        result.dictAnalyseResult["win"] += bet * nMultiple;
+                        if(nMultiple === undefined){
+                            log.info('---------------parseInt(i) - 1:' + parseInt(i) - 1 +'yl.length:'+ yl.length);
+                        }
+                        nMultiple = nMultiple ? nMultiple : 0
+                        const bet = StringUtil.divNumbers(config.nBetSum, config.nGameLines.length, 2);
+                        gWinDetail.push(StringUtil.rideNumbers(bet ,nMultiple, 2));
+                        result.dictAnalyseResult["win"] = StringUtil.addNumbers(result.dictAnalyseResult["win"], StringUtil.rideNumbers(bet ,nMultiple, 2));
                     }
                     gl = {
                         gWinCards: gWinCards,
@@ -954,14 +971,9 @@ function specialPlayMethAfter(config, result, user){
                     goldWinDetail[i] = gl;
                 }
             }
+            log.info('freeSymbolList:' + user.getFreeSymbolList())
             result.dictAnalyseResult["goldWinDetail"] = goldWinDetail;
         }
-        if (result.dictAnalyseResult["getFreeTime"]["bFlag"]) {
-            // 合并数组
-            user.setFreeSymbolList(user.getFreeSymbolList().concat(result.dictAnalyseResult["getFreeTime"]["card"]));
-        }
-
-        // user.setFreeSymbolList([]);
     }
 }
 

@@ -15,12 +15,9 @@ const pool = mysql.createPool({
 
 //获得免费次数
 exports.getFreeCount = function (gameId, userInfo, callback_c) {
-
     pool.getConnection(function (err, connection) {
-
-        var values = [];
+        let values = [];
         values.push(parseInt(gameId.toString() + userInfo.toString()));
-
         async.waterfall([
             function (callback) {
                 var sql = "select * from useraccounts where Id=?";
@@ -70,16 +67,37 @@ exports.getFreeCount = function (gameId, userInfo, callback_c) {
 };
 
 //保存免费次数
-exports.saveFree = function saveFree(gameId, userInfo, callback) {
-
-    var sql = "UPDATE useraccounts SET freeCount=?,LotteryCount=? WHERE Id =?";
-    var values = [];
-
+exports.saveFree = function (gameId, userInfo, callback) {
+    const sql = "UPDATE useraccounts SET freeCount=?,LotteryCount=? WHERE Id =?";
+    let values = [];
     values.push(userInfo.freeCount);
     values.push(userInfo.LotteryCount);
     values.push(parseInt(gameId.toString() + userInfo.userId.toString()));
     pool.getConnection(function (err, connection) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+};
 
+
+
+//保存免费次数
+exports.saveDigDigDiggerFree = function (gameId, userInfo, callback) {
+    const sql = "UPDATE useraccounts SET freeCount=?,LotteryCount=?,gameDict=? WHERE Id =?";
+    let values = [];
+    values.push(userInfo.freeCount);
+    values.push(userInfo.LotteryCount);
+    values.push(userInfo.gameDict);
+    values.push(parseInt(gameId.toString() + userInfo.userId.toString()));
+    pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
             if (err) {
                 console.log(err);
@@ -88,12 +106,11 @@ exports.saveFree = function saveFree(gameId, userInfo, callback) {
                 callback(1);
             }
         });
-
         connection.release();
         values = [];
-
     });
 };
+
 
 //增加免费次数
 exports.addFreeCount = function (gameId, userId, freeCount, callback) {
@@ -103,6 +120,7 @@ exports.addFreeCount = function (gameId, userId, freeCount, callback) {
     values.push(parseInt(gameId.toString() + userId.toString()));
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
             if (err) {
                 console.log(err);
                 callback(0);
@@ -110,7 +128,6 @@ exports.addFreeCount = function (gameId, userId, freeCount, callback) {
                 callback(1);
             }
         });
-        connection.release();
         values = [];
     });
 }
@@ -122,6 +139,7 @@ exports.reduceFreeCount = function (gameId, userId, callback) {
     values.push(parseInt(gameId.toString() + userId.toString()));
     pool.getConnection(function (err, connection) {
         connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
             if (err) {
                 console.log(err);
                 callback(0);
@@ -129,7 +147,6 @@ exports.reduceFreeCount = function (gameId, userId, callback) {
                 callback(1);
             }
         });
-        connection.release();
         values = [];
     });
 };
@@ -141,6 +158,11 @@ exports.lotteryLog = function lotteryLog(gameId, userInfo, callback) {
     const values = [];
 
     pool.getConnection(function (err, connection) {
+        if(err){
+            if(connection) connection.release();
+            log.err('lotteryLog' + err);
+            return;
+        }
         for (let i = 0; i < userInfo.length; i++) {
             values.push(userInfo[i].userid);
             values.push(userInfo[i].bet);
@@ -153,85 +175,38 @@ exports.lotteryLog = function lotteryLog(gameId, userInfo, callback) {
             values.push(userInfo[i].free_count_win);
             values.push(userInfo[i].free_count_current);
             values.push(userInfo[i].result_array);
-
             if (userInfo[i].free_count_before > 0 && userInfo[i].score_win === 0) {
                 values.push(1);
             } else {
                 values.push(0);
             }
         }
-        try{
-            connection.query({sql: sql, values: values}, function (err, rows) {
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            try{
+                connection.release();
                 if (err) {
                     log.err("lotteryLog");
                     log.err(err);
                 }
-                connection.release();
-            });
-        }catch (e){
-            log.err(e);
-        }
-    });
-
-};
-
-//奖池记录
-exports.Update_score_pool = function Update_score_pool(poollist, Virtualpool, poollistId, callback) {
-    var sql = "UPDATE score_pool SET score_pool=? WHERE id = ?";
-
-    pool.getConnection(function (err, connection) {
-        for (var i = 0; i <= poollistId.length; ++i) {
-            var values = [];
-            if (i != poollistId.length) {
-                values.push(poollist[i]);
-                values.push(poollistId[i]);
-            } else {
-                values.push(Virtualpool);
-                values.push(0);
-            }
-            connection.query({sql: sql, values: values}, function (err, rows) {
-                if (err) {
-                    console.log(err);
-                }
-            })
-        }
-        connection.release();
-    });
-};
-
-//获得奖池最新记录
-exports.getScore_pools = function getScore_pools(callback) {
-    var sql = "SELECT * FROM score_pool";
-    pool.getConnection(function (err, connection) {
-
-        connection.query({sql: sql}, function (err, rows) {
-            if (err) {
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows.length == 0) {
-                    callback(0);
-                } else {
-                    callback(rows);
-                }
+            }catch (e){
+                if(connection) connection.release();
+                log.err(e);
             }
         });
-        connection.release();
-
     });
+
 };
 
 
 //===========================================================================================================================================================
 //获得拉霸水位和库存 奖池最新记录
 exports.getGamblingGame = function getGamblingGame(callback) {
-
-    var sql = "SELECT * FROM gambling_game_list WHERE nGameID = ?";
-    var values = [];
+    const sql = "SELECT * FROM gambling_game_list WHERE nGameID = ?";
+    const values = [];
     values.push(gameConfig.gameId);
     pool.getConnection(function (err, connection) {
-
         connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
             if (err) {
                 console.log(err);
                 callback(0);
@@ -243,27 +218,22 @@ exports.getGamblingGame = function getGamblingGame(callback) {
                 }
             }
         });
-        connection.release();
-
     });
 };
 
 //保存库存奖池
 exports.Update_GamblingBalanceGold = function Update_GamblingBalanceGold(nGamblingBalanceGold, nSysBalanceGold, callback) {
-    var sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?,nSysBalanceGold= ?  WHERE nGameID = ?";
-
+    const sql = "UPDATE gambling_game_list SET nGamblingBalanceGold=?,nSysBalanceGold= ?  WHERE nGameID = ?";
     pool.getConnection(function (err, connection) {
         const values = [nGamblingBalanceGold, nSysBalanceGold, gameConfig.gameId];
         console.log("用户库存 系统库存 游戏ID");
         console.log(values);
         connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
             if (err) {
                 console.log(err);
             }
         });
-
-        connection.release();
-
     });
 };
 
@@ -277,6 +247,7 @@ exports.insertBatchCards = function (batchData, gameId) {
         pool.getConnection(function (err, connection) {
             if(err){
                 log.err('插入图案组合' + err);
+                connection.release();
                 reject(err);
                 return;
             }
@@ -296,7 +267,9 @@ exports.searchCardsGroupByMul = function (gameId, callback) {
     const sql = 'SELECT mul,GROUP_CONCAT(card SEPARATOR \'|\') AS cards FROM cards_' + gameId + ' GROUP BY mul';
     pool.getConnection(function (err, connection) {
         if(err){
+            connection.release();
             log.err('查询图案组合' + err);
+            callback(0);
             return;
         }
         connection.query({sql: sql, values: []}, function (err, rows) {
@@ -320,6 +293,7 @@ exports.handCardsMuls = function (gameId, callback) {
     const sql = 'select DISTINCT mul from la_ba.cards_'+ gameId;
     pool.getConnection(function (err, connection) {
         if(err){
+            connection.release();
             log.err('handCardsMuls' + err);
             return;
         }
@@ -378,6 +352,7 @@ exports.handCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot,
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('handCardsByMuls' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -414,6 +389,7 @@ exports.syncHandCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJack
             if (err) {
                 log.err('handCardsByMuls' + err);
                 reject(0);
+                connection.release();
                 return;
             }
             connection.query({sql: sql, values: valuse}, function (err, rows) {

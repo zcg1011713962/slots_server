@@ -22,7 +22,7 @@ User = function(userInfo,_socket){
     };
 
     this.update = function (_userInfo) {
-        if (_userInfo.userId === this._userId) {
+        if (parseInt(_userInfo.userId ) === parseInt(this._userId)) {
             this._account = _userInfo.account;
             this._nickname = _userInfo.nickname;
             this._islogin = true;

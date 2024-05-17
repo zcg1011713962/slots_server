@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 
 
 
-exports.googleLogin = function googleLogin(user, socket, callback){
+exports.googleLogin = function (user, socket, callback){
     // google登录
     const sql = 'CALL LoginByGoogle(?,?,?)';
     let values = [];
@@ -29,6 +29,7 @@ exports.googleLogin = function googleLogin(user, socket, callback){
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -54,11 +55,12 @@ exports.googleLogin = function googleLogin(user, socket, callback){
         })
     });
 }
-exports.pwdLogin = function pwdLogin(user, socket, callback){
+exports.pwdLogin = function (user, socket, callback){
     const sql = 'CALL LoginByPassword(?,?)';
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -85,13 +87,14 @@ exports.pwdLogin = function pwdLogin(user, socket, callback){
 }
 
 // 邮箱登录
-exports.emailLogin =  function emailLogin(user, socket, callback){
+exports.emailLogin =  function (user, socket, callback){
     // email登录
     const sql = 'CALL LoginByEmail(?)';
 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -118,13 +121,14 @@ exports.emailLogin =  function emailLogin(user, socket, callback){
 }
 
 // token登录
-exports.tokenLogin = function tokenLogin(user, socket, callback){
+exports.tokenLogin = function (user, socket, callback){
     // email登录
     const sql = 'CALL LoginByToken(?)';
 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -151,12 +155,13 @@ exports.tokenLogin = function tokenLogin(user, socket, callback){
 }
 
 // 邮箱查询
-exports.emailSearch = function emailSearch(email, callback){
+exports.emailSearch = function (email, callback){
     const sql = 'CALL LoginByEmail(?)';
 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -177,7 +182,7 @@ exports.emailSearch = function emailSearch(email, callback){
 }
 
 // 邮箱绑定
-exports.emailBind = function emailBind(userId , email, callback){
+exports.emailBind = function (userId , email, callback){
     const sql = 'update newuseraccounts set email = ? where id = ?';
     let values = [];
     values.push(email)
@@ -186,6 +191,7 @@ exports.emailBind = function emailBind(userId , email, callback){
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -206,7 +212,7 @@ exports.emailBind = function emailBind(userId , email, callback){
 }
 
 // 邮箱注册
-exports.registerByEmail = function registerByEmail(socket, email, account, pwd, nickname, king,  callback){
+exports.registerByEmail = function (socket, email, account, pwd, nickname, king,  callback){
     // email登录
     const sql = 'CALL RegisterByEmail(?,?,?,?,?)';
     let values = [];
@@ -219,6 +225,7 @@ exports.registerByEmail = function registerByEmail(socket, email, account, pwd, 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -257,6 +264,7 @@ exports.registerByGoogle = function registerByGoogle(user, account, pwd, nicknam
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -289,6 +297,7 @@ exports.saveInviteCode = function saveInviteCode(userId, inviteCode){
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -305,7 +314,7 @@ exports.saveInviteCode = function saveInviteCode(userId, inviteCode){
 
 
 // 游客注册
-exports.RegisterByGuest = function RegisterByGuest(userInfo, callback) {
+exports.RegisterByGuest = function (userInfo, callback) {
     const sql = 'call RegisterByGuest(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
     let values = [];
 
@@ -369,6 +378,7 @@ exports.RegisterByGuest = function RegisterByGuest(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -402,6 +412,7 @@ exports.SetPassword = function SetPassword(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -428,6 +439,7 @@ exports.logoutAccount = function logoutAccount(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -439,66 +451,6 @@ exports.logoutAccount = function logoutAccount(userId, callback) {
                 callback(0);
             } else {
                 callback(1);
-            }
-        });
-        values = [];
-    });
-};
-
-//更新手机号码
-exports.SetPhoneNo = function SetPhoneNo(userInfo, callback) {
-    const sql = 'UPDATE newuseraccounts SET phoneNo=? WHERE Id=?';
-    let values = [];
-    values.push(userInfo.phoneNo);
-    values.push(userInfo.Id);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("SetPhoneNo");
-                console.log(err);
-                callback(0);
-            } else {
-                callback(1);
-            }
-        });
-        values = [];
-    });
-};
-
-
-//检查电话号码
-exports.phoneCheck = function phoneCheck(userInfo, callback) {
-    const sql = 'call checkPhone(?,?)';
-    let values = [];
-    values.push(userInfo.userId);
-    values.push(userInfo.phone);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("phoneCheck");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows[0]) {
-                    callback(rows[0][0].rcode);
-                } else {
-                    callback(0);
-                }
-
             }
         });
         values = [];
@@ -538,6 +490,7 @@ exports.batchUpdateAccount = function batchUpdateAccount(userList, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -569,6 +522,7 @@ exports.getUserId = function getUserId(accountname, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -592,7 +546,7 @@ exports.getUserId = function getUserId(accountname, callback) {
 };
 
 // 查询用户id
-exports.webGetUser = function webGetUser(accountname, callback) {
+exports.webGetUser = function (accountname, callback) {
     const sql = 'SELECT newuseraccounts.nickname,userinfo_imp.* FROM newuseraccounts LEFT JOIN userinfo_imp ON newuseraccounts.`Id` = userinfo_imp.`userId` WHERE Account=?';
     let values = [];
 
@@ -601,6 +555,7 @@ exports.webGetUser = function webGetUser(accountname, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -623,7 +578,7 @@ exports.webGetUser = function webGetUser(accountname, callback) {
 };
 
 
-exports.searchUserById = function searchUserById(userId, callback) {
+exports.searchUserById = function (userId, callback) {
     const sql = 'SELECT a.*,b.*, c.* FROM newuseraccounts a LEFT JOIN userinfo_imp b ON a.`Id` = b.`userId` LEFT JOIN userinfo c ON a.`Id` = c.`userId`  WHERE a.ID=?';
     let values = [];
 
@@ -632,6 +587,7 @@ exports.searchUserById = function searchUserById(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -663,6 +619,7 @@ exports.addGetBustTimes = function addGetBustTimes(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -686,7 +643,7 @@ exports.addGetBustTimes = function addGetBustTimes(userId, callback) {
 
 
 //查询注册ip是否存在
-exports.getUserIdByIp = function getUserIdByIp(ip, callback) {
+exports.getUserIdByIp = function (ip, callback) {
     const sql = 'SELECT Id FROM newuseraccounts WHERE loginip=?';
     let values = [];
     values.push(ip);
@@ -694,6 +651,7 @@ exports.getUserIdByIp = function getUserIdByIp(ip, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -716,7 +674,7 @@ exports.getUserIdByIp = function getUserIdByIp(ip, callback) {
 };
 
 //查询用户剩余金币
-exports.getUserCoinById = function getUserCoinById(userid, callback) {
+exports.getUserCoinById = function (userid, callback) {
     const sql = 'SELECT score FROM userinfo_imp WHERE userId=?';
     let values = [];
     values.push(userid);
@@ -724,6 +682,7 @@ exports.getUserCoinById = function getUserCoinById(userid, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -753,6 +712,7 @@ exports.getBankPwdById = function getBankPwdById(userid, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -784,6 +744,7 @@ exports.updateBankPwdById = function updateBankPwdById(pwd, userid, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -818,6 +779,7 @@ exports.updateNewHandFlag = function (userId, newHandFlag, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -847,6 +809,7 @@ exports.checkNickName = function checkNickName(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -876,6 +839,7 @@ exports.checkNickName2 = function checkNickName2(userName, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -906,6 +870,7 @@ exports.updateNickName = function updateNickName(userId, nickname, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -934,6 +899,7 @@ exports.checkVip = function checkVip(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -956,8 +922,8 @@ exports.checkVip = function checkVip(userId, callback) {
 };
 
 // 订单记录
-exports.orderRecord = function (userId, orderId, productId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit, callback) {
-    const sql = 'INSERT INTO pay_order (orderId, userId, productId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ';
+exports.orderRecord = function (userId, orderId, productId, amount, currencyType, vipLevel, goodsType, price, group, service, mul, shopType, val, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit,silverCoin, callback) {
+    const sql = 'INSERT INTO pay_order (orderId, userId, productId, amount, currencyType, vipLevel, goodsType, price, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, promoteWithdrawLimit,silverCoin) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?) ';
 
     let values = [];
     values.push(orderId);
@@ -980,11 +946,12 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
     values.push(payChannel);
     values.push(payType);
     values.push(promoteWithdrawLimit);
-
+    values.push(silverCoin);
 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1009,7 +976,7 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
 
 // 查询未支付的指定订单
 exports.searchOrder = function searchOrder(userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId, silverCoin FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -1018,6 +985,7 @@ exports.searchOrder = function searchOrder(userId, orderId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1043,7 +1011,7 @@ exports.searchOrder = function searchOrder(userId, orderId, callback) {
 
 // 查询已经支付的指定订单
 exports.searchPayOrder = function (userId, orderId, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId, silverCoin FROM pay_order where orderId = ? and userId = ? and status in(?,?)';
     let values = [];
     values.push(orderId);
     values.push(userId);
@@ -1052,6 +1020,7 @@ exports.searchPayOrder = function (userId, orderId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1077,7 +1046,7 @@ exports.searchPayOrder = function (userId, orderId, callback) {
 
 // 查询所有未支付订单
 exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId FROM pay_order where status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payType, productId, silverCoin FROM pay_order where status = ? or status = ?';
     let values = [];
     values.push(TypeEnum.OrderStatus.create);
     values.push(TypeEnum.OrderStatus.paying);
@@ -1086,6 +1055,7 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1109,7 +1079,7 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
 
 // 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, productId, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, productId,silverCoin, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
     let values = [];
     values.push(userId);
     values.push(payStatus[0]);
@@ -1118,6 +1088,7 @@ exports.searchAllOrder = function (userId, payStatus, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1148,6 +1119,7 @@ exports.searchBetRecord = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1183,6 +1155,7 @@ exports.betRecord = function (userId,gameId,gameName,betSum,promoteWithdrawLimit
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1213,6 +1186,7 @@ exports.unLockWithdrawPage = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1243,6 +1217,7 @@ exports.searchWithdrawPageStatus = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1271,8 +1246,8 @@ exports.searchFirstRechargeGoodsEndTime = function (userId, day,  callback) {
         // 先查询 userId 是否存在
         connection.query('SELECT firstRechargeGoodsEndTime FROM userinfo WHERE userId = ?', [userId], function (error, results, fields) {
             if (error) {
-                callback(0)
                 connection.release();
+                callback(0)
                 return;
             }
             // 如果 userId 存在，则更新数据
@@ -1306,6 +1281,7 @@ exports.updateOrder = function updateOrder(userId, orderId, payStatus, callback)
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1327,13 +1303,14 @@ exports.updateOrder = function updateOrder(userId, orderId, payStatus, callback)
     });
 };
 
-exports.getVipLevel = function getVipLevel(userId, callback) {
+exports.getVipLevel = function (userId, callback) {
     const sql = 'select housecard from newuseraccounts where Id=?';
     let values = [];
     values.push(userId);
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1363,6 +1340,7 @@ exports.checkTotalCharge = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1392,6 +1370,7 @@ exports.searchWithdrawLimit = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1422,6 +1401,7 @@ exports.searchSilverCoin = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1433,7 +1413,7 @@ exports.searchSilverCoin = function (userId, callback) {
                 callback(0);
             } else {
                 if (rows && rows.length > 0) {
-                    callback(1, rows[0]);
+                    callback(rows[0]);
                 } else {
                     callback(0);
                 }
@@ -1453,6 +1433,7 @@ exports.reduceSilverCoin = function (userId, silverCoin, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1463,11 +1444,64 @@ exports.reduceSilverCoin = function (userId, silverCoin, callback) {
                 log.err(err);
                 callback(0);
             } else {
-                if (rows && rows.length > 0) {
-                    callback(1);
-                } else {
-                    callback(0);
-                }
+                callback(1);
+            }
+        });
+        values = [];
+    });
+};
+
+
+
+// 增加银币
+exports.addSilverCoin = function (userId, silverCoin, callback) {
+    const sql = 'update userinfo_imp set silverCoin = silverCoin + ? where userId = ?';
+    let values = [];
+    values.push(silverCoin ? silverCoin : 0);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("增加银币");
+                log.err(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 减少银币
+exports.reduceSilverCoin = function (userId, silverCoin, callback) {
+    const sql = 'update userinfo_imp set silverCoin = silverCoin - ? where userId = ?';
+    let values = [];
+    values.push(silverCoin ? silverCoin : 0);
+    values.push(userId);
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("减少银币");
+                log.err(err);
+                callback(0);
+            } else {
+                callback(1);
             }
         });
         values = [];
@@ -1475,7 +1509,7 @@ exports.reduceSilverCoin = function (userId, silverCoin, callback) {
 };
 
 //修改累计充值
-exports.updateTotalCharge = function updateTotalCharge(userId, amount, callback) {
+exports.updateTotalCharge = function (userId, amount, callback) {
     const sql = 'update newuseraccounts set totalRecharge = totalRecharge + ? where Id=?';
     let values = [];
     values.push(Number(amount));
@@ -1484,6 +1518,7 @@ exports.updateTotalCharge = function updateTotalCharge(userId, amount, callback)
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1517,6 +1552,7 @@ exports.updateLang = function updateLang(userId, language, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1539,7 +1575,7 @@ exports.updateLang = function updateLang(userId, language, callback) {
 };
 
 //修改vip等级
-exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
+exports.updateVipLevel = function (userId, vipLevel, callback) {
     const sql = 'update newuseraccounts set housecard=?,is_vip =? where Id=?';
     let values = [];
 
@@ -1549,6 +1585,7 @@ exports.updateVipLevel = function updateVipLevel(userId, vipLevel, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1574,6 +1611,7 @@ exports.searchBankTransferIntoRecord = function searchBankTransferIntoRecord(use
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1605,6 +1643,7 @@ exports.searchBankTransferOutRecord = function searchBankTransferOutRecord(userI
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1637,6 +1676,7 @@ exports.updateVipScore = function (userId, vipScore, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1666,6 +1706,7 @@ exports.addVipScore = function (userId, vipScore, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1683,6 +1724,101 @@ exports.addVipScore = function (userId, vipScore, callback) {
     });
 }
 
+
+// 兑换记录
+exports.exchangeRecord = function (userId, val, goodsId, goodsType, name, target_price, callback) {
+    const sql = 'INSERT INTO gameaccount.exchange_record (userId, val, goodsId, goodsType, name, target_price) VALUES(?, ?, ?, ?, ?, ?);';
+    let values = [];
+    values.push(userId);
+    values.push(val);
+    values.push(goodsId);
+    values.push(goodsType);
+    values.push(name);
+    values.push(target_price);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("兑换记录");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
+            }
+        });
+        values = [];
+    });
+}
+
+
+
+// 查询兑换记录
+exports.searchExchangeRecord = function (userId, goodsId, callback) {
+    const sql = 'select * from  gameaccount.exchange_record where userId = ? and goodsId = ?';
+    let values = [];
+    values.push(userId);
+    values.push(goodsId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("查询兑换记录");
+                log.err(err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+        values = [];
+    });
+}
+
+
+exports.searchExchangeRecordCount = async function (pairs) {
+    const promises = pairs.map(pair => {
+        return new Promise((resolve, reject) => {
+            pool.getConnection(function (err, connection) {
+                connection.query(
+                    'SELECT COUNT(1) AS count FROM exchange_record WHERE userId = ? AND goodsId = ?',
+                    [pair.userId, pair.goodsId],
+                    (error, result) => {
+                        connection.release();
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve({
+                                userId: pair.userId,
+                                goodsId: pair.goodsId,
+                                count: result[0].count
+                            });
+                        }
+                    }
+                );
+            });
+        });
+    });
+    return await Promise.all(promises);
+}
+
+
 // 增加提现额度
 exports.addWithdrawLimit = function addWithdrawLimit(userId, withdrawLimit, callback) {
     const sql = 'update userinfo_imp set withdrawLimit = withdrawLimit + ? where userId=?';
@@ -1693,6 +1829,7 @@ exports.addWithdrawLimit = function addWithdrawLimit(userId, withdrawLimit, call
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1722,6 +1859,7 @@ exports.reduceWithdrawLimit = function reduceWithdrawLimit(userId, amount, callb
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1749,6 +1887,7 @@ exports.updateHeadUrl = function updateNickName(userId, url, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1771,7 +1910,7 @@ exports.updateHeadUrl = function updateNickName(userId, url, callback) {
 };
 
 // 银行转账
-exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, changeType, callback) {
+exports.BankTransfer = function (userId, giveUserId, bankScore, changeType, callback) {
     const sql = 'call BankTransfer(?,?,?,?)';
     let values = [];
     values.push(Number(userId));
@@ -1782,6 +1921,7 @@ exports.BankTransfer = function BankTransfer(userId, giveUserId, bankScore, chan
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1813,6 +1953,7 @@ exports.searchUserSignIn = function searchUserSignIn(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1839,6 +1980,7 @@ exports.userFirstSignIn = function (userId, lastSignInDate, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1871,6 +2013,7 @@ exports.userKeepSignIn = function (userId, lastSignInDate, days, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1903,6 +2046,7 @@ exports.userResetSignIn = function (userId, lastSignInDate, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1925,7 +2069,7 @@ exports.userResetSignIn = function (userId, lastSignInDate, callback) {
 
 
 // 转正
-exports.changleOfficial = function changleOfficial(userId, callback) {
+exports.changleOfficial = function (userId, callback) {
     const sql = 'update newuseraccounts set official = 1 where Id = ?';
     let values = [];
     values.push(userId);
@@ -1933,6 +2077,7 @@ exports.changleOfficial = function changleOfficial(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1960,6 +2105,7 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -1983,7 +2129,7 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 
 //添加银行卡
-exports.addBank = function addBank(userId, account, name, cpf, bankType, callback) {
+exports.addBank = function (userId, account, name, cpf, bankType, callback) {
     const sql = 'call AddBankCard(?,?,?,?,?)';
     let values = [];
 
@@ -1996,6 +2142,7 @@ exports.addBank = function addBank(userId, account, name, cpf, bankType, callbac
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2029,6 +2176,7 @@ exports.editBank = function editBank(userId, account, name, bankType, cardId, ca
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2050,7 +2198,7 @@ exports.editBank = function editBank(userId, account, name, bankType, cardId, ca
 };
 
 //删除银行卡
-exports.delBank = function delBank(userId, cardId, callback) {
+exports.delBank = function (userId, cardId, callback) {
     const sql = 'DELETE FROM bankbindlist WHERE userId=? AND cardId=?';
     let values = [];
     values.push(userId);
@@ -2059,6 +2207,7 @@ exports.delBank = function delBank(userId, cardId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2088,6 +2237,7 @@ exports.getBank = function getBank(_userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2107,7 +2257,7 @@ exports.getBank = function getBank(_userId, callback) {
 
 
 //获得用户道具
-exports.getPropByUserId = function getPropByUserId(_userId, callback) {
+exports.getPropByUserId = function (_userId, callback) {
     const sql = 'select * from prop_item where userid=?';
     let values = [];
     values.push(_userId);
@@ -2115,6 +2265,7 @@ exports.getPropByUserId = function getPropByUserId(_userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2145,6 +2296,7 @@ exports.getUseCoin = function getUseCoin(_userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2178,6 +2330,7 @@ exports.saveUserLog = function saveUserLog(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2205,6 +2358,7 @@ exports.AddGold = function AddGold(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2225,7 +2379,7 @@ exports.AddGold = function AddGold(userInfo, callback) {
     });
 };
 
-exports.AddDiamond = function AddDiamond(userInfo, callback) {
+exports.AddDiamond = function (userInfo, callback) {
     const sql = 'call AddDiamond(?,?,?)';
     let values = [];
     values.push(userInfo.userid);
@@ -2235,6 +2389,7 @@ exports.AddDiamond = function AddDiamond(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2257,9 +2412,9 @@ exports.AddDiamond = function AddDiamond(userInfo, callback) {
 
 
 //不在线修改金钱(减)
-exports.AddGoldSub = function AddGoldSub(userInfo, callback) {
-    var sql = 'call AddGoldSub(?,?,?)';
-    var values = [];
+exports.AddGoldSub = function (userInfo, callback) {
+    const sql = 'call AddGoldSub(?,?,?)';
+    let values = [];
     values.push(userInfo.userid);
     values.push(userInfo.addgold);
     values.push(userInfo.change_type);
@@ -2268,6 +2423,7 @@ exports.AddGoldSub = function AddGoldSub(userInfo, callback) {
         if(err){
             log.err('获取数据库连接失败' + err);
             callback(0);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -2289,7 +2445,7 @@ exports.AddGoldSub = function AddGoldSub(userInfo, callback) {
 
 
 //不在线修改钻石(减)
-exports.AddDiamondSub = function AddGoldSub(userInfo, callback) {
+exports.AddDiamondSub = function (userInfo, callback) {
     const sql = 'call AddDiamondSub(?,?,?)';
     let values = [];
     values.push(userInfo.userid);
@@ -2299,6 +2455,7 @@ exports.AddDiamondSub = function AddGoldSub(userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2328,6 +2485,7 @@ exports.score_changeLog = function score_changeLog(userInfo) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         for (var i = 0; i < userInfo.length; i++) {
@@ -2352,7 +2510,7 @@ exports.score_changeLog = function score_changeLog(userInfo) {
 };
 
 // 金币改变记录
-exports.scoreChangeLog = function scoreChangeLog(userid, score_before, score_change, score_current, change_type, isOnline) {
+exports.scoreChangeLog = function (userid, score_before, score_change, score_current, change_type, isOnline) {
     const sql = "INSERT INTO score_changelog(userid,score_before,score_change,score_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
     let values = [];
     values.push(userid);
@@ -2365,12 +2523,42 @@ exports.scoreChangeLog = function scoreChangeLog(userid, score_before, score_cha
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
                 log.err('scoreChangeLog' + err);
+            }
+            values = [];
+        });
+    });
+};
+
+
+
+// 银币改变记录
+exports.silverCoinChangeLog = function (userid, silver_coin_before, silver_coin_change, silver_coin_current, change_type, isOnline) {
+    const sql = "INSERT INTO silver_coin_changelog(userid,score_before,score_change,score_current,change_type,isOnline) VALUES(?,?,?,?,?,?)";
+    let values = [];
+    values.push(userid);
+    values.push(silver_coin_before);
+    values.push(silver_coin_change);
+    values.push(silver_coin_current);
+    values.push(change_type);
+    values.push(isOnline);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('银币改变记录' + err);
             }
             values = [];
         });
@@ -2391,6 +2579,7 @@ exports.diamondChangeLog = function (userid, diamond_before, diamond_change, dia
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -2411,9 +2600,10 @@ exports.insert_mark = function insert_mark(userInfo) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
-        for (var i = 0; i < userInfo.length; i++) {
+        for (let i = 0; i < userInfo.length; i++) {
             if (userInfo[i].userId > 15000) {
                 values.push(userInfo[i].userId);
                 values.push(userInfo[i].useCoin);
@@ -2434,41 +2624,6 @@ exports.insert_mark = function insert_mark(userInfo) {
     });
 };
 
-//摇奖记录
-exports.getRecord = function getRecord(userInfo, callback_c) {
-    let sql = "SELECT mark.*,newuseraccounts.Account FROM mark JOIN newuseraccounts ON mark.userId=newuseraccounts.Id WHERE balanceTime >= ? and balanceTime <= ? LIMIT ?,?";
-
-    if (!userInfo.lineCount) {
-        sql = "SELECT mark.*,newuseraccounts.Account FROM mark JOIN newuseraccounts ON mark.userId=newuseraccounts.Id WHERE balanceTime >= ? and balanceTime <= ?";
-    }
-    let values = [];
-    values.push(userInfo.beginTime);
-    values.push(userInfo.endTime);
-    values.push(parseInt(userInfo.linebegin));
-    values.push(parseInt(userInfo.lineCount));
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback_c(0)
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('getRecord' + err);
-                callback_c(0);
-            } else {
-                if (rows.length) {
-                    callback_c(1, rows);
-                } else {
-                    callback_c(2);
-                }
-            }
-        });
-        values = [];
-    });
-};
 
 
 //摇奖记录
@@ -2480,6 +2635,7 @@ exports.getLotteryLog = function getLotteryLog(userInfo, callback_c) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback_c(0);
             return;
         }
@@ -2508,6 +2664,7 @@ exports.mark = function mark(userInfo, callback_c) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback_c(0);
             return;
         }
@@ -2538,6 +2695,7 @@ exports.updateProp = function updateProp(_userInfo, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2561,39 +2719,6 @@ exports.updateProp = function updateProp(_userInfo, callback) {
 
 
 
-
-// 发邮件
-exports.sendEmail = function sendEmail(info, callback) {
-    const sql = 'call sendEmail(?,?,?,?,?,?,?)';
-    let values = [];
-    values.push(info.userId);
-    values.push(info.winPropId);
-    values.push(info.winPropCount);
-    values.push(info.winScore);
-    values.push(info.type);
-    values.push(info.sendCoinUserId);
-    values.push(info.nickName);
-
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('sendEmail' + err);
-                callback(0);
-            } else {
-                callback(1, rows[0][0].id);
-            }
-        })
-        values = [];
-    });
-}
-
-
 //更新充值数据
 exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
     const sql = "call updateRecharge(?)";
@@ -2603,6 +2728,7 @@ exports.updateRecharge = function updateRecharge(out_trade_no, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2634,6 +2760,7 @@ exports.setNewHandGive = function setNewHandGive(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2664,6 +2791,7 @@ exports.checkRecharge = function checkRecharge(out_trade_no, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2694,6 +2822,7 @@ exports.updateFirstexchange = function updateFirstexchange(_userId) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -2720,6 +2849,7 @@ exports.sendcoinlog = function sendcoinlog(info, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2736,7 +2866,7 @@ exports.sendcoinlog = function sendcoinlog(info, callback) {
 };
 
 //查询金币记录
-exports.selectcoinlog = function selectcoinlog(userid, callback) {
+exports.selectcoinlog = function (userid, callback) {
     let sql = "select * from sendcoinlog where userId = ?";
     let values = [];
     values.push(userid);
@@ -2744,6 +2874,7 @@ exports.selectcoinlog = function selectcoinlog(userid, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2773,6 +2904,7 @@ exports.selectgetcoinlog = function selectgetcoinlog(userid, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2802,6 +2934,7 @@ exports.updateCoinLogState = function updateCoinLogState(state, id, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2826,6 +2959,7 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2853,8 +2987,8 @@ exports.saveDot = function (userId, adid, gps, apptoken, callback) {
         // 先查询 userId 是否存在
         connection.query('SELECT userId FROM dot_base_data WHERE userId = ?', [userId], function (error, results, fields) {
             if (error) {
-                callback(0)
                 connection.release();
+                callback(0)
                 return;
             }
             // 如果 userId 存在，则更新数据
@@ -2898,6 +3032,7 @@ exports.updateDot = function (userId, adid, gps, apptoken, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2928,6 +3063,7 @@ exports.searchDotByUserId = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2957,6 +3093,7 @@ exports.updateAccountByDeviceCode = function (deviceCode, account, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -2986,6 +3123,7 @@ exports.searchFirstRecharge = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3018,6 +3156,7 @@ exports.updateFirstRecharge = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3047,6 +3186,7 @@ exports.searchUserMoney = function searchUserMoney(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3081,6 +3221,7 @@ exports.lockBankScore = function lockBankScore(userId, bankScore, lockWithdrawLi
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3112,6 +3253,7 @@ exports.updateWithdrawPayStatus = function updateWithdrawPayStatus(userId, order
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3147,6 +3289,7 @@ exports.unlockBankScore = function unlockBankScore(userId, bankScore, withdrawLi
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3174,6 +3317,7 @@ exports.searchCoinRank = function (callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3190,7 +3334,6 @@ exports.searchCoinRank = function (callback) {
                 }
             }
         });
-        values = [];
     });
 }
 
@@ -3202,6 +3345,7 @@ exports.searchRechargeRank = function (callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3218,7 +3362,6 @@ exports.searchRechargeRank = function (callback) {
                 }
             }
         });
-        values = [];
     });
 }
 
@@ -3230,8 +3373,8 @@ exports.searchBigWinToday = function (callback) {
         // 查询用户信息
         connection.query('SELECT Id AS userId, nickname, headimgurl FROM newuseraccounts', function (error, users, fields) {
             if (error){
-                callback(0)
                 connection.release();
+                callback(0)
                 return;
             }
             // 查询最新的得分变化信息
@@ -3271,6 +3414,7 @@ exports.updateGuideStep = function (userId, step, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3302,6 +3446,7 @@ exports.saveBankGuideStep = function (userId, step, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3334,6 +3479,7 @@ exports.searchBankGuideStep = function (userId, step, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3363,6 +3509,7 @@ exports.updateWinScorePopFirstRecharge = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3402,6 +3549,8 @@ exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, accou
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0)
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3433,6 +3582,7 @@ exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(use
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3464,6 +3614,7 @@ exports.searchTotalWithdraw = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3493,6 +3644,7 @@ exports.AddUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3523,6 +3675,7 @@ exports.ReduceUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback)
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3552,6 +3705,8 @@ exports.withdrawFailedRecord = function (userId, glodCoin, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0)
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3584,6 +3739,8 @@ exports.searchUsedWithdrawLimit = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0)
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3604,7 +3761,7 @@ exports.searchUsedWithdrawLimit = function (userId, callback) {
 }
 
 // 查询提现申请记录
-exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, callback) {
+exports.searchWithdrawApplyRecord = function (userId, callback) {
     const sql = "SELECT id, amount, create_time, account, bankType, name, status, orderId, pay_status payStatus FROM withdraw_record WHERE userId = ?";
 
     let values = [];
@@ -3613,6 +3770,7 @@ exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, c
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3636,7 +3794,7 @@ exports.searchWithdrawApplyRecord = function searchWithdrawApplyRecord(userId, c
 exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
     const sql = "INSERT INTO email (title_id, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    var values = [];
+    let values = [];
     values.push(title);
     values.push(type);
     values.push(to_userid);
@@ -3648,6 +3806,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -3670,6 +3829,7 @@ exports.selectEmail = function selectEmail(types, userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3699,6 +3859,7 @@ exports.selectEmailTypes = function selectEmailTypes(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3728,6 +3889,7 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3739,7 +3901,6 @@ exports.setEmailisRead = function setEmailisRead(id, callback) {
             } else {
                 callback(1);
             }
-
         });
         values = [];
     });
@@ -3754,6 +3915,7 @@ exports.setEmailisAlllReadByUserId = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3765,7 +3927,6 @@ exports.setEmailisAlllReadByUserId = function (userId, callback) {
             } else {
                 callback(1);
             }
-
         });
         values = [];
     });
@@ -3780,6 +3941,7 @@ exports.delEmailById = function delEmailById(id, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3791,7 +3953,6 @@ exports.delEmailById = function delEmailById(id, callback) {
             } else {
                 callback(1);
             }
-
         });
         values = [];
     });
@@ -3806,6 +3967,7 @@ exports.searchUnReadEmail = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('查询是否有未读邮件' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3821,7 +3983,6 @@ exports.searchUnReadEmail = function (userId, callback) {
                     callback(0);
                 }
             }
-
         });
         values = [];
     });
@@ -3839,6 +4000,7 @@ exports.searchUserEmailById = function (id, userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('查询邮件' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3854,7 +4016,6 @@ exports.searchUserEmailById = function (id, userId, callback) {
                     callback(0);
                 }
             }
-
         });
         values = [];
     });
@@ -3870,6 +4031,7 @@ exports.searchEmailFirstRechargeAward = function (otherId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('查询排行榜奖励类型邮件' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -3885,7 +4047,6 @@ exports.searchEmailFirstRechargeAward = function (otherId, callback) {
                     callback(0);
                 }
             }
-
         });
         values = [];
     });
@@ -3899,6 +4060,7 @@ exports.updateEmailRankAwardStatus = function (ids, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('更新排行榜奖励领取状态' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4067,6 +4229,7 @@ exports.selectSystemEmail = function selectSystemEmail(callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4097,6 +4260,7 @@ exports.sendcoinServer = function sendcoinServer(userid, sendCoin, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4122,6 +4286,7 @@ exports.saveLineOut = function saveLineOut(userid) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -4142,6 +4307,7 @@ exports.deleteLineOut = function saveLineOut(userid) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -4155,12 +4321,13 @@ exports.deleteLineOut = function saveLineOut(userid) {
 }
 
 
-exports.clenaLineOut = function clenaLineOut() {
+exports.clenaLineOut = function () {
     const sql = 'DELETE FROM lineout';
     let values = [];
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
@@ -4184,6 +4351,7 @@ exports.getScore = function getScore(_userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4218,6 +4386,7 @@ exports.addAccountScore = function addAccountScore(_userId, score, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4251,6 +4420,7 @@ exports.reduceAccountScore = function reduceAccountScore(_userId, score, callbac
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4282,6 +4452,7 @@ exports.addAccountDiamond = function (_userId, diamond, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4316,6 +4487,7 @@ exports.changeOfficial = function changeOfficial(_info, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4355,6 +4527,7 @@ exports.addcharLog = function addcharLog(_info, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4381,6 +4554,7 @@ exports.getcharLog = function getcharLog(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4417,6 +4591,7 @@ exports.updateCharLog = function updateCharLog(userId, idList, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4442,6 +4617,7 @@ exports.selectServerLog = function selectServerLog(callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4481,7 +4657,6 @@ exports.getCoinRank = function getCoinRank(callback) {
                 log.err("查询金币排行榜" + err);
                 callback(0);
             } else {
-                // console.log(rows);
                 if (rows.length == 0) {
                     callback(0);
                 } else {
@@ -4489,9 +4664,7 @@ exports.getCoinRank = function getCoinRank(callback) {
                 }
             }
         });
-
         values = [];
-
     });
 };
 
@@ -4503,6 +4676,7 @@ exports.getDiamondRank = function getDiamondRank(callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4536,6 +4710,7 @@ exports.searchInvitedCode = function searchInvitedCode(userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4564,6 +4739,7 @@ exports.bathchSearchUserInfo = function bathchSearchUserInfo(userIds, callback) 
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4601,6 +4777,7 @@ exports.rankAwardRecord = function (userId, type, goodsType, val, rank_start_tim
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4633,6 +4810,7 @@ exports.firstRechargeAwardRecord = function (userId, rewardGoldVal, rewardDiamon
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4662,6 +4840,7 @@ exports.searchfirstRechargeAwardRecord = function (callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }
@@ -4692,6 +4871,7 @@ exports.searchfirstRechargeAwardRecordByUser = function (userId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
+            connection.release();
             callback(0);
             return;
         }

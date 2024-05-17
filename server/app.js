@@ -277,18 +277,28 @@ app.get('/goodsList', function (req, res) {
 // 获取商品兑换列表
 app.get('/exchangeList', function (req, res) {
     log.info('获取商品兑换列表')
-    gameInfo.getExchangeGoods((code, msg, data) =>{
+    const userId = req.query.userId;
+    if(userId === undefined || userId === ''){
+        log.info(userId + '获取商品兑换列表失败')
+        res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
+        return;
+    }
+    gameInfo.getExchangeGoods(userId, (code, msg, data) =>{
         res.send({code: code, data: data});
     });
 });
 
 // 兑换物品
 app.get('/exchangeGoods', function (req, res) {
-    const productId = req.query.productId;
-    const userId = req.query.userId;
+    const productId = Number(req.query.productId);
+    const userId = Number(req.query.userId);
     log.info(userId+ '兑换物品' + productId)
     gameInfo.shopExchangeGoods(productId, userId, (code, msg, data) =>{
-        res.send({code: code, data: data});
+        if(code){
+            res.send({code: code, data: data});
+        }else{
+            res.send({code: code, msg: msg});
+        }
     });
 });
 

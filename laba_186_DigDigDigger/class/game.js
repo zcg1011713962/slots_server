@@ -255,13 +255,17 @@ var GameInfo = function () {
             const self = this;
             if (userId) {
                 CacheUtil.getFreeCount(userId).then(freeCount =>{
+                    let gameDict = {
+                        freeSymbolList: this.userList[_socket.userId].freeSymbolList,
+                    };
                     //存免费次数
                     const info = {
                         userId: userId,
                         freeCount: freeCount,
-                        LotteryCount: 0
+                        LotteryCount: 0,
+                        gameDict: JSON.stringify(gameDict)
                     };
-                    gameDao.saveFree(gameConfig.gameId, info, function (result) {
+                    gameDao.saveDigDigDiggerFree(gameConfig.gameId, info, function (result) {
                         log.info(userId + '保存免费次数' + info.freeCount);
                         self._Csocket.emit("lineOut", {
                             signCode: gameConfig.LoginServeSign,
@@ -517,13 +521,24 @@ var GameInfo = function () {
         };
         //登录获取免费次数
         this.LoginfreeCount = function (_userId, _socket) {
-            var self = this;
+            const self = this;
             gameDao.getFreeCount(gameConfig.gameId, _userId, function (ResultCode, Result) {
                 if (!self.userList[_userId]) return;
                 Result.Id = _userId;
-                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount);
+                let data = {};
+                try {
+                    data = JSON.parse(Result.gameDict);
+                    Result.freeSymbolList = data.freeSymbolList;
+                } catch (e) {
+                    Result.freeSymbolList = [];
+                }
+                log.info(_userId + "从数据库里获得免费次数" + Result.freeCount + "免费模式的挖矿图标" + Result.freeSymbolList);
                 CacheUtil.setFreeCount(_userId, Result.freeCount)
-                _socket.emit("LoginfreeCountResult", {ResultCode: 1, freeCount: Result.freeCount});
+                _socket.emit("LoginfreeCountResult", {
+                    ResultCode: 1,
+                    freeCount: Result.freeCount,
+                    cardList: Result.freeSymbolList
+                });
             })
         };
 

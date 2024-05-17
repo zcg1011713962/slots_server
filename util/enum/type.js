@@ -14,15 +14,17 @@ const GoodsType = {
     turntableTime: 6, // 转盘次数
     vipScore: 7, // vip点数
     withdrawTime: 8, // 提现次数
+    silverCoin: 9, // 银币
     mixture: 99 // 混合
 };
 
 
 const CurrencyTypeIndex = {
-    0: 'BRL' // R$雷亚尔
+    Brazil_BRL: 0 // R$雷亚尔
 };
 
 const CurrencyType = {
+    Default: 'BRL', // R$雷亚尔
     Brazil_BRL: 'BRL' // R$雷亚尔
   /*  China_RMB: 1, // RMB人民币
     America_US: 2,    // $美元*/
@@ -108,18 +110,17 @@ const PayChannelType ={
     pix: 'pix' // pix
 }
 
-
 const ScoreChangeType = {
-    daySign: 0, // 每日签到
+   /* daySign: 0, // 每日签到
     vipDaylyGet: 1, // vip每日领取
     vipMonthlyGet: 2, // vip每月领取
     luckyCoinGive: 3, // 领取幸运币活动送金币
     inviteBindUser: 4, // 邀请绑定给被邀请用户送金币
-    inviteBindAgent: 5, // 邀请绑定给代理人送金币
+    inviteBindAgent: 5, // 邀请绑定给代理人送金币*/
     newHandGive: 6 ,//新手送金币
-    rebateShop: 7,  // 邀请绑定-购物返点
+   /* rebateShop: 7,  // 邀请绑定-购物返点*/
     bustBonus: 8,  // 破产补助金
-    upgradeGiveGlod: 9, //VIP升级奖励
+   /* upgradeGiveGlod: 9, //VIP升级奖励*/
     gameGlodCoin: 10, // 玩游戏获得
     storeBuy: 11, // 商城购买
     firstRechargeBuy: 12, //首充礼包购买
@@ -130,18 +131,43 @@ const ScoreChangeType = {
     firstRechargeContinueReward: 17,  // 首充持续奖励
     withdrawApply: 18,  // 提现申请扣减
     withdrawApplyBack: 19,  // 提现申请不通过,退回
-    coinRankAward: 20,  // 金币排行榜奖励
+   /* coinRankAward: 20,  // 金币排行榜奖励
     rechargeRankAward: 21,  // 充值排行榜奖励
-    bigWinRankAward: 22,  // 大富豪排行榜奖励
+    bigWinRankAward: 22,  // 大富豪排行榜奖励*/
     withdrawGoodsBuy: 23,  // 解锁提现商品
-    exchange: 24  // 银币兑换金币
+    exchange: 24,  // 银币兑换金币
+    monthCardBuy: 25, //月卡购买
 };
+
+
+const SilverCoinChangeType = {
+    storeBuy: 0, // 商城购买
+    firstRechargeBuy: 1,  // 首充购买
+    discountLimitedBuy: 2,  //  限时折扣购买
+    turntableBuy: 3,  //  转盘购买
+    monthCardBuy: 4, // 月卡购买
+    withdrawGoodsBuy: 5, // 解锁提现商品购买
+    daySign: 6, // 每日签到
+    vipDaylyGet: 7, // vip每日领取
+    vipMonthlyGet: 8, // vip每月领取
+    luckyCoinGive: 9, // 领取幸运币活动送金币
+    inviteBindUser: 10, // 邀请绑定给被邀请用户送金币
+    inviteBindAgent: 11, // 邀请绑定给代理人送金币
+    rebateShop: 12,  // 邀请绑定-购物返点
+    upgradeGiveGlod: 13, //VIP升级奖励
+    coinRankAward: 14,  // 金币排行榜奖励
+    rechargeRankAward: 15,  // 充值排行榜奖励
+    bigWinRankAward: 16,  // 大富豪排行榜奖励
+    changleOfficial: 17, // 绑定邮箱
+    firstRechargeContinueReward: 18, // 首充持续奖励
+    exchange: 19  // 银币兑换减少
+}
 
 const DiamondChangeType = {
     storeBuy: 0, // 商城购买
     firstRechargeBuy: 1, //首充礼包购买
     firstRechargeContinueReward: 2, // 首充持续奖励
-    changleOfficial: 3 // 首充持续奖励
+    changleOfficial: 3 // 绑定邮箱
 }
 
 const NewHandFlag = {
@@ -236,5 +262,6 @@ module.exports = {
     LotteryResultCode,
  	OrderStatus,
     PayType,
-    RankType
+    RankType,
+    SilverCoinChangeType
 };

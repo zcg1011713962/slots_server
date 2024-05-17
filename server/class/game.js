@@ -385,7 +385,8 @@ var GameInfo = function () {
                                                         currSignInFlag: currSignInFlag, // 当日是否签到
                                                         unReadEmail: unReadEmailCode, // 是否有未读取邮件
                                                         currDateInvite: currDateInvite, // 当日是否邀请
-                                                        withdrawLimit: withdrawLimit // 提现额度
+                                                        withdrawLimit: withdrawLimit, // 提现额度
+                                                        silverCoin: user.silverCoin // 银币
                                                     }
                                                     callback(ret);
                                                 })
@@ -428,7 +429,11 @@ var GameInfo = function () {
         }
 
         this.sendHallShopCallBack = function (userId, shopType, serverId, code, msg, data) {
-            log.info('商城购买回调，通知大厅 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType)
+            try{
+                log.info('商城购买回调，通知大厅 userId:' + userId + 'serverId:' + serverId + 'shopType:' + shopType + 'data:' + JSON.stringify(data))
+            }catch (e){
+                log.err(e)
+            }
             if (this.userList[userId]) {
                 this.userList[userId]._socket.emit('ShoppingResult', {code: code, data: data});
             }
@@ -508,13 +513,16 @@ var GameInfo = function () {
                 const goodsType = parseFloat(shopItem['type']);
                 // 数量
                 const goodsVal = parseFloat(shopItem['val']);
-                // 巴西币
-                const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
-                log.info(userId + '购买提现解锁商品原价:' + price + '折扣价:' + amount)
+                // 货币类型
+                const currencyTypeIndex = parseFloat(shopItem['currency_type']);
+                const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
+                // 银币
+                const silverCoin = parseFloat(shopItem['silver_coin']);
+                log.info(userId + '购买提现解锁商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin + '支付开关:' + paySwitch)
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.withdraw_goods, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
+                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.withdraw_goods, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods, silverCoin)
                 }else{
-                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.withdraw_goods, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.withdraw_goods, TypeEnum.ShopGroupType.normal, 0, 0, 0, silverCoin)
                 }
             })
 
@@ -564,6 +572,13 @@ var GameInfo = function () {
             })
         }*/
 
+        this.getCurrencyTypeByIndex = function (index){
+            if(index === TypeEnum.CurrencyTypeIndex.Brazil_BRL){
+                return TypeEnum.CurrencyType.Brazil_BRL;
+            }
+            return TypeEnum.CurrencyType.Default;
+        }
+
 
         this.monthCardGoodsBuy = function (orderId, userId, productId, service, hallUrl, serverId, nSwitch, paySwitch, goods, callback) {
             const self = this;
@@ -584,17 +599,20 @@ var GameInfo = function () {
                 const goodsType = parseFloat(shopItem['type']);
                 // 数量
                 const goodsVal = parseFloat(shopItem['val']);
-                // 巴西币
-                const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
+                // 银币
+                const silverCoin = parseFloat(shopItem['silver_coin']);
+                // 货币类型
+                const currencyTypeIndex = parseFloat(shopItem['currency_type']);
+                const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
+                // 月卡持续奖励
                 const buyContinueRewardGold = parseFloat(shopItem['buy_continue_reward_gold']);
                 const buyContinueRewardDiamond = parseFloat(shopItem['buy_continue_reward_diamond']);
                 const buyContinueDays = parseFloat(shopItem['buy_continue_days']);
-                log.info(userId + '购买月卡商品原价:' + price + '折扣价:' + amount + '持续奖励金币:' + buyContinueRewardGold + '持续奖励钻石:' + buyContinueRewardDiamond + '持续天数:' + buyContinueDays)
-
+                log.info(userId + '购买月卡商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin + '持续奖励金币:' + buyContinueRewardGold + '持续奖励银币:' + buyContinueRewardDiamond + '持续天数:' + buyContinueDays + '支付开关:' + paySwitch)
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.month_card_goods, TypeEnum.ShopGroupType.normal, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, 0)
+                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.month_card_goods, TypeEnum.ShopGroupType.normal, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, 0, silverCoin)
                 }else{
-                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.month_card_goods, TypeEnum.ShopGroupType.normal, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.month_card_goods, TypeEnum.ShopGroupType.normal, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, silverCoin)
                 }
             })
         }
@@ -628,14 +646,17 @@ var GameInfo = function () {
                     const goodsType = parseFloat(shopItem['type']);
                     // 数量
                     const goodsVal = parseFloat(shopItem['val']);
-                    // 巴西币
-                    const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
-                    log.info(userId + '购买首充商品原价:' + price + '折扣价:' + amount)
+                    // 银币
+                    const silverCoin = parseFloat(shopItem['silver_coin']);
+                    // 货币类型
+                    const currencyTypeIndex = parseFloat(shopItem['currency_type']);
+                    const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
+                    log.info(userId + '购买首充商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin + '支付开关:' + paySwitch)
 
                     if(paySwitch){
-                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, 0, 0, 0, 0)
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, 0, 0, 0, 0, silverCoin)
                     }else{
-                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, 0, 0, 0)
+                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.firstRecharge, TypeEnum.ShopGroupType.rechargeGift, 0, 0, 0, silverCoin)
                     }
                 });
             })
@@ -663,15 +684,19 @@ var GameInfo = function () {
                     const price = parseFloat(shopItem['source_price']);
                     // 折扣价
                     const amount = parseFloat(shopItem['target_price']);
-                    // 巴西币
-                    const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
+                    // 货币类型
+                    const currencyTypeIndex = parseFloat(shopItem['currency_type']);
+                    const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
                     // 金币数量
                     const goodsVal = parseFloat(shopItem['Discount_BONUS']);
+                    // 银币
+                    const silverCoin = parseFloat(shopItem['silver_coin']);
+                    log.info(userId + '购买限时折扣商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin + '支付开关:' + paySwitch)
 
                     if(paySwitch){
-                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
+                        self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods, silverCoin)
                     }else{
-                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                        self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,shopItem.type, TypeEnum.ShopType.discount_Limited, TypeEnum.ShopGroupType.normal, 0, 0, 0, silverCoin)
                     }
                 })
             })
@@ -691,20 +716,23 @@ var GameInfo = function () {
                 // 价格
                 const amount = buyMulPriceItem.price;
                 // 货币类型
-                const currencyType = buyMulPriceItem.currencyType;
+                const currencyTypeIndex = buyMulPriceItem.currencyType;
+                const currencyType = self.getCurrencyTypeByIndex(currencyTypeIndex);
                 // 购买倍数
                 const mul = buyMulPriceItem.mul;
-                log.info(userId + '购买免费转盘门票' + 'amount:' + amount + 'currencyType:' + currencyType + 'mul:' + mul)
+                // 银币
+                const silverCoin = buyMulPriceItem.silver_coin;
+                log.info(userId + '购买免费转盘门票' + 'amount:' + amount + 'currencyType:' + currencyType + 'mul:' + mul + '购买赠送银币:' + silverCoin + '支付开关:' + paySwitch)
 
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId, TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
+                    self.placeOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId, TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods, silverCoin)
                 }else{
-                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId ,TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0)
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, 1, amount, currencyType, nSwitch, callback, service, mul, serverId ,TypeEnum.GoodsType.turntableTicket, TypeEnum.ShopType.free_turntable, TypeEnum.ShopGroupType.normal, 0, 0, 0, silverCoin)
                 }
             });
         }
 
-        this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, goods) {
+        this.placeOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, goods, silverCoin) {
             const self = this;
             const callbackUrl = hallUrl + '/shoppingCallBack?userId=' + userId + '&orderId=' + orderId;
             // 支付类型
@@ -730,7 +758,7 @@ var GameInfo = function () {
                                             // 单笔充值额度提升=充值金额*recharge_vip_socre_percentage百分比。
                                             const promoteWithdrawLimit = StringUtil.rideNumbers(amount, parseInt(config.recharge_vip_socre_percentage) / 100, 2);
                                             // 记录订单详情
-                                            dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.PayChannelType.pix, TypeEnum.PayType.fatpag, promoteWithdrawLimit,ret => {
+                                            dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, TypeEnum.PayChannelType.pix, TypeEnum.PayType.fatpag, promoteWithdrawLimit, silverCoin,ret => {
                                                 if (ret) {
                                                     self.intervalSearchOrder(userId, orderId, TypeEnum.PayType.fatpag);
                                                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data)
@@ -792,7 +820,7 @@ var GameInfo = function () {
          * 测试只支持 betcatpay支付
          * @constructor
          */
-        this.TestPlaceOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays) {
+        this.TestPlaceOrder = function (hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, mul, serverId, goodsType, shopType, group, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, silverCoin) {
             const self = this;
             CacheUtil.searchOrderCache(userId, productId, amount, TypeEnum.PayType.betcatpay).then(orderInfo => {
                 if (orderInfo) {
@@ -805,7 +833,7 @@ var GameInfo = function () {
                             // 单笔充值额度提升=充值金额*recharge_vip_socre_percentage百分比。
                             const promoteWithdrawLimit = StringUtil.rideNumbers(amount, parseInt(config.recharge_vip_socre_percentage) / 100, 2);
                             // 记录订单详情
-                            dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.PayType.betcatpay, promoteWithdrawLimit, ret => {
+                            dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, TypeEnum.PayType.betcatpay, promoteWithdrawLimit, silverCoin,ret => {
                                 if (ret) {
                                     log.info(userId + '测试购买下订单成功' + orderId)
                                     const orderResult = {
@@ -957,13 +985,17 @@ var GameInfo = function () {
                 const goodsType = parseFloat(shopItem['type']);
                 // 数量
                 const goodsVal = parseFloat(shopItem['val']) * count;
-                // 巴西币
-                const currencyType = TypeEnum.CurrencyType.Brazil_BRL;
+                // 货币类型
+                const currencyTypeIndex = parseFloat(shopItem['currency_type']);
+                const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
+                // 银币
+                const silverCoin = parseFloat(shopItem['silver_coin']);
+                log.info(userId + '购买普通商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin)
 
                 if(paySwitch){
-                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
+                    self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId, goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods, silverCoin)
                 }else{
-                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods)
+                    self.TestPlaceOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId ,goodsType, TypeEnum.ShopType.store, TypeEnum.ShopGroupType.normal, 0, 0, 0, silverCoin)
                 }
             })
         }
@@ -1023,7 +1055,7 @@ var GameInfo = function () {
                     const amount = row.amount;
                     const currencyType = row.currencyType;
                     const group = row.group;
-                    const shopType = row.shopType;
+                    const shopType = row.shopType; // 购买类型
                     const mul = row.mul;
                     const service = row.service;
                     const val = row.val;
@@ -1031,6 +1063,7 @@ var GameInfo = function () {
                     const buyContinueRewardGold = row.buyContinueRewardGold;
                     const buyContinueRewardDiamond = row.buyContinueRewardDiamond;
                     const buyContinueDays = row.buyContinueDays;
+                    const silverCoin = Number(row.silverCoin); // 获得银币
 
                     dao.getScore(userId, (code, row) => {
                         if (!code) {
@@ -1039,17 +1072,17 @@ var GameInfo = function () {
                         }
                         const currScore = row.score;
                         if (TypeEnum.ShopType.store === shopType) {
-                            this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback)
+                            this.storeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, silverCoin, callback)
                         } else if (TypeEnum.ShopType.free_turntable === shopType) {
-                            this.freeTurntableBuyCallback(userId, orderId, mul, amount, currencyType, shopType, service, serverId, payStatus, callback)
+                            this.freeTurntableBuyCallback(userId, orderId, mul, amount, currencyType, shopType, service, serverId, payStatus, silverCoin, callback)
                         } else if (TypeEnum.ShopType.discount_Limited === shopType) {
-                            this.discountLimitedBuyCallback(userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, callback)
+                            this.discountLimitedBuyCallback(userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, silverCoin, callback)
                         } else if (TypeEnum.ShopType.firstRecharge === shopType) {
-                            this.firstRechargeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback)
+                            this.firstRechargeBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, silverCoin, callback)
                         } else if (TypeEnum.ShopType.withdraw_goods === shopType) {
-                            this.withdrawGoodsBuyCallback(userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, callback)
+                            this.withdrawGoodsBuyCallback(userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, silverCoin, callback)
                         } else if (TypeEnum.ShopType.month_card_goods === shopType) {
-                            this.monthCardGoodsBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, callback)
+                            this.monthCardGoodsBuyCallback(userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, silverCoin, callback)
                         } else {
                             callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         }
@@ -1169,7 +1202,7 @@ var GameInfo = function () {
         }
 
         // 商城购买回调
-        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback) {
+        this.storeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, silverCoin, callback) {
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
             let totalVal = 0; // 总金币数量
@@ -1182,7 +1215,6 @@ var GameInfo = function () {
                     const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                     // 增加VIP积分(VIP点数)
                     let addVipPoint = StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                    log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
 
                     CacheUtil.getScoreConfig().then(scoreConfig => {
                         const score_amount_ratio = scoreConfig.score_amount_ratio
@@ -1205,12 +1237,16 @@ var GameInfo = function () {
                                 addVal = 0;
                                 totalVal = sourceVal;
                             }
+                            // 发银币
+                            self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.storeBuy, ret=>{
+                                log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
+                            })
                             // 更新订单状态
                             dao.updateOrder(userId, orderId, payStatus, ret => {
                                 // 发金币或钻石
                                 if (TypeEnum.GoodsType.gold === goodsType) {
                                     CacheUtil.addGoldCoin(userId, Number(totalVal), TypeEnum.ScoreChangeType.storeBuy, (ret, currGoldCoin) => {
-                                        log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
+                                        log.info(userId + '当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
                                     });
                                 } else if (TypeEnum.GoodsType.diamond === goodsType) {
                                     CacheUtil.addDiamond(userId, Number(totalVal), TypeEnum.DiamondChangeType.storeBuy, (code, currDiamond) => {
@@ -1229,7 +1265,8 @@ var GameInfo = function () {
                                         addVal: addVal,
                                         totalVal: totalVal,
                                         shopScoreAddRate: config.shopScoreAddRate,
-                                        shopType: TypeEnum.ShopType.store
+                                        shopType: TypeEnum.ShopType.store,
+                                        silverCoin: silverCoin
                                     }
                                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service, serverId)
                                 })
@@ -1241,6 +1278,41 @@ var GameInfo = function () {
                 log.err(e)
                 callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
             }
+        }
+
+        // 增加银币-通过活动奖池发奖励
+        this.addSilverCoinFromJackpot = function (userId, silverCoin, type, callback){
+            log.info(userId + '增加银币-通过活动奖池发奖励,发放类型:' + type + '数量:' + silverCoin)
+            CacheUtil.DecrJackpot(silverCoin).then(r =>{
+                CacheUtil.addSilverCoin(userId, silverCoin, type, (code, currSilverCoin)=>{
+                    if(this.userList[userId]){
+                        this.userList[userId].silverCoin = StringUtil.addNumbers(this.userList[userId].silverCoin, silverCoin)
+                    }
+                    callback(code, currSilverCoin)
+                })
+            })
+        }
+
+        // 增加银币
+        this.addSilverCoin = function (userId, silverCoin, type){
+            CacheUtil.addSilverCoin(userId, silverCoin, type, ret=>{
+                if(this.userList[userId]){
+                    this.userList[userId].silverCoin = StringUtil.addNumbers(this.userList[userId].silverCoin, silverCoin)
+                }
+            })
+        }
+
+
+        // 减少银币
+        this.reduceSilverCoin = function (userId, silverCoin, type, callback){
+            CacheUtil.reduceSilverCoin(userId, silverCoin, type, (code,beforeSilverCoin, currSilverCoin)=>{
+                if(code){
+                    if(this.userList[userId]){
+                        this.userList[userId].silverCoin = StringUtil.reduceNumbers(this.userList[userId].silverCoin, silverCoin)
+                    }
+                }
+                callback(code,beforeSilverCoin, currSilverCoin)
+            })
         }
 
         this.addVipScore = function (userId, amount, callback){
@@ -1256,7 +1328,7 @@ var GameInfo = function () {
         }
 
         // 免费转盘购买回调
-        this.freeTurntableBuyCallback = function (userId, orderId, mul, amount, currencyType, shopType, service, serverId, payStatus, callback) {
+        this.freeTurntableBuyCallback = function (userId, orderId, mul, amount, currencyType, shopType, service, serverId, payStatus, silverCoin, callback) {
             const self = this;
             self.turntableCharge(userId, mul, (code, msg, data) => {
                 if (code) {
@@ -1269,8 +1341,10 @@ var GameInfo = function () {
                             const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                             // 增加VIP积分(VIP点数)
                             let addVipPoint = StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                            log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
-
+                            // 发银币
+                            self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.turntableBuy, ret =>{
+                                log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
+                            })
                             CacheUtil.getScoreConfig().then(scoreConfig => {
                                 const score_amount_ratio = scoreConfig.score_amount_ratio
                                 // 充值统计VIP升级
@@ -1280,11 +1354,13 @@ var GameInfo = function () {
                         })
                     })
                 }
+                data.silverCoin = undefined;
+                data.silverCoin = silverCoin;
                 callback(code, msg, data, shopType, service, serverId)
             });
         }
 
-        this.firstRechargeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, callback) {
+        this.firstRechargeBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, payStatus, silverCoin, callback) {
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
             let totalVal = 0; // 总金币数量
@@ -1298,7 +1374,6 @@ var GameInfo = function () {
                         const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                         // 增加VIP积分(VIP点数)
                         let addVipPoint =  StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
                             // 充值统计VIP升级
@@ -1324,13 +1399,16 @@ var GameInfo = function () {
                                         dao.updateOrder(userId, orderId, payStatus, ret => {
                                             if (TypeEnum.GoodsType.gold === goodsType) {
                                                 CacheUtil.addGoldCoin(userId, Number(totalVal), TypeEnum.ScoreChangeType.firstRechargeBuy, (ret, currGoldCoin) => {
-                                                    log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
+                                                    log.info(userId + '当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
                                                 });
                                             } else if (TypeEnum.GoodsType.diamond === goodsType) {
                                                 CacheUtil.addDiamond(userId, Number(totalVal), TypeEnum.DiamondChangeType.firstRechargeBuy, (code, currDiamond) => {
                                                     log.info(userId + '购买成功，增加'+ totalVal +'钻石,当前钻石:' + currDiamond)
                                                 })
                                             }
+                                            // 发银币
+                                            self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.firstRechargeBuy)
+                                            log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
                                             // 查询是否购买首充礼包
                                             dao.searchFirstRecharge(userId, row => {
                                                 // 查询当前金
@@ -1343,7 +1421,8 @@ var GameInfo = function () {
                                                     addVal: addVal,
                                                     totalVal: totalVal,
                                                     shopScoreAddRate: config.shopScoreAddRate,
-                                                    shopType: TypeEnum.ShopType.firstRecharge
+                                                    shopType: TypeEnum.ShopType.firstRecharge,
+                                                    silverCoin: silverCoin
                                                 }
                                                 callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result, shopType, service, serverId)
                                             })
@@ -1363,7 +1442,7 @@ var GameInfo = function () {
         }
 
 
-        this.monthCardGoodsBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, callback){
+        this.monthCardGoodsBuyCallback = function (userId, orderId, goodsType, price, amount, currencyType, group, shopType, service, val, serverId, currScore, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payStatus, silverCoin, callback){
             let sourceVal = 0; // 原价金币数量
             let addVal = 0; // 增加金币数量
             let totalVal = 0; // 总金币数量
@@ -1377,7 +1456,6 @@ var GameInfo = function () {
                         const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                         // 增加VIP积分(VIP点数)
                         let addVipPoint =  StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
                             // 充值统计VIP升级
@@ -1392,10 +1470,13 @@ var GameInfo = function () {
                                     sourceVal = val;
                                     totalVal = sourceVal;
                                 }
+                                // 发银币
+                                self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.monthCardBuy)
+                                log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
 
                                 if (TypeEnum.GoodsType.gold === goodsType) {
-                                    CacheUtil.addGoldCoin(userId, Number(totalVal), TypeEnum.ScoreChangeType.firstRechargeBuy, (ret, currGoldCoin) => {
-                                        log.info('当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
+                                    CacheUtil.addGoldCoin(userId, Number(totalVal), TypeEnum.ScoreChangeType.monthCardBuy, (ret, currGoldCoin) => {
+                                        log.info(userId + '当前VIP等级:' + currVipLevel + '金币加成率:' + config.shopScoreAddRate + '订单金额' + amount + '货币类型' + currencyType + '额外加成金币' + addVal + '用户获得金币' + totalVal)
                                     });
                                 } else if (TypeEnum.GoodsType.diamond === goodsType) {
                                     CacheUtil.addDiamond(userId, Number(totalVal), TypeEnum.DiamondChangeType.firstRechargeBuy, (code, currDiamond) => {
@@ -1406,7 +1487,7 @@ var GameInfo = function () {
                                 dao.updateOrder(userId, orderId, payStatus, ret => {
                                     // 设置月卡持续奖励
                                     self.setFirstRechargeContinueReward(userId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays)
-                                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.month_card_goods}
+                                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.month_card_goods, silverCoin: silverCoin}
                                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data, TypeEnum.ShopType.month_card_goods, service, serverId)
                                 })
                             })
@@ -1432,7 +1513,7 @@ var GameInfo = function () {
         }
 
 
-        this.discountLimitedBuyCallback = function (userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, callback) {
+        this.discountLimitedBuyCallback = function (userId, orderId, amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, silverCoin, callback) {
             const self = this;
             CacheUtil.addGoldCoin(userId, Number(val), TypeEnum.ScoreChangeType.discountLimitedBuy, (ret, currGoldCoin) => {
                 // 更新订单状态
@@ -1444,7 +1525,9 @@ var GameInfo = function () {
                         const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                         // 增加VIP积分(VIP点数)
                         let addVipPoint = StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
+                        // 发银币
+                        self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.discountLimitedBuy)
+                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
 
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
@@ -1453,13 +1536,13 @@ var GameInfo = function () {
                             })
                         })
                     })
-                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.discount_Limited}
+                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.discount_Limited, silverCoin: silverCoin}
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data, TypeEnum.ShopType.discount_Limited, service, serverId)
                 })
             });
         }
 
-        this.withdrawGoodsBuyCallback = function (userId, orderId,  amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, callback) {
+        this.withdrawGoodsBuyCallback = function (userId, orderId,  amount, currencyType, service, serverId, goodsType, val, currScore, payStatus, silverCoin, callback) {
             const self = this;
             CacheUtil.addGoldCoin(userId, Number(val), TypeEnum.ScoreChangeType.withdrawGoodsBuy, (ret, currGoldCoin) => {
                 // 更新订单状态
@@ -1471,8 +1554,9 @@ var GameInfo = function () {
                         const flow_vip_socre_percentage = vConfig.flow_vip_socre_percentage;
                         // 增加VIP积分(VIP点数)
                         let addVipPoint = StringUtil.rideNumbers(amount, recharge_vip_socre_percentage / 100, 2);
-                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint);
-
+                        // 发银币
+                        self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.withdrawGoodsBuy)
+                        log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
                         CacheUtil.getScoreConfig().then(scoreConfig => {
                             const score_amount_ratio = scoreConfig.score_amount_ratio
                             // 充值统计VIP升级
@@ -1480,7 +1564,7 @@ var GameInfo = function () {
                             })
                         })
                     })
-                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.withdraw_goods}
+                    const data = {goodsType: goodsType, val: val, shopType: TypeEnum.ShopType.withdraw_goods, silverCoin: silverCoin}
                     dao.unLockWithdrawPage(userId, code =>{
                         if(code){
                             log.info('解锁提现页成功')
@@ -1547,8 +1631,8 @@ var GameInfo = function () {
 
         // VIP领取金币
         this.vipGetGold = function (userId, type, callback) {
+            const self = this;
             const vipLevel = this.userList[userId].vip_level;
-
             CacheUtil.getVipConfig().then(config => {
                 const currConfig = config.find(item => item.level === vipLevel);
                 if (!this.userList[userId].is_vip) {
@@ -1564,8 +1648,8 @@ var GameInfo = function () {
                         }
                         CacheUtil.VIPDailyGet(userId, ret => {
                             if (ret) {
-                                CacheUtil.addGoldCoin(userId, Number(currConfig.dailyGetGold), TypeEnum.ScoreChangeType.vipDaylyGet, (ret, currGoldCoin) => {
-                                    log.info(userId + '每日领取金币:' + currConfig.dailyGetGold + 'VIP等级' + vipLevel + '领取后金币:' + currGoldCoin)
+                                self.addSilverCoinFromJackpot(userId, Number(currConfig.dailyGetGold), TypeEnum.SilverCoinChangeType.vipDaylyGet, (ret, currSilverCoin) => {
+                                    log.info(userId + 'VIP每日领取银币:' + currConfig.dailyGetGold + 'VIP等级' + vipLevel + '领取后银币:' + currSilverCoin)
                                 });
                                 callback(1, ErrorCode.SUCCESS.msg, {type: TypeEnum.GoodsType.gold})
                             } else {
@@ -1581,8 +1665,8 @@ var GameInfo = function () {
                         }
                         CacheUtil.VIPMonthlyGet(userId, ret => {
                             if (ret) {
-                                CacheUtil.addGoldCoin(userId, Number(currConfig.monthlyGetGold), TypeEnum.ScoreChangeType.vipMonthlyGet, (ret, currGoldCoin) => {
-                                    log.info(userId + '每月领取金币:' + currConfig.monthlyGetGold + 'VIP等级' + vipLevel + '领取后金币:' + currGoldCoin)
+                                self.addSilverCoinFromJackpot(userId, Number(currConfig.monthlyGetGold), TypeEnum.SilverCoinChangeType.vipMonthlyGet, (ret, currSilverCoin) => {
+                                    log.info(userId + '每月领取银币:' + currConfig.monthlyGetGold + 'VIP等级' + vipLevel + '领取后银币:' + currSilverCoin)
                                 });
                                 callback(1, ErrorCode.SUCCESS.msg, {type: TypeEnum.GoodsType.gold})
                             } else {
@@ -1822,6 +1906,7 @@ var GameInfo = function () {
 
         // 签到奖励
         this.signReward = function (userId, consecutiveDays) {
+            const self = this;
             CacheUtil.getSignInConfig().then(config => {
                 const signInConfig = config.find(item => item.id === consecutiveDays);
                 const level = this.userList[userId].vip_level;
@@ -1830,9 +1915,9 @@ var GameInfo = function () {
                     for (let i = 0; i < signInConfig.award.length; i++) {
                         if (signInConfig.award[i].type === TypeEnum.GoodsType.gold) {
                             const addScore = StringUtil.rideNumbers(signInConfig.award[i].val, currVipConfig.dailySignScoreAddRate / 100, 2);
-                            // 发放金币
-                            CacheUtil.addGoldCoin(userId, addScore, TypeEnum.ScoreChangeType.daySign, (ret, currGoldCoin) => {
-                                log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取金币' + signInConfig.award[i].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
+                            // 发放银币
+                            self.addSilverCoinFromJackpot(userId, addScore, TypeEnum.SilverCoinChangeType.daySign, (ret, currSilverCoin) => {
+                                log.info(userId + '签到第' + consecutiveDays + '天,未加成前领取银币' + signInConfig.award[i].val + '加成百分比' + currVipConfig.dailySignScoreAddRate)
                             });
                         } else if (signInConfig.award[i].type === 1) {
                             // 发放钻石
@@ -1947,9 +2032,10 @@ var GameInfo = function () {
                                     // 扣奖池
                                     redis_laba_win_pool.redis_win_pool_decrby(luckyScore)
                                     // 幸运金奖池-发放幸运金
-                                    CacheUtil.addGoldCoin(userId, luckyScore, TypeEnum.ScoreChangeType.luckyCoinGive, (ret, currGoldCoin) => {});
+                                    self.addSilverCoinFromJackpot(userId, luckyScore, TypeEnum.SilverCoinChangeType.luckyCoinGive, (r, currSilverCoin) => {
+                                        log.info(userId + '领取幸运银币:' + luckyScore + '当前已领幸运币:' + ret.luckyCoin);
+                                    });
                                     luckGoldResult.val = luckyScore;
-                                    log.info(userId + '领取幸运金币:' + luckyScore + '当前已领幸运币:' + ret.luckyCoin);
                                     getFlag = true;
                                 }
                                 if (!getFlag) {
@@ -2251,6 +2337,7 @@ var GameInfo = function () {
 
         // 绑定邀请码
         this.bindInviteCode = function (socket, inviteCode, callback) {
+            const self = this;
             dao.existInviteCode(inviteCode, row => {
                 const userId = socket.userId;
                 if (!row) {
@@ -2286,9 +2373,9 @@ var GameInfo = function () {
                                                     if (err) {
                                                         callback(ErrorCode.ERROR.code, ErrorCode.ERROR.msg)
                                                     } else {
-                                                        // 给绑定用户立即送金币
-                                                        CacheUtil.addGoldCoin(userId, inviteeRewardGold, TypeEnum.ScoreChangeType.inviteBindUser, (ret, currGoldCoin) => {
-                                                            log.info('代理' + agentUserId + '邀请用户' + userId + '送给用户金币' + inviteeRewardGold)
+                                                        // 给绑定用户立即送银币
+                                                        self.addSilverCoinFromJackpot(userId, inviteeRewardGold, TypeEnum.SilverCoinChangeType.inviteBindUser, (ret, currSilverCoin) => {
+                                                            log.info('代理' + agentUserId + '邀请用户' + userId + '送给用户银币' + inviteeRewardGold)
                                                         });
                                                         // 返点记录（代理人金币未领取）
                                                         ymDao.agentRebateRecord(agentUserId, userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.unissued, row => {
@@ -2399,6 +2486,7 @@ var GameInfo = function () {
         // 领取返点
         this.getRebate = function (socket, callback) {
             const userId = socket.userId;
+            const self = this;
             // 查询未领取的返点
             ymDao.searchInviteSend(userId, row => {
 
@@ -2415,10 +2503,10 @@ var GameInfo = function () {
                                 log.info('领取返点' + userId + '类型:' + item.type + '金币数量:' + item.rebate_glod);
                                 const rebateGlodCoin = Number(item.rebate_glod);
                                 if (item.type === TypeEnum.AgentRebateType.bindInviteCode) {
-                                    CacheUtil.addGoldCoin(userId, rebateGlodCoin, TypeEnum.ScoreChangeType.inviteBindAgent, (ret, currGoldCoin) => {
+                                    self.addSilverCoinFromJackpot(userId, rebateGlodCoin, TypeEnum.SilverCoinChangeType.inviteBindAgent, (ret, currSilverCoin) => {
                                     });
                                 } else if (item.type === TypeEnum.AgentRebateType.recharge) {
-                                    CacheUtil.addGoldCoin(userId, rebateGlodCoin, TypeEnum.ScoreChangeType.rebateShop, (ret, currGoldCoin) => {
+                                    self.addSilverCoinFromJackpot(userId, rebateGlodCoin, TypeEnum.SilverCoinChangeType.rebateShop, (ret, currSilverCoin) => {
                                     });
                                 }
                             })
@@ -2705,14 +2793,14 @@ var GameInfo = function () {
                             if(goodsType === 0){
                                 let changleType = 0;
                                 if(type === TypeEnum.RankType.coin){
-                                    changleType = TypeEnum.ScoreChangeType.coinRankAward
+                                    changleType = TypeEnum.SilverCoinChangeType.coinRankAward
                                 }else if(type === TypeEnum.RankType.bigwin){
-                                    changleType = TypeEnum.ScoreChangeType.bigWinRankAward
+                                    changleType = TypeEnum.SilverCoinChangeType.bigWinRankAward
                                 }else if(type === TypeEnum.RankType.recharge){
-                                    changleType = TypeEnum.ScoreChangeType.rechargeRankAward
+                                    changleType = TypeEnum.SilverCoinChangeType.rechargeRankAward
                                 }
                                 CacheUtil.addGoldCoin(userId, val, changleType, ret =>{
-                                    log.info(userId + '领取排行榜奖励');
+                                    log.info(userId + '领取排行榜银币奖励');
                                 })
                             }
                         })
@@ -2765,6 +2853,8 @@ var GameInfo = function () {
         // 获取邮件奖励
         this.getEmailAward = function (socket, data) {
             const userId = socket.userId;
+            const self = this;
+
             let awards = []; // 领取的奖励明细
             let len = data.length; // 用户判断多个异步回调成功
             for(let i in data){
@@ -2810,10 +2900,10 @@ var GameInfo = function () {
                                     dao.updateFirstRechargeAwardStatus(otherId, ret =>{})
                                     CacheUtil.addGoldCoin(userId, rewardGoldVal, TypeEnum.ScoreChangeType.firstRechargeContinueReward, ret =>{
                                         log.info(userId + '获取月卡持续奖励邮件金币:' + rewardGoldVal)
-                                        CacheUtil.addDiamond(userId, rewardDiamondVal, TypeEnum.DiamondChangeType.firstRechargeContinueReward, ret =>{
+                                        self.addSilverCoin(userId, rewardDiamondVal, TypeEnum.SilverCoinChangeType.firstRechargeContinueReward, ret =>{
                                             awards.push({id: id, type: type, rewardGoldVal: rewardGoldVal, rewardDiamondVal : rewardDiamondVal})
                                             --len;
-                                            log.info(userId + '获取月卡持续奖励邮件钻石:' + rewardDiamondVal)
+                                            log.info(userId + '获取月卡持续奖励邮件银币:' + rewardDiamondVal)
                                             this.getEmailAwardCallBack(len, socket, awards);
                                         })
                                     })
@@ -3121,44 +3211,6 @@ var GameInfo = function () {
         };
 
 
-        this.sendEmail = function (info) {
-            var self = this;
-
-            dao.sendEmail(info, function (result, idx) {
-                if (result) {
-                    if (self.userList[info.userId]) {
-                        var prize = {
-                            id: idx,
-                            propId: info.winPropId,
-                            propCount: info.winPropCount,
-                            winScore: info.winScore,
-                            rankidx: 0,
-                            isGetPrize: 0,
-                            type: info.type,
-                            sendCoinUserId: info.sendCoinUserId,
-                            nickName: info.nickName
-                        };
-
-                        self.userList[info.userId]._socket.emit("addPrize", prize);
-                        //判断是否已经有此条记录
-                        var same = false;
-                        if (self.userList[info.userId] && self.userList[info.userId]._prize) {
-                            for (var j = 0; j < self.userList[info.userId]._prize.length; j++) {
-                                if (self.userList[info.userId]._prize[j].id == prize.id) {
-                                    same = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!same) {
-                            self.userList[info.userId]._prize.push(prize);
-                        }
-
-                    }
-                }
-            });
-        };
 
 
         // 发送邮箱验证码
@@ -3195,6 +3247,7 @@ var GameInfo = function () {
 
         // 绑定邮箱验证码
         this.bindEmail = function (socket, email, code, callback) {
+            const self = this;
             // 邮箱地址校验
             if (!emailValidator(email)) {
                 callback(ErrorCode.EMAIL_INPUT_ERROR.code, ErrorCode.EMAIL_INPUT_ERROR.msg)
@@ -3215,10 +3268,10 @@ var GameInfo = function () {
                                     // 转正式账号
                                     this.changleOfficial(socket.userId);
                                     const result = {
-                                        goodsType: [TypeEnum.GoodsType.diamond],
+                                        goodsType: [TypeEnum.GoodsType.silverCoin],
                                         sourceVal: [35]
                                     }
-                                    CacheUtil.addDiamond(socket.userId, 35, TypeEnum.DiamondChangeType.changleOfficial, ret =>{
+                                    self.addSilverCoinFromJackpot(socket.userId, 35, TypeEnum.SilverCoinChangeType.changleOfficial, ret =>{
                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, result)
                                     })
                                 } else {
@@ -3326,7 +3379,7 @@ var GameInfo = function () {
                                     luckyItem.luckyRushEndTime = now + luckyRushTimeMs;
                                     // 在线玩家推送幸运币可领取状态
                                     if (this.userList[userIdKey] && luckyItem.pushStatus === 1) {
-                                        log.info('在线玩家推送幸运币可领取状态' + userIdKey)
+                                        log.info(userIdKey + '在线玩家推送幸运币可领取状态')
                                         luckyItem.pushStatus = 0;
                                         this.userList[userIdKey]._socket.emit('luckyCoinGetStatus', {
                                             code: 1,
@@ -3482,67 +3535,118 @@ var GameInfo = function () {
         };
 
 
-        this.getExchangeGoods = function (callback) {
+        this.getExchangeGoods = function (userId, callback) {
             CacheUtil.getExchangeConfig().then(exchangeConfig => {
-                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, exchangeConfig)
+                const pairs = [];
+                exchangeConfig.forEach(item =>{
+                    const goodsId = item.id;
+                    pairs.push({userId: userId, goodsId: goodsId})
+                })
+                dao.searchExchangeRecordCount(pairs).then(rows =>{
+                    exchangeConfig = exchangeConfig.map(it => {
+                        const row = rows.filter(r => r.goodsId === it.id);
+                        const buyLimitTime = it.buy_times;
+                        if(buyLimitTime && Number(buyLimitTime) > 0){
+                            it.resBuyTime = buyLimitTime - row[0].count;
+                            return it;
+                        }
+                        return it;
+                    })
+                    callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, exchangeConfig)
+                })
             })
         }
 
         this.shopExchangeGoods = function (productId, userId, callback) {
             CacheUtil.getExchangeConfig().then(config =>{
-                const exchangeItem = config.filter(it => it.id === productId);
+                const exchangeItems = config.filter(it => it.id === productId);
+                if(exchangeItems.length < 1){
+                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                    return;
+                }
+                const exchangeItem = exchangeItems[0];
                 const goodsType = parseInt(exchangeItem.goodsType); // 物品类型
+                const name = exchangeItem.name; // 物品名称
                 const val = Number(exchangeItem.val) // 获得物品数量
                 const silverCoin  = Number(exchangeItem.target_price) // 花费银币
+                const buyTimes = Number(exchangeItem.buy_times) // 限购次数
+                const goodsId = Number(exchangeItem.id) // 物品id
 
-                dao.searchSilverCoin(userId,row =>{
-                    if(row){
-                        const currSilverCoin = row.silverCoin
-                        if(silverCoin > -1 && currSilverCoin >= silverCoin){
-                            // 扣银币
-                            dao.reduceSilverCoin(userId, silverCoin, code =>{
-                                if(code){
-                                    // 发货
-                                    switch(goodsType){
-                                        case TypeEnum.GoodsType.gold: //金币
-                                            // 发金币
-                                            CacheUtil.addGoldCoin(userId, val, TypeEnum.ScoreChangeType.exchange, ret =>{
-                                                log.info(userId + '兑换金币数量:' + val)
-                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
-                                            });
-                                            break;
-                                        case TypeEnum.GoodsType.withdrawLimit://提现额度
-                                            dao.addWithdrawLimit(userId, val, ret =>{
-                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
-                                            })
-                                            break;
-                                        case TypeEnum.GoodsType.withdrawTime://提现次数
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
-                                            break;
-                                        case TypeEnum.GoodsType.turntableTime://转盘次数
-                                            CacheUtil.addTurntableCoin(userId, 5)
-                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
-                                            break;
-                                        case TypeEnum.GoodsType.vipScore://VIP点数
-                                            if(this.userList[userId]){
-                                                this.userList[userId].vip_score = StringUtil.addNumbers(this.userList[userId].vip_score, val);
-                                            }
-                                            dao.addVipScore(userId, val, ret =>{
-                                                callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, [])
-                                            })
-                                            break;
-                                        default:
-                                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
-                                            break;
-                                    }
-                                }else{
-                                    callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
-                                }
-                            })
-                        }else {
-                            callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, [])
-                        }
+                // 查询兑换记录
+                dao.searchExchangeRecord(userId, goodsId, rows =>{
+                    let exchangleTime = 0;
+                    if(!rows){
+                        exchangleTime = 0;
+                    }else{
+                        exchangleTime = rows.length;
                     }
+                    if(exchangleTime >= buyTimes){ //限购
+                        log.info(userId + '兑换物品次数限制')
+                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        return;
+                    }
+                    // 查询银币账户
+                    dao.searchSilverCoin(userId,row =>{
+                        if(row){
+                            const currSilverCoin = Number(row.silverCoin)
+                            if(silverCoin > -1 && currSilverCoin >= silverCoin){
+                                // 扣银币
+                                this.reduceSilverCoin(userId,silverCoin, TypeEnum.SilverCoinChangeType.exchange, (code,beforeSilverCoin, currSilverCoin)=>{
+                                    log.info(userId + '兑换状态'+ code +'扣银币前:' + beforeSilverCoin + '扣银币后:' + currSilverCoin)
+                                    if(code){
+                                        // 兑换记录
+                                        dao.exchangeRecord(userId, val, goodsId, goodsType, name, silverCoin, ret =>{
+                                            this.getExchangeGoods(userId, (code, msg, data) =>{
+                                                // 发货
+                                                switch(goodsType){
+                                                    case TypeEnum.GoodsType.gold: //金币
+                                                        // 发金币
+                                                        CacheUtil.addGoldCoin(userId, val, TypeEnum.ScoreChangeType.exchange, ret =>{
+                                                            log.info(userId + '兑换金币数量:' + val)
+                                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                                        });
+                                                        break;
+                                                    case TypeEnum.GoodsType.withdrawLimit://提现额度
+                                                        dao.addWithdrawLimit(userId, val, ret =>{
+                                                            log.info(userId + '兑换提现额度数量:' + val)
+                                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                                        })
+                                                        break;
+                                                    case TypeEnum.GoodsType.withdrawTime://提现次数
+                                                        log.info(userId + '兑换提现次数:' + val)
+                                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                                        break;
+                                                    case TypeEnum.GoodsType.turntableTime://转盘次数
+                                                        log.info(userId + '兑换转盘次数:' + val)
+                                                        CacheUtil.addTurntableCoin(userId, 5)
+                                                        callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                                        break;
+                                                    case TypeEnum.GoodsType.vipScore://VIP点数
+                                                        dao.addVipScore(userId, val, ret =>{
+                                                            if(this.userList[userId]){
+                                                                this.userList[userId].vip_score = StringUtil.addNumbers(this.userList[userId].vip_score, val);
+                                                            }
+                                                            log.info(userId + '兑换VIP点数:' + val)
+                                                            callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
+                                                        })
+                                                        break;
+                                                    default:
+                                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg, data)
+                                                        break;
+                                                }
+                                            });
+                                        })
+                                    }else{
+                                        log.info(userId + '银币扣费失败')
+                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                    }
+                                })
+                            }else {
+                                log.info(userId + '银币账户不足')
+                                callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                            }
+                        }
+                    })
                 })
             })
         }
@@ -4230,6 +4334,7 @@ var GameInfo = function () {
 
         // 弹VIP升级奖励
         this.popUpgradeGiveGlod = function (userId, oldVipLevel, vipLevel, serverId) {
+            const self = this;
             CacheUtil.getVipConfig().then(config => {
                 const upgradeGiveGlod = config.find(it => it.level === vipLevel).upgradeGiveGlod;
                 const data = {
@@ -4238,8 +4343,8 @@ var GameInfo = function () {
                     currvipLevel: vipLevel,
                     oldVipLevel: oldVipLevel
                 }
-                CacheUtil.addGoldCoin(userId, Number(upgradeGiveGlod), TypeEnum.ScoreChangeType.upgradeGiveGlod, (ret, currGoldCoin) => {
-                    log.info(userId + 'VIP升级弹窗,升级前VIP等级:' + oldVipLevel + '当前VIP等级:' + vipLevel + '升级奖励金币:' + upgradeGiveGlod)
+                self.addSilverCoinFromJackpot(userId, Number(upgradeGiveGlod), TypeEnum.SilverCoinChangeType.upgradeGiveGlod, (ret, currSilverCoin) => {
+                    log.info(userId + 'VIP升级弹窗,升级前VIP等级:' + oldVipLevel + '当前VIP等级:' + vipLevel + '升级奖励银币:' + upgradeGiveGlod)
                     if (this.userList[userId]) {
                         this.userList[userId]._socket.emit('vipUpgrade', {code: 1, data: data});
                     } else {

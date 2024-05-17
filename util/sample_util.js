@@ -374,6 +374,12 @@ async function jungledelight(config) {
             continue;
         }
 
+        if (list_one_count(config.nGameMagicCardIndex, col1) > 0 ||
+            list_one_count(config.nGameMagicCardIndex, col5) > 0) {
+            len --;
+            continue;
+        }
+
         let result = {}
         result.dictAnalyseResult = analyse_result.initResult(config.nGameLines.length);
         LABA.HandCardsAnalyse(nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, 0, config.freeCards, config.freeTimes, config, result);

@@ -37,6 +37,7 @@ User = function(_userInfo,_socket){
 	this.bankGuideStep = -1; // 银行指引步数
 	this.newHandGive = 0; // 新手领取礼包
 	this.newHandFlag = 0;
+	this.silverCoin = 0;
 
 
 	this.init = function(_userInfo,_socket){
@@ -76,6 +77,7 @@ User = function(_userInfo,_socket){
 		this.newHandGive = _userInfo.newHandGive;
 		this.language = _userInfo.language;
 		this.newHandFlag = _userInfo.newHandFlag;
+		this.silverCoin = Number(_userInfo.silverCoin);
 	};
 
 

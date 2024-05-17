@@ -160,6 +160,13 @@ io.on('connection', function (socket) {
         });
     });
 
+    // 获取游戏内银币
+    socket.on('getSilverCoin', function () {
+        CacheUtil.getSilverCoin(socket.userId).then(coin =>{
+            socket.emit('getSilverCoinResult', {code: 1, data: {silverCoin: coin}})
+        });
+    });
+
     //登录游戏获取免费游戏次数
     socket.on('history', function () {
         gameInfo.getHistory(socket.userId, socket);

@@ -125,8 +125,8 @@ exports.generateGameResult  = function generateGameResult(winRate) {
 
 exports.addNumbers  = function addNumbers(a, b) {
     // 使用parseInt()或parseFloat()将输入转换为数字
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
@@ -136,9 +136,9 @@ exports.addNumbers  = function addNumbers(a, b) {
 
 exports.addTNumbers  = function addTNumbers(a, b, c) {
     // 使用parseInt()或parseFloat()将输入转换为数字
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
-    const num3 = parseFloat(c);
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
+    const num3 = typeof c === 'string' ? parseFloat(c) : c;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2) || isNaN(num3)) {
         return NaN;
@@ -149,8 +149,8 @@ exports.addTNumbers  = function addTNumbers(a, b, c) {
 
 exports.reduceNumbers  = function reduceNumbers(a, b) {
     // 使用parseInt()或parseFloat()将输入转换为数字
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
@@ -161,8 +161,8 @@ exports.reduceNumbers  = function reduceNumbers(a, b) {
 
 exports.compareNumbers  = function compareNumbers(a, b) {
     // 使用parseInt()或parseFloat()将输入转换为数字
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
@@ -170,9 +170,9 @@ exports.compareNumbers  = function compareNumbers(a, b) {
     return num1 < num2;
 }
 
-exports.rideNumbers  = function rideNumbers(a, b, decimalPlaces) {
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
+exports.rideNumbers  = function (a, b, decimalPlaces) {
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
@@ -181,9 +181,9 @@ exports.rideNumbers  = function rideNumbers(a, b, decimalPlaces) {
 }
 
 
-exports.divNumbers  = function divNumbers(a, b, decimalPlaces) {
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
+exports.divNumbers  = function (a, b, decimalPlaces) {
+    const num1 = typeof a === 'string' ? parseFloat(a) : a;
+    const num2 = typeof b === 'string' ? parseFloat(b) : b;
     // 检查输入是否为有效数字，若无效则返回NaN
     if (isNaN(num1) || isNaN(num2)) {
         return NaN;
@@ -191,7 +191,7 @@ exports.divNumbers  = function divNumbers(a, b, decimalPlaces) {
     return this.toFixed((num1 / num2), decimalPlaces);
 }
 
-exports.toFixed  = function toFixed(num, decimalPlaces) {
+exports.toFixed  = function (num, decimalPlaces) {
     const parsedNum = typeof num === 'string' ? parseFloat(num) : num;
     // 将数字转换为字符串
     const numString = parsedNum.toString();

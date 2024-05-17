@@ -18,7 +18,7 @@ exports.initDayJob = function (userList){
         pushRedPoint(userList);
     })
 
-    // 定义每分钟定时任务
+    // 定义每1钟定时任务
     const mJob = schedule.scheduleJob('*/1 * * * *', async () => {
         try {
             // 发排行榜奖励
