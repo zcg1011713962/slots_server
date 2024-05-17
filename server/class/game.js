@@ -3582,7 +3582,7 @@ var GameInfo = function () {
                     }
                     if(exchangleTime >= buyTimes){ //限购
                         log.info(userId + '兑换物品次数限制')
-                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                        callback(ErrorCode.SILVERCOIN_EXCHANGLE_LIMIT.code, ErrorCode.SILVERCOIN_EXCHANGLE_LIMIT.msg)
                         return;
                     }
                     // 查询银币账户
@@ -3638,7 +3638,7 @@ var GameInfo = function () {
                                         })
                                     }else{
                                         log.info(userId + '银币扣费失败')
-                                        callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
+                                        callback(ErrorCode.SILVERCOIN_NOT_ENOUGH.code, ErrorCode.SILVERCOIN_NOT_ENOUGH.msg)
                                     }
                                 })
                             }else {

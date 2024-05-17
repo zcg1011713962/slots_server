@@ -67,6 +67,8 @@ class ErrorCode {
     static get WITHDRAW_APPLY_CONTENT() { return { code: 'c0014', msg: '提现成功邮件内容' , langCode: 'languageId_361' }; }
     static get WITHDRAW_FAILED_TITLE() { return { code: 'c0015', msg: '提现被拒邮件标题' , langCode: 'languageId_362' }; }
     static get WITHDRAW_FAILED_CONTENT() { return { code: 'c0016', msg: '提现被拒邮件内容' , langCode: 'languageId_363' }; }
+    static get SILVERCOIN_EXCHANGLE_LIMIT() { return { code: 'W408', msg: '银币兑换次数不足' , langCode: 'languageId_364' }; }
+    static get SILVERCOIN_NOT_ENOUGH() { return { code: 'W409', msg: '银币不足' , langCode: 'languageId_365' }; }
 }
 
 
