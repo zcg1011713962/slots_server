@@ -945,7 +945,7 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
     values.push(buyContinueDays);
     values.push(payChannel);
     values.push(payType);
-    values.push(promoteWithdrawLimit);
+    values.push(promoteWithdrawLimit ? promoteWithdrawLimit : 0);
     values.push(silverCoin);
 
     pool.getConnection(function (err, connection) {
@@ -1079,7 +1079,7 @@ exports.searchAllOffLineOrder = function searchAllOffLineOrder(callback) {
 
 // 查询所有订单
 exports.searchAllOrder = function (userId, payStatus, callback) {
-    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, productId,silverCoin, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ?';
+    const sql = 'SELECT id, orderId, userId, amount, currencyType, vipLevel, goodsType, price, status, `group`, service, mul, shopType, `val`, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannel, payType, productId,silverCoin, create_time createTime, promoteWithdrawLimit FROM pay_order where userId = ? and status = ? or status = ? order by create_time desc limit 100';
     let values = [];
     values.push(userId);
     values.push(payStatus[0]);
@@ -1510,8 +1510,9 @@ exports.reduceSilverCoin = function (userId, silverCoin, callback) {
 
 //修改累计充值
 exports.updateTotalCharge = function (userId, amount, callback) {
-    const sql = 'update newuseraccounts set totalRecharge = totalRecharge + ? where Id=?';
+    const sql = 'update newuseraccounts set totalRecharge = totalRecharge + ?, weekRecharge = weekRecharge + ? where Id=?';
     let values = [];
+    values.push(Number(amount));
     values.push(Number(amount));
     values.push(userId);
 
@@ -1534,6 +1535,32 @@ exports.updateTotalCharge = function (userId, amount, callback) {
                 } else {
                     callback(1);
                 }
+            }
+        });
+        values = [];
+    });
+};
+
+
+// 清空周充值
+exports.clearWeekRecharge = function (callback) {
+    const sql = 'update newuseraccounts set weekRecharge = 0';
+    let values = [];
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                console.log("清空周充值");
+                console.log(err);
+                callback(0);
+            } else {
+                callback(1);
             }
         });
         values = [];
@@ -3341,7 +3368,7 @@ exports.searchCoinRank = function (callback) {
 
 // 充值排行
 exports.searchRechargeRank = function (callback) {
-    const sql = "select Id userId, nickname,headimgurl, totalRecharge  from newuseraccounts order by totalRecharge desc";
+    const sql = "select Id userId, nickname,headimgurl, weekRecharge as totalRecharge  from newuseraccounts order by totalRecharge desc";
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);

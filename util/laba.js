@@ -1,6 +1,7 @@
 const laba_config = require("./config/laba_config");
 const StringUtil = require("./string_util");
 const gameDao = require("./dao/gameDao");
+const analyse_result = require("./lottery_analyse_result");
 const log = require("../CClass/class/loginfo").getInstand;
 
 module.exports.createHandCards = function (cards, weight_two_array, col_count, line_count, cardsNumber, jackpotCard, icon_type_bind, winJackpot, blankCard) {
@@ -743,6 +744,107 @@ module.exports.tigerFullScreen = function (dictAnalyseResult, nGameLines) {
     }
 }
 
+module.exports.tigerOpenBoxBefore = function (dictAnalyseResult, config, result){
+    let chooseNum = RandomNumBoth(0, config.cards.length - 1);
+    if(chooseNum === config.jackpotCard || chooseNum === config.nGameMagicCardIndex || chooseNum === config.openBoxCard){// 排除jackpot图案
+        chooseNum = 0;
+    }
+    let startNum = RandomNumBoth(3, 7);
+    // startNum = 9;
+    let finalList = [];
+    let startList = [];
+    result.nHandCards = [config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard];
+    for (let i = 0; i < startNum; i++) {
+        let a = RandomNumBoth(0, result.nHandCards.length - 1);
+        if(a === config.jackpotCard){// 排除jackpot图案
+            a = 0;
+        }
+        if (result.nHandCards[a] !== chooseNum) {
+            result.nHandCards[a] = chooseNum;
+            startList.push(a);
+        } else {
+            i--;
+        }
+    }
+    startList.sort(function (a, b) {
+        return a - b;
+    });
+    finalList.push(startList.concat());
+
+    // 传递参数
+    result.chooseNum = chooseNum;
+    result.finalList = finalList;
+    result.startList = startList;
+}
+
+module.exports.tigerOpenBoxAfter = function (config, result, user){
+    let res_list = [];
+    let newHandCard = [];
+    for (let i in result.nHandCards) {
+        newHandCard.push(parseInt(result.nHandCards[i]) + 1);
+    }
+    result.dictAnalyseResult["nHandCards"] = newHandCard;
+    res_list.push(JSON.parse(JSON.stringify(result.dictAnalyseResult)));
+    // 初始化分析结果
+    result.dictAnalyseResult = analyse_result.initResult(config.nBetSum)
+    for (let i = 0; i < config.cards.length; i++) {
+        result.dictAnalyseResult["nWinCards"].push(false);
+    }
+    while(true){
+        let haveChange = false;
+        for (let i = 0; i < result.nHandCards.length; i++) {
+            let c = RandomNumBoth(0, config.cards.length - 1);
+            if(c === config.jackpotCard){ // 过滤jackpot图案
+                c = 0;
+            }
+            if ((c === result.chooseNum && result.nHandCards[i] !== c)) {
+                haveChange = true;
+                result.nHandCards[i] = result.chooseNum;
+                result.startList.push(i);
+                //console.log(c, i);
+            } else if (c === config.nGameMagicCardIndex && result.nHandCards[i] !== result.chooseNum && result.nHandCards[i] !== config.nGameMagicCardIndex) {
+                haveChange = true;
+                result.nHandCards[i] = config.nGameMagicCardIndex;
+                result.startList.push(i);
+                //console.log(c, i);
+            }
+        }
+        result.startList.sort(function (a, b) {
+            return a - b;
+        });
+        if (result.startList.length === config.cards.length) {
+            haveChange = false;
+        }
+        result.finalList.push(result.startList.concat());
+        this.HandCardsAnalyse(result.nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, result.winItem.winJackpot, config.freeCards, config.freeTimes, config, result);
+        let newHandCard = [];
+        for (let i in result.nHandCards) {
+            newHandCard.push(parseInt(result.nHandCards[i]) + 1);
+        }
+        result.dictAnalyseResult["nHandCards"] = newHandCard;
+        res_list.push(JSON.parse(JSON.stringify(result.dictAnalyseResult)));
+
+        result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
+        for (let i = 0; i < config.cards.length; i++) {
+            result.dictAnalyseResult["nWinCards"].push(false);
+        }
+        //没有变化的时候直接跳出
+        if (!haveChange) {
+            break;
+        }
+    }
+    result.dictAnalyseResult["getBigWin"] = {
+        bFlag: true,
+        isStart: true,
+        list: result.finalList,
+        card: result.chooseNum + 1,
+        res_list: res_list
+    };
+    console.log(result.finalList);
+    this.HandCardsAnalyse(result.nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, result.winItem.winJackpot, config.freeCards, config.freeTimes, config, result);
+    log.info('老虎特殊玩法转动结束')
+}
+
 module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
      try{
          let chooseNum = result.chooseNum > -1 ? result.chooseNum : RandomNumBoth(0, 6);
@@ -795,87 +897,6 @@ module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
 }
 
 
-/*module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
-    try{
-        if(result.startList &&  result.startList.length > 0){
-            for (let i = 0; i < result.nHandCards.length; i++) {
-                if(result.startList.length === 9){
-                    break;
-                }
-                result.nHandCards = [1, 1, 1, 7, 1, 1, 7, 7, 7]
-            }
-            result.startList.sort(function (a, b) {
-                return a - b;
-            });
-            result.finalList.push(result.startList.concat());
-        }else{
-           /!* let startNum = RandomNumBoth(3, 6);
-            // startNum = 9;
-            let finalList = [];
-            let startList = [];
-            result.nHandCards = [config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard];
-            for (let i = 0; i < startNum; i++) {
-                let a = RandomNumBoth(0, 6);
-                if (result.nHandCards[a] !== chooseNum) {
-                    result.nHandCards[a] = chooseNum;
-                    startList.push(a);
-                } else {
-                    i--;
-                }
-            }*!/
-            gameDao.syncHandCardsByMuls(config.gameId, result.muls , false, true, 0).then(cardRow =>{
-                let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
-                cards = cards.filter(card =>{
-                    // 除了特殊卡，所有图案都相同
-                    const c = card.filter(element => element !== config.openBoxCard);
-                    // 选择的卡
-                    result.chooseNum = c[0];
-                    const allSame = c.every((element, index, array) => {
-                        return element === array[0];
-                    });
-                    if(allSame){
-                        return card;
-                    }
-                })
-                console.log(cards);
-                const index = StringUtil.RandomNum(0, cards.length - 1)
-                const card = cards[index];
-                let finalList = [];
-                /!*for(let i = 0 ; i < card.length; i++){
-                    if(card[i] === result.chooseNum){
-                        startList.push(i);
-                    }
-                }*!/
-
-                let startList = [0,1,2];
-                startList.sort(function (a, b) {
-                    return a - b;
-                });
-                finalList.push(startList.concat());
-                result.nHandCards = [1, 1, 1, 7, 7, 7, 7, 7, 7];
-                result.chooseNum = 1;
-                result.startList = [0,1,2];
-                result.finalList = finalList;
-                result.resList = []
-            })
-
-
-
-            startList.sort(function (a, b) {
-                return a - b;
-            });
-            finalList.push(startList.concat());
-
-            result.chooseNum = chooseNum;
-            result.startList = startList;
-            result.finalList = finalList;
-            result.resList = [];
-        }
-
-    }catch (e){
-        log.err(e)
-    }
-}*/
 
 module.exports.ganeshagoldOpenBox = function (result){
 

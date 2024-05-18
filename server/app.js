@@ -70,22 +70,23 @@ app.get('/registerByGuest', async function (req, res) {
 //版本验证
 app.post('/checkVersion', function (req, res) {
     //验证版本
+    log.info('版本验证' + req.query.key)
     const r = req.query.key;
     let key = version + num;
-    log.info('版本验证' + key)
     CacheUtil.getDownloadExtConfig().then(config =>{
         const downloadUrl = config.download_url;
         if (r !== key) {
+            log.info('版本验证返回' + downloadUrl)
             res.send({code: 0, url: downloadUrl});
             return;
         }
+        log.info('版本验证返回' + downloadUrl)
         res.send({code: 1, url: downloadUrl});
     });
 });
 
 // 根据设备码获取用户名信息
 app.get('/devcodesearch', function (req, res) {
-    //验证版本
     const deviceCode = req.query.deviceCode;
     log.info('根据设备码获取用户名信息' + deviceCode)
     if(!deviceCode || deviceCode.length < 1){
@@ -133,6 +134,10 @@ app.get('/searchRank', function (req, res) {
             const currUserCoinRank = coinRank.filter(item => {
                 return item.userId === userId
             });
+            // 过滤掉金币小于0的用户
+            coinRank = coinRank.filter(item => {
+                return Number(item.totalCoin) > 0;
+            });
             // 充值排行
             gameInfo.searchRechargeRank(rechargeRank =>{
                 let currRechargeRankOrder = 1;
@@ -143,7 +148,12 @@ app.get('/searchRank', function (req, res) {
                 const currRechargeRank = rechargeRank.filter(item => {
                     return item.userId === userId
                 });
-                // 赢金币排行
+                // 过滤掉没充过钱的用户
+                rechargeRank = rechargeRank.filter(item => {
+                    return Number(item.totalRecharge) > 0;
+                });
+
+                // 大赢家排行
                 gameInfo.searchBigWinToday(bigWinTodayRank =>{
                     let bigWinTodayRankOrder = 1;
                     bigWinTodayRank = bigWinTodayRank.map(item =>{
@@ -152,6 +162,10 @@ app.get('/searchRank', function (req, res) {
                     });
                     const currBigWinTodayRank = bigWinTodayRank.filter(item => {
                         return item.userId === userId
+                    });
+                    // 过滤掉没赢过钱的用户
+                    bigWinTodayRank = bigWinTodayRank.filter(item => {
+                        return Number(item.winCoin) > 0;
                     });
 
                     CacheUtil.getRankAwardConfig((coinRankJackpot, rechargeRankJackpot, bigWinRankJackpot, rankRatioList) =>{
@@ -175,11 +189,11 @@ app.get('/searchRank', function (req, res) {
                         rechargeAwards.sort((a, b) => b - a);
                         bigWinAwards.sort((a, b) => b - a);
                         res.send({code: 1, data: {
-                                coinRank: coinRank.slice(0, 50),  // 金币排行
+                                coinRank: coinRank.length <= 50 ? coinRank : coinRank.slice(0, 50),  // 金币排行
                                 currUserCoinRank: currUserCoinRank[0], // 当前用户金币排行
-                                rechargeRank: rechargeRank.slice(0, 50), // 充值排行
+                                rechargeRank: rechargeRank.length <= 50 ? rechargeRank : rechargeRank.slice(0, 50), // 充值排行
                                 currRechargeRank: currRechargeRank[0], // 当前用户充值排行
-                                bigWinTodayRank: bigWinTodayRank.slice(0, 50), // 大富豪排行
+                                bigWinTodayRank: bigWinTodayRank.length <= 50 ? bigWinTodayRank : bigWinTodayRank.slice(0, 50), // 大富豪排行
                                 currBigWinTodayRank: currBigWinTodayRank[0], // 当前用户大富排行
                                 coinRankJackpot: coinRankJackpot, // 金币排行奖池
                                 rechargeRankJackpot: rechargeRankJackpot, // 充值排行奖池
@@ -206,7 +220,6 @@ app.get('/searchRank', function (req, res) {
 
 // 保存新手指引步数
 app.get('/saveGuideStep', function (req, res) {
-    //验证版本
     const userId = req.query.userId ? parseInt( req.query.userId) : 0;
     const step = req.query.step;
     log.info('保存新手指引步数' + userId + 'step:' + step)
@@ -294,11 +307,7 @@ app.get('/exchangeGoods', function (req, res) {
     const userId = Number(req.query.userId);
     log.info(userId+ '兑换物品' + productId)
     gameInfo.shopExchangeGoods(productId, userId, (code, msg, data) =>{
-        if(code){
-            res.send({code: code, data: data});
-        }else{
-            res.send({code: code, msg: msg});
-        }
+        res.send({code: code, data: data});
     });
 });
 
@@ -387,6 +396,7 @@ app.get('/Shopping', async function (req, res) {
     const shopType = req.query.shopType ? req.query.shopType : 0;
     const serverId = req.query.serverId ? req.query.serverId : 0; // 大厅0 游戏serverId
     const goods = req.query.goods ? req.query.goods : '';
+
     log.info(userId + '购买商品' + 'productId:' + productId + 'shopType:' + shopType + 'service:' + service + 'serverId:' +serverId + 'goods' + goods)
 
     if(shopType === undefined || service === undefined || userId === undefined || userId === '' || productId === undefined || count === undefined || isNaN(serverId)) {
@@ -397,27 +407,29 @@ app.get('/Shopping', async function (req, res) {
 
     const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
-        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, goods, (code, msg, data) => {
-            CacheUtil.delUserProtocol(userId, "Shopping")
-            if(code){
-                log.info(userId + '购买商品下单成功');
-                CacheUtil.paySwitch().then(ok =>{
-                    if(ok){
-                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
-                            if(ret){
-                                log.info(userId + '充值打点成功');
-                            }
-                        })
-                    }else{
-                        log.info(userId + '测试环境不支持充值打点')
-                    }
-                })
-                res.send({code: code, data: data});
-            }else{
-                log.info(userId + '购买商品下单失败:' + msg);
-                res.send({code: code, msg: msg});
-            }
-        });
+        CacheUtil.getPayType().then(payType =>{
+            gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, goods, payType, (code, msg, data) => {
+                CacheUtil.delUserProtocol(userId, "Shopping")
+                if(code){
+                    log.info(userId + '购买商品下单成功');
+                    CacheUtil.paySwitch().then(ok =>{
+                        if(ok){
+                            gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
+                                if(ret){
+                                    log.info(userId + '充值打点成功');
+                                }
+                            })
+                        }else{
+                            log.info(userId + '测试环境不支持充值打点')
+                        }
+                    })
+                    res.send({code: code, data: data});
+                }else{
+                    log.info(userId + '购买商品下单失败:' + msg);
+                    res.send({code: code, msg: msg});
+                }
+            });
+        })
     }
 });
 
@@ -471,7 +483,6 @@ app.get('/shoppingCallBack', function (req, res) {
 
 // 提现回调
 app.get('/withdrawCallBack', async function (req, res) {
-    //验证版本
     const userId = req.query.userId ? Number(req.query.userId) : 0;
     const orderId = req.query.orderId ? req.query.orderId : null;
     log.info('提现回调' + userId + '订单' + orderId)
@@ -509,7 +520,6 @@ app.get('/bankrupt', function (req, res) {
 
 // 打点基础数据
 app.get('/dotBase', function (req, res) {
-    //验证版本
     const userId = req.query.userId;
     const adid = req.query.adid  === undefined ? '': req.query.adid ;
     const gps = req.query.gps === undefined ? '' : req.query.gps;
@@ -530,7 +540,6 @@ app.get('/dotBase', function (req, res) {
 
 // 客户端打点
 app.get('/dot', function (req, res) {
-    //验证版本
     const userId = req.query.userId;
     const key = req.query.key;
     const gps = req.query.gps;
@@ -1451,9 +1460,9 @@ io.on('connection', function (socket) {
         if (gameInfo.IsPlayerOnline(userId)) {
             const ret = await CacheUtil.recordUserProtocol(userId, 'getRebate')
             if(ret){
-                gameInfo.getRebate(socket, (code, msg) =>{
+                gameInfo.getRebate(socket, (code, msg, data) =>{
                     CacheUtil.delUserProtocol(userId, 'getRebate')
-                    socket.emit('getRebateResult', {code:code, msg: msg});
+                    socket.emit('getRebateResult', {code:code, msg: msg, data: data});
                 });
             }
         }else{

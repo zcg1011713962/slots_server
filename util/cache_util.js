@@ -10,6 +10,7 @@ const gameDao = require("./dao/gameDao");
 const gamblingBalanceGold= 'gamblingBalanceGold';
 const sysBalanceGold= 'sysBalanceGold';
 const redisJackpotKey = "jackpot";
+const silverJackpotKey = "silverJackpot";
 
 const bankPwdErrorTimes= 'bankPwdErrorTimes';
 const everydayLuckyCoin= 'everydayLuckyCoin';
@@ -27,6 +28,8 @@ const userDiscountLimitedKey = 'userDiscountLimited';
 const newbierPartKey = 'newbierPart';
 const buyCallBackSwitchKey  = 'buyCallBackSwitch';
 const paySwitchKey  = 'paySwitch';
+const payTypeKey = 'payType';
+
 const nGamblingWaterLevelGoldKey = 'nGamblingWaterLevelGold';
 const recordHandCardKey = 'recordHandCards';
 const orderCacheKey  = 'orderCache';
@@ -52,6 +55,11 @@ const gameConfig = {
 const jackpotConfig = {
     jackpotConfigKey: 'jackpotConfig'
 }
+
+const silverJackpotConfig = {
+    silverJackpotConfigKey: 'silverJackpotConfig'
+}
+
 
 
 const serverConfig = {
@@ -95,6 +103,8 @@ exports.initJackpot  = function () {
     });
 }
 
+
+
 // 累加总奖池
 exports.IncrJackpot  = function (val) {
     if(val > 0){
@@ -111,6 +121,12 @@ exports.DecrJackpot  = function (val) {
 exports.getJackpot  = function () {
     return RedisUtil.get(redisJackpotKey);
 };
+
+// 获取银币奖池
+exports.getSilverJackpot  = function () {
+    return RedisUtil.get(silverJackpotKey);
+};
+
 
 
 // 初始化用户库存
@@ -191,6 +207,14 @@ exports.getJackpotConfig = async function(){
         log.err('getJackpotConfig');
     }
 }
+exports.getSilverJackpotConfig = async function(){
+    try{
+        return RedisUtil.get(silverJackpotConfig.silverJackpotConfigKey).then(config => JSON.parse(config))
+    } catch(e){
+        log.err('getJackpotConfig');
+    }
+}
+
 
 
 exports.getDiscountLimitedConfig = async function(){
@@ -309,13 +333,23 @@ exports.getSignInConfig = async function(){
         log.err('getSignInConfig');
     }
 }
-
+// 获取金币活动配置
 exports.getActivityJackpotConfig = async function(){
     try{
         return RedisUtil.get(jackpotConfig.jackpotConfigKey).then(config => JSON.parse(config))
     }
     catch(e){
         log.err('getJackpotConfig');
+    }
+}
+
+// 获取银币活动配置
+exports.getActivitySilverCoinConfig = async function(){
+    try{
+        return RedisUtil.get(silverJackpotConfig.silverJackpotConfigKey).then(config => JSON.parse(config))
+    }
+    catch(e){
+        log.err('getActivitySilverCoinConfig');
     }
 }
 
@@ -730,6 +764,17 @@ exports.getActivityJackpot = function(callback){
     })
 }
 
+// 获取银币活动奖池
+exports.getSilverCoinJackpot = function(callback){
+    const self = this;
+    this.getSilverJackpot().then(silverJackpot =>{
+        self.getSilverJackpotConfig().then(config =>{
+            const activityJackpot= silverJackpot ? silverJackpot * config.jackpot_ratio.activity / 100 : 0;
+            callback(StringUtil.toFixed(activityJackpot, 2))
+        })
+    })
+}
+
 
 // 存储用户基础信息
 exports.setUserInfo = function(userId, userInfo){
@@ -1130,6 +1175,13 @@ exports.paySwitch = function(){
     });
 }
 
+// 每个国家部署不同服务，使用不同支付类型
+exports.getPayType = function(){
+    return RedisUtil.get(payTypeKey).then(payTyp =>{
+       return payTyp;
+    });
+}
+
 // 购买回调开关
 exports.getGamblingWaterLevelGold = function(){
     return RedisUtil.get(nGamblingWaterLevelGoldKey).then(nGamblingWaterLevelGold =>{
@@ -1328,7 +1380,7 @@ exports.getRankAwardConfig = function(callback){
         const totalWeight = StringUtil.addTNumbers(coinRankWeight, rechargeRankWeight, bigWinWeight);
         // 公用排行前几名奖池占比
         const rankRatioList = cf.rankRatioList;
-        this.getActivityJackpot(activityJackpot =>{
+        this.getSilverCoinJackpot(activityJackpot =>{
             const rankJackpot= StringUtil.rideNumbers(activityJackpot, rankRatio/100, 2)
             // 每种奖池数量
             const coinRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(coinRankWeight, totalWeight, 2), 2)
@@ -1343,7 +1395,7 @@ exports.getRankAwardConfig = function(callback){
 
 exports.getRankJackpot = function(callback){
     const self = this;
-    self.getActivityJackpot(activityJackpot =>{
+    self.getSilverCoinJackpot(activityJackpot =>{
         self.getRankConfig().then(config =>{
             const rankJackpot = StringUtil.rideNumbers(activityJackpot, config.rankRatio / 100, 2 );
             const coinRankWeight = config.rankRatioWeight.coinRankWeight;
@@ -1398,8 +1450,12 @@ exports.searchOrderCache = function(userId, productId, amount, orderType){
 
 // 删除订单缓存
 exports.delOrderCache = function(userId, productId, amount, orderType){
-    const key = orderCacheKey + userId + '_' + productId + '_'  + StringUtil.toFixed(amount, 2).toString() + '_' + orderType;
-    return RedisUtil.del(key);
+    try{
+        const key = orderCacheKey + userId + '_' + productId + '_'  + StringUtil.toFixed(amount, 2).toString() + '_' + orderType;
+        return RedisUtil.del(key);
+    }catch (e){
+        log.err(e)
+    }
 }
 
 

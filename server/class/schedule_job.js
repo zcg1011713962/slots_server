@@ -141,54 +141,62 @@ function rankAward (type,rankStartTime, rankEndTime, coinRankJackpot, rechargeRa
     if(TypeEnum.RankType.coin === type){
         // 金币排行
         gameInfo.searchCoinRank(coinRank =>{
+            // 过滤掉金币小于0的用户
+            coinRank = coinRank.filter(item => {
+                return Number(item.totalCoin) > 0;
+            });
             const awardUsers = coinRank.slice(0, awardNum);
             // 给每个用户发奖励
             for(let i = 0; i < awardUsers.length; i++){
                 const userId = awardUsers[i].userId;
                 const currAwardVal = StringUtil.rideNumbers(coinRankJackpot, percentages[i], 2)
-                log.info('金币排行榜给用户:' + userId  + '金币数量:' + currAwardVal + '名次:' + (i + 1))
+                log.info('金币排行榜给用户:' + userId  + '银币数量:' + currAwardVal + '名次:' + (i + 1))
                 // 插入排行奖励表
                 dao.rankAwardRecord(userId, type, TypeEnum.GoodsType.gold, currAwardVal, rankStartTime, rankEndTime, (i + 1), insertId =>{
-                    CacheUtil.DecrJackpot(currAwardVal).then(r =>{
-                        // 发邮件奖励
-                        gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.gold)
-                    });
+                    // 发邮件奖励
+                    gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.silverCoin)
                 })
             }
         })
     }else if(TypeEnum.RankType.recharge === type){
         // 充值排行
         gameInfo.searchRechargeRank(rechargeRank =>{
+            // 过滤掉没充过钱的用户
+            rechargeRank = rechargeRank.filter(item => {
+                return Number(item.totalRecharge) > 0;
+            });
             const awardUsers = rechargeRank.slice(0, awardNum);
             // 给每个用户发奖励
             for(let i = 0; i < awardUsers.length; i++){
                 const userId = awardUsers[i].userId;
                 const currAwardVal = StringUtil.rideNumbers(rechargeRankJackpot, percentages[i], 2)
-                log.info('充值排行榜给用户:' + userId + '金币数量:' + currAwardVal + '名次:' + (i + 1))
+                log.info('充值排行榜给用户:' + userId + '银币数量:' + currAwardVal + '名次:' + (i + 1))
                 // 插入充值奖励表
                 dao.rankAwardRecord(userId, type, TypeEnum.GoodsType.gold, currAwardVal, rankStartTime, rankEndTime, (i + 1), insertId =>{
-                    CacheUtil.DecrJackpot(currAwardVal).then(r =>{
-                        // 发邮件奖励
-                        gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.gold)
-                    })
+                    // 发邮件奖励
+                    gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.silverCoin)
                 })
             }
+            // 清理周充值榜
+            gameInfo.clearWeekRecharge();
         })
     }else if(TypeEnum.RankType.bigwin === type){
         // 大富豪排行
         gameInfo.searchBigWinToday(bigWinTodayRank =>{
+            // 过滤掉没赢过钱的用户
+            bigWinTodayRank = bigWinTodayRank.filter(item => {
+                return Number(item.winCoin) > 0;
+            });
             const awardUsers = bigWinTodayRank.slice(0, awardNum);
             // 给每个用户发奖励
             for(let i = 0; i < awardUsers.length; i++){
                 const userId = awardUsers[i].userId;
                 const currAwardVal = StringUtil.rideNumbers(bigWinRankJackpot, percentages[i], 2)
-                log.info('大富豪排行排行榜给用户:' +'金币数量:' + currAwardVal + '名次:' + (i + 1))
+                log.info('大富豪排行排行榜给用户:' +'银币数量:' + currAwardVal + '名次:' + (i + 1))
                 // 插入充值奖励表
                 dao.rankAwardRecord(userId, type, TypeEnum.GoodsType.gold, currAwardVal, rankStartTime, rankEndTime, (i + 1), insertId =>{
-                    CacheUtil.DecrJackpot(currAwardVal).then(r =>{
-                        // 发邮件奖励
-                        gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.gold)
-                    })
+                    // 发邮件奖励
+                    gameInfo.saveEmail(LanguageItem.coin_rank_award_title, TypeEnum.EmailType.rank_award, userId, 0, LanguageItem.coin_rank_award_content, insertId, TypeEnum.GoodsType.silverCoin)
                 })
             }
         })

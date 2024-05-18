@@ -20,14 +20,14 @@ const GoodsType = {
 
 
 const CurrencyTypeIndex = {
-    Brazil_BRL: 0 // R$雷亚尔
+    Brazil_BRL: 0, // R$雷亚尔
+    Indian_Rupee: 1 // ₹卢比
 };
 
 const CurrencyType = {
     Default: 'BRL', // R$雷亚尔
-    Brazil_BRL: 'BRL' // R$雷亚尔
-  /*  China_RMB: 1, // RMB人民币
-    America_US: 2,    // $美元*/
+    Brazil_BRL: 'BRL', // R$雷亚尔
+    Indian_Rupee: 'IR' // ₹卢比
 };
 
 
@@ -107,7 +107,8 @@ const GameType = {
 
 
 const PayChannelType ={
-    pix: 'pix' // pix
+    pix: 'pix', // pix
+    IR: 'IR'
 }
 
 const ScoreChangeType = {
@@ -160,7 +161,8 @@ const SilverCoinChangeType = {
     bigWinRankAward: 16,  // 大富豪排行榜奖励
     changleOfficial: 17, // 绑定邮箱
     firstRechargeContinueReward: 18, // 首充持续奖励
-    exchange: 19  // 银币兑换减少
+    exchange: 19,  // 银币兑换减少
+    turntable: 20, // 大厅免费转盘获得
 }
 
 const DiamondChangeType = {
@@ -215,8 +217,9 @@ const pushFirstRechargeType = {
 
 
 const PayType = {
-    betcatpay: 0, // pix betcatpay支付
-    fatpag: 1 // fastPay fatpag支付
+    betcatpay: 0, // pix betcatpay巴西支付
+    fatpag: 1, // fastPay 巴西支付
+    apnaPay: 2 // apnaPay 印度支付
 };
 
 

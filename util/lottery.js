@@ -347,7 +347,7 @@ function Lottery(config, gameInfo, callback) {
             log.info(config.userId + '水位:' + config.nGamblingWaterLevelGold + '添加库存:' + addBalance +  '添加奖池:' + addJackpot + '当前库存:' + currBalance + '当前游戏奖池:' + gameJackpot);
         })
     })
-    const result = {
+    const result= {
         nHandCards: [], // 图案
         winFlag: false, // 输赢标识
         winItem:{       // 赢金币类型(cardsHandle方法内赋值)
@@ -360,7 +360,10 @@ function Lottery(config, gameInfo, callback) {
         expectMulSection: [], // 预期倍数区间
         dictAnalyseResult: analyse_result.initResult(config.nBetSum), // 返回给客户端结果
         resDictList: [],
-        newHandFlag: config.newHandFlag // 新手标识
+        newHandFlag: config.newHandFlag, // 新手标识
+        chooseNum: -1, // 老虎特殊玩法
+        finalList: [], // 老虎特殊玩法
+        startList: [] // 老虎特殊玩法
     }
 
     // 是否击中免费
@@ -709,10 +712,12 @@ function cardsHandle (config, result, user){
 }
 
 function specialPlayMethBefore(config, result, user){
-    if(config.gameId === 268 && result.nHandCards.includes(config.openBoxCard) || result.chooseNum > -1){
+    //if(config.gameId === 268 && result.nHandCards.includes(config.openBoxCard) || result.chooseNum > -1){
+    if(config.gameId === 268 && result.nHandCards.includes(config.openBoxCard)){
         log.info('老虎特殊玩法转动前')
         // 老虎特殊bouns
-        LABA.tigerOpenBox(result.dictAnalyseResult, config, result);
+        // LABA.tigerOpenBox(result.dictAnalyseResult, config, result);
+        LABA.tigerOpenBoxBefore(result.dictAnalyseResult, config, result);
     }else if(config.gameId === 263){
         // 大象特殊bouns
         // 找出三个以上的免费
@@ -755,9 +760,10 @@ function specialPlayMethBefore(config, result, user){
 
 function specialPlayMethAfter(config, result, user){
     if (config.gameId === 268) {
-        if(result.chooseNum > -1){
+        // if(result.chooseNum > -1){
+        if(result.nHandCards.includes(config.openBoxCard)){
             log.info('老虎特殊玩法转动后')
-            let newHandCard = [];
+            /*let newHandCard = [];
             for (let i in result.nHandCards) {
                 newHandCard.push(parseInt(result.nHandCards[i]) + 1);
             }
@@ -778,11 +784,11 @@ function specialPlayMethAfter(config, result, user){
             }
             // 初始化分析结果
             result.dictAnalyseResult = analyse_result.initResult(config.nBetSum)
-            cardsHandle(config, result, user);
-        }else{
-            // 老虎全屏
-            LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);
+            cardsHandle(config, result, user);*/
+            LABA.tigerOpenBoxAfter(config, result, user)
         }
+        // 老虎全屏
+        LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);
     }else if(config.gameId === 272){
         // 浣熊特殊模式
         const len = result.nHandCards.filter(card => card === config.freeCards[0]).length;
@@ -810,7 +816,7 @@ function specialPlayMethAfter(config, result, user){
         if(parseInt(config.feeBeforeFreeCount) > 0 || len > 3){
             result.dictAnalyseResult["fWildNum"] = wildCount;
             let mul = 1;
-            if(wildCount === 2){
+            if(wildCount === 1 || wildCount === 2){
                 mul = 2
             }else if(wildCount === 3){
                 mul = 3
