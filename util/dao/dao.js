@@ -1112,7 +1112,7 @@ exports.searchAllOrder = function (userId, payStatus, callback) {
 
 // 查询下注记录
 exports.searchBetRecord = function (userId, callback) {
-    const sql = 'SELECT b.id, b.userId , b.gameId, b.gameName, b.betSum, b.promoteWithdrawLimit, b.create_time, b.update_time, n.headimgurl, n.nickname  FROM bet_record b left join newuseraccounts n on b.userId  = n.Id where b.userId = ?';
+    const sql = 'SELECT b.id, b.userId , b.gameId, b.gameName, b.betSum, b.promoteWithdrawLimit, b.create_time, b.update_time, n.headimgurl, n.nickname  FROM bet_record b left join newuseraccounts n on b.userId  = n.Id where b.userId = ? order by b.update_time desc limit 100';
     let values = [];
     values.push(userId);
 
