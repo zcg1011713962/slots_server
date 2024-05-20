@@ -16,9 +16,20 @@ exports.initDayJob = function (userList){
         CacheUtil.clearLuckyCoinLimit();
         log.info('每日红点事件推送');
         pushRedPoint(userList);
+        // 发首充持续奖励
+        dao.searchfirstRechargeAwardRecord(rows =>{
+            if(rows){
+                rows.forEach(row =>{
+                    const userId = row.userId;
+                    const id = row.id;
+                    log.info('发首充持续奖励邮件给' + userId);
+                    gameInfo.saveEmail(LanguageItem.month_card_continue_award_title, TypeEnum.EmailType.first_recharge_continue_award, userId, 0, LanguageItem.month_card_continue_award_content, id, TypeEnum.GoodsType.mixture)
+                })
+            }
+        });
     })
 
-    // 定义每1钟定时任务
+    // 定义每1分钟定时任务
     const mJob = schedule.scheduleJob('*/1 * * * *', async () => {
         try {
             // 发排行榜奖励
@@ -55,18 +66,8 @@ exports.initDayJob = function (userList){
                     })
                 })
             })
-            // 发首充持续奖励
-            dao.searchfirstRechargeAwardRecord(rows =>{
-                if(rows){
-                    rows.forEach(row =>{
-                        const userId = row.userId;
-                        const id = row.id;
-                        gameInfo.saveEmail(LanguageItem.month_card_continue_award_title, TypeEnum.EmailType.first_recharge_continue_award, userId, 0, LanguageItem.month_card_continue_award_content, id, TypeEnum.GoodsType.mixture)
-                    })
-                }
-            });
         } catch (error) {
-            log.err('执行每日定时任务：'+ error);
+            log.err('执行每分钟定时任务：'+ error);
         }
     });
 }
