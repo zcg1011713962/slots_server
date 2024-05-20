@@ -53,20 +53,12 @@ exports.ydBuyOrder  = async function (uid, prodcutId, orderId, amount, currency,
     try {
         // 加密数据
         const body = {
-            apiKey: 'V7ZZbvvg3x',
-            sign: '',
-            clientId: orderId,
-            amount: amount,
-            skipUrl: '',
-            callbackUrl: '',
-            payMode: 'launch',
-            name: '',
-            phone: '',
-            email: ''
-        };
-        const apiSecret = '6XLsu1pyRr'
-        body.sign = ydGenerateSign(body, apiSecret);
-        const url = 'https://test-api.apnapay.net/api/payin/desk';
+            "app_token": "857a300f45086d327b85773e26a7054c",
+            "amount": amount,
+            "merOrderNo": orderId,
+            "environment": "sandox"
+        }
+        const url = 'https://inpay.junglespin.net/pay/createPayOrder';
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -107,13 +99,10 @@ exports.searchYDOrder  = async function (orderId, payType) {
     try {
         // 加密数据
         const body = {
-            apiKey: 'V7ZZbvvg3x',
-            sign: '',
-            clientId: orderId
+            app_token: '857a300f45086d327b85773e26a7054c',
+            merOrderNo: orderId,
         };
-        const apiSecret = '6XLsu1pyRr'
-        body.sign = ydGenerateSign(body, apiSecret);
-        const url = 'https://test-api.apnapay.net/api/payin/status';
+        const url = 'https://inpay.junglespin.net/pay/queryPay';
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -162,4 +151,7 @@ function ydGenerateSign(body, apiSecret) {
     // console.log(sign);
     return sign;
 }
+
+
+
 

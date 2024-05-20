@@ -519,6 +519,7 @@ var GameInfo = function () {
                 // 银币
                 const silverCoin = parseFloat(shopItem['silver_coin']);
                 log.info(userId + '购买提现解锁商品原价:' + price + '折扣价:' + amount + '货币类型:' + currencyType + '购买会赠送银币:' + silverCoin + '支付开关:' + paySwitch)
+
                 if(paySwitch){
                     self.placeOrder(hallUrl, userId, orderId, productId, goodsVal, amount, currencyType, nSwitch, callback, service, 0, serverId,goodsType, TypeEnum.ShopType.withdraw_goods, TypeEnum.ShopGroupType.normal, 0, 0, 0, goods, payType, silverCoin)
                 }else{
@@ -824,7 +825,7 @@ var GameInfo = function () {
                             try {
                                 log.info(userId + '下购买订单' + res)
                                 const orderResult = JSON.parse(res);
-                                if (orderResult && orderResult.code === 1000) {
+                                if (orderResult && orderResult.code === 0) {
                                     // 订单缓存
                                     CacheUtil.orderCache(userId, productId, amount, payType, orderResult.data)
                                     self.getVipLevel(userId, vipLevel => {
@@ -843,12 +844,12 @@ var GameInfo = function () {
                                                         "currency": TypeEnum.CurrencyType.Indian_Rupee,
                                                         "currencyType": TypeEnum.CurrencyTypeIndex.Indian_Rupee,
                                                         "switch": nSwitch,
-                                                        "createTime": new Date().getTime(),
-                                                        "updateTime": new Date().getTime(),
+                                                        "createTime": orderResult.data.createTime,
+                                                        "updateTime": orderResult.data.createTime,
                                                         "sign": "",
                                                         "params": {
-                                                            "qrcode": orderResult.data.payLink,
-                                                            "url": orderResult.data.payLink
+                                                            "qrcode": orderResult.data.url,
+                                                            "url": orderResult.data.url
                                                         }
                                                     }
                                                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
@@ -1031,14 +1032,9 @@ var GameInfo = function () {
                         try {
                             const res = JSON.parse(result);
                             // log.info(userId + '查询订单结果:' +  res);
-                            if(res && res.code === 1000 && res.data){
+                            if(res && res.code === 0 && res.data){
                                 let orderStatus = 0;
-                                if(res.data.status === 'FAIL' ||  res.data.status === 'REFUND'){
-                                    orderStatus = TypeEnum.OrderStatus.payFailed;
-                                }else if(res.data.status === 'SUCCESS'){
-                                    orderStatus = TypeEnum.OrderStatus.payedNotify ;
-                                }
-                                const amount = res.data.amount;
+                                const amount = StringUtil.toFixed(res.data.amount, 2);
                                 if(orderStatus === TypeEnum.OrderStatus.payedNotify){
                                     log.info(userId + '订单支付成功:' +  res);
                                     self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
@@ -3104,7 +3100,8 @@ var GameInfo = function () {
 
         // 客户端打点
         this.dot = function (userId, key, gps, adid, apptoken, money, callback) {
-            dao.searchDotByUserId(userId, row =>{
+             callback(1)
+            /*dao.searchDotByUserId(userId, row =>{
                 if(row){
                     money=  !!money ? money : null;
                     gps =  !!gps ? gps : row.gps;
@@ -3127,7 +3124,8 @@ var GameInfo = function () {
                 }else{
                     callback(0)
                 }
-            })
+            })*/
+
         }
 
         this.searchNotifyMsg = function (){
@@ -3323,8 +3321,8 @@ var GameInfo = function () {
 
 
         // 绑定银行卡
-        this.bindBankCard = function (userId, account, bankType, name, cpf, callback) {
-            dao.addBank(userId, account, name, cpf, bankType, function (result, nickName) {
+        this.bindBankCard = function (userId, account, bankType, name, cpf, ifsc, bankName, callback) {
+            dao.addBank(userId, account, name, cpf, bankType, ifsc , bankName, function (result, nickName) {
                 if (result) {
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg);
                 } else {
@@ -4824,7 +4822,9 @@ var GameInfo = function () {
                         withdrawChannel: row.bankType,
                         account: row.account,
                         cpf: row.cpf,
-                        name: row.name
+                        name: row.name,
+                        ifsc: row.ifsc,
+                        bankName: row.bankName
                     }
                 })
             }
@@ -4848,6 +4848,8 @@ var GameInfo = function () {
                             const bankType = cards[0].bankType;
                             const name = cards[0].name;
                             const cpf = cards[0].cpf;
+                            const ifsc = cards[0].ifsc;
+                            const bankName = cards[0].bankName;
 
                             CacheUtil.getBankTransferConfig().then(transferConfig => {
                                 const withdrawProportion = transferConfig.withdraw_proportion; // 提现金币比例
@@ -4862,7 +4864,7 @@ var GameInfo = function () {
                                     if (code && bankPwd && Number(bankPwd) === Number(pwd)) {  // 校验银行密码成功
                                         const orderId = StringUtil.generateOrderId();  // 生成提现订单
                                         const callbackUrl =  urlConfig.hallUrl + '/withdrawCallBack?userId=' + userId + '&orderId=' + orderId;
-                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, callbackUrl, orderId, 0, currencyType, ret => {
+                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, ifsc, bankName , callbackUrl, orderId, 0, currencyType, ret => {
                                             if (ret) {
                                                 const withdrawGlodCoin = StringUtil.rideNumbers( withdrawAmount, withdrawProportion, 2);
                                                 CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply,ret =>{

@@ -946,7 +946,7 @@ exports.orderRecord = function (userId, orderId, productId, amount, currencyType
     values.push(payChannel);
     values.push(payType);
     values.push(promoteWithdrawLimit ? promoteWithdrawLimit : 0);
-    values.push(silverCoin);
+    values.push(silverCoin ? silverCoin : 0);
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -2156,15 +2156,17 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 
 //添加银行卡
-exports.addBank = function (userId, account, name, cpf, bankType, callback) {
-    const sql = 'call AddBankCard(?,?,?,?,?)';
+exports.addBank = function (userId, account, name, cpf, bankType, ifsc , bankName, callback) {
+    const sql = 'call AddBankCard(?,?,?,?,?,?,?)';
     let values = [];
 
     values.push(userId);
     values.push(account);
     values.push(name);
-    values.push(bankType);
-    values.push(cpf);
+    values.push(bankType ? bankType : '');
+    values.push(cpf ? cpf : '');
+    values.push(ifsc ? ifsc : '');
+    values.push(bankName ? bankName : '');
 
     pool.getConnection(function (err, connection) {
         if(err){
@@ -3558,8 +3560,8 @@ exports.updateWinScorePopFirstRecharge = function (userId, callback) {
 }
 
 // 提现申请记录
-exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, callback) {
-    const sql = "INSERT INTO withdraw_record(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType) VALUES(?, ?, ?, ? , ?, ?, ?, ?, ?, ?)";
+exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, account, bankType, name, cpf, ifsc, bankName, callbackUrl, orderId, lockBankScore, currencyType, callback) {
+    const sql = "INSERT INTO withdraw_record(userId, amount, account, bankType, name, cpf, callbackUrl, orderId, lockBankScore, currencyType, ifsc, bankName) VALUES(?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?)";
 
     let values = [];
     values.push(userId);
@@ -3572,6 +3574,8 @@ exports.withdrawApplyRecord = function withdrawApplyRecord(userId, amount, accou
     values.push(orderId);
     values.push(lockBankScore);
     values.push(currencyType);
+    values.push(ifsc);
+    values.push(bankName);
 
     pool.getConnection(function (err, connection) {
         if(err){
