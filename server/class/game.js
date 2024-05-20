@@ -4659,10 +4659,14 @@ var GameInfo = function () {
 
         // 邮件通知
         this.saveEmail = function (title, type, to_userid, from_userid, content_id, otherId, goods_type) {
+            const self = this;
             // 保存邮件
-            dao.saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type);
-            // 有未读邮件通知
-            this.pushUndoEven(to_userid, TypeEnum.UndoEvenType.email);
+            dao.saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type, ret =>{
+                if(ret){
+                    // 有未读邮件通知
+                    self.pushUndoEven(to_userid, TypeEnum.UndoEvenType.email);
+                }
+            });
         }
 
         // 通过VIP等级获取VIP配置表
