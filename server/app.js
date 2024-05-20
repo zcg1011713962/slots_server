@@ -1354,13 +1354,13 @@ io.on('connection', function (socket) {
     });
 
     // 邮件一键已读
-    socket.on("setEmailAllRead", function () {
+   /* socket.on("setEmailAllRead", function () {
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.setEmailAllRead(socket.userId, data =>{
                 socket.emit('setEmailAllReadResult', {code: 1, data: data});
             });
         }
-    });
+    });*/
 
     // 邮件一键领取
     socket.on("setEmailAllGet", function () {
