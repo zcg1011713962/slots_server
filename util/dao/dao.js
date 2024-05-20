@@ -3818,7 +3818,7 @@ exports.searchWithdrawApplyRecord = function (userId, callback) {
 };
 
 // 保存邮件记录
-exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type) {
+exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, content_id, otherId, goods_type, callback) {
     const sql = "INSERT INTO email (title_id, `type`, to_userid, from_userid, content_id, otherId, goods_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     let values = [];
@@ -3834,12 +3834,16 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
         if(err){
             log.err('获取数据库连接失败' + err);
             connection.release();
+            callback(0)
             return;
         }
         connection.query({sql: sql, values: values}, function (err, rows) {
             connection.release();
             if (err) {
                 log.err('保存邮件记录' + err);
+                callback(0)
+            }else{
+                callback(1)
             }
         });
         values = [];
