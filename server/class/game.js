@@ -2900,6 +2900,7 @@ var GameInfo = function () {
             const self = this;
             this.setEmailAllRead(userId, data =>{
                 log.info(userId + '全部置为已读');
+                // 查询排行榜奖励
                 dao.selectEmailRankAwardByUser(userId, rows =>{
                     if(rows){
                         rows.forEach(row =>{
@@ -2924,6 +2925,7 @@ var GameInfo = function () {
                         log.info(userId + '更新邮件排行榜状态ids:' + ids);
                         dao.updateEmailRankAwardStatus(ids, ret =>{})
                     }
+                    // 查询月卡持续奖励
                     dao.searchfirstRechargeAwardRecordByUser(userId, rows =>{
                         if(rows){
                             rows.forEach(row =>{
