@@ -1106,6 +1106,7 @@ io.on('connection', function (socket) {
 
         const userId = socket.userId;
         if(d.pwd1.toString().length !== 6){
+            log.info(userId + '设置密码长度不足六位')
             socket.emit('setBankPwdResult', {code: ErrorCode.PWD_ILLEGAL.code, msg: ErrorCode.PWD_ILLEGAL.msg});
             return;
         }
@@ -1124,6 +1125,7 @@ io.on('connection', function (socket) {
                     }
                 });
             } else {
+                log.info(userId + '两次密码不一致pwd2:' + d.pwd2 + 'pwd1:' + d.pwd1)
                 socket.emit('setBankPwdResult', {code: ErrorCode.TWO_TIME_PWD_DIFFER.code, msg: ErrorCode.TWO_TIME_PWD_DIFFER.msg});
             }
         }

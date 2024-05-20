@@ -4876,6 +4876,7 @@ var GameInfo = function () {
                                             }
                                         })
                                     } else {
+                                        log.info(userId + '密码校验失败' + bankPwd + '|' +  pwd);
                                         callback(ErrorCode.BANK_PWD_INUPT_ERROR_MAX.code, ErrorCode.BANK_PWD_INUPT_ERROR_MAX.msg)
                                     }
                                 })
