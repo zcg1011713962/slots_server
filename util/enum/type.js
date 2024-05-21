@@ -222,6 +222,11 @@ const PayType = {
     apnaPay: 2 // apnaPay 印度支付
 };
 
+const CountryType = {
+    yd: 'yd',
+    bx: 'bx',
+};
+
 
 const dotEnum = {
     register: 'nvixl1', // 发起注册
@@ -266,5 +271,6 @@ module.exports = {
  	OrderStatus,
     PayType,
     RankType,
-    SilverCoinChangeType
+    SilverCoinChangeType,
+    CountryType
 };

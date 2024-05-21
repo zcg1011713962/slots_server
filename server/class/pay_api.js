@@ -1,9 +1,14 @@
 const HTTPRequest = require('../../util/http_util');
 const TypeEnum = require('../../util/enum/type')
-const crypto = require('crypto');
-// 巴西代收下订单
+const CacheUtil = require('../../util/cache_util')
+const log = require('../../CClass/class/loginfo').getInstand
+
+
+// 巴西betcatPay代收下订单
 exports.buyOrder  = async function buyOrder(uid, prodcut_id, orderId, amount, currency, callbackUrl) {
     try {
+        const commonCache = await CacheUtil.getCommonCache();
+        const betcatPay = commonCache.payUrls.betcatPay;
         const params = {
             orderId: orderId,
             amount: `${amount}`,
@@ -12,20 +17,22 @@ exports.buyOrder  = async function buyOrder(uid, prodcut_id, orderId, amount, cu
             product_id: `${prodcut_id}`,
             returnUrl: `${callbackUrl}`
         };
-        const url = 'http://pay.pokerslotgame.com/api/betcatpay/createPaymentOrder';
+        const url = betcatPay.payUrl;
         const body = JSON.stringify(params);
         const headers = {
             'Content-Type': 'application/json'
         };
         return await HTTPRequest.sendRequest(url, 'POST', body, headers);
     } catch (error) {
-        console.error('Error:', error);
+        log.err('巴西betcatPay代收下订单Error:'+ error);
     }
 }
 
-// 巴西代收下订单
+// 巴西fastPay代收下订单
 exports.fastBuyOrder  = async function fastBuyOrder(uid, prodcut_id, orderId, amount, currency, goods, callbackUrl) {
     try {
+        const commonCache = await CacheUtil.getCommonCache();
+        const fastPay = commonCache.payUrls.fastPay;
         const params = {
             orderId: orderId,
             amount: `${amount}`,
@@ -33,17 +40,16 @@ exports.fastBuyOrder  = async function fastBuyOrder(uid, prodcut_id, orderId, am
             uid: `${uid}`,
             product_id: `${prodcut_id}`,
             returnUrl: `${callbackUrl}`,
-            goods: goods,
-            remark: 'test'
+            goods: goods
         };
-        const url = 'http://pay.pokerslotgame.com/api/fatpagpay/createPaymentOrder';
+        const url = fastPay.payUrl;
         const body = JSON.stringify(params);
         const headers = {
             'Content-Type': 'application/json'
         };
         return await HTTPRequest.sendRequest(url, 'POST', body, headers);
     } catch (error) {
-        console.error('Error:', error);
+        log.err('巴西fastPay代收下订单Error:'+ error);
     }
 }
 
@@ -51,28 +57,22 @@ exports.fastBuyOrder  = async function fastBuyOrder(uid, prodcut_id, orderId, am
 // 印度代收下订单
 exports.ydBuyOrder  = async function (uid, prodcutId, orderId, amount, currency, callbackUrl) {
     try {
-        // 加密数据
+        const commonCache = await CacheUtil.getCommonCache();
+        const apnaPay = commonCache.payUrls.apnaPay;
+
         const body = {
-            apiKey: 'V7ZZbvvg3x',
-            sign: '',
-            clientId: orderId,
-            amount: amount,
-            skipUrl: '',
-            callbackUrl: '',
-            payMode: 'launch',
-            name: '',
-            phone: '',
-            email: ''
-        };
-        const apiSecret = '6XLsu1pyRr'
-        body.sign = ydGenerateSign(body, apiSecret);
-        const url = 'https://test-api.apnapay.net/api/payin/desk';
+            "app_token": apnaPay.token,
+            "amount": amount,
+            "merOrderNo": orderId,
+            "environment": apnaPay.environment // 环境
+        }
+        const url = apnaPay.payUrl;
         const headers = {
             'Content-Type': 'application/json'
         };
         return await HTTPRequest.sendRequest(url, 'POST', JSON.stringify(body), headers);
     } catch (error) {
-        console.error('Error:', error);
+        log.err('印度apnaPay代收下订单Error:'+ error);
     }
 }
 
@@ -81,14 +81,18 @@ exports.ydBuyOrder  = async function (uid, prodcutId, orderId, amount, currency,
 // 查询巴西代收订单
 exports.searchBXOrder  = async function (orderId, payType) {
     try {
+        const commonCache = await CacheUtil.getCommonCache();
+
         const params = {
             merOrderNo: orderId
         };
         let url = '';
         if(TypeEnum.PayType.fatpag === payType){
-            url = 'http://pay.pokerslotgame.com/api/fatpagpay/queryPaymentOrder';
+            const fastPay = commonCache.payUrls.fastPay;
+            url = fastPay.searchPayUrl;
         }else if(TypeEnum.PayType.betcatpay === payType){
-            url = 'http://pay.pokerslotgame.com/api/betcatpay/queryPaymentOrder';
+            const betcatPay = commonCache.payUrls.betcatPay;
+            url = betcatPay.searchPayUrl;
         }
         const body = JSON.stringify(params);
         const headers = {
@@ -96,7 +100,7 @@ exports.searchBXOrder  = async function (orderId, payType) {
         };
         return await HTTPRequest.sendRequest(url, 'POST', body, headers);
     } catch (error) {
-        console.error('Error:', error);
+        log.err('查询巴西代收订单Error:'+ error);
     }
 }
 
@@ -105,61 +109,25 @@ exports.searchBXOrder  = async function (orderId, payType) {
 // 查询印度代收订单
 exports.searchYDOrder  = async function (orderId, payType) {
     try {
-        // 加密数据
+        const commonCache = await CacheUtil.getCommonCache();
+        const apnaPay = commonCache.payUrls.apnaPay;
+
         const body = {
-            apiKey: 'V7ZZbvvg3x',
-            sign: '',
-            clientId: orderId
+            app_token: apnaPay.token,
+            merOrderNo: orderId,
         };
-        const apiSecret = '6XLsu1pyRr'
-        body.sign = ydGenerateSign(body, apiSecret);
-        const url = 'https://test-api.apnapay.net/api/payin/status';
+        const url = apnaPay.searchPayUrl;
         const headers = {
             'Content-Type': 'application/json'
         };
         return await HTTPRequest.sendRequest(url, 'POST', JSON.stringify(body), headers);
     } catch (error) {
-        console.error('Error:', error);
+        log.err('查询印度apnaPay代收订单Error:'+ error);
     }
 }
 
 
-// 查询巴西Fatpag订单
-exports.searchOrder  = async function searchOrder(orderId) {
-    try {
-        const params = {
-            merOrderNo: orderId
-        };
-        const url = 'http://pay.pokerslotgame.com/api/betcatpay/queryPaymentOrder';
-        const body = JSON.stringify(params);
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        return await HTTPRequest.sendRequest(url, 'POST', body, headers);
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
 
 
-// 印度生成签名
-function ydGenerateSign(body, apiSecret) {
-    const sortedBody = {};
-    Object.keys(body).sort().forEach(key =>{
-        if (key !== 'sign') {
-        sortedBody[key] = body[key];
-        }
-    });
 
-    const params = [];
-    for (const key in sortedBody) {
-        params.push(`${key}=${sortedBody[key]}`);
-    }
-    params.push(`apiSecret=${apiSecret}`);
-
-    const beforeSign = params.join('&');
-    const sign = crypto.createHash('md5').update(beforeSign).digest('hex');
-    // console.log(sign);
-    return sign;
-}
 
