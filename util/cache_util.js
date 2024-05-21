@@ -38,6 +38,7 @@ const emailCodeExpireSecond = 600; // 邮箱验证码过期时间
 const emailCodeLongExpireSecond = 800; // 过期校验过期时间
 
 const notifyMsgKey = 'notifyMsg';
+const commonCacheKey = 'commonCache';
 
 const gameConfig = {
     gameConfigKey: 'gameConfig',
@@ -1470,4 +1471,13 @@ exports.getNotifyMsg = function(){
 exports.saveNotifyMsg = function(v){
     RedisUtil.set(notifyMsgKey, JSON.stringify(v)).then(r =>{
     })
+}
+
+
+exports.initCommonCache = function(v){
+    return RedisUtil.set(commonCacheKey, JSON.stringify(v));
+}
+
+exports.getCommonCache = function(){
+    return RedisUtil.get(commonCacheKey).then(v => JSON.parse(v));
 }
