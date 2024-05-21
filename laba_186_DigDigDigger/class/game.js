@@ -528,7 +528,7 @@ var GameInfo = function () {
                 let data = {};
                 try {
                     data = JSON.parse(Result.gameDict);
-                    Result.freeSymbolList = data.freeSymbolList;
+                    Result.freeSymbolList = data.freeSymbolList ? data.freeSymbolList : [];
                     self.userList[_userId].setFreeSymbolList(Result.freeSymbolList)
                 } catch (e) {
                     Result.freeSymbolList = [];
