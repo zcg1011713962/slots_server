@@ -366,12 +366,16 @@ function Lottery(config, gameInfo, callback) {
         startList: [] // 老虎特殊玩法
     }
 
-    // 是否击中免费
-    let hitFree = StringUtil.luckRandom(0, 100, config.freeRatio)
-    // 是否击中bonus玩法
-    let hitBonus = StringUtil.luckRandom(0, 100, config.bonusRatio)
-    // 是否击中jackpot
-    result.winItem.winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit, config);
+    let hitFree = false;
+    let hitBonus = false;
+    if(config.feeBeforeFreeCount < 3){
+        // 是否击中免费
+        hitFree = StringUtil.luckRandom(0, 100, config.freeRatio)
+        // 是否击中bonus玩法
+        hitBonus = StringUtil.luckRandom(0, 100, config.bonusRatio)
+        // 是否击中jackpot
+        result.winItem.winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit, config);
+    }
 
     // 足球游戏适配
     if(gameInfo.gameId === 283){

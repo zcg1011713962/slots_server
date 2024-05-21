@@ -4924,3 +4924,32 @@ exports.searchfirstRechargeAwardRecordByUser = function (userId, callback) {
 }
 
 
+
+
+exports.searchCountryConf = function (callback) {
+    const sql = 'select * from gameaccount.`country_conf` where isUsed = 1 order by update_time desc limit 1';
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('获取数据库连接失败' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err("searchCountryConf" + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+        })
+    });
+}
+
+
