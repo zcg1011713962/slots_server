@@ -407,29 +407,27 @@ app.get('/Shopping', async function (req, res) {
 
     const ret = await CacheUtil.recordUserProtocol(userId, "Shopping")
     if (ret) {
-        CacheUtil.getPayType().then(payType =>{
-            gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, goods, payType, (code, msg, data) => {
-                CacheUtil.delUserProtocol(userId, "Shopping")
-                if(code){
-                    log.info(userId + '购买商品下单成功');
-                    CacheUtil.paySwitch().then(ok =>{
-                        if(ok){
-                            gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
-                                if(ret){
-                                    log.info(userId + '充值打点成功');
-                                }
-                            })
-                        }else{
-                            log.info(userId + '测试环境不支持充值打点')
-                        }
-                    })
-                    res.send({code: code, data: data});
-                }else{
-                    log.info(userId + '购买商品下单失败:' + msg);
-                    res.send({code: code, msg: msg});
-                }
-            });
-        })
+        gameInfo.Shopping(Number(userId), Number(productId), Number(count), Number(service), Number(shopType), serverId, goods, (code, msg, data) => {
+            CacheUtil.delUserProtocol(userId, "Shopping")
+            if(code){
+                log.info(userId + '购买商品下单成功');
+                CacheUtil.paySwitch().then(ok =>{
+                    if(ok){
+                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
+                            if(ret){
+                                log.info(userId + '充值打点成功');
+                            }
+                        })
+                    }else{
+                        log.info(userId + '测试环境不支持充值打点')
+                    }
+                })
+                res.send({code: code, data: data});
+            }else{
+                log.info(userId + '购买商品下单失败:' + msg);
+                res.send({code: code, msg: msg});
+            }
+        });
     }
 });
 
