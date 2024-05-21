@@ -416,7 +416,8 @@ var GameInfo = function () {
                     const val = {
                         country: row.country,
                         currencyType: Number(row.currencyType),
-                        payUrls: row.payUrls
+                        payUrls: row.payUrls,
+                        dotUrls: row.dotUrls
                     }
                     await CacheUtil.initCommonCache(val);
                 } else {
@@ -1041,7 +1042,7 @@ var GameInfo = function () {
                                             callback(1)
                                         });
                                         // 充值成功打点
-                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,code =>{
+                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.recharge_arrive,code =>{
                                             if(code){
                                                 log.info(userId + '充值成功打点成功,充值金额:' + amount)
                                             }else{
@@ -1099,7 +1100,7 @@ var GameInfo = function () {
                                             self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
                                         }
                                         // 充值成功打点
-                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,code =>{
+                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,TypeEnum.DotNameEnum.recharge_arrive, code =>{
                                             if(code){
                                                 log.info(userId + '充值成功打点成功,充值金额:' + amount)
                                             }else{
@@ -3153,31 +3154,53 @@ var GameInfo = function () {
 
 
         // 客户端打点
-        this.dot = function (userId, key, gps, adid, apptoken, money, callback) {
+        this.dot = function (userId, key, gps, adid, apptoken, money, dotName, callback) {
             dao.searchDotByUserId(userId, row =>{
                 if(row){
                     money=  !!money ? money : null;
                     gps =  !!gps ? gps : row.gps;
                     adid = !!adid  ? adid : row.adid;
                     apptoken = !!apptoken ? apptoken : row.apptoken;
-                    dot.dotRequest(gps, adid, apptoken, key, money).then(data =>{
-                        try{
-                            const d = JSON.parse(data);
-                            if(d.status === "OK"){
-                                log.info(userId + '打点成功key:' + key )
-                                callback(1)
-                            }else{
-                                callback(0)
-                            }
-                        }catch (e){
-                            log.err('打点异常' + e)
-                            callback(0)
+
+                    CacheUtil.getCommonCache().then(commonCache =>{
+                        if(commonCache.country === TypeEnum.CountryType.bx){
+                            dot.bxDotRequest(gps, adid, apptoken, key, money).then(data =>{
+                                try{
+                                    const d = JSON.parse(data);
+                                    if(d.status === "OK"){
+                                        log.info(userId + '打点成功dotName:' + dotName )
+                                        callback(1)
+                                    }else{
+                                        callback(0)
+                                    }
+                                }catch (e){
+                                    log.err('打点异常' + e)
+                                    callback(0)
+                                }
+                            });
+                        }else if(commonCache.country === TypeEnum.CountryType.yd){
+                            dot.ydDotRequest(gps, adid, apptoken, dotName, money).then(data =>{
+                                try{
+                                    const d = JSON.parse(data);
+                                    if(d.code === 0){
+                                        log.info(userId + '打点成功dotName:' + dotName )
+                                        callback(1)
+                                    }else{
+                                        callback(0)
+                                    }
+                                }catch (e){
+                                    log.err('打点异常' + e)
+                                    callback(0)
+                                }
+                            })
                         }
-                    });
+
+                    })
                 }else{
                     callback(0)
                 }
             })
+
         }
 
         this.searchNotifyMsg = function (){
