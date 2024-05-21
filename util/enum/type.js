@@ -229,14 +229,22 @@ const CountryType = {
 
 
 const dotEnum = {
-    register: 'nvixl1', // 发起注册
-    login: 't93b78', // 登录
-    star_game_100: 'ywt0mq', // 玩家累计游戏局数,玩游戏累计满5局
-    toatl_jackpot: 'xhp537' ,// 总击中奖池
-    total_code_success: 'gvgu9g', // 绑定成功
-    gold_code_success: 'lc2x0f', // 推广发送金币成功
     recharge: 'g5qi4w', // 充值
     recharge_arrive: 'gg48nw' // 充值成功
+}
+
+const DotNameEnum = {
+    register: 'register', // 注册
+    login: 'login', // 登录
+    first_recharge: 'first_recharge', // 首充提交订单
+    first_recharge_arrive: 'first_recharge_arrive', // 首充成功
+    recharge: 'recharge', // 复充提交订单
+    recharge_arrive: 'recharge_arrive', // 复充成功
+    withdraw: 'withdraw', // 赠币提交订单
+    withdraw_arrive: 'withdraw_arrive', // 赠币成功
+    bind_card: 'bind_card', // 绑卡
+    login_game: 'login_game', // 进入游戏
+    total_login_success: 'total_login_success', // 登录成功总数
 }
 
 const RankType = {
@@ -272,5 +280,6 @@ module.exports = {
     PayType,
     RankType,
     SilverCoinChangeType,
-    CountryType
+    CountryType,
+    DotNameEnum
 };

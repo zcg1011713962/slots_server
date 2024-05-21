@@ -412,15 +412,15 @@ app.get('/Shopping', async function (req, res) {
             if(code){
                 log.info(userId + '购买商品下单成功');
                 CacheUtil.paySwitch().then(ok =>{
-                    if(ok){
-                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , ret =>{
+                    //if(ok){
+                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
                             if(ret){
                                 log.info(userId + '充值打点成功');
                             }
                         })
-                    }else{
-                        log.info(userId + '测试环境不支持充值打点')
-                    }
+                    //}else{
+                    //    log.info(userId + '测试环境不支持充值打点')
+                    //}
                 })
                 res.send({code: code, data: data});
             }else{
@@ -550,7 +550,7 @@ app.get('/dot', function (req, res) {
     }
     CacheUtil.paySwitch().then(ok =>{
         if(ok){
-            gameInfo.dot(userId, key,  gps, adid, apptoken, null ,code =>{
+            gameInfo.dot(userId, key,  gps, adid, apptoken, null , '', code =>{
                 if(code){
                     log.info(userId + '客户端打点 key:' + key + '成功')
                     res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
