@@ -108,7 +108,7 @@ const GameType = {
 
 const PayChannelType ={
     pix: 'pix', // pix
-    IR: 'IR'
+    apnapay: 'apnapay'
 }
 
 const ScoreChangeType = {
