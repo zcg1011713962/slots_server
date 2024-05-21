@@ -412,15 +412,15 @@ app.get('/Shopping', async function (req, res) {
             if(code){
                 log.info(userId + '购买商品下单成功');
                 CacheUtil.paySwitch().then(ok =>{
-                    //if(ok){
+                    if(ok){
                         gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
                             if(ret){
                                 log.info(userId + '充值打点成功');
                             }
                         })
-                    //}else{
-                    //    log.info(userId + '测试环境不支持充值打点')
-                    //}
+                    }else{
+                        log.info(userId + '测试环境不支持充值打点')
+                    }
                 })
                 res.send({code: code, data: data});
             }else{
