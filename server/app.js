@@ -249,7 +249,7 @@ app.get('/saveBankStep', function (req, res) {
 });
 
 
-// 查询订单记录
+// 查询订单(购买)记录
 app.get('/searchOrderRecord', function (req, res) {
     const userId = req.query.userId;
     log.info( userId + '查询订单记录')
@@ -411,17 +411,19 @@ app.get('/Shopping', async function (req, res) {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 log.info(userId + '购买商品下单成功');
-                CacheUtil.paySwitch().then(ok =>{
-                    if(ok){
-                        gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
-                            if(ret){
-                                log.info(userId + '充值打点成功');
-                            }
-                        })
-                    }else{
-                        log.info(userId + '测试环境不支持充值打点')
-                    }
-                })
+                if(TypeEnum.ShopType.firstRecharge === shopType){
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.first_recharge, ret =>{
+                        if(ret){
+                            log.info(userId + '首充提交订单打点成功');
+                        }
+                    })
+                }else{
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
+                        if(ret){
+                            log.info(userId + '复充提交订单打点成功');
+                        }
+                    })
+                }
                 res.send({code: code, data: data});
             }else{
                 log.info(userId + '购买商品下单失败:' + msg);
@@ -528,10 +530,10 @@ app.get('/dotBase', function (req, res) {
     }
     gameInfo.saveDot(userId, adid, gps, apptoken, row =>{
         if (row) {
-            log.info(userId + '客户端打点成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+            log.info(userId + '保存打点基础数据成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
         }else{
-            log.info(userId + '客户端打点失败' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+            log.info(userId + '保存打点基础数据失败' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
         }
     });
 });
@@ -548,21 +550,14 @@ app.get('/dot', function (req, res) {
     if(!userId || !key){
         return;
     }
-    CacheUtil.paySwitch().then(ok =>{
-        if(ok){
-            gameInfo.dot(userId, key,  gps, adid, apptoken, null , '', code =>{
-                if(code){
-                    log.info(userId + '客户端打点 key:' + key + '成功')
-                    res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
-                }else{
-                    res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
-                }
-            });
+    gameInfo.dot(userId, key,  gps, adid, apptoken, null , '', code =>{
+        if(code){
+            log.info(userId + '客户端打点 key:' + key + '成功')
+            res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
         }else{
-            log.info(userId + '测试环境不支持打点')
             res.send({code: ErrorCode.FAILED.code, msg: ErrorCode.FAILED.msg});
         }
-    })
+    });
 });
 
 // 查询跑马灯缓存20条
@@ -604,7 +599,7 @@ io.on('connection', function (socket) {
             socket.emit("loginResult", {code: ErrorCode.LOGIN_FAILED_LOGINAGAIN.code, msg: ErrorCode.LOGIN_FAILED_LOGINAGAIN.msg});
             return;
         }
-        log.info("登录大厅" + JSON.stringify(data));
+        // log.info("登录大厅" + JSON.stringify(data));
 
         try {
             const user = StringUtil.isJson(data) ? JSON.parse(data) : data;
@@ -616,7 +611,7 @@ io.on('connection', function (socket) {
             if(user.userName && user.password){
                 user.password = StringUtil.pwdEncrypt(user.userName, user.password);
                 user.sign = user.password;
-                log.info("账户密码登录" + JSON.stringify(data));
+                // log.info("账户密码登录" + JSON.stringify(data));
             }
 
             gameInfo.loginSwitch(user, socket, (code, msg, data)=> {
@@ -625,6 +620,13 @@ io.on('connection', function (socket) {
                         socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                         return;
                     }
+                    gameInfo.dot(data.Id, null, null, null, null, null , TypeEnum.DotNameEnum.login, ret =>{
+                        if(ret){
+                            log.info(data.Id + '登录打点成功')
+                        }else{
+                            log.info(data.Id + '登录打点失败')
+                        }
+                    })
                     if (gameInfo.IsPlayerOnline(data.Id)) {
                         // 返回大厅的用户  不允许在游戏里，断开游戏
                         gameInfo.existGameDel(data.Id);
@@ -664,6 +666,13 @@ io.on('connection', function (socket) {
             //让这个用户进入该游戏
             const encoin = ServerInfo.getServerEnterCoinByProt(userId);
             CacheUtil.getUserInfo(userId, (ret, user) =>{
+                gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.login_game,code =>{
+                    if(code){
+                        log.info(userId + '进入游戏打点成功')
+                    }else{
+                        log.info(userId + '进入游戏打点失败')
+                    }
+                })
                 if(!ret){
                     socket.emit('LoginGameResult', {ResultCode: 0, userid: userInfo.userid, msg: {_userId: 0, msg: "获取用户信息失败!"}});
                     return;
@@ -1049,7 +1058,7 @@ io.on('connection', function (socket) {
     })
 
 
-    // 绑定银行卡
+    // 绑定银行卡（绑卡）
     socket.on('bindBankCard', function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
         if(!d || !d.cpf || !d.account || !d.name || !d.bankType) return;
@@ -1058,6 +1067,13 @@ io.on('connection', function (socket) {
         if(gameInfo.IsPlayerOnline(userId)){
             gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf , (code, msg) => {
                 if (code) {
+                    gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.bind_card,code =>{
+                        if(code){
+                            log.info(userId + '提现提交订单打点成功')
+                        }else{
+                            log.info(userId + '提现提交订单打点失败')
+                        }
+                    })
                     socket.emit('bindBankCardResult', {code: code, msg: msg});
                 } else {
                     socket.emit('bindBankCardResult', {code: code, msg: msg});
@@ -1079,6 +1095,13 @@ io.on('connection', function (socket) {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(ErrorCode.WITHDRAW_SUCCESS.code === code){
                     log.info(userId + '发起提现申请成功');
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null , TypeEnum.DotNameEnum.withdraw,code =>{
+                        if(code){
+                            log.info(userId + '提现提交订单打点成功')
+                        }else{
+                            log.info(userId + '提现提交订单打点失败')
+                        }
+                    })
                     socket.emit('withdrawResult', {code: code, msg: msg, data: data});
                 }else{
                    log.info(userId + '发起提现申请失败:' + msg);
@@ -1650,7 +1673,7 @@ io.on('connection', function (socket) {
     });
 
 
-    // 查询订单记录
+    // 查询订单(购买)记录
     socket.on("orderRecord", function () {
         log.info(socket.userId + '查询订单记录')
         if (gameInfo.IsPlayerOnline(socket.userId)) {

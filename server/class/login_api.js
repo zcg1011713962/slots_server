@@ -2,6 +2,8 @@ const dao = require("../../util/dao/dao");
 const crypto = require('crypto');
 const Buffer = require("buffer").Buffer;
 const StringUtil = require('../../util/string_util');
+const {getInstand: gameInfo} = require("./game");
+const TypeEnum = require("../../util/enum/type");
 const log = require('../../CClass/class/loginfo').getInstand
 
 const key = "42dfcb34fb02d8cd";
@@ -49,6 +51,11 @@ const registerByGuestApi = function (req, gameInfo , callback) {
 				const userId  = data.Id;
 				// 设置邀请码
 				gameInfo.setInviteCode(userId)
+				gameInfo.dot(userId, null, null, null, null, null , TypeEnum.DotNameEnum.register, ret =>{
+					if(ret){
+						log.info(userId + '游客注册打点成功');
+					}
+				})
 				log.info("游客注册成功:" + userId + "账户:" + data.Account + "金币:" + data.score + "钻石:" + data.diamond);
 				callback(1, '{"status":0,"msg":"","data":{"password":"' + king + '","account":"' + account + '"}}');
 				return;

@@ -23,7 +23,6 @@ class ErrorCode {
     static get EMAIL_BINDED() { return { code: 'E405', msg: '此邮箱地址已被其他账号绑定，请使用不同的邮箱进行绑定。', langCode: 'languageId_261'}; }
     static get ERROR_INVITE_CODE() { return { code: 'E502', msg: '错误的邀请码', langCode: 'languageId_316' } ; }
     static get SELF_INVITE_CODE() { return { code: 'E503', msg: '自己的邀请码' , langCode: 'languageId_317' }; }
-
     static get VIP_ENTER_HALL_NOTIFY() { return { code: 'p0001', msg: 'VIP进大厅跑马灯' , langCode: 'languageId_320' }; }
     static get VIP_UPGRADE_NOTIFY() { return { code: 'p0002', msg: '发送VIP升级通知' , langCode: 'languageId_321' }; }
     static get BANK_TRANSFER_NOTIFY() { return { code: 'p0003', msg: '转账消息通知' , langCode: 'languageId_52' }; }
@@ -54,12 +53,6 @@ class ErrorCode {
     static get BANK_PWD_INUPT_ERROR_MAX() { return { code: 'W405', msg: '密码输入错误${}次', langCode: 'languageId_346' }; }
     static get TRANS_ERROR_CALL_CENTER() { return { code: 'W406', msg: '您的账号无法交易请联系客服', langCode: 'languageId_347' }; }
     static get TRANS_ERROR_VIP_LEVEL() { return { code: 'W407', msg: 'VIP等级不够', langCode: 'languageId_348' }; }
-    static get SHOP_FIRST_RECHARGE() { return { code: 'S0001', msg: '首充', langCode: 'languageId_349' }; }
-    static get SHOP_GLOD_COIN() { return { code: 'S0002', msg: ' 商城', langCode: 'languageId_314' }; }
-    static get SHOP_DIAMOND() { return { code: 'S0003', msg: '转盘', langCode: 'languageId_315' }; }
-    static get SHOP_PROP() { return { code: 'S0004', msg: '限时折扣', langCode: 'languageId_350' }; }
-    static get SHOP_MONTHCARD() { return { code: 'S0005', msg: '月卡', langCode: 'languageId_351' }; }
-    static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0006', msg: '免费转盘门票', langCode: 'languageId_352' }; }
     static get HIT_JACKPOT_NOTIFY() { return { code: 'p0004', msg: '击中奖池跑马灯' , langCode: 'languageId_357' }; }
     static get BIG_WIN_NOTIFY() { return { code: 'p0005', msg: '赢分大于配置，侧边栏动画' , langCode: 'languageId_358' }; }
     static get WITHDRAW_NOTIFY() { return { code: 'p0006', msg: '提现申请成功跑马灯' , langCode: 'languageId_359' }; }
@@ -69,6 +62,13 @@ class ErrorCode {
     static get WITHDRAW_FAILED_CONTENT() { return { code: 'c0016', msg: '提现被拒邮件内容' , langCode: 'languageId_363' }; }
     static get SILVERCOIN_EXCHANGLE_LIMIT() { return { code: 'W408', msg: '银币兑换次数不足' , langCode: 'languageId_364' }; }
     static get SILVERCOIN_NOT_ENOUGH() { return { code: 'W409', msg: '银币不足' , langCode: 'languageId_365' }; }
+    static get SHOP_FIRST_RECHARGE() { return { code: 'S0001', msg: '首充购买', langCode: 'languageId_366' }; }
+    static get SHOP_STORE() { return { code: 'S0002', msg: ' 商城购买', langCode: 'languageId_367' }; }
+    static get SHOP_WITHDRAW_GOODS() { return { code: 'S0003', msg: '提现物品购买', langCode: 'languageId_368' }; }
+    static get SHOP_DISCOUNT_LIMITED() { return { code: 'S0004', msg: '限时折扣购买', langCode: 'languageId_369' }; }
+    static get SHOP_MONTHCARD() { return { code: 'S0005', msg: '月卡购买', langCode: 'languageId_370' }; }
+    static get SHOP_FREE_TURNTABLE_TICKET() { return { code: 'S0006', msg: '转盘门票购买', langCode: 'languageId_371' }; }
+    static get SHOP_EXCHANGEGOODS() { return { code: 'S0007', msg: '兑换物品', langCode: 'languageId_372' }; }
 }
 
 
