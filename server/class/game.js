@@ -605,6 +605,8 @@ var GameInfo = function () {
         this.getCurrencyTypeByIndex = function (index){
             if(index === TypeEnum.CurrencyTypeIndex.Brazil_BRL){
                 return TypeEnum.CurrencyType.Brazil_BRL;
+            }else if(index === TypeEnum.CurrencyTypeIndex.Indian_Rupee){
+                return TypeEnum.CurrencyType.Indian_Rupee;
             }
             return TypeEnum.CurrencyType.Default;
         }
@@ -781,7 +783,7 @@ var GameInfo = function () {
                 if(payType === -1){
                     throw new Error('支付类型无法确定，出错了')
                 }
-                CacheUtil.searchOrderCache(userId, productId, amount, TypeEnum.PayType.betcatpay).then(orderInfo => {
+                CacheUtil.searchOrderCache(userId, productId, amount, payType).then(orderInfo => {
                     if (orderInfo) {
                         log.info(userId + '已经存在的订单,使用存在的订单:' + JSON.stringify(orderInfo))
                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderInfo)
@@ -837,7 +839,7 @@ var GameInfo = function () {
                                                 // 记录订单详情
                                                 dao.orderRecord(parseInt(userId), orderId, productId, amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays,  TypeEnum.PayChannelType.pix, payType, promoteWithdrawLimit, silverCoin,ret => {
                                                     if (ret) {
-                                                        this.intervalSearchOrder(userId, orderId, payType);
+                                                        self.intervalSearchOrder(userId, orderId, payType);
                                                         orderResult.data.switch = nSwitch;
                                                         orderResult.data.currencyType = TypeEnum.CurrencyTypeIndex.Brazil_BRL;
                                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderResult.data);
@@ -872,7 +874,7 @@ var GameInfo = function () {
                                                 // 记录订单详情
                                                 dao.orderRecord(parseInt(userId), orderId, productId , amount, currencyType, vipLevel, goodsType, amount, group, service, mul, shopType, goodsVal, serverId, buyContinueRewardGold, buyContinueRewardDiamond, buyContinueDays, payChannelType , payType, promoteWithdrawLimit, silverCoin, ret => {
                                                     if (ret) {
-                                                        this.intervalSearchOrder(userId, orderId,  payType);
+                                                        self.intervalSearchOrder(userId, orderId,  payType);
                                                         const data = {
                                                             "orderStatus": 1,
                                                             "orderNo": orderId,
@@ -881,8 +883,8 @@ var GameInfo = function () {
                                                             "currency": TypeEnum.CurrencyType.Indian_Rupee,
                                                             "currencyType": TypeEnum.CurrencyTypeIndex.Indian_Rupee,
                                                             "switch": nSwitch,
-                                                            "createTime": orderResult.data.createTime,
-                                                            "updateTime": orderResult.data.createTime,
+                                                            "createTime": orderResult.data.create_time,
+                                                            "updateTime": orderResult.data.create_time,
                                                             "sign": "",
                                                             "params": {
                                                                 "qrcode": orderResult.data.url,
@@ -935,7 +937,7 @@ var GameInfo = function () {
                     throw new Error('支付类型无法确定，出错了')
                 }
 
-                CacheUtil.searchOrderCache(userId, productId, amount, TypeEnum.PayType.betcatpay).then(orderInfo => {
+                CacheUtil.searchOrderCache(userId, productId, amount, payType).then(orderInfo => {
                     if (orderInfo) {
                         log.info(userId + '已经存在的订单,使用存在的订单:' + orderInfo)
                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, orderInfo)
@@ -1101,7 +1103,7 @@ var GameInfo = function () {
                             const res = JSON.parse(result);
                             // log.info(userId + '查询订单结果:' +  res);
                             if(res && res.code === 0 && res.data){
-                                let orderStatus = 0;
+                                let orderStatus = res.data.status;
                                 const amount = StringUtil.toFixed(res.data.amount, 2);
                                 if(orderStatus === TypeEnum.OrderStatus.payedNotify){
                                     log.info(userId + '订单支付成功:' +  res);
