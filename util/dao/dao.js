@@ -3039,7 +3039,7 @@ exports.saveDot = function (userId, adid, gps, apptoken, callback) {
                         callback(0)
                         return;
                     }
-                    log.info('userId 不存在打点数据，插入成功')
+                    log.info('userId 保存打点数据成功')
                     callback(1)
                 });
             }

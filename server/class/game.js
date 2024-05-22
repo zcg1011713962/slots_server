@@ -202,7 +202,13 @@ var GameInfo = function () {
                                     if (ret1 && ret2) {
                                         result.Obj.token = token;
                                         result.win_pool = gameJackpot;
-
+                                        self.dot(userInfo.Id, null, null, null, null, null , TypeEnum.DotNameEnum.total_login_success, ret =>{
+                                            if(ret){
+                                                log.info(userInfo.Id + '登录大厅成功，打点成功')
+                                            }else{
+                                                log.info(userInfo.Id + '登录大厅成功，打点失败')
+                                            }
+                                        })
                                         log.info(userInfo.Id + '登录大厅结果' + JSON.stringify(result));
                                         socket.emit('loginResult', result);
                                         callback(null, result);
@@ -1040,16 +1046,27 @@ var GameInfo = function () {
                                             } else if (serverId !== 0) { // 游戏内
                                                 self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
                                             }
+                                            if(shopType === TypeEnum.ShopType.firstRecharge){
+                                                // 充值成功打点
+                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.first_recharge_arrive,code =>{
+                                                    if(code){
+                                                        log.info(userId + '首充打点成功,充值金额:' + amount)
+                                                    }else{
+                                                        log.info(userId + '首充打点失败,充值金额:' + amount)
+                                                    }
+                                                })
+                                            }else{
+                                                // 充值成功打点
+                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.recharge_arrive,code =>{
+                                                    if(code){
+                                                        log.info(userId + '复充打点成功,充值金额:' + amount)
+                                                    }else{
+                                                        log.info(userId + '复充打点失败,充值金额:' + amount)
+                                                    }
+                                                })
+                                            }
                                             callback(1)
                                         });
-                                        // 充值成功打点
-                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.recharge_arrive,code =>{
-                                            if(code){
-                                                log.info(userId + '充值成功打点成功,充值金额:' + amount)
-                                            }else{
-                                                log.info(userId + '充值成功打点失败,充值金额:' + amount)
-                                            }
-                                        })
                                     }else{
                                         dao.updateOrder(userId, orderId, orderStatus, ret=>{
                                             log.info(userId + '订单' + orderId + '订单状态:' + orderStatus)
@@ -1259,6 +1276,7 @@ var GameInfo = function () {
         // 提现结果回调
         this.withdrawCallBack = function (userId, orderId, callback) {
             try {
+                const self = this;
                 dao.searchWithdrawRecordByOrdeId(userId, orderId, (code, row) => {
                     if (!code) {
                         log.err(userId + '无此提现记录' + orderId)
@@ -1284,7 +1302,7 @@ var GameInfo = function () {
                                 log.info(userId + '订单:' + orderId + '已返还提现额度：' + withdrawAmount)
                             })
                         })
-                    }else if(status === 1){
+                    }else if(status === 1){ // 提现成功
                         dao.searchUserById(userId, row =>{
                             // 发送提现跑马灯
                             const noticeMsg = [{
@@ -1297,8 +1315,15 @@ var GameInfo = function () {
                                 }
                             }]
                             http_bc.sendNoticeMsg(noticeMsg);
-                            this.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
+                            self.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
                             log.info(userId + '提现成功，跑马灯通知')
+                        })
+                        self.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.withdraw_arrive,code =>{
+                            if(code){
+                                log.info(userId + '提现成功打点成功')
+                            }else{
+                                log.info(userId + '提现成功打点失败')
+                            }
                         })
                     }
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg)
@@ -3151,52 +3176,65 @@ var GameInfo = function () {
 
         // 客户端打点
         this.dot = function (userId, key, gps, adid, apptoken, money, dotName, callback) {
-            dao.searchDotByUserId(userId, row =>{
-                if(row){
-                    money=  !!money ? money : null;
-                    gps =  !!gps ? gps : row.gps;
-                    adid = !!adid  ? adid : row.adid;
-                    apptoken = !!apptoken ? apptoken : row.apptoken;
+            CacheUtil.paySwitch().then(ok =>{
+                if(ok){
+                    dao.searchDotByUserId(userId, row =>{
+                        if(row){
+                            money=  !!money ? money : null;
+                            gps =  !!gps ? gps : row.gps;
+                            adid = !!adid  ? adid : row.adid;
+                            apptoken = !!apptoken ? apptoken : row.apptoken;
 
-                    CacheUtil.getCommonCache().then(commonCache =>{
-                        if(commonCache.country === TypeEnum.CountryType.bx){
-                            dot.bxDotRequest(gps, adid, apptoken, key, money).then(data =>{
-                                try{
-                                    const d = JSON.parse(data);
-                                    if(d.status === "OK"){
-                                        log.info(userId + '打点成功dotName:' + dotName )
-                                        callback(1)
-                                    }else{
-                                        callback(0)
+                            CacheUtil.getCommonCache().then(commonCache =>{
+                                if(commonCache.country === TypeEnum.CountryType.bx){
+                                    if(key === null){
+                                        return;
                                     }
-                                }catch (e){
-                                    log.err('打点异常' + e)
-                                    callback(0)
-                                }
-                            });
-                        }else if(commonCache.country === TypeEnum.CountryType.yd){
-                            dot.ydDotRequest(gps, adid, apptoken, dotName, money).then(data =>{
-                                try{
-                                    const d = JSON.parse(data);
-                                    if(d.code === 0){
-                                        log.info(userId + '打点成功dotName:' + dotName )
-                                        callback(1)
-                                    }else{
-                                        callback(0)
+                                    dot.bxDotRequest(gps, adid, apptoken, key, money).then(data =>{
+                                        try{
+                                            const d = JSON.parse(data);
+                                            if(d.status === "OK"){
+                                                log.info(userId + '打点成功dotName:' + dotName )
+                                                callback(1)
+                                            }else{
+                                                log.info(userId + '打点失败:' + data)
+                                                callback(0)
+                                            }
+                                        }catch (e){
+                                            log.err(userId + '打点异常' + e)
+                                            callback(0)
+                                        }
+                                    });
+                                }else if(commonCache.country === TypeEnum.CountryType.yd){
+                                    if(dotName === null){
+                                        return;
                                     }
-                                }catch (e){
-                                    log.err('打点异常' + e)
-                                    callback(0)
+                                    dot.ydDotRequest(gps, adid, apptoken, dotName, money).then(data =>{
+                                        try{
+                                            const d = JSON.parse(data);
+                                            if(d.code === 0){
+                                                log.info(userId + '打点成功dotName:' + dotName )
+                                                callback(1)
+                                            }else{
+                                                log.info(userId + '打点失败:' + data)
+                                                callback(0)
+                                            }
+                                        }catch (e){
+                                            log.err(userId + '打点异常' + e)
+                                            callback(0)
+                                        }
+                                    })
                                 }
+
                             })
+                        }else{
+                            callback(0)
                         }
-
                     })
                 }else{
-                    callback(0)
+                    log.info(userId + '测试环境不支持打点 dotName:' + dotName + ' key:' + key)
                 }
             })
-
         }
 
         this.searchNotifyMsg = function (){
@@ -4291,7 +4329,7 @@ var GameInfo = function () {
                         let totalReCharge = 0;
                         let num = rows.length;
                         rows = rows.map(row =>{
-                            const goodsTypeCode = self.getGoodsTypeCode(row);
+                            const shopTypeLangCode = self.getShopTypeLangCode(row);
                             totalPromoteWithdrawLimit += Math.floor(row.promoteWithdrawLimit)
                             totalReCharge += Math.floor(row.amount)
                             return {
@@ -4300,11 +4338,12 @@ var GameInfo = function () {
                                 orderId: row.orderId, //订单ID
                                 amount: row.amount, // 金额
                                 currencyType: row.currencyType, // 货币类型
-                                goodsType: goodsTypeCode, // 物品类型多语言码
+                                // goodsType: goodsTypeCode, // 物品类型多语言码
                                 orderTime: row.createTime, // 订单时间
                                 payType: row.payType, // 支付类型
                                 payChannel: row.payChannel, // 支付渠道
-                                promoteWithdrawLimit:  row.promoteWithdrawLimit // 单笔提升提现额度
+                                promoteWithdrawLimit:  row.promoteWithdrawLimit, // 单笔提升提现额度
+                                shopTypeLangCode: shopTypeLangCode // 购物类型多语言码
                             }
                         })
                         callback({totalReCharge: totalReCharge, totalPromoteWithdrawLimit: totalPromoteWithdrawLimit, withdrawLimit: withdrawLimit,  rows: rows})
@@ -4315,20 +4354,32 @@ var GameInfo = function () {
             })
         }
 
-        this.getGoodsTypeCode = function (row){
-            let goodsTypeCode = ErrorCode.SHOP_GLOD_COIN.code;
-            if(row.group === TypeEnum.ShopGroupType.rechargeGift){
-                goodsTypeCode = ErrorCode.SHOP_FIRST_RECHARGE.code;
-            }else if(row.goodsType === TypeEnum.GoodsType.gold){
-                goodsTypeCode = ErrorCode.SHOP_GLOD_COIN.code;
-            }else if(row.goodsType === TypeEnum.GoodsType.prop){
-                goodsTypeCode = ErrorCode.SHOP_PROP.code;
-            }else if(row.goodsType === TypeEnum.GoodsType.monthCard){
-                goodsTypeCode = ErrorCode.SHOP_MONTHCARD.code;
-            }else if(row.goodsType === TypeEnum.GoodsType.turntableTicket){
-                goodsTypeCode = ErrorCode.SHOP_FREE_TURNTABLE_TICKET.code;
-            }else if(row.goodsType === TypeEnum.GoodsType.diamond){
-                goodsTypeCode = ErrorCode.SHOP_DIAMOND.code;
+        this.getShopTypeLangCode = function (row){
+            let goodsTypeCode = '';
+            switch (row.shopType){
+                case TypeEnum.ShopType.store:
+                    goodsTypeCode = ErrorCode.SHOP_STORE.code;
+                    break;
+                case TypeEnum.ShopType.free_turntable:
+                    goodsTypeCode = ErrorCode.SHOP_FREE_TURNTABLE_TICKET.code;
+                    break;
+                case TypeEnum.ShopType.discount_Limited:
+                    goodsTypeCode = ErrorCode.SHOP_DISCOUNT_LIMITED.code;
+                    break;
+                case TypeEnum.ShopType.firstRecharge:
+                    goodsTypeCode = ErrorCode.SHOP_FIRST_RECHARGE.code;
+                    break;
+                case TypeEnum.ShopType.withdraw_goods:
+                    goodsTypeCode = ErrorCode.SHOP_WITHDRAW_GOODS.code;
+                    break;
+                case TypeEnum.ShopType.month_card_goods:
+                    goodsTypeCode = ErrorCode.SHOP_MONTHCARD.code;
+                    break;
+                case TypeEnum.ShopType.exchangeGoods:
+                    goodsTypeCode = ErrorCode.SHOP_EXCHANGEGOODS.code;
+                    break;
+                default:
+                    break;
             }
             return goodsTypeCode;
         }

@@ -18,7 +18,6 @@ const GoodsType = {
     mixture: 99 // 混合
 };
 
-
 const CurrencyTypeIndex = {
     Brazil_BRL: 0, // R$雷亚尔
     Indian_Rupee: 1 // ₹卢比
