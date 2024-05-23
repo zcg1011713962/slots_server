@@ -411,7 +411,7 @@ app.get('/Shopping', async function (req, res) {
             CacheUtil.delUserProtocol(userId, "Shopping")
             if(code){
                 log.info(userId + '购买商品下单成功');
-                if(TypeEnum.ShopType.firstRecharge === shopType){
+                if(TypeEnum.ShopType.firstRecharge === Number(shopType)){
                     gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.first_recharge, ret =>{
                         if(ret){
                             log.info(userId + '首充提交订单打点成功');
