@@ -245,7 +245,7 @@ FreeTimeAnalyse = function (nHandCards, freeCards, freeTimes) {
 
 
     if(nCount > 0){
-        dictResult["nFreeTime"] = nCount;
+        dictResult["nFreeTime"] = 1;
         dictResult["bFlag"] = true;
         dictResult["nIndex"] = nIndex.length === 1 ? nIndex[0]: nIndex;
     }
@@ -843,57 +843,6 @@ module.exports.tigerOpenBoxAfter = function (config, result, user){
     console.log(result.finalList);
     this.HandCardsAnalyse(result.nHandCards, config.nGameLines, config.icon_mul, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.nGameLineDirection, config.bGameLineRule, config.nBetList, config.jackpotCard, result.winItem.winJackpot, config.freeCards, config.freeTimes, config, result);
     log.info('老虎特殊玩法转动结束')
-}
-
-module.exports.tigerOpenBox = function (dictAnalyseResult, config, result){
-     try{
-         let chooseNum = result.chooseNum > -1 ? result.chooseNum : RandomNumBoth(0, 6);
-         if(result.startList &&  result.startList.length > 0){
-             for (let i = 0; i < result.nHandCards.length; i++) {
-                 if(result.startList.length === 9){
-                     break;
-                 }
-                 let c = RandomNumBoth(0, 6);
-                 if ((c === chooseNum && result.nHandCards[i] !== c && result.nHandCards[i] !== config.jackpotCard)) {
-                     result.nHandCards[i] = chooseNum;
-                     result.startList.push(i);
-                 } else if (c === config.nGameMagicCardIndex && result.nHandCards[i] !== chooseNum && result.nHandCards[i] !== config.nGameMagicCardIndex && result.nHandCards[i] !== config.jackpotCard) {
-                     result.nHandCards[i] = config.nGameMagicCardIndex;
-                     result.startList.push(i);
-                 }
-             }
-             result.startList.sort(function (a, b) {
-                 return a - b;
-             });
-             result.finalList.push(result.startList.concat());
-         }else{
-             let startNum = RandomNumBoth(3, 6);
-             // startNum = 9;
-             let finalList = [];
-             let startList = [];
-             result.nHandCards = [config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard, config.openBoxCard];
-             for (let i = 0; i < startNum; i++) {
-                 let a = RandomNumBoth(0, 6);
-                 if (result.nHandCards[a] !== chooseNum) {
-                     result.nHandCards[a] = chooseNum;
-                     startList.push(a);
-                 } else {
-                     i--;
-                 }
-             }
-             startList.sort(function (a, b) {
-                 return a - b;
-             });
-             finalList.push(startList.concat());
-
-             result.chooseNum = chooseNum;
-             result.startList = startList;
-             result.finalList = finalList;
-             result.resList = [];
-         }
-     }catch (e){
-         log.err(e)
-     }
 }
 
 
