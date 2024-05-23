@@ -470,8 +470,13 @@ function Lottery(config, gameInfo, callback) {
                     CacheUtil.getNewbierPartMulByUserId(config.userId).then(mulIndex => {
                         log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
                         // 获取倍数区间
-                        const mulSection = LABA.getMulByIndex(iconValue, mulIndex);
+                        let mulSection = LABA.getMulByIndex(iconValue, mulIndex);
                         log.info(config.userId + '新手获取玩家当局的倍数区间:' + JSON.stringify(mulSection))
+                        if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0){
+                            // 大象免费模式默认x2倍 所以要/2
+                            log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
+                            mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
+                        }
                         // 根据特殊将 从倍数区间过滤出满足的图案倍数
                         let muls = 0;
                         if (mulSection.length === 1) {
@@ -533,9 +538,15 @@ function Lottery(config, gameInfo, callback) {
                                 log.info(config.userId + '当前RTP:' + currRtp + '根据RTP获取倍数权重数组' + JSON.stringify(weights))
                                 log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
                                 // 获取倍数区间
-                                const mulSection = LABA.getMulByWeight(iconValue, weights);
+                                let mulSection = LABA.getMulByWeight(iconValue, weights);
                                 log.info(config.userId + '根据倍数权重出倍区间' + JSON.stringify(mulSection))
                                 let muls = 0;
+                                if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0){
+                                    // 大象免费模式默认x2倍 所以要/2
+                                    log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
+                                    mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
+                                }
+
                                 if(mulSection.length === 1){
                                     // 最后一项
                                     if( mulSection[0] === iconValue[iconValue.length - 1][0] ){
@@ -551,6 +562,7 @@ function Lottery(config, gameInfo, callback) {
                                 if(muls.length > 10){ // 优化查询速度
                                     muls = StringUtil.shuffleArray(muls).slice(0, 10)
                                 }
+
                                 result.muls = muls;
                                 log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
 
@@ -764,31 +776,8 @@ function specialPlayMethBefore(config, result, user){
 
 function specialPlayMethAfter(config, result, user){
     if (config.gameId === 268) {
-        // if(result.chooseNum > -1){
         if(result.nHandCards.includes(config.openBoxCard)){
             log.info('老虎特殊玩法转动后')
-            /*let newHandCard = [];
-            for (let i in result.nHandCards) {
-                newHandCard.push(parseInt(result.nHandCards[i]) + 1);
-            }
-            result.dictAnalyseResult["nHandCards"] = newHandCard;
-            result.resList.push(JSON.parse(JSON.stringify(result.dictAnalyseResult)))
-
-            if (result.startList.length === 9) {
-                result.dictAnalyseResult["getBigWin"] = {
-                    bFlag: true,
-                    isStart: true,
-                    list: result.finalList,
-                    card: result.chooseNum + 1,
-                    res_list: result.resList
-                }
-                // 老虎全屏
-                LABA.tigerFullScreen(result.dictAnalyseResult, config.nGameLines);
-                return;
-            }
-            // 初始化分析结果
-            result.dictAnalyseResult = analyse_result.initResult(config.nBetSum)
-            cardsHandle(config, result, user);*/
             LABA.tigerOpenBoxAfter(config, result, user)
         }
         // 老虎全屏
