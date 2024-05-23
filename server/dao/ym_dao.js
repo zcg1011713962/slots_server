@@ -327,7 +327,7 @@ exports.agentRebateRecord = function agentRebateRecord(invite_uid ,invitee_uid, 
                 callback(0)
             } else {
                 if(rows){
-                    callback(rows)
+                    callback(rows.insertId ? rows.insertId : -1)
                 }else{
                     callback(0)
                 }

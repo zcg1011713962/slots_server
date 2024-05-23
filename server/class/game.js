@@ -990,18 +990,18 @@ var GameInfo = function () {
             let elapsedTime = 0; // 记录经过的时间（秒）
             // 先查询一次订单
             self.searchOrderUpdate(userId, orderId, payType,(ret) =>{
-                if(!ret){
-                    // 查询一次失败后， 定时10秒再查
-                    const interval = setInterval(() => {
-                        self.searchOrderUpdate(userId, orderId, payType, (code) =>{
-                            const timeOut = elapsedTime >= 60 * 60;
-                            if (code || timeOut) {
-                                // 条件满足时清除定时器
-                                clearInterval(interval);
-                                dao.searchOrder(userId, orderId, row =>{
-                                    const amount = row.amount;
-                                    const orderType = row.payType;
-                                    const productId = row.productId;
+                dao.searchOrder(userId, orderId, row =>{
+                    const amount = row.amount;
+                    const orderType = row.payType;
+                    const productId = row.productId;
+                    if(!ret){
+                        // 查询一次失败后， 定时10秒再查
+                        const interval = setInterval(() => {
+                            self.searchOrderUpdate(userId, orderId, payType, (code) =>{
+                                const timeOut = elapsedTime >= 60 * 60;
+                                if (code || timeOut) {
+                                    // 条件满足时清除定时器
+                                    clearInterval(interval);
                                     if(timeOut){
                                         dao.updateOrder(userId, orderId, TypeEnum.OrderStatus.payTimeOut, ret =>{
                                             log.info(userId + '订单超时结束，移除缓存订单orderId:' + orderId);
@@ -1011,14 +1011,15 @@ var GameInfo = function () {
                                         log.info(userId + '订单完成,移除缓存订单orderId:' + orderId);
                                         CacheUtil.delOrderCache(userId, productId, amount, orderType).then(r =>{})
                                     }
-                                })
-                            }
-                        })
-                        elapsedTime += 10; // 每次操作后增加10秒
-                    }, 10000); // 间隔10秒执行一次
-                }else{
-                    log.info(userId + '订单完成orderId:' + orderId);
-                }
+                                }
+                            })
+                            elapsedTime += 10; // 每次操作后增加10秒
+                        }, 10000); // 间隔10秒执行一次
+                    }else{
+                        CacheUtil.delOrderCache(userId, productId, amount, orderType).then(r =>{})
+                        log.info(userId + '订单完成orderId:' + orderId);
+                    }
+                })
             })
         }
 
@@ -1293,23 +1294,8 @@ var GameInfo = function () {
                     const payStatus = row.payStatus; // 支付状态
                     const status = row.status; // 审核状态
                     const withdrawAmount = row.amount; // 提现金额
-                    if ((payStatus === -1 || status === 2)) {  // 支付失败 或者审核不通过
-                        // 获取提现配置
-                        CacheUtil.getBankTransferConfig().then(config => {
-                            const withdrawProportion = config.withdraw_proportion; // 提现金币比例
-                            const glodCoin = StringUtil.rideNumbers(withdrawProportion, withdrawAmount, 2);
-                            // 插入提现失败表
-                            dao.withdrawFailedRecord(userId, glodCoin, newUserId =>{
-                                if(newUserId){
-                                    // 发邮件提醒
-                                    this.saveEmail(LanguageItem.withdraw_failed_title, TypeEnum.EmailType.withdrawFailed, userId, 0, LanguageItem.withdraw_apply_content, newUserId, TypeEnum.GoodsType.gold)
-                                }
-                            });
-                            dao.ReduceUsedWithdrawLimit(userId, withdrawAmount, ret =>{
-                                log.info(userId + '订单:' + orderId + '已返还提现额度：' + withdrawAmount)
-                            })
-                        })
-                    }else if(status === 1){ // 提现成功
+                    log.info(userId + '提现审核订单:' + orderId + '支付状态:' + payStatus + '审核状态:' + status + '提现金额:' + withdrawAmount)
+                    if(payStatus === 2 && status === 1){ // 提现成功
                         dao.searchUserById(userId, row =>{
                             // 发送提现跑马灯
                             const noticeMsg = [{
@@ -1331,6 +1317,22 @@ var GameInfo = function () {
                             }else{
                                 log.info(userId + '提现成功打点失败')
                             }
+                        })
+                    }else{ // 支付失败 或者审核不通过
+                        // 获取提现配置
+                        CacheUtil.getBankTransferConfig().then(config => {
+                            const withdrawProportion = config.withdraw_proportion; // 提现金币比例
+                            const glodCoin = StringUtil.rideNumbers(withdrawProportion, withdrawAmount, 2);
+                            // 插入提现失败表
+                            dao.withdrawFailedRecord(userId, glodCoin, newUserId =>{
+                                if(newUserId){
+                                    // 发邮件提醒
+                                    this.saveEmail(LanguageItem.withdraw_failed_title, TypeEnum.EmailType.withdrawFailed, userId, 0, LanguageItem.withdraw_apply_content, newUserId, TypeEnum.GoodsType.gold)
+                                }
+                            });
+                            dao.ReduceUsedWithdrawLimit(userId, withdrawAmount, ret =>{
+                                log.info(userId + '订单:' + orderId + '已返还提现额度：' + withdrawAmount)
+                            })
                         })
                     }
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg)
@@ -2567,12 +2569,15 @@ var GameInfo = function () {
                                                         self.addSilverCoinFromJackpot(userId, inviteeRewardGold, TypeEnum.SilverCoinChangeType.inviteBindUser, (ret, currSilverCoin) => {
                                                             log.info('代理' + agentUserId + '邀请用户' + userId + '送给用户银币' + inviteeRewardGold)
                                                         });
-                                                        // 返点记录（代理人金币未领取）
-                                                        ymDao.agentRebateRecord(agentUserId, userId, TypeEnum.CurrencyType.Brazil_BRL, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.unissued, row => {
-                                                            if (row) {
-                                                                // 发邮件通知代理人
-                                                                this.saveEmail(LanguageItem.new_hand_bind_title, TypeEnum.EmailType.agent_bind_inform, agentUserId, 0, LanguageItem.new_hand_bind_content, -1, TypeEnum.GoodsType.gold)
-                                                            }
+
+                                                        CacheUtil.getCommonCache().then(commonCache =>{
+                                                            // 返点记录（代理人金币未领取）
+                                                            ymDao.agentRebateRecord(agentUserId, userId, commonCache.currencyType, 0, agentRewardGold, TypeEnum.AgentRebateType.bindInviteCode, TypeEnum.AgentRebateStatus.unissued, insertId => {
+                                                                if (insertId) {
+                                                                    // 发邮件通知代理人
+                                                                    this.saveEmail(LanguageItem.new_hand_bind_title, TypeEnum.EmailType.agent_bind_inform, agentUserId, 0, LanguageItem.new_hand_bind_content, insertId, TypeEnum.GoodsType.silverCoin)
+                                                                }
+                                                            })
                                                         })
                                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg)
                                                     }
@@ -4632,6 +4637,7 @@ var GameInfo = function () {
                         // 返点记录（待领取）
                         log.info(userId + '充值类型' + currencyType + '货币数量' + currencyVal + '代理人' + inviteUid + '获得奖励' + rebateGlod);
                         ymDao.agentRebateRecord(inviteUid, userId, currencyType, currencyVal, rebateGlod, TypeEnum.AgentRebateType.recharge, TypeEnum.AgentRebateStatus.unissued, r => {
+
                         })
                     });
                 }
