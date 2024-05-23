@@ -865,8 +865,6 @@ var GameInfo = function () {
                                     log.info(userId + '下购买订单' + res)
                                     const orderResult = JSON.parse(res);
                                     if (orderResult && orderResult.code === 0) {
-                                        // 订单缓存
-                                        CacheUtil.orderCache(userId, productId, amount, payType, orderResult.data)
                                         self.getVipLevel(userId, vipLevel => {
                                             CacheUtil.getVConfig().then(config => {
                                                 // 单笔充值额度提升=充值金额*recharge_vip_socre_percentage百分比。
@@ -891,6 +889,8 @@ var GameInfo = function () {
                                                                 "url": orderResult.data.url
                                                             }
                                                         }
+                                                        // 订单缓存
+                                                        CacheUtil.orderCache(userId, productId, amount, payType, data)
                                                         callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg, data)
                                                     } else {
                                                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
