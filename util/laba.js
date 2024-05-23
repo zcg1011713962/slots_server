@@ -1921,8 +1921,10 @@ module.exports.AnalyseColumnSolt = function (
     });
 
     // 去重和删除不满足条件的连线
-    nWinLines = nWinLines.filter(line => line.length >= nLowerLimit && !nWinLines.some(otherLine =>
-        otherLine !== line && new Set(otherLine).size > new Set(line).size));
+    nWinLines = nWinLines.filter(line => line.length >= nLowerLimit);
+    // nWinLines = nWinLines.filter(line => !nWinLines.some(otherLine => otherLine !== line && new Set(otherLine).size > new Set(line).size));
+    nWinLines = nWinLines.filter(line => !nWinLines.some(otherLine => otherLine !== line && isSubset(line, otherLine)));
+
 
     // 根据下注倍数计算每条线
     let bIsFree = false;  //# 是否免费
@@ -2022,7 +2024,9 @@ module.exports.AnalyseColumnSolt = function (
     return result;
 };
 
-
+function isSubset(subset, array) {
+    return subset.every(elem => array.includes(elem));
+}
 
 
 function RandomNumForList(arr) {

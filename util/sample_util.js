@@ -495,7 +495,7 @@ async function ganeshagold(config) {
         //
         let combinations = outputAllNCardCombinations(cards, 15);*/
 
-        const combinations = generateRandomHands(6000000, 15, 10);
+        const combinations = generateRandomHands(1000000, 15, 10);
 
       /*  combinations = StringUtil.shuffleArray(combinations)*/
         let len = combinations.length;
