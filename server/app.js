@@ -528,7 +528,7 @@ app.get('/dotBase', function (req, res) {
     if(!userId){
         return;
     }
-    gameInfo.saveDot(userId, adid, gps, apptoken, row =>{
+    gameInfo.saveDot(userId, adid, gps, apptoken, gameInfo, row =>{
         if (row) {
             log.info(userId + '保存打点基础数据成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});

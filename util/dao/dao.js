@@ -6,6 +6,7 @@ const RedisUtil = require('../redis_util');
 const StringUtil = require("../string_util");
 const TypeEnum = require("../enum/type");
 
+
 const pool = mysql.createPool({
     connectionLimit: 10000,
     host: mysql_config.host,
@@ -3009,7 +3010,7 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
 
 
 // 保存打点基础数据
-exports.saveDot = function (userId, adid, gps, apptoken, callback) {
+exports.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
     pool.getConnection(function (err, connection) {
         // 先查询 userId 是否存在
         connection.query('SELECT userId FROM dot_base_data WHERE userId = ?', [userId], function (error, results, fields) {
@@ -3037,6 +3038,14 @@ exports.saveDot = function (userId, adid, gps, apptoken, callback) {
                         callback(0)
                         return;
                     }
+                    // 客户端第一次进来保存打点认为是注册，注册时候没有adid等，在这里打点
+                    gameInfo.dot(userId, null, null, null, null, null , TypeEnum.DotNameEnum.register, ret =>{
+                        if(ret){
+                            log.info(userId + '游客注册打点成功');
+                        }else{
+                            log.info(userId + '游客注册打点失败');
+                        }
+                    })
                     log.info('userId 保存打点数据成功')
                     callback(1)
                 });
