@@ -1049,7 +1049,7 @@ var GameInfo = function () {
                                             } else if (serverId !== 0) { // 游戏内
                                                 self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
                                             }
-                                            if(shopType === TypeEnum.ShopType.firstRecharge){
+                                            if(Number(shopType) === TypeEnum.ShopType.firstRecharge){
                                                 // 充值成功打点
                                                 self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.first_recharge_arrive,code =>{
                                                     if(code){
@@ -1286,9 +1286,9 @@ var GameInfo = function () {
                         callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg)
                         return;
                     }
-                    const payStatus = row.payStatus; // 支付状态
-                    const status = row.status; // 审核状态
-                    const withdrawAmount = row.amount; // 提现金额
+                    const payStatus = Number(row.payStatus); // 支付状态
+                    const status = Number(row.status); // 审核状态
+                    const withdrawAmount = StringUtil.toFixed(row.amount, 2); // 提现金额
                     log.info(userId + '提现审核订单:' + orderId + '支付状态:' + payStatus + '审核状态:' + status + '提现金额:' + withdrawAmount)
                     if(payStatus === 2 && status === 1){ // 提现成功
                         dao.searchUserById(userId, row =>{
@@ -1306,7 +1306,7 @@ var GameInfo = function () {
                             self.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
                             log.info(userId + '提现成功，跑马灯通知')
                         })
-                        self.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.withdraw_arrive,code =>{
+                        self.dot(userId, null,  null, null, null, withdrawAmount , TypeEnum.DotNameEnum.withdraw_arrive,code =>{
                             if(code){
                                 log.info(userId + '提现成功打点成功')
                             }else{
@@ -3171,8 +3171,8 @@ var GameInfo = function () {
 
 
         // 存储打点数据
-        this.saveDot = function (userId, adid, gps, apptoken, callback) {
-            dao.saveDot(userId, adid, gps, apptoken, callback);
+        this.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
+            dao.saveDot(userId, adid, gps, apptoken, gameInfo, callback);
         }
 
         // 存储打点数据
