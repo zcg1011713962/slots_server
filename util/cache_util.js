@@ -863,55 +863,63 @@ exports.getSilverCoin = function(userId){
     return RedisUtil.hget(`${userInfoKey}:${userId}`, 'silverCoin').then(coin => { return StringUtil.toFixed(coin, 2)});
 }
 // 给用户加银币
-exports.addSilverCoin = function(userId, coinsToAdd, type, callback){
-    if(coinsToAdd > 0){
-        dao.addSilverCoin(userId, coinsToAdd, ret =>{
-            if (!ret) {
-                log.err(userId + '增加银币失败,数量:'+ coinsToAdd + '类型:' +  type);
-                callback(0)
-                return;
-            }
-            RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'silverCoin', `${coinsToAdd}`, (err, val) => {
-                if(err){
-                    log.err(userId + '增加银币失败,数量:'+ coinsToAdd + '类型:' +  type + 'err:' + err);
-                    callback(0)
+exports.addSilverCoin = function(userId, coinsToAdd, type){
+    const self = this;
+    return new Promise((resolve, reject) => {
+        if (coinsToAdd > 0) {
+            dao.addSilverCoin(userId, coinsToAdd, ret => {
+                if (!ret) {
+                    log.err(userId + '增加银币失败,数量:' + coinsToAdd + '类型:' + type);
+                    reject(0)
                     return;
                 }
-                const currSilverCoin = StringUtil.toFixed(val, 2);
-                log.info(userId + '增加银币' + coinsToAdd + '类型:' +  type + '当前银币:' + currSilverCoin);
-                const beforeSilverCoin = currSilverCoin - coinsToAdd;
-                // 银币记录
-                dao.silverCoinChangeLog(userId, beforeSilverCoin, coinsToAdd,  currSilverCoin, type, 1)
-                callback(1, currSilverCoin)
-            });
-        })
-    }else{
-        callback(1)
-    }
+                RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'silverCoin', `${coinsToAdd}`, (err, val) => {
+                    if (err) {
+                        log.err(userId + '增加银币失败,数量:' + coinsToAdd + '类型:' + type + 'err:' + err);
+                        reject(0)
+                        return;
+                    }
+                    const currSilverCoin = StringUtil.toFixed(val, 2);
+                    log.info(userId + '增加银币' + coinsToAdd + '类型:' + type + '当前银币:' + currSilverCoin);
+                    const beforeSilverCoin = currSilverCoin - coinsToAdd;
+                    // 银币记录
+                    dao.silverCoinChangeLog(userId, beforeSilverCoin, coinsToAdd, currSilverCoin, type, 1)
+                    resolve(currSilverCoin)
+                });
+            })
+        } else {
+            self.getSilverCoin(userId).then(currSilverCoin =>{
+                resolve(currSilverCoin)
+            })
+        }
+    })
 }
 
 // 给用户减银币
-exports.reduceSilverCoin = function(userId, coinsToReduce, type, callback){
-    this.getSilverCoin(userId).then(silverCoin =>{
-        dao.reduceSilverCoin(userId, coinsToReduce, ret =>{
-            if (!ret) {
-                log.err(userId + '减少银币失败,数量:'+ coinsToReduce + '类型:' +  type);
-                callback(0)
-                return;
-            }
-            RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'silverCoin', -coinsToReduce, (err, val) => {
-                if (err) {
-                    log.err(userId + '减少银币' + err);
-                    callback(0)
-                } else {
-                    const currSilverCoin = StringUtil.toFixed(val, 2);
-                    log.info(userId + '减少银币:' + coinsToReduce + '类型:' + type +'当前银币:' + currSilverCoin);
-                    const beforeSilverCoin = silverCoin;
-                    // 银币记录
-                    dao.silverCoinChangeLog(userId, beforeSilverCoin, -coinsToReduce,  currSilverCoin, type, 1)
-                    callback(1, beforeSilverCoin, currSilverCoin)
+exports.reduceSilverCoin = function(userId, coinsToReduce, type){
+    const self = this;
+    return new Promise((resolve, reject) => {
+        self.getSilverCoin(userId).then(silverCoin => {
+            dao.reduceSilverCoin(userId, coinsToReduce, ret => {
+                if (!ret) {
+                    log.err(userId + '减少银币失败,数量:' + coinsToReduce + '类型:' + type);
+                    reject(0)
+                    return;
                 }
-            });
+                RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'silverCoin', -coinsToReduce, (err, val) => {
+                    if (err) {
+                        log.err(userId + '减少银币' + err);
+                        reject(0)
+                    } else {
+                        const currSilverCoin = StringUtil.toFixed(val, 2);
+                        log.info(userId + '减少银币:' + coinsToReduce + '类型:' + type + '当前银币:' + currSilverCoin);
+                        const beforeSilverCoin = silverCoin;
+                        // 银币记录
+                        dao.silverCoinChangeLog(userId, beforeSilverCoin, -coinsToReduce, currSilverCoin, type, 1)
+                        resolve(beforeSilverCoin, currSilverCoin)
+                    }
+                });
+            })
         })
     })
 }
@@ -921,31 +929,36 @@ exports.getGoldCoin = function(userId){
     return RedisUtil.hget(`${userInfoKey}:${userId}`, 'score').then(coin => { return StringUtil.toFixed(coin, 2)});
 }
 // 给用户加金币
-exports.addGoldCoin = function(userId, coinsToAdd, type, callback){
-    if(coinsToAdd > 0){
-        dao.addAccountScore(userId, coinsToAdd, ret =>{
-            if (!ret) {
-                log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type);
-                callback(0)
-                return;
-            }
-            RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', `${coinsToAdd}`, (err, val) => {
-                if(err){
-                    log.err(userId + '增加金币失败,数量:'+ coinsToAdd + '类型:' +  type + 'err:' + err);
-                    callback(0)
+exports.addGoldCoin = function(userId, coinsToAdd, type){
+    const self = this;
+    return new Promise((resolve, reject) => {
+        if (coinsToAdd > 0) {
+            dao.addAccountScore(userId, coinsToAdd, ret => {
+                if (!ret) {
+                    log.err(userId + '增加金币失败,数量:' + coinsToAdd + '类型:' + type);
+                    reject(0)
                     return;
                 }
-                const currGoldCoin = StringUtil.toFixed(val, 2);
-                log.info(userId + '增加金币' + coinsToAdd + '类型:' +  type + '当前金币:' + currGoldCoin);
-                const beforeGoldCoins = currGoldCoin - coinsToAdd;
-                // 金币记录
-                dao.scoreChangeLog(userId, beforeGoldCoins, coinsToAdd,  currGoldCoin, type, 1)
-                callback(1, currGoldCoin)
-            });
-        })
-    }else{
-        callback(1)
-    }
+                RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', `${coinsToAdd}`, (err, val) => {
+                    if (err) {
+                        log.err(userId + '增加金币失败,数量:' + coinsToAdd + '类型:' + type + 'err:' + err);
+                        reject(0)
+                        return;
+                    }
+                    const currGoldCoin = StringUtil.toFixed(val, 2);
+                    log.info(userId + '增加金币' + coinsToAdd + '类型:' + type + '当前金币:' + currGoldCoin);
+                    const beforeGoldCoins = currGoldCoin - coinsToAdd;
+                    // 金币记录
+                    dao.scoreChangeLog(userId, beforeGoldCoins, coinsToAdd, currGoldCoin, type, 1)
+                    resolve(currGoldCoin)
+                });
+            })
+        } else {
+            self.getGoldCoin(userId).then(currGoldCoin =>{
+                resolve(currGoldCoin)
+            })
+        }
+    })
 }
 
 
