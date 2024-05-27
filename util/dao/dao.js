@@ -3864,12 +3864,7 @@ exports.saveEmail = function saveEmail(title, type, to_userid, from_userid, cont
 };
 
 //查询邮件记录
-exports.selectEmail = function selectEmail(types, userId, callback) {
-    const sql = "call GetEmail(?,?)";
-    let values = [];
-    values.push(types);
-    values.push(userId);
-
+exports.selectEmail = function (types, toUserId, callback) {
     pool.getConnection(function (err, connection) {
         if(err){
             log.err('获取数据库连接失败' + err);
@@ -3877,21 +3872,71 @@ exports.selectEmail = function selectEmail(types, userId, callback) {
             callback(0);
             return;
         }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                log.err('查询邮件记录' + err);
-            } else {
-                if (rows && rows.length > 0) {
-                    callback(1, rows[0]);
-                } else {
-                    callback(0);
-                }
-            }
+        getEmail(types, toUserId, connection).then((results) => {
+            callback(1, results)
+        }).catch((err) => {
+            log.err(err)
+            callback(0)
         });
-        values = [];
     });
 };
+
+function getEmail(typeParam, toUserId, connection) {
+    return new Promise((resolve, reject) => {
+        const types = typeParam.split(',');
+        const len = types.length;
+        const promises = [];
+
+        // 循环执行查询并处理结果
+        types.forEach(type => {
+            let query = '';
+
+            switch (type) {
+                case '0':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.transfer_bank_score rewardGoldVal, 0 rewardDiamondVal, e.isRead status, -1 rankType, -1 rank, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.log_bank_transfer b ON e.to_userid = b.to_userid AND e.otherId = b.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 0 AND e.to_userid = ${toUserId}`;
+                    break;
+                case '1':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.rebate_glod rewardGoldVal, 0 rewardDiamondVal, e.isRead status, -1 rankType, -1 rank, null orderId FROM gameaccount.email e LEFT JOIN ym_manage.agent_rebate b ON e.otherId = b.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 1 AND e.to_userid = ${toUserId}`;
+                    break;
+                case '2':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.rewardGoldVal, r.rewardDiamondVal, r.status, -1 rankType, -1 rank, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.first_recharge_award r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 2 AND e.to_userid = ${toUserId}`;
+                    break;
+                case '3':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.val rewardGoldVal, 0 rewardDiamondVal, r.status, r.type rankType, r.rank, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.rank_award r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 3 AND e.to_userid = ${toUserId}`;
+                    break;
+                case '4':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, 0 rewardGoldVal, 0 rewardDiamondVal, 0 status, 0 rankType, 0 rank, r.orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_success r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 4 AND e.to_userid = ${toUserId}`;
+                    break;
+                case '5':
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.goldVal rewardGoldVal, 0 rewardDiamondVal, 0 status, 0 rankType, 0 rank, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_failed r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 5 AND e.to_userid = ${toUserId}`;
+                    break;
+                default:
+                    break;
+            }
+
+            promises.push(new Promise((resolve, reject) => {
+                // 执行查询
+                connection.query(query, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            }));
+        });
+
+        // 等待所有查询完成后处理结果
+        Promise.all(promises)
+            .then(results => {
+                // 合并所有查询结果
+                const mergedResults = results.reduce((acc, val) => acc.concat(val), []);
+                connection.release();
+                resolve(mergedResults);
+            })
+            .catch(err => {
+                connection.release();
+                reject(err)
+            });
+    });
+}
 
 
 // 查询邮件类型
