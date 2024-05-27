@@ -602,19 +602,18 @@ function afterLottery(config, gameInfo, result, callback){
         // 本局记录,是否需要特殊结算
         lastTimeRecord(config, gameInfo.userList[config.userId], dictAnalyseResult.getFreeTime['bFlag'], dictAnalyseResult.getOpenBox['bFlag'] , config.nGameLines, config.freeCards, dictAnalyseResult.nMultiple, dictAnalyseResult.nWinLinesDetail, user.freeCount, result)
 
-        reduceBalanceGold(config, winscore, win, winJackpot, openBoxCardWin, (r) =>{
+        reduceBalanceGold(config, winscore, win, winJackpot, openBoxCardWin, async (r) => {
             // 本局获得免费次数
             const freeCount = dictAnalyseResult["getFreeTime"]["nFreeTime"];
             // 当前免费次数和金币
             const currFreeCount = parseInt(StringUtil.addNumbers(user.freeCount, freeCount));
-            const currGoldCoin = StringUtil.addNumbers(winscore, user.score);
             // 增减金币和免费次数
-            CacheUtil.addGoldCoin(config.userId, winscore, TypeEnum.ScoreChangeType.gameGlodCoin, (c) => {
-                CacheUtil.addFreeCount(config.gameId, config.userId, freeCount,   (ret) =>{
+            await CacheUtil.addGoldCoin(config.userId, winscore, TypeEnum.ScoreChangeType.gameGlodCoin).then((currGoldCoin) => {
+                CacheUtil.addFreeCount(config.gameId, config.userId, freeCount, (ret) => {
                     // 中奖信息通知
                     analyse_result.winNoticeMsg(config, user, dictAnalyseResult, result);
                     // 分析结果构建
-                    const resultArray =  analyse_result.analyseResultBuild(currFreeCount, currGoldCoin, dictAnalyseResult);
+                    const resultArray = analyse_result.analyseResultBuild(currFreeCount, currGoldCoin, dictAnalyseResult);
                     // 日志记录
                     lottery_record.record(gameInfo._Csocket, config.nGameLines.length, config.serverId, config.gameId,
                         config.userId, config.nBetSum, winscore, config.beforeGoldCoin, currGoldCoin, freeCount, config.feeBeforeFreeCount,
@@ -625,7 +624,7 @@ function afterLottery(config, gameInfo, result, callback){
                     const r = analyse_result.lotteryReturn(currGoldCoin, winscore, freeCount, currFreeCount, dictAnalyseResult, result.resDictList, result.newHandFlag);
                     callback(r);
                 })
-            });
+            })
         })
     })
 

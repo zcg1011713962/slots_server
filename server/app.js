@@ -1061,11 +1061,11 @@ io.on('connection', function (socket) {
     // 绑定银行卡（绑卡）
     socket.on('bindBankCard', function (data) {
         const d = StringUtil.isJson(data) ? JSON.parse(data) : data;
-        if(!d || !d.cpf || !d.account || !d.name || !d.bankType) return;
+        if(!d || !d.account || !d.name) return;
 
         const userId = socket.userId;
         if(gameInfo.IsPlayerOnline(userId)){
-            gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf , (code, msg) => {
+            gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf, d.ifsc , d.bankName , (code, msg) => {
                 if (code) {
                     gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.bind_card,code =>{
                         if(code){
