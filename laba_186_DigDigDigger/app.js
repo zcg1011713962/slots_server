@@ -212,12 +212,12 @@ io.on('connection', function (socket) {
     })
 });
 
-app.set('port', process.env.PORT || gameConfig.port);
-const server = http.listen(app.get('port'), function () {
-    log.info('start at port:' + server.address().port);
-});
-
-
-log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.gameId).then(config => {
+    app.set('port', process.env.PORT || config.port);
+    const server = http.listen(app.get('port'), function () {
+        log.info('start at port:' + server.address().port);
+    });
+    log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
+})
 
 /*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/

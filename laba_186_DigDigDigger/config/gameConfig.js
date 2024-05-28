@@ -3,7 +3,6 @@ gameConfig = {};
 gameConfig.gameId = 286;			//第几个游戏ID
 gameConfig.serverId = 15186;		//当前游戏的第几台服务器
 gameConfig.logflag = 15186;		//游戏记录表示
-gameConfig.port = 15186;		//游戏记录表示
 gameConfig.gameName = "DigDigDigger";
 gameConfig.sendMessage_mul = 5;
 

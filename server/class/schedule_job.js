@@ -7,7 +7,7 @@ const StringUtil = require('../../util/string_util')
 const LanguageItem = require("../../util/enum/language");
 const dao = require('../../util/dao/dao')
 
-exports.initDayJob = function (userList){
+exports.initDayJob = function (){
     // 定义每日定时任务
     const dayJob = schedule.scheduleJob('0 0 * * *', async () => {
         log.info('开始清理VIP每日领取状态');
@@ -15,6 +15,8 @@ exports.initDayJob = function (userList){
         log.info('开始清理每日领取幸运币上限');
         CacheUtil.clearLuckyCoinLimit();
         log.info('每日红点事件推送');
+
+        const userList = gameInfo.getOnlinePlayer()
         pushRedPoint(userList);
         // 发首充持续奖励
         dao.searchfirstRechargeAwardRecord(rows =>{
@@ -85,7 +87,7 @@ exports.initMonthJob = function (){
 }
 
 
-exports.interval = function (gameInfo) {
+exports.interval = function () {
     const period = 2000;
     setInterval(function () {
         // 幸运币活动刷新
