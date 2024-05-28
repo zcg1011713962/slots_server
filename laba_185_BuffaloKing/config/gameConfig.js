@@ -4,7 +4,6 @@ gameConfig = {};
 gameConfig.gameId = 285;			//第几个游戏ID
 gameConfig.serverId = 15185;		//当前游戏的第几台服务器
 gameConfig.logflag = 15185;		//游戏记录表示
-gameConfig.port = 15185;		//游戏记录表示
 gameConfig.gameName = "BuffaloKing";
 gameConfig.sendMessage_mul = 5;
 
