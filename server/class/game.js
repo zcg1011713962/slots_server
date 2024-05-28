@@ -644,7 +644,7 @@ var GameInfo = function () {
                 // 数量
                 const goodsVal = parseFloat(shopItem['val']);
                 // 银币
-                const silverCoin = parseFloat(shopItem['silver_coin']);
+                const silverCoin = shopItem['silver_coin'] ? parseFloat(shopItem['silver_coin']) : 0;
                 // 货币类型
                 const currencyTypeIndex = parseFloat(shopItem['currency_type']);
                 const currencyType =  self.getCurrencyTypeByIndex(currencyTypeIndex);
@@ -1681,7 +1681,7 @@ var GameInfo = function () {
                                     totalVal = sourceVal;
                                 }
                                 // 发银币
-                                await self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.monthCardBuy)
+                                // await self.addSilverCoin(userId, silverCoin, TypeEnum.SilverCoinChangeType.monthCardBuy)
                                 log.info(userId + '充值成功' + amount + '金额,获得VIP点数:' + addVipPoint + '发银币:' + silverCoin);
 
                                 if (TypeEnum.GoodsType.gold === goodsType) {

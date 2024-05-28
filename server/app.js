@@ -458,7 +458,7 @@ app.get('/shoppingCallBack', function (req, res) {
                             const amount = row.amount;
                             const orderType = row.payType;
                             const productId = row.productId;
-                            log.info(userId + '回调订单:' + amount + 'orderType:' + orderType + 'productId:' + productId)
+                            log.info(userId + '回调订单:' + amount + 'orderType:' + orderType + 'productId:' + productId + 'serverId:' + serverId)
                             CacheUtil.delOrderCache(userId, productId, amount, orderType)
                             // 响应
                             res.send({code: code, msg: msg});
