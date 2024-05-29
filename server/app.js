@@ -1065,7 +1065,7 @@ io.on('connection', function (socket) {
 
         const userId = socket.userId;
         if(gameInfo.IsPlayerOnline(userId)){
-            gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf, d.ifsc , d.bankName , (code, msg) => {
+            gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf, d.ifsc , d.bankName, d.phone,d.email,(code, msg) => {
                 if (code) {
                     gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.bind_card,code =>{
                         if(code){
@@ -1934,15 +1934,15 @@ io.on('connection', function (socket) {
 });
 
 
-app.set('port', process.env.PORT || 13000);
+app.set('port', process.env.PORT || 23000);
 const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
 });
 
 // 触发定时任务
-ScheduleJob.initDayJob(gameInfo.getOnlinePlayer());
+ScheduleJob.initDayJob();
 ScheduleJob.initMonthJob();
-ScheduleJob.interval(gameInfo);
+ScheduleJob.interval();
 
 dao.clenaLineOut();
 gameInfo.updateOffLineOrder();

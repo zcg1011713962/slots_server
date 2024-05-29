@@ -3477,15 +3477,15 @@ var GameInfo = function () {
 
 
         // 绑定银行卡
-        this.bindBankCard = function (userId, account, bankType, name, cpf, ifsc, bankName, callback) {
-            dao.addBank(userId, account, name, cpf, bankType, ifsc , bankName, function (result, nickName) {
+        this.bindBankCard = function (userId, account, bankType, name, cpf, ifsc, bankName, phone, email, callback) {
+            dao.addBank(userId, account, name, cpf, bankType, ifsc , bankName, phone, email, function (result) {
                 if (result) {
                     callback(ErrorCode.SUCCESS.code, ErrorCode.SUCCESS.msg);
                 } else {
                     callback(ErrorCode.FAILED.code, ErrorCode.FAILED.msg);
                 }
             });
-        };
+        }
 
 
 
@@ -4996,7 +4996,9 @@ var GameInfo = function () {
                         cpf: row.cpf,
                         name: row.name,
                         ifsc: row.ifsc,
-                        bankName: row.bankName
+                        bankName: row.bankName,
+                        phone: row.phone,
+                        email: row.email
                     }
                 })
             }

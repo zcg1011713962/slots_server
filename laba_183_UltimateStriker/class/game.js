@@ -230,7 +230,7 @@ var GameInfo = function () {
                 }
             }
             if (saveListLotteryLogTemp.length > 0) {
-                gameDao.lotteryLog(saveListLotteryLogTemp);
+                gameDao.lotteryLog(gameConfig.gameId, saveListLotteryLogTemp);
             }
         };
 
@@ -247,17 +247,23 @@ var GameInfo = function () {
 
         //删除用户
         this.deleteUser = function (_socket) {
-            let userId = _socket.userId;
+            const userId = _socket.userId;
             const self = this;
             if (userId) {
                 CacheUtil.getFreeCount(userId).then(freeCount =>{
                     //存免费次数
+                    let gameDict = {
+                        freeCount: freeCount,
+                        freeMul: this.userList[_socket.userId].getFreeMul(),
+                    };
+                    //存免费次数
                     const info = {
                         userId: userId,
                         freeCount: freeCount,
-                        LotteryCount: 0
+                        LotteryCount: 0,
+                        gameDict: JSON.stringify(gameDict),
                     };
-                    gameDao.saveFree(info, function (result) {
+                    gameDao.saveDigDigDiggerFree(gameConfig.gameId, info, function (result) {
                         log.info(userId + '保存免费次数' + info.freeCount);
                         self._Csocket.emit("lineOut", {
                             signCode: gameConfig.LoginServeSign,
@@ -270,7 +276,6 @@ var GameInfo = function () {
                         });
                         delete self.userList[userId];
                         log.info(userId + '离开游戏,移除用户,当前游戏人数:' + self.getOnlinePlayerCount())
-                        userId = null;
                     });
                 })
             }

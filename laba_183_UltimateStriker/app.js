@@ -10,7 +10,7 @@ const Urls = require("../util/config/url_config");
 const {getInstand: Config} = require("./config/read_config");
 const Lottery = require("../util/lottery");
 const CacheUtil = require('../util/cache_util');
-
+const SampleUtil = require('../util/sample_util');
 
 const Csocket = Cio(Urls.hall_url);
 
@@ -217,5 +217,7 @@ CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.gameId).then(config => {
     });
     log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 })
+
+/*SampleUtil.init(gameConfig.gameName, gameConfig.gameId);*/
 
 
