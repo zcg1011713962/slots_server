@@ -236,16 +236,18 @@ FreeTimeAnalyse = function (nHandCards, freeCards, freeTimes) {
     };
     let nCount = 0;
     let nIndex = []
+    let nFreeTime = 0;
     for (var i in nHandCards) {
         if (freeCards.includes(nHandCards[i])) {
             nCount += freeTimes.get(nHandCards[i])
+            nFreeTime = freeTimes.get(nHandCards[i])
             nIndex.push(nHandCards[i])
         }
     }
 
 
     if(nCount > 0){
-        dictResult["nFreeTime"] = 1;
+        dictResult["nFreeTime"] = nFreeTime;
         dictResult["bFlag"] = true;
         dictResult["nIndex"] = nIndex.length === 1 ? nIndex[0]: nIndex;
     }
