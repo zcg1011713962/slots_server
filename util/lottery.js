@@ -363,7 +363,9 @@ function Lottery(config, gameInfo, callback) {
         newHandFlag: config.newHandFlag, // 新手标识
         chooseNum: -1, // 老虎特殊玩法
         finalList: [], // 老虎特殊玩法
-        startList: [] // 老虎特殊玩法
+        startList: [], // 老虎特殊玩法
+        superCardDetailList: [],// 足球存卡
+        superCardList: []
     }
 
     let hitFree = false;
@@ -976,9 +978,37 @@ function specialPlayMethAfter(config, result, user){
             result.dictAnalyseResult["goldWinDetail"] = goldWinDetail;
         }
     }else if(config.gameId === 283){
-        if(parseInt(config.feeBeforeFreeCount) > 0 && result.dictAnalyseResult["win"] > 0){
+        if(parseInt(config.feeBeforeFreeCount) > 0 && result.dictAnalyseResult["win"] > 0){ // 免费游戏中
             user.AddFreeMul(1);
         }
+        const freeCard = config.freeCards[0];
+        // 非免费模式内大于4张进免费
+        const len = result.nHandCards.filter(card => card === freeCard).length;
+        if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){ // 进免费模式
+            let t = 0;
+            for (let i in result.superCardDetailList) {//计算免费长牌数量
+                if (result.superCardDetailList[i].r === freeCard + 1) {
+                    t++;
+                }
+            }
+            for (let i = 0; i < result.nHandCards.length; i++) {
+                if (result.nHandCards[i] === freeCard) {//检测是否为长牌
+                    let noFind = true;
+                    for (let j in result.superCardList) {
+                        if (result.superCardList[j].indexOf(i) > -1) {
+                            noFind = false;
+                        }
+                    }
+                    if (noFind) {
+                        t++;
+                    }
+                }
+            }
+            if (t >= 4) {
+                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 15 + 2 * (t - 4)};
+            }
+        }
+
     }
 }
 
