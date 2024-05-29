@@ -2158,7 +2158,7 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 
 //添加银行卡
-exports.addBank = function (userId, account, name, cpf, bankType, ifsc , bankName, callback) {
+exports.addBank = function (userId, account, name, cpf, bankType, ifsc , bankName, phone, email, callback) {
     const sql = 'call AddBankCard(?,?,?,?,?,?,?)';
     let values = [];
 
@@ -2169,6 +2169,8 @@ exports.addBank = function (userId, account, name, cpf, bankType, ifsc , bankNam
     values.push(cpf ? cpf : '');
     values.push(ifsc ? ifsc : '');
     values.push(bankName ? bankName : '');
+    values.push(phone ? phone : '');
+    values.push(email ? email : '');
 
     pool.getConnection(function (err, connection) {
         if(err){

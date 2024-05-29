@@ -153,7 +153,7 @@ exports.reduceFreeCount = function (gameId, userId, callback) {
 
 
 //摇奖记录
-exports.lotteryLog = function (gameId, userInfo, callback) {
+exports.lotteryLog = function (gameId, userInfo) {
     const sql = `INSERT INTO lotterylog_${gameId}(userid,bet,line_s,score_before,score_linescore,score_win,score_current,free_count_before,free_count_win,free_count_current,result_array,mark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`;
     const values = [];
 
