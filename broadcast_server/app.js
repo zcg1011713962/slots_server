@@ -42,7 +42,7 @@ io.on('connection', function (socket) {
 });
 
 
-app.set('port', process.env.PORT || 23001);
+app.set('port', process.env.PORT || 13001);
 
 const server = http.listen(app.get('port'), function () {
     log.info('start at port:' + server.address().port);
