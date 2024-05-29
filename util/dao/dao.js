@@ -2159,7 +2159,7 @@ exports.existInviteCode = function existInviteCode(inviteCode, callback){
 
 //添加银行卡
 exports.addBank = function (userId, account, name, cpf, bankType, ifsc , bankName, phone, email, callback) {
-    const sql = 'call AddBankCard(?,?,?,?,?,?,?)';
+    const sql = 'call AddBankCard(?,?,?,?,?,?,?,?,?)';
     let values = [];
 
     values.push(userId);

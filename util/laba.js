@@ -2230,6 +2230,8 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
     }
     result.dictAnalyseResult["win"] = all_win;
     result.resDictList = resDictList;
+    result.superCardDetailList = superCardDetailList;
+    result.superCardList = superCardList;
 
 }
 

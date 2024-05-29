@@ -575,34 +575,37 @@ async function UltimateStriker(config) {
     const combinations = generateRandomHands(500000, 36, 13);
     let len = combinations.length;
     for (let item in combinations) {
-        const nHandCards = combinations[item];
+        let nHandCards = combinations[item];
 
-        //万能牌每列只许出现一张
-        let col1 = [nHandCards[0], nHandCards[5], nHandCards[10]];
-        let col2 = [nHandCards[1], nHandCards[6], nHandCards[11]];
-        let col3 = [nHandCards[2], nHandCards[7], nHandCards[12]];
-        let col4 = [nHandCards[3], nHandCards[8], nHandCards[13]];
-        let col5 = [nHandCards[4], nHandCards[9], nHandCards[14]];
-
-        if (list_one_count(config.nGameMagicCardIndex, col1) > 0 ||
-            list_one_count(config.nGameMagicCardIndex, col2) > 1 ||
-            list_one_count(config.nGameMagicCardIndex, col3) > 1 ||
-            list_one_count(config.nGameMagicCardIndex, col4) > 1 ||
-            list_one_count(config.nGameMagicCardIndex, col5) > 1) {
+        // 普通模式列不能出现万能牌
+        let col1 = [nHandCards[0], nHandCards[6], nHandCards[12], nHandCards[18], nHandCards[24], nHandCards[30]];
+        let col2 = [nHandCards[1], nHandCards[7], nHandCards[13], nHandCards[19], nHandCards[25], nHandCards[31]];
+        let col3 = [nHandCards[2], nHandCards[8], nHandCards[14], nHandCards[20], nHandCards[26], nHandCards[32]];
+        let col4 = [nHandCards[3], nHandCards[9], nHandCards[15], nHandCards[21], nHandCards[27], nHandCards[33]];
+        let col5 = [nHandCards[4], nHandCards[10], nHandCards[16], nHandCards[22], nHandCards[28], nHandCards[34]];
+        let col6 = [nHandCards[5], nHandCards[11], nHandCards[17], nHandCards[23], nHandCards[29], nHandCards[35]];
+        const len1 = col1.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        const len2 = col2.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        const len3 = col3.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        const len4 = col4.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        const len5 = col5.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        const len6 = col6.filter(card => Number(card) === config.nGameMagicCardIndex).length
+        if (len1 > 0 || len2 > 0 || len3 > 0 || len4 > 0 || len5 > 0 || len6 > 0) {
             len --;
             continue;
         }
 
         let result = {}
         result.dictAnalyseResult = analyse_result.initResult(20);
-        result.nHandCards = nHandCards;
+        result.nHandCards = [...nHandCards];
         LABA.footballCardsHandle(config, result, 1, false, 1);
         const mul = StringUtil.divNumbers(result.dictAnalyseResult["win"], 20, 1);
 
         let free = 0;
         let jackpot = 0;
         let openBox = 0;
-        if (nHandCards.includes(config.freeCards[0])) {
+        const fLen = nHandCards.filter(card => card === config.freeCards[0]).length
+        if (fLen >= 4) {
             free = 1;
         }
         if (nHandCards.includes(config.jackpotCard)) {
@@ -612,8 +615,6 @@ async function UltimateStriker(config) {
         if(oLen >= 3){
             openBox = 1;
         }
-
-
 
         // 将数据添加到批量数据数组中
         batchData.push({nHandCards, mul, free, jackpot, openBox});
