@@ -407,6 +407,8 @@ function Lottery(config, gameInfo, callback) {
                     hitFree = false;
                 }
 
+
+
                 log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
                 if((config.newHandFlag && config.gameId === 288 && lastTimeRecord['free']) || (config.gameId === 288 && !config.newHandFlag && lastTimeRecord.free)) {  // 新手上局是免费的 || 新手转非新手 上局是免费的情况,这把不使用新手线路，选一个倍数 + 上局实际倍数 <= 预期倍数
                     // 钻石游戏需要单独处理免费模式
@@ -475,8 +477,8 @@ function Lottery(config, gameInfo, callback) {
                         // 获取倍数区间
                         let mulSection = LABA.getMulByIndex(iconValue, mulIndex);
                         log.info(config.userId + '新手获取玩家当局的倍数区间:' + JSON.stringify(mulSection))
-                        if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0){
-                            // 大象免费模式默认x2倍 所以要/2
+                        if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
+                            // 足球、大象免费模式默认x2倍 所以要/2
                             log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
                             mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
                         }
@@ -544,8 +546,8 @@ function Lottery(config, gameInfo, callback) {
                                 let mulSection = LABA.getMulByWeight(iconValue, weights);
                                 log.info(config.userId + '根据倍数权重出倍区间' + JSON.stringify(mulSection))
                                 let muls = 0;
-                                if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0){
-                                    // 大象免费模式默认x2倍 所以要/2
+                                if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
+                                    // 足球、大象免费模式默认x2倍 所以要/2
                                     log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
                                     mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
                                 }
