@@ -1122,6 +1122,7 @@ module.exports.HandCardsAnalyse_MixFootball = function (nHandCards ,nColumnNumbe
                 // console.log(GOLD_Single);
                 try {
                     win_num = StringUtil.rideNumbers(iconMul[card][x.length - nLowerLimit] , nBet, 2);
+                    log.info('线赢:' + win_num)
                 }catch (e){
                     console.log(nHandCards)
                     console.log(card)
@@ -1129,7 +1130,7 @@ module.exports.HandCardsAnalyse_MixFootball = function (nHandCards ,nColumnNumbe
                     log.err(e)
                 }
 
-                AllWinNum += win_num;
+                AllWinNum = StringUtil.addNumbers(AllWinNum, win_num);
                 let win_line = [];
                 for (let i_idx in nHandCards) {
                     let i = parseInt(i_idx);
@@ -1191,8 +1192,8 @@ module.exports.addSpecialCard = function (arr, colNum, nHandCards, superCardList
         [[0, 1, 2, 3], [4, 5]],
     ];
 
-    let r1 = RandomNumBoth(0, 3);//出现几组
-    let card = RandomNumBoth(0, 11);//哪张牌
+    let r1 = RandomNumBoth(0, 2);//出现几组
+    let card = RandomNumBoth(0, 10);//哪张牌 不要出百变
     switch (r1) {
         case 0:
             break;
@@ -1989,29 +1990,13 @@ module.exports.AnalyseColumnSolt = function (
 
 module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTimeFlag, nBet){
     const nHandCards = result.nHandCards;
-
-    // 足球
-    let col1 = [nHandCards[0], nHandCards[6], nHandCards[12], nHandCards[18], nHandCards[24], nHandCards[30]];
-    let col2 = [nHandCards[1], nHandCards[7], nHandCards[13], nHandCards[19], nHandCards[25], nHandCards[31]];
-    let col3 = [nHandCards[2], nHandCards[8], nHandCards[14], nHandCards[20], nHandCards[26], nHandCards[32]];
-    let col4 = [nHandCards[3], nHandCards[9], nHandCards[15], nHandCards[21], nHandCards[27], nHandCards[33]];
-    let col5 = [nHandCards[4], nHandCards[10], nHandCards[16], nHandCards[22], nHandCards[28], nHandCards[34]];
-    let col6 = [nHandCards[5], nHandCards[11], nHandCards[17], nHandCards[23], nHandCards[29], nHandCards[35]];
-    //随机转换多格的牌型
-    let superCardList = {};
-    let superCardDetailList = {};
-    let sId = 1;
-    col2 = this.addSpecialCard(col2, 1, nHandCards, superCardList, superCardDetailList, sId, config);
-    col3 = this.addSpecialCard(col3, 2, nHandCards, superCardList, superCardDetailList, sId, config);
-    col4 = this.addSpecialCard(col4, 3, nHandCards, superCardList, superCardDetailList, sId, config);
-    col5 = this.addSpecialCard(col5, 4, nHandCards, superCardList, superCardDetailList, sId, config);
-
-    // console.log(col2, col3, col4, col5);
-
     this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
-    result.dictAnalyseResult["sr"] = superCardList;
-    result.dictAnalyseResult["srd"] = superCardDetailList;
 
+    log.info('start-----------------------------------')
+    this.handCardLog(nHandCards, 6, 6)
+
+    const superCardList = result.dictAnalyseResult["sr"];
+    const superCardDetailList = result.dictAnalyseResult["srd"];
 
     let resDictList = [];
     let new_hand_card = [];
@@ -2026,7 +2011,7 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
     var box_win = 0;
     while (true) {
         if (result.dictAnalyseResult["win"] > 0) { // 中奖了
-            all_win += result.dictAnalyseResult["win"];
+            all_win = StringUtil.addNumbers(all_win, result.dictAnalyseResult["win"]);
             combo_num += 1;
             var win_lines_index = [];
             for (let nwldi in result.dictAnalyseResult["nWinLinesDetail"]) {
@@ -2194,7 +2179,7 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
             };*/
             result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
             this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
-
+            this.handCardLog(nHandCards, 6, 6)
 
             new_hand_card = [];
             for (const i in nHandCards) {
@@ -2213,10 +2198,12 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
             } else if (combo_num >= 4) {
                 mul = FREE_MUL[3];
             }
-            result.dictAnalyseResult["win"] *= mul;
+            result.dictAnalyseResult["win"] = StringUtil.rideNumbers(result.dictAnalyseResult["win"], mul, 2);
+            log.info('足球连击数:'+ combo_num + '加倍' + mul + '连击后赢:' + result.dictAnalyseResult["win"])
 
-            if (bFreeTimeFlag) {
-                result.dictAnalyseResult["win"] *= freeMul;
+            if (bFreeTimeFlag){
+                result.dictAnalyseResult["win"] = StringUtil.rideNumbers(result.dictAnalyseResult["win"], freeMul, 2);
+                log.info('足球免费模式下累积翻倍' + freeMul + '翻倍后赢:' + result.dictAnalyseResult["win"])
                 result.dictAnalyseResult["fMultiple"] = freeMul;
             }
 
@@ -2228,6 +2215,7 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
             break;
         }
     }
+    // 连线总赢分
     result.dictAnalyseResult["win"] = all_win;
     result.resDictList = resDictList;
     result.superCardDetailList = superCardDetailList;

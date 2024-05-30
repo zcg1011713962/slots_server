@@ -364,8 +364,9 @@ function Lottery(config, gameInfo, callback) {
         chooseNum: -1, // 老虎特殊玩法
         finalList: [], // 老虎特殊玩法
         startList: [], // 老虎特殊玩法
-        superCardDetailList: [],// 足球存卡
-        superCardList: []
+        superCardDetailList: [],// 足球
+        superCardList: [], // 足球
+        changeHandCard: [] // 足球(第一次变换后手牌)
     }
 
     let hitFree = false;
@@ -402,7 +403,7 @@ function Lottery(config, gameInfo, callback) {
                 }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
                     hitFree = true;
                 }
-                if(config.gameId === 272 && parseInt(config.feeBeforeFreeCount) > 0){ // 浣熊免费模式不叠加
+                if(config.gameId === 272 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){ // 足球、浣熊免费模式不叠加
                     hitFree = false;
                 }
 
@@ -775,6 +776,33 @@ function specialPlayMethBefore(config, result, user){
         if(parseInt(config.feeBeforeFreeCount) < 1){
             user.setFreeSymbolList([]);
         }
+    }else if (config.gameId === 283){
+        const nHandCards = result.nHandCards;
+        log.info('变图案前:' + nHandCards)
+        // 足球
+        let col1 = [nHandCards[0], nHandCards[6], nHandCards[12], nHandCards[18], nHandCards[24], nHandCards[30]];
+        let col2 = [nHandCards[1], nHandCards[7], nHandCards[13], nHandCards[19], nHandCards[25], nHandCards[31]];
+        let col3 = [nHandCards[2], nHandCards[8], nHandCards[14], nHandCards[20], nHandCards[26], nHandCards[32]];
+        let col4 = [nHandCards[3], nHandCards[9], nHandCards[15], nHandCards[21], nHandCards[27], nHandCards[33]];
+        let col5 = [nHandCards[4], nHandCards[10], nHandCards[16], nHandCards[22], nHandCards[28], nHandCards[34]];
+        let col6 = [nHandCards[5], nHandCards[11], nHandCards[17], nHandCards[23], nHandCards[29], nHandCards[35]];
+        //随机转换多格的牌型
+        let superCardList = {};
+        let superCardDetailList = {};
+        let sId = 1;
+
+        if(!allElementsEqualZero(result.muls)){
+            // 变图案
+            col2 = LABA.addSpecialCard(col2, 1, nHandCards, superCardList, superCardDetailList, sId, config);
+            col3 = LABA.addSpecialCard(col3, 2, nHandCards, superCardList, superCardDetailList, sId, config);
+            col4 = LABA.addSpecialCard(col4, 3, nHandCards, superCardList, superCardDetailList, sId, config);
+            col5 = LABA.addSpecialCard(col5, 4, nHandCards, superCardList, superCardDetailList, sId, config);
+            log.info('变图案后:' + nHandCards)
+        }
+        result.dictAnalyseResult["sr"] = superCardList;
+        result.dictAnalyseResult["srd"] = superCardDetailList;
+        result.changeHandCard = nHandCards;
+        result.nHandCards = nHandCards;
     }
 }
 
@@ -985,6 +1013,9 @@ function specialPlayMethAfter(config, result, user){
         // 非免费模式内大于4张进免费
         const len = result.nHandCards.filter(card => card === freeCard).length;
         if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){ // 进免费模式
+            // 初始化倍率
+            user.setFreeMul(2)
+
             let t = 0;
             for (let i in result.superCardDetailList) {//计算免费长牌数量
                 if (result.superCardDetailList[i].r === freeCard + 1) {
@@ -1005,7 +1036,7 @@ function specialPlayMethAfter(config, result, user){
                 }
             }
             if (t >= 4) {
-                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 15 + 2 * (t - 4)};
+                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 1 + 2 * (t - 4)};
             }
         }
 
@@ -1092,26 +1123,11 @@ function lotteryTimes (config, finVal) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function footballAdapter(config, result, gameInfo, callback){
-    result.nHandCards = LABA.createHandCards(config.cards, config.weight_two_array, config.col_count, config.line_count, config.cardsNumber, config.jackpotCard, config.iconTypeBind, result.winItem.winJackpot, config.blankCard);
-    cardsHandle(config, result, gameInfo.userList[config.userId])
-    afterLottery(config, gameInfo, result, callback);
+function allElementsEqualZero(arr) {
+    return arr.every(element => element === 0);
 }
+
+
 
 
 

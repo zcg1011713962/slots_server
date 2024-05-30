@@ -68,6 +68,10 @@ User = function(userInfo,_socket){
 	this.getFreeMul = function () {
 		return this.freeMul;
 	};
+
+	this.setFreeMul = function (data) {
+		this.freeMul = data;
+	};
 	this.init(userInfo,_socket);
 };
 
