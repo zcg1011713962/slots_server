@@ -1007,12 +1007,15 @@ function specialPlayMethAfter(config, result, user){
         }
     }else if(config.gameId === 283){
         if(parseInt(config.feeBeforeFreeCount) > 0 && result.dictAnalyseResult["win"] > 0){ // 免费游戏中
-            user.AddFreeMul(1);
+            if(user.getFreeMul() < 8){
+                user.AddFreeMul(1);
+            }
         }
         const freeCard = config.freeCards[0];
         // 非免费模式内大于4张进免费
         const len = result.nHandCards.filter(card => card === freeCard).length;
         if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){ // 进免费模式
+            log.info('足球进入免费模式--------------------------')
             // 初始化倍率
             user.setFreeMul(2)
 
@@ -1036,7 +1039,7 @@ function specialPlayMethAfter(config, result, user){
                 }
             }
             if (t >= 4) {
-                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 1 + 2 * (t - 4)};
+                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 15 + 2 * (t - 4)};
             }
         }
 

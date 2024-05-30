@@ -2124,7 +2124,9 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                             nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
                             nHandCards[parseInt(n_h_i) + 30] = -1;
                         } else {
-                            nHandCards[n_h_i] = config.cards[StringUtil.RandomNumBoth(0, config.cards.length - 1)];
+                            let cardIndex = StringUtil.RandomNumBoth(0, config.cards.length - 1);
+                            cardIndex = cardIndex === config.jackpotIndex ? 0 : cardIndex;
+                            nHandCards[n_h_i] = config.cards[cardIndex] ;
                         }
                     }
                 }
@@ -2147,7 +2149,9 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                             nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
                             nHandCards[parseInt(n_h_i) + 30] = -1;
                         } else {
-                            nHandCards[n_h_i] = config.cards[StringUtil.RandomNumBoth(0, config.cards.length - 1)];
+                            let cardIndex = StringUtil.RandomNumBoth(0, config.cards.length - 1);
+                            cardIndex = cardIndex === config.jackpotIndex ? 0 : cardIndex;
+                            nHandCards[n_h_i] = config.cards[cardIndex] ;
                         }
                     }
                 }
