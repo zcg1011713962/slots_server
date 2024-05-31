@@ -594,12 +594,16 @@ async function UltimateStriker(config) {
             len --;
             continue;
         }
+        const l = nHandCards.filter(card => card === config.freeCards[0]).length
+        if(l > 4){
+            len --;
+            continue;
+        }
 
         let result = {}
         result.dictAnalyseResult = analyse_result.initResult(20);
         result.nHandCards = [...nHandCards];
         LABA.footballCardsHandle(config, result, 1, false, 1);
-        nHandCards = result.changeHandCard;
         const mul = StringUtil.divNumbers(result.dictAnalyseResult["win"], 20, 1);
 
         let free = 0;
