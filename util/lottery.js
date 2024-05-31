@@ -401,7 +401,7 @@ function Lottery(config, gameInfo, callback) {
             log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
 
             // 足球免费模式限制倍率
-            if(gameInfo.gameId === 283 &&  config.feeBeforeFreeCount > 0 && user.getFreeMul() >= 6){
+            if(gameInfo.gameId === 283 &&  config.feeBeforeFreeCount > 0 && user.getFreeMul() >= 4){
                 selectMinMulCards(user, gameInfo, config, result,currGameMuls, minMulCards, hitFree, hitBonus, lastTimeRecord, callback);
                 return;
             }
@@ -780,6 +780,15 @@ function specialPlayMethBefore(config, result, user){
             user.setFreeSymbolList([]);
         }
     }else if (config.gameId === 283){
+        const freeCard = config.freeCards[0];
+        // 非免费模式内大于4张进免费
+        const len = result.nHandCards.filter(card => card === freeCard).length;
+        if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){ // 进免费模式
+            log.info('足球进入免费模式--------------------------')
+            // 初始化倍率
+            user.setFreeMul(2)
+        }
+
         const nHandCards = result.nHandCards;
         log.info('变图案前:' + nHandCards)
         // 足球
@@ -1016,38 +1025,11 @@ function specialPlayMethAfter(config, result, user){
                 user.AddFreeMul(1);
             }
         }
-        const freeCard = config.freeCards[0];
-        // 非免费模式内大于4张进免费
-        const len = result.nHandCards.filter(card => card === freeCard).length;
-        if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){ // 进免费模式
-            log.info('足球进入免费模式--------------------------')
-            // 初始化倍率
-            user.setFreeMul(2)
-
-            let t = 0;
-            for (let i in result.superCardDetailList) {//计算免费长牌数量
-                if (result.superCardDetailList[i].r === freeCard + 1) {
-                    t++;
-                }
-            }
-            for (let i = 0; i < result.nHandCards.length; i++) {
-                if (result.nHandCards[i] === freeCard) {//检测是否为长牌
-                    let noFind = true;
-                    for (let j in result.superCardList) {
-                        if (result.superCardList[j].indexOf(i) > -1) {
-                            noFind = false;
-                        }
-                    }
-                    if (noFind) {
-                        t++;
-                    }
-                }
-            }
-            if (t >= 4) {
-                result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 15 + 2 * (t - 4)};
-            }
+        const len = result.nHandCards.filter(card => card === config.freeCards[0]).length;
+        if(parseInt(config.feeBeforeFreeCount) < 1 && len >= 4){
+            // 给免费次数
+            result.dictAnalyseResult["getFreeTime"] = {"bFlag": true, "nFreeTime": 15 + 2 * (len - 4)};
         }
-
     }
 }
 
