@@ -1326,14 +1326,7 @@ exports.setHandCards = function(gameId, mulCardsMap){
 }
 
 
-// 记录用户出过的图案组合
-exports.recordUserHandCards = function(gameId, userId, cards){
-    const num = cards[0]
-    const card = [...cards];
-    card.shift();
-    const key = recordHandCardKey + '_' + gameId + '_' + userId;
-    RedisUtil.hmset(key, num, JSON.stringify(card))
-}
+
 
 
 // 获取用户出过的图案组合
@@ -1348,19 +1341,7 @@ exports.getRecordUserHandCards = function(gameId, userId, callback){
     });
 }
 
-// 获取用户出过的图案组合
-exports.delRecordUserHandCards = function(gameId, userId, cardNums){
-    try{
-        const stringArray = cardNums.map(num => num.toString());
-        if(stringArray.length === 0 || stringArray.length === ''){
-            return;
-        }
-        const key = recordHandCardKey + '_' + gameId + '_' + userId;
-        RedisUtil.hashdelAsync(key, ...stringArray).then(ret =>{});
-    }catch (e){
-        log.err(e)
-    }
-}
+
 
 // 更新为非新手
 exports.updateNewHandFlag = function(userId, newHandFlag){

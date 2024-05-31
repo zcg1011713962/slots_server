@@ -379,216 +379,217 @@ function Lottery(config, gameInfo, callback) {
         // 是否击中jackpot
         result.winItem.winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit, config);
     }
-
-    // 足球游戏适配
-   /* if(gameInfo.gameId === 283){
-        footballAdapter(config,  result, gameInfo, callback)
-        return;
-    }*/
     let iconValue =  config.iconValue;
 
     // 获取游戏所有倍数
     gameDao.handCardsMuls(config.gameId, (currGameMulsRow) =>{
-        const currGameMuls = currGameMulsRow.map(it => Number(it.mul))
+        const currGameMuls = currGameMulsRow.map(it => Number(it.mul)).sort((a, b) => a - b);
         log.info('获取游戏所有倍数')
         gameDao.minMulCards(config.gameId, (minMulCardRow) =>{
             log.info('获取游戏最小倍数对应的图案组合')
-           const minMulCards = minMulCardRow.map(it => JSON.parse(it.card))
-            // 当前用户出过的图案组合编号
-            CacheUtil.getRecordUserHandCards(config.gameId, config.userId, (cardNums) =>{
-                const lastTimeRecord = user.getLastTimeRecord();
-                log.info(config.userId + '上局回顾,上局是否免费:' + lastTimeRecord.free + '上局是否击中特殊玩法' + lastTimeRecord.openBox + '上局实际倍数:' + lastTimeRecord.actualMul + '本局预期的倍数区间' + JSON.stringify(lastTimeRecord.expectMulSection) + '上局赢的线' + JSON.stringify(lastTimeRecord.nWinLinesDetail));
-                if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) && lastTimeRecord.openBox){ // 大象、公牛、挖矿 特殊玩法内不叠加特殊玩法
-                    hitBonus = false;
-                }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
+            const minMulCards = minMulCardRow.map(it => JSON.parse(it.card))
+            const lastTimeRecord = user.getLastTimeRecord();
+            log.info(config.userId + '上局回顾,上局是否免费:' + lastTimeRecord.free + '上局是否击中特殊玩法' + lastTimeRecord.openBox + '上局实际倍数:' + lastTimeRecord.actualMul + '本局预期的倍数区间' + JSON.stringify(lastTimeRecord.expectMulSection) + '上局赢的线' + JSON.stringify(lastTimeRecord.nWinLinesDetail));
+            if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) && lastTimeRecord.openBox){ // 大象、公牛、挖矿 特殊玩法内不叠加特殊玩法
+                hitBonus = false;
+            }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
+                hitFree = true;
+            }
+            if(config.gameId === 272 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){ // 足球、浣熊免费模式不叠加
+                hitFree = false;
+            }
+            log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
+
+            // 足球免费模式限制倍率
+            if(gameInfo.gameId === 283 &&  config.feeBeforeFreeCount > 0 && user.getFreeMul() >= 6){
+                selectMinMulCards(user, gameInfo, config, result,currGameMuls, minMulCards, hitFree, hitBonus, lastTimeRecord, callback);
+                return;
+            }
+
+            if((config.newHandFlag && config.gameId === 288 && lastTimeRecord['free']) || (config.gameId === 288 && !config.newHandFlag && lastTimeRecord.free)) {  // 新手上局是免费的 || 新手转非新手 上局是免费的情况,这把不使用新手线路，选一个倍数 + 上局实际倍数 <= 预期倍数
+                // 钻石游戏需要单独处理免费模式
+                const lastHandCard = lastTimeRecord['lastHandCard'];
+                let expectMulSection = user.getLastTimeRecord()['expectMulSection'];
+                expectMulSection = expectMulSection.length === 1 ? [expectMulSection[0],expectMulSection[0]] : expectMulSection;
+                const filterMuls = currGameMuls.filter(mul => mul <= expectMulSection[1])
+                const currMul = filterMuls.length > 0 ? Math.max(...filterMuls) : 0;
+                let muls = StringUtil.getRandomMuls(currGameMuls, [0, currMul]);
+                result.expectMulSection = expectMulSection;
+                const freeCount = lastHandCard.filter(element =>  config.freeCards.includes(element)).length;
+                if(freeCount === 1){
                     hitFree = true;
-                }
-                if(config.gameId === 272 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){ // 足球、浣熊免费模式不叠加
+                    log.info('出一个免费,可选倍数区间:' + JSON.stringify(expectMulSection)  + '可选倍数:' + JSON.stringify(muls))
+                    if(expectMulSection.length === 1 && expectMulSection[0] <= Math.min(...currGameMuls)){
+                        // 出了一张免费牌 预期倍数为当前游戏最低倍时 直接中（否者钻石游戏出两个免费会找不到合适的结果）
+                        muls = currGameMuls.filter(mul => mul <= expectMulSection[1] && mul >= expectMulSection[0])
+                    }
+                }else if(freeCount === 2){
+                    muls = currGameMuls.filter(mul => mul <= expectMulSection[1] && mul >= expectMulSection[0])
+                    log.info('出两个免费,可选倍数区间:' + JSON.stringify(expectMulSection) + '可选倍数:' + JSON.stringify(muls))
+                    hitFree = true;
+                }else if(freeCount === 3){
+                    log.info('出三个免费,可选倍数区间:' + JSON.stringify(expectMulSection) + '可选倍数:' + JSON.stringify(muls))
                     hitFree = false;
                 }
-
-
-
-                log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
-                if((config.newHandFlag && config.gameId === 288 && lastTimeRecord['free']) || (config.gameId === 288 && !config.newHandFlag && lastTimeRecord.free)) {  // 新手上局是免费的 || 新手转非新手 上局是免费的情况,这把不使用新手线路，选一个倍数 + 上局实际倍数 <= 预期倍数
-                    // 钻石游戏需要单独处理免费模式
-                    const lastHandCard = lastTimeRecord['lastHandCard'];
-                    let expectMulSection = user.getLastTimeRecord()['expectMulSection'];
-                    expectMulSection = expectMulSection.length === 1 ? [expectMulSection[0],expectMulSection[0]] : expectMulSection;
-                    const filterMuls = currGameMuls.filter(mul => mul <= expectMulSection[1])
-                    const currMul = filterMuls.length > 0 ? Math.max(...filterMuls) : 0;
-                    let muls = StringUtil.getRandomMuls(currGameMuls, [0, currMul]);
-                    result.expectMulSection = expectMulSection;
-                    const freeCount = lastHandCard.filter(element =>  config.freeCards.includes(element)).length;
-                    if(freeCount === 1){
-                        hitFree = true;
-                        log.info('出一个免费,可选倍数区间:' + JSON.stringify(expectMulSection)  + '可选倍数:' + JSON.stringify(muls))
-                        if(expectMulSection.length === 1 && expectMulSection[0] <= Math.min(...currGameMuls)){
-                            // 出了一张免费牌 预期倍数为当前游戏最低倍时 直接中（否者钻石游戏出两个免费会找不到合适的结果）
-                            muls = currGameMuls.filter(mul => mul <= expectMulSection[1] && mul >= expectMulSection[0])
+                muls = muls.length > 0 ? muls : [currGameMuls[0]];
+                gameDao.handCardsByMuls(config.gameId, muls, hitFree, hitBonus, result.winItem.winJackpot, (cardRow) =>{
+                    let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
+                    try{
+                        if(cards === null || cards.length === 0){
+                            log.err(config.userId + '区间倍数图案数组为空,取最小倍数图案组合')
+                            cards = minMulCards;
                         }
-                    }else if(freeCount === 2){
-                        muls = currGameMuls.filter(mul => mul <= expectMulSection[1] && mul >= expectMulSection[0])
-                        log.info('出两个免费,可选倍数区间:' + JSON.stringify(expectMulSection) + '可选倍数:' + JSON.stringify(muls))
-                        hitFree = true;
-                    }else if(freeCount === 3){
-                        log.info('出三个免费,可选倍数区间:' + JSON.stringify(expectMulSection) + '可选倍数:' + JSON.stringify(muls))
-                        hitFree = false;
+                        if(freeCount === 1){
+                            for(let j = 0; j < lastHandCard.length; j++){
+                                if(config.freeCards.includes(lastHandCard[j])){
+                                    cards = cards.filter(subArray => {
+                                        const len = subArray.filter(element => element === config.freeCards[0]).length;
+                                        return lastHandCard[j] === subArray[j] &&  len === 1;
+                                    });
+                                }
+                            }
+                        }else if(freeCount === 2){
+                            // 找出两个位置相同的免费
+                            for(let j = 0; j < lastHandCard.length; j++){
+                                if(config.freeCards.includes(lastHandCard[j])){
+                                    cards = cards.filter(subArray => {
+                                        const len = subArray.filter(element => element === config.freeCards[0]).length;
+                                        return lastHandCard[j] === subArray[j] &&  len === 2;
+                                    });
+                                }
+                            }
+                        }
+                        isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                        cardsHandle(config, result, gameInfo.userList[config.userId])
+                        afterLottery(config, gameInfo, result, callback);
+                    }catch (e){
+                        log.err(config.userId, '摇奖异常', e)
+                        callback(0)
                     }
-                    muls = muls.length > 0 ? muls : [currGameMuls[0]];
-                    gameDao.handCardsByMuls(config.gameId, muls, hitFree, hitBonus, result.winItem.winJackpot, (cardRow) =>{
-                        let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
+                })
+            }else if(config.newHandFlag){ // 新手
+                CacheUtil.getNewbierPartMulByUserId(config.userId).then(mulIndex => {
+                    log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
+                    // 获取倍数区间
+                    let mulSection = LABA.getMulByIndex(iconValue, mulIndex);
+                    log.info(config.userId + '新手获取玩家当局的倍数区间:' + JSON.stringify(mulSection))
+                    if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
+                        // 足球、大象免费模式默认x2倍 所以要/2
+                        log.info(config.userId + '足球、大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
+                        mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
+                    }
+                    // 根据特殊将 从倍数区间过滤出满足的图案倍数
+                    let muls = 0;
+                    if (mulSection.length === 1) {
+                        // 最后一项
+                        if (mulSection[0] === iconValue[iconValue.length - 1][0]) {
+                            // 找游戏里满足大于此倍数的区间
+                            muls = currGameMuls.filter(mul => mul >= mulSection[0])
+                        } else {
+                            muls = mulSection;
+                        }
+                    } else {
+                        muls = StringUtil.getRandomMuls(currGameMuls, mulSection);
+                    }
+                    if (hitFree && muls.length === 1) {
+                        muls = [0, muls[0]];
+                    }
+                    result.expectMulSection = mulSection;
+                    if(muls.length > 10){ // 优化查询速度
+                        muls = StringUtil.shuffleArray(muls).slice(0, 10)
+                    }
+                    result.muls = muls;
+                    log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
+                    gameDao.handCardsByMuls(config.gameId, muls , hitFree, hitBonus, result.winItem.winJackpot,(cardRow) =>{
+                        const cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
                         try{
-                            if(cards === null || cards.length === 0){
-                                log.err(config.userId + '区间倍数图案数组为空,取最小倍数图案组合')
-                                cards = minMulCards;
-                            }
-                            if(freeCount === 1){
-                                for(let j = 0; j < lastHandCard.length; j++){
-                                    if(config.freeCards.includes(lastHandCard[j])){
-                                        cards = cards.filter(subArray => {
-                                            const len = subArray.filter(element => element === config.freeCards[0]).length;
-                                            return lastHandCard[j] === subArray[j] &&  len === 1;
-                                        });
-                                    }
-                                }
-                            }else if(freeCount === 2){
-                                // 找出两个位置相同的免费
-                                for(let j = 0; j < lastHandCard.length; j++){
-                                    if(config.freeCards.includes(lastHandCard[j])){
-                                        cards = cards.filter(subArray => {
-                                            const len = subArray.filter(element => element === config.freeCards[0]).length;
-                                            return lastHandCard[j] === subArray[j] &&  len === 2;
-                                        });
-                                    }
-                                }
-                            }
-                            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
                             cardsHandle(config, result, gameInfo.userList[config.userId])
                             afterLottery(config, gameInfo, result, callback);
                         }catch (e){
-                            log.err(config.userId, '摇奖异常', e)
+                            log.err(config.userId + '摇奖异常' + e)
                             callback(0)
                         }
                     })
-                }else if(config.newHandFlag){ // 新手
-                    CacheUtil.getNewbierPartMulByUserId(config.userId).then(mulIndex => {
-                        log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
-                        // 获取倍数区间
-                        let mulSection = LABA.getMulByIndex(iconValue, mulIndex);
-                        log.info(config.userId + '新手获取玩家当局的倍数区间:' + JSON.stringify(mulSection))
-                        if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
-                            // 足球、大象免费模式默认x2倍 所以要/2
-                            log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
-                            mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
-                        }
-                        // 根据特殊将 从倍数区间过滤出满足的图案倍数
-                        let muls = 0;
-                        if (mulSection.length === 1) {
-                            // 最后一项
-                            if (mulSection[0] === iconValue[iconValue.length - 1][0]) {
-                                // 找游戏里满足大于此倍数的区间
-                                muls = currGameMuls.filter(mul => mul >= mulSection[0])
-                            } else {
-                                muls = mulSection;
+                })
+            }else if(!config.newHandFlag){ // 非新手
+                // 获取系统当前库存
+                CacheUtil.getGamblingBalanceGold().then(gamblingBalanceGold =>{
+                    if(gamblingBalanceGold < 0){
+                        log.info(config.userId + '库存不足,当前库存:' + gamblingBalanceGold + '发最小倍数')
+                        // 库存不足 倍数内随机获取图案组合
+                        selectMinMulCards(user, gameInfo, config, result,currGameMuls, minMulCards, hitFree, hitBonus, lastTimeRecord, callback);
+                    }else{
+                        // 库存充足 获取当前玩家RTP 根据RTP出倍数区间 RTP = 总回报/总下注 * 100 %
+                        const currRtp = config.totalBet ? StringUtil.rideNumbers(StringUtil.divNumbers(config.totalBackBet, config.totalBet, 2), 100, 2) :  0;
+                        log.info(config.userId + '总下注:' + config.totalBet + '总回报:' +  config.totalBackBet + '当前rtp:' + currRtp)
+                        // 根据预期RTP获取倍数权重
+                        CacheUtil.getControlAwardByRtp(currRtp).then(weights =>{
+                            log.info(config.userId + '当前RTP:' + currRtp + '根据RTP获取倍数权重数组' + JSON.stringify(weights))
+                            log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
+                            // 获取倍数区间
+                            let mulSection = LABA.getMulByWeight(iconValue, weights);
+                            log.info(config.userId + '根据倍数权重出倍区间' + JSON.stringify(mulSection))
+                            let muls = 0;
+                            if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
+                                // 足球、大象免费模式默认x2倍 所以要/2
+                                log.info(config.userId + '足球、大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
+                                mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
                             }
-                        } else {
-                            muls = StringUtil.getRandomMuls(currGameMuls, mulSection);
-                        }
-                        if (hitFree && muls.length === 1) {
-                            muls = [0, muls[0]];
-                        }
-                        result.expectMulSection = mulSection;
-                        if(muls.length > 10){ // 优化查询速度
-                            muls = StringUtil.shuffleArray(muls).slice(0, 10)
-                        }
-                        result.muls = muls;
-                        log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
-                        gameDao.handCardsByMuls(config.gameId, muls , hitFree, hitBonus, result.winItem.winJackpot,(cardRow) =>{
-                            const cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
-                            try{
-                                isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
-                                cardsHandle(config, result, gameInfo.userList[config.userId])
-                                afterLottery(config, gameInfo, result, callback);
-                            }catch (e){
-                                log.err(config.userId + '摇奖异常' + e)
-                                callback(0)
-                            }
-                        })
-                    })
-                }else if(!config.newHandFlag){ // 非新手
-                    // 获取系统当前库存
-                    CacheUtil.getGamblingBalanceGold().then(gamblingBalanceGold =>{
-                        if(gamblingBalanceGold < 0){
-                            log.info(config.userId + '库存不足,当前库存:' + gamblingBalanceGold + '发最小倍数')
-                            // 库存不足 倍数内随机获取图案组合
-                            try{
-                                result.expectMulSection = [currGameMuls[0]];
-                                result.muls = [currGameMuls[0]]; // 满足条件的倍数
-                                log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify([currGameMuls[0]]))
 
-                                isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, minMulCards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
-                                cardsHandle(config, result, user)
-                                afterLottery(config, gameInfo, result, callback);
-                            }catch (e){
-                                log.err(config.userId + '摇奖异常' + e)
-                                callback(0)
-                            }
-                        }else{
-                            // 库存充足 获取当前玩家RTP 根据RTP出倍数区间 RTP = 总回报/总下注 * 100 %
-                            const currRtp = config.totalBet ? StringUtil.rideNumbers(StringUtil.divNumbers(config.totalBackBet, config.totalBet, 2), 100, 2) :  0;
-                            log.info(config.userId + '总下注:' + config.totalBet + '总回报:' +  config.totalBackBet + '当前rtp:' + currRtp)
-                            // 根据预期RTP获取倍数权重
-                            CacheUtil.getControlAwardByRtp(currRtp).then(weights =>{
-                                log.info(config.userId + '当前RTP:' + currRtp + '根据RTP获取倍数权重数组' + JSON.stringify(weights))
-                                log.info(config.userId + '倍数区间二维数组:' + JSON.stringify(iconValue))
-                                // 获取倍数区间
-                                let mulSection = LABA.getMulByWeight(iconValue, weights);
-                                log.info(config.userId + '根据倍数权重出倍区间' + JSON.stringify(mulSection))
-                                let muls = 0;
-                                if(config.gameId === 263 && parseInt(config.feeBeforeFreeCount) > 0 || config.gameId === 283 && parseInt(config.feeBeforeFreeCount) > 0){
-                                    // 足球、大象免费模式默认x2倍 所以要/2
-                                    log.info(config.userId + '大象免费模式默认x2倍 所以要取倍数区间的时候需要除以2出倍区间' + mulSection)
-                                    mulSection = mulSection.map(element => StringUtil.divNumbers(element , 2, 2));
-                                }
-
-                                if(mulSection.length === 1){
-                                    // 最后一项
-                                    if( mulSection[0] === iconValue[iconValue.length - 1][0] ){
-                                        // 找游戏里满足大于此倍数的区间
-                                        muls = currGameMuls.filter(mul => mul >= mulSection[0])
-                                    }else{
-                                        muls = mulSection;
-                                    }
+                            if(mulSection.length === 1){
+                                // 最后一项
+                                if( mulSection[0] === iconValue[iconValue.length - 1][0] ){
+                                    // 找游戏里满足大于此倍数的区间
+                                    muls = currGameMuls.filter(mul => mul >= mulSection[0])
                                 }else{
-                                    muls = StringUtil.getRandomMuls(currGameMuls, mulSection);
+                                    muls = mulSection;
                                 }
-                                result.expectMulSection = mulSection;
-                                if(muls.length > 10){ // 优化查询速度
-                                    muls = StringUtil.shuffleArray(muls).slice(0, 10)
+                            }else{
+                                muls = StringUtil.getRandomMuls(currGameMuls, mulSection);
+                            }
+                            result.expectMulSection = mulSection;
+                            if(muls.length > 10){ // 优化查询速度
+                                muls = StringUtil.shuffleArray(muls).slice(0, 10)
+                            }
+
+                            result.muls = muls;
+                            log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
+
+                            gameDao.handCardsByMuls(config.gameId, muls, hitFree, hitBonus, result.winItem.winJackpot, (cardRow) =>{
+                                let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
+                                try{
+                                    isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                                    cardsHandle(config, result, user)
+                                    afterLottery(config, gameInfo, result, callback);
+                                }catch (e){
+                                    log.err(config.userId + '摇奖异常' + e)
+                                    callback(0)
                                 }
-
-                                result.muls = muls;
-                                log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
-
-                                gameDao.handCardsByMuls(config.gameId, muls, hitFree, hitBonus, result.winItem.winJackpot, (cardRow) =>{
-                                    let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
-                                    try{
-                                        isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, cardNums, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
-                                        cardsHandle(config, result, user)
-                                        afterLottery(config, gameInfo, result, callback);
-                                    }catch (e){
-                                        log.err(config.userId + '摇奖异常' + e)
-                                        callback(0)
-                                    }
-                                })
                             })
-                        }
-                    })
-                }
-            })
+                        })
+                    }
+                })
+            }
         })
     })
+}
+
+// 派发最小奖
+function selectMinMulCards(user, gameInfo, config, result,currGameMuls, minMulCards, hitFree, hitBonus, lastTimeRecord, callback){
+    try{
+        result.expectMulSection = [currGameMuls[0]];
+        result.muls = [currGameMuls[0]]; // 满足条件的倍数
+        log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify([currGameMuls[0]]))
+
+        isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, minMulCards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+        cardsHandle(config, result, user)
+        afterLottery(config, gameInfo, result, callback);
+    }catch (e){
+        log.err(config.userId + '摇奖异常' + e)
+        callback(0)
+    }
+
 }
 
 
@@ -641,7 +642,7 @@ function lastTimeRecord(config, user, free, openBox, nGameLines, freeCards, actu
     user.setLastTimeRecord({free: free, openBox: openBox, lastHandCard: result.nHandCards , actualMul: actualMul, expectMulSection: expectMulSection,  nWinLinesDetail: nWinLinesDetail });
 }
 
-function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, cardNums, newHandFlag, result,  nWinLinesDetail, nGameMagicCardIndex, config, lastTimeRecord){
+function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, newHandFlag, result,  nWinLinesDetail, nGameMagicCardIndex, config, lastTimeRecord){
     if(iconTypeBind && iconTypeBind.length > 0){
         // 如果开了配牌器
         log.info('配牌器开关已打开,配牌:' + JSON.stringify(iconTypeBind));
@@ -800,6 +801,8 @@ function specialPlayMethBefore(config, result, user){
             col4 = LABA.addSpecialCard(col4, 3, nHandCards, superCardList, superCardDetailList, sId, config);
             col5 = LABA.addSpecialCard(col5, 4, nHandCards, superCardList, superCardDetailList, sId, config);
             log.info('变图案后:' + nHandCards)
+        }else{
+            log.info('本局倍数为0，不变图案')
         }
         result.dictAnalyseResult["sr"] = superCardList;
         result.dictAnalyseResult["srd"] = superCardDetailList;

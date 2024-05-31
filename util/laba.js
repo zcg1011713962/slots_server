@@ -1192,8 +1192,8 @@ module.exports.addSpecialCard = function (arr, colNum, nHandCards, superCardList
         [[0, 1, 2, 3], [4, 5]],
     ];
 
-    let r1 = RandomNumBoth(0, 2);//出现几组
-    let card = RandomNumBoth(0, 10);//哪张牌 不要出百变
+    let r1 = RandomNumBoth(0, 3);//出现几组
+    let card = RandomNumBoth(0, 11);//哪张牌
     switch (r1) {
         case 0:
             break;
@@ -1989,11 +1989,11 @@ module.exports.AnalyseColumnSolt = function (
 
 
 module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTimeFlag, nBet){
-    const nHandCards = result.nHandCards;
+    let nHandCards = result.nHandCards;
     this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
 
-    log.info('start-----------------------------------')
-    this.handCardLog(nHandCards, 6, 6)
+    /*log.info('start-----------------------------------')
+    this.handCardLog(nHandCards, 6, 6)*/
 
     const superCardList = result.dictAnalyseResult["sr"];
     const superCardDetailList = result.dictAnalyseResult["srd"];
@@ -2052,10 +2052,15 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                         }
                     }
                     if (!isFind) {
-                        nHandCards[x] = -1;
+                        if(config.jackpotCard !== nHandCards[x]){ // jackpot 不消除
+                            nHandCards[x] = -1;
+                        }
                     }
                 }
             }
+            log.info('替换中奖手牌位置')
+            this.handCardLog(nHandCards, 6, 6);
+
             // console.log("typeList:" + JSON.stringify(typeList));
             //整合需要替换的卡牌
             for (let i in typeList) {
@@ -2063,7 +2068,7 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                     delete superCardList[i];
                     delete superCardDetailList[i];
                 } else if (typeList[i] === 2) {
-                    let newCard = config.cards[StringUtil.RandomNumBoth(0, 10)];
+                    let newCard = config.cards[StringUtil.RandomNumBoth(0, 4)];
                     superCardDetailList[i].r = newCard + 1;
                     superCardDetailList[i].bt = 1;
                     superCardDetailList[i].ls = 1;
@@ -2103,87 +2108,16 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                     superCardList[i][j] += 6 * dn;
                 }
             }
-
-            nHandCards.reverse();
-            if (!bFreeTimeFlag) {
-                for (let n_h_i in nHandCards) {
-                    if (nHandCards[n_h_i] === -1) {
-                        if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
-                            nHandCards[parseInt(n_h_i) + 6] = -1;
-                        } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
-                            nHandCards[parseInt(n_h_i) + 12] = -1;
-                        } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
-                            nHandCards[parseInt(n_h_i) + 18] = -1;
-                        } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
-                            nHandCards[parseInt(n_h_i) + 24] = -1;
-                        } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
-                            nHandCards[parseInt(n_h_i) + 30] = -1;
-                        } else {
-                            let cardIndex = StringUtil.RandomNumBoth(0, config.cards.length - 1);
-                            cardIndex = cardIndex === config.jackpotCard ? 0 : cardIndex;
-                            nHandCards[n_h_i] = config.cards[cardIndex] ;
-                        }
-                    }
-                }
-            } else {
-                for (let n_h_i in nHandCards) {
-                    if (nHandCards[n_h_i] === -1) {
-                        if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
-                            nHandCards[parseInt(n_h_i) + 6] = -1;
-                        } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
-                            nHandCards[parseInt(n_h_i) + 12] = -1;
-                        } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
-                            nHandCards[parseInt(n_h_i) + 18] = -1;
-                        } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
-                            nHandCards[parseInt(n_h_i) + 24] = -1;
-                        } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
-                            nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
-                            nHandCards[parseInt(n_h_i) + 30] = -1;
-                        } else {
-                            let cardIndex = StringUtil.RandomNumBoth(0, config.cards.length - 1);
-                            cardIndex = cardIndex === config.jackpotCard ? 0 : cardIndex;
-                            nHandCards[n_h_i] = config.cards[cardIndex] ;
-                        }
-                    }
-                }
-
-            }
             nHandCards.reverse();
 
-           /* result.dictAnalyseResult = {
-                code: 2,
-                nHandCards: [],    //# 结果手牌
-                nAllWinLines: [],  //# 中奖的线数的检索
-                nWinLinesDetail: [],  //# 中奖线数上中奖的牌的检索
-                nWinDetail: [],       //# 每条线中多少钱
-                nBet: 0,            // # 下注总额
-                win: 0,             //# 中奖总额
-                nWinCards: [],      //# 位数与手牌数相同，中奖的为True，没中奖的为False
-                nWinCards_top: [],
-                getOpenBox: {
-                    bFlag: false,
-                    nWinOpenBox: 0
-                },
-                getFreeTime: {
-                    bFlag: false,
-                    nFreeTime: 0,
-                    nIndex: 0
-                },
-                fMultiple: 1,
-                nBetTime: Number(new Date())
-            };*/
+            // 变图案
+            nHandCards = changleCard([...nHandCards], config)
+
+            nHandCards.reverse();
+
             result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
             this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
-            this.handCardLog(nHandCards, 6, 6)
+            /*this.handCardLog(nHandCards, 6, 6)*/
 
             new_hand_card = [];
             for (const i in nHandCards) {
@@ -2225,6 +2159,34 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
     result.superCardDetailList = superCardDetailList;
     result.superCardList = superCardList;
 
+}
+
+
+function changleCard(nHandCards, config){
+    for (let n_h_i in nHandCards) {
+        if (nHandCards[n_h_i] === -1) {
+            if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
+                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
+                nHandCards[parseInt(n_h_i) + 6] = -1;
+            } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
+                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
+                nHandCards[parseInt(n_h_i) + 12] = -1;
+            } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
+                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
+                nHandCards[parseInt(n_h_i) + 18] = -1;
+            } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
+                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
+                nHandCards[parseInt(n_h_i) + 24] = -1;
+            } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
+                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
+                nHandCards[parseInt(n_h_i) + 30] = -1;
+            } else {
+                let cardIndex = StringUtil.RandomNumBoth(0, 10); // 随机不出免费，百变，jackpot
+                nHandCards[n_h_i] = config.cards[cardIndex] ;
+            }
+        }
+    }
+    return nHandCards;
 }
 
 
