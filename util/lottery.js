@@ -202,7 +202,7 @@ function newhandProtectControl (userId, historyWinScore, totalRecharge, callback
                 newHandFlag = 0;
                 log.info('---------------------------------------' + userId + '本局为非新手用户,总充值:'+ totalRecharge + '剩余新手局数:' + length + '历史赢分:' + StringUtil.toFixed(historyWinScore, 2) + '---------------------------------------')
             }else{
-               log.info('---------------------------------------' + userId + '本局为新手用户,总充值:'+ totalRecharge + '非新手需要充值大于' + recharge + '或者新手局数不足，当前配置局数:'+ (newHandCurrCount + 1) + '剩余新手局数:' + (length -1) + '---------------------------------------')
+               log.info('---------------------------------------' + userId + '本局为新手用户,总充值:'+ totalRecharge + '非新手需要充值大于' + recharge + '或者新手局数不足，当前已使用新手局数:'+ (newHandCurrCount + 1) + '剩余新手局数:' + (length -1) + '---------------------------------------')
            }
             callback(newHandFlag, newbierPart)
         })
@@ -348,6 +348,10 @@ function Lottery(config, gameInfo, callback) {
             log.info(config.userId + '水位:' + config.nGamblingWaterLevelGold + '添加库存:' + addBalance +  '添加奖池:' + addJackpot + '当前库存:' + currBalance + '当前游戏奖池:' + gameJackpot);
         })
     })
+    const currRtp = config.totalBet ? StringUtil.rideNumbers(StringUtil.divNumbers(config.totalBackBet, config.totalBet, 2), 100, 2) :  0;
+    // 库存充足 获取当前玩家RTP 根据RTP出倍数区间 RTP = 总回报/总下注 * 100 %
+    log.info(config.userId + '总下注:' + config.totalBet + '总回报:' +  config.totalBackBet + '当前rtp:' + currRtp)
+
     const result= {
         nHandCards: [], // 图案
         winFlag: false, // 输赢标识
@@ -357,7 +361,7 @@ function Lottery(config, gameInfo, callback) {
             openBoxCardWin: 0,
             finVal: 0
         },
-        currRtp: 0, // 当前RTP
+        currRtp: currRtp, // 当前RTP
         expectMulSection: [], // 预期倍数区间
         dictAnalyseResult: analyse_result.initResult(config.nBetSum), // 返回给客户端结果
         resDictList: [],
@@ -372,11 +376,19 @@ function Lottery(config, gameInfo, callback) {
 
     let hitFree = false;
     let hitBonus = false;
+
+    let freeRatio = config.freeRatio;
+    let bonusRatio = config.bonusRatio;
+
     if(config.feeBeforeFreeCount < 3){
+        if(currRtp > 65){ // RTP过高降低特殊模式概率
+            freeRatio = freeRatio / 2;
+            bonusRatio = bonusRatio / 2;
+        }
         // 是否击中免费
-        hitFree = StringUtil.luckRandom(0, 100, config.freeRatio)
+        hitFree = StringUtil.luckRandom(0, 100, freeRatio)
         // 是否击中bonus玩法
-        hitBonus = StringUtil.luckRandom(0, 100, config.bonusRatio)
+        hitBonus = StringUtil.luckRandom(0, 100, bonusRatio)
         // 是否击中jackpot
         result.winItem.winJackpot = LABA.JackpotAnalyse(config.gameJackpot, config.nBetSum, config.jackpotRatio, config.jackpotLevelMoney, config.jackpotLevelProb, config.betJackpotLevelBet, config.betJackpotLevelIndex, config.jackpotPayLevel, config.iconTypeBind, config.jackpotCard, config.jackpotCardLowerLimit, config);
     }
@@ -402,8 +414,15 @@ function Lottery(config, gameInfo, callback) {
             log.info(config.userId + '是否击中免费:' + hitFree + '是否击中bonus玩法:' + hitBonus + '是否击中jackpot:' + result.winItem.winJackpot)
 
             // 足球免费模式限制倍率
-            if(gameInfo.gameId === 283 &&  config.feeBeforeFreeCount > 0 && user.getFreeMul() >= 4){
-                selectMinMulCards(user, gameInfo, config, result,currGameMuls, false, false, minMulCards, lastTimeRecord, 0, callback);
+            if(gameInfo.gameId === 283 &&  config.feeBeforeFreeCount > 0 && user.getFreeMul() >= 3){
+                if(config.newHandFlag){
+                    CacheUtil.getNewbierPartMulByUserId(config.userId).then(mulIndex => {})
+                }
+                let minMul = 0;
+                if(currRtp < 70 && config.feeBeforeFreeCount < 3){
+                    minMul = 1.2
+                }
+                selectMinMulCards(user, gameInfo, config, result,currGameMuls, false, false, minMulCards, lastTimeRecord, minMul, callback);
                 return;
             }
 
@@ -521,9 +540,6 @@ function Lottery(config, gameInfo, callback) {
                         // 库存不足 倍数内随机获取图案组合
                         selectMinMulCards(user, gameInfo, config, result,currGameMuls, false, false, minMulCards, lastTimeRecord, 1.2, callback);
                     }else{
-                        // 库存充足 获取当前玩家RTP 根据RTP出倍数区间 RTP = 总回报/总下注 * 100 %
-                        const currRtp = config.totalBet ? StringUtil.rideNumbers(StringUtil.divNumbers(config.totalBackBet, config.totalBet, 2), 100, 2) :  0;
-                        log.info(config.userId + '总下注:' + config.totalBet + '总回报:' +  config.totalBackBet + '当前rtp:' + currRtp)
                         // 根据预期RTP获取倍数权重
                         CacheUtil.getControlAwardByRtp(currRtp).then(weights =>{
                             log.info(config.userId + '当前RTP:' + currRtp + '根据RTP获取倍数权重数组' + JSON.stringify(weights))
@@ -1058,13 +1074,31 @@ function reduceBalanceGold(config, winscore, win , winJackpot, openBoxCardWin, c
         CacheUtil.DecrGamblingBalanceGold(StringUtil.addNumbers(win, openBoxCardWin)).then(r =>{
             // 减少奖池
             CacheUtil.DecrJackpot(winJackpot).then(r2 =>{
-                callback(1)
+                if(winscore > config.nBetSum){
+                    // 赢
+                    CacheUtil.playGameWinscore(config.userId, StringUtil.reduceNumbers(winscore, config.nBetSum)).then(r =>{
+                        callback(1)
+                    });
+                }else{
+                    if(config.feeBeforeFreeCount < 1){
+                        // 输
+                        CacheUtil.playGameWinscore(config.userId, StringUtil.reduceNumbers(config.nBetSum, winscore)).then(r =>{
+                            callback(1)
+                        });
+                    }else{
+                        callback(1)
+                    }
+                }
             })
         });
     } else {  // 输
-        CacheUtil.playGameWinscore(config.userId, -config.nBetSum).then(r =>{
+        if(config.feeBeforeFreeCount < 1){
+            CacheUtil.playGameWinscore(config.userId, -config.nBetSum).then(r =>{
+                callback(1)
+            });
+        }else{
             callback(1)
-        });
+        }
     }
 }
 

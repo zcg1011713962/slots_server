@@ -75,15 +75,6 @@ var GameInfo = function () {
                 var nowDate = new Date();
                 var minute = nowDate.getMinutes();
                 var second = nowDate.getSeconds();
-                if (second === 25) {
-                    self.saveGamblingBalanceGold();
-                    log.info("保存库存和奖池");
-                    redis_send_and_listen.send_msg("OnlineUserMsg", {
-                        server_id: gameConfig.serverId,
-                        online_num: self.getOnlinePlayerCount()
-                    });
-                }
-
                 //推送奖池给玩家
                 if (second % 10 === 0) {
                     CacheUtil.pushGameJackpot(self.userList);

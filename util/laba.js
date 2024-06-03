@@ -426,7 +426,7 @@ exports.getMulByWeight = function (mulArr, weights) {
     for (let i = 0; i < weights.length; i++) {
         currentWeight += weights[i];
         if (randomValue <= currentWeight) {
-            log.info('总权重:' + totalWeight + '随机出的权重:' + currentWeight + '倍数区间数组下标:' + i)
+            log.info('当前权重值:' + currentWeight + '随机出的权重值:' + randomValue + '倍数区间数组下标:' + i)
             return mulArr[i];
         }
     }
@@ -963,9 +963,8 @@ module.exports.grandWheelOpenBox = function (dictAnalyseResult, nHandCards, open
  * @param iconMul
  * @param config
  * @param result
- * @constructor
  */
-module.exports.HandCardsAnalyse_MixFootball = function (nHandCards ,nColumnNumber, nMagicCard, nLowerLimit, freeCards, nBet, iconMul, config, result){
+function HandCardsAnalyse_MixFootball(nHandCards ,nColumnNumber, nMagicCard, nLowerLimit, freeCards, nBet, iconMul, config, result){
     const nFreeCard = freeCards[0];
 
     let now_time = Number(new Date());
@@ -1121,7 +1120,9 @@ module.exports.HandCardsAnalyse_MixFootball = function (nHandCards ,nColumnNumbe
                 // console.log(game_odds[card][x.length]);
                 // console.log(GOLD_Single);
                 try {
-                    win_num = StringUtil.rideNumbers(iconMul[card][x.length - nLowerLimit] , nBet, 2);
+                    if(card > -1){
+                        win_num = StringUtil.rideNumbers(iconMul[card][x.length - nLowerLimit] , nBet, 2);
+                    }
                     log.info('线赢:' + win_num)
                 }catch (e){
                     console.log(nHandCards)
@@ -1990,7 +1991,7 @@ module.exports.AnalyseColumnSolt = function (
 
 module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTimeFlag, nBet){
     let nHandCards = result.nHandCards;
-    this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
+    HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
 
     /*log.info('start-----------------------------------')
     this.handCardLog(nHandCards, 6, 6)*/
@@ -2010,7 +2011,7 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
     var all_win = 0;
     var box_win = 0;
     while (true) {
-        if (result.dictAnalyseResult["win"] > 0) { // 中奖了
+        if (Number(result.dictAnalyseResult["win"]) > 0) { // 中奖了
             all_win = StringUtil.addNumbers(all_win, result.dictAnalyseResult["win"]);
             combo_num += 1;
             var win_lines_index = [];
@@ -2111,12 +2112,11 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
             nHandCards.reverse();
 
             // 变图案
-            nHandCards = changleCard([...nHandCards], config)
+            nHandCards = changleCard([...nHandCards], config, nBet, result, combo_num)
 
             nHandCards.reverse();
-
             result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
-            this.HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
+            HandCardsAnalyse_MixFootball(nHandCards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
             /*this.handCardLog(nHandCards, 6, 6)*/
 
             new_hand_card = [];
@@ -2142,12 +2142,12 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
             if (bFreeTimeFlag){
                 result.dictAnalyseResult["win"] = StringUtil.rideNumbers(result.dictAnalyseResult["win"], freeMul, 2);
                 log.info('足球免费模式下累积翻倍' + freeMul + '翻倍后赢:' + result.dictAnalyseResult["win"])
-                result.dictAnalyseResult["fMultiple"] = freeMul;
+                // 下一轮升级倍数
+                result.dictAnalyseResult["fMultiple"] = freeMul + 1;
             }
 
             result.dictAnalyseResult["sr"] = superCardList;
             result.dictAnalyseResult["srd"] = superCardDetailList;
-
             resDictList.push(JSON.parse(JSON.stringify(result.dictAnalyseResult)));
         } else {
             break;
@@ -2161,32 +2161,74 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
 
 }
 
+/**
+ *  根据连击数决定变什么图案
+ * @param nHandCards
+ * @param config
+ * @param nBet 每根线的下注
+ * @param result
+ * @param comboNum 连击数
+ * @returns {*[]}
+ */
+function changleCard(nHandCards, config, nBet, result, comboNum){
+    const cards = [...nHandCards]
+    let times = 0;
+    while(true){
+        times ++;
+        result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
+        HandCardsAnalyse_MixFootball(cards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
+        const bWin = Number(result.dictAnalyseResult["win"])
 
-function changleCard(nHandCards, config){
-    for (let n_h_i in nHandCards) {
-        if (nHandCards[n_h_i] === -1) {
-            if (parseInt(n_h_i) + 6 < 36 && nHandCards[parseInt(n_h_i) + 6] !== -1) {
-                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 6];
-                nHandCards[parseInt(n_h_i) + 6] = -1;
-            } else if (parseInt(n_h_i) + 12 < 36 && nHandCards[parseInt(n_h_i) + 12] !== -1) {
-                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 12];
-                nHandCards[parseInt(n_h_i) + 12] = -1;
-            } else if (parseInt(n_h_i) + 18 < 36 && nHandCards[parseInt(n_h_i) + 18] !== -1) {
-                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 18];
-                nHandCards[parseInt(n_h_i) + 18] = -1;
-            } else if (parseInt(n_h_i) + 24 < 36 && nHandCards[parseInt(n_h_i) + 24] !== -1) {
-                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 24];
-                nHandCards[parseInt(n_h_i) + 24] = -1;
-            } else if (parseInt(n_h_i) + 30 < 36 && nHandCards[parseInt(n_h_i) + 30] !== -1) {
-                nHandCards[n_h_i] = nHandCards[parseInt(n_h_i) + 30];
-                nHandCards[parseInt(n_h_i) + 30] = -1;
-            } else {
-                let cardIndex = StringUtil.RandomNumBoth(0, 10); // 随机不出免费，百变，jackpot
-                nHandCards[n_h_i] = config.cards[cardIndex] ;
+
+        for (let n_h_i in cards) {
+            if (cards[n_h_i] === -1) {
+                if (parseInt(n_h_i) + 6 < 36 && cards[parseInt(n_h_i) + 6] !== -1) {
+                    cards[n_h_i] = cards[parseInt(n_h_i) + 6];
+                    cards[parseInt(n_h_i) + 6] = -1;
+                } else if (parseInt(n_h_i) + 12 < 36 && cards[parseInt(n_h_i) + 12] !== -1) {
+                    cards[n_h_i] = cards[parseInt(n_h_i) + 12];
+                    cards[parseInt(n_h_i) + 12] = -1;
+                } else if (parseInt(n_h_i) + 18 < 36 && cards[parseInt(n_h_i) + 18] !== -1) {
+                    cards[n_h_i] = cards[parseInt(n_h_i) + 18];
+                    cards[parseInt(n_h_i) + 18] = -1;
+                } else if (parseInt(n_h_i) + 24 < 36 && cards[parseInt(n_h_i) + 24] !== -1) {
+                    cards[n_h_i] = cards[parseInt(n_h_i) + 24];
+                    cards[parseInt(n_h_i) + 24] = -1;
+                } else if (parseInt(n_h_i) + 30 < 36 && cards[parseInt(n_h_i) + 30] !== -1) {
+                    cards[n_h_i] = cards[parseInt(n_h_i) + 30];
+                    cards[parseInt(n_h_i) + 30] = -1;
+                } else {
+                    let min = 0;
+                    let max = 10; // 随机默认不出免费，百变，jackpot
+                    // 0-4是小倍图案
+                    if(result.currRtp > 70){
+                        max = 4;
+                    }
+
+                    const col = n_h_i % 6;
+                    // RTP太低，出百变提升中奖率
+                    if(result.currRtp < 30 && !config.newHandFlag && !cards.includes(config.nGameMagicCardIndex) &&  col !== 0){
+                        min = 12;
+                        max = 12;
+                    }
+                    let cardIndex = StringUtil.RandomNumBoth(min, max);
+                    cards[n_h_i] = config.cards[cardIndex] ;
+                }
             }
         }
+        result.dictAnalyseResult = analyse_result.initResult(config.nBetSum);
+        HandCardsAnalyse_MixFootball(cards, config.col_count, config.nGameMagicCardIndex, config.nGameLineWinLowerLimitCardNumber, config.freeCards ,nBet, config.icon_mul, config, result);
+        // 变牌次数超过30次或者变之前跟变之后赢的是一样的 返回
+        if(times > 30 || bWin === Number(result.dictAnalyseResult["win"])){
+            break;
+        }
+        if(comboNum >= 2 && Number(result.dictAnalyseResult["win"]) > 0){
+            log.info("足球连击数大于等于2且变出的图案为赢,重新变图案=======================================================================")
+            continue;
+        }
+        break;
     }
-    return nHandCards;
+    return cards;
 }
 
 
