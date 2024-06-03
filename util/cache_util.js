@@ -149,7 +149,7 @@ exports.initSysBalanceGold  = function () {
 
 // 获取用户库存
 exports.getGamblingBalanceGold  = function () {
-    return RedisUtil.get(gamblingBalanceGold);
+    return RedisUtil.get(gamblingBalanceGold).then( currBalance => StringUtil.toFixed(currBalance, 2));
 }
 
 exports.IncrGamblingBalanceGold  = function (increment) {
@@ -459,7 +459,7 @@ exports.pushGameJackpot  = function (userList){
                     minor_jackpot: minorJackpot,
                     mini_jackpot: miniJackpot,
                 }
-                log.info('推送奖池数据' + userId + 'jackpot' + JSON.stringify(jackpot) + 'user:' + userList[userId])
+                // log.info('推送奖池数据' + userId + 'jackpot' + JSON.stringify(jackpot) + 'user:' + userList[userId])
                 if(userList[userId]) userList[userId]._socket.emit("pushGamblingWinPool", jackpot);
             }
         })
@@ -1029,7 +1029,7 @@ exports.feeCost = function(gameId, userId, nBetSum, type, callback){
                     if(ret){
                         callback(1, beforeFreeCount, currFreeCount, goldCoin)
                     }else{
-                        callback(0, 0, 0)
+                        callback(0, 0, 0, 0)
                     }
                 });
             }else{
@@ -1039,11 +1039,11 @@ exports.feeCost = function(gameId, userId, nBetSum, type, callback){
                         if(ret){
                             callback(1, freeCount, freeCount, goldCoin)
                         }else{
-                            callback(0, 0, 0)
+                            callback(0, 0, 0, 0)
                         }
                     });
                 }else{
-                    callback(0, 0, 0)
+                    callback(0, 0, 0, 0)
                 }
             }
         })
