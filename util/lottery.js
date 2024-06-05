@@ -397,12 +397,13 @@ function Lottery(config, gameInfo, callback) {
     // 获取游戏所有倍数
     gameDao.handCardsMuls(config.gameId, (currGameMulsRow) =>{
         const currGameMuls = currGameMulsRow.map(it => Number(it.mul)).sort((a, b) => a - b);
-        log.info('获取游戏所有倍数')
+        // log.info('获取游戏所有倍数')
         gameDao.minMulCards(config.gameId, (minMulCardRow) =>{
-            log.info('获取游戏最小倍数对应的图案组合')
+            // log.info('获取游戏最小倍数对应的图案组合')
             const minMulCards = minMulCardRow.map(it => JSON.parse(it.card))
             const lastTimeRecord = user.getLastTimeRecord();
-            log.info(config.userId + '上局回顾,上局是否免费:' + lastTimeRecord.free + '上局是否击中特殊玩法' + lastTimeRecord.openBox + '上局实际倍数:' + lastTimeRecord.actualMul + '本局预期的倍数区间' + JSON.stringify(lastTimeRecord.expectMulSection) + '上局赢的线' + JSON.stringify(lastTimeRecord.nWinLinesDetail));
+            log.info(config.userId + '上局回顾,上局是否免费:' + lastTimeRecord.free + '上局是否击中特殊玩法' + lastTimeRecord.openBox + '上局实际倍数:' + lastTimeRecord.actualMul + '本局预期的倍数区间' + JSON.stringify(lastTimeRecord.expectMulSection));
+            log.info(config.userId + '上局普通连线赢:' + lastTimeRecord.win);
             if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) && lastTimeRecord.openBox){ // 大象、公牛、挖矿 特殊玩法内不叠加特殊玩法
                 hitBonus = false;
             }else if((config.gameId === 263 || config.gameId === 285 || config.gameId === 286 ) &&  hitBonus){ // 大象、公牛、挖矿、击中特殊玩法就是进入免费模式
@@ -479,7 +480,7 @@ function Lottery(config, gameInfo, callback) {
                                 }
                             }
                         }
-                        isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                        isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards,  config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result)
                         cardsHandle(config, result, gameInfo.userList[config.userId])
                         afterLottery(config, gameInfo, result, callback);
                     }catch (e){
@@ -519,11 +520,11 @@ function Lottery(config, gameInfo, callback) {
                         muls = StringUtil.shuffleArray(muls).slice(0, 10)
                     }
                     result.muls = muls;
-                    log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
+                    log.info(config.userId + '新手,满足条件的倍数数组:' + JSON.stringify(muls))
                     gameDao.handCardsByMuls(config.gameId, muls , hitFree, hitBonus, result.winItem.winJackpot,(cardRow) =>{
                         const cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
                         try{
-                            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result)
                             cardsHandle(config, result, gameInfo.userList[config.userId])
                             afterLottery(config, gameInfo, result, callback);
                         }catch (e){
@@ -571,12 +572,12 @@ function Lottery(config, gameInfo, callback) {
                             }
 
                             result.muls = muls;
-                            log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify(muls))
+                            log.info(config.userId + '非新手RTP控制,满足条件的倍数数组:' + JSON.stringify(muls))
 
                             gameDao.handCardsByMuls(config.gameId, muls, hitFree, hitBonus, result.winItem.winJackpot, (cardRow) =>{
                                 let cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
                                 try{
-                                    isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+                                    isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard, config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result)
                                     cardsHandle(config, result, user)
                                     afterLottery(config, gameInfo, result, callback);
                                 }catch (e){
@@ -600,10 +601,10 @@ function selectMinMulCards(user, gameInfo, config, result,currGameMuls, hitFree,
         const muls = [minArr[index]];
         result.expectMulSection = muls;
         result.muls = muls; // 满足条件的倍数
-        log.info(config.userId + '满足条件的倍数数组:' + JSON.stringify([minArr[index]]))
+        log.info(config.userId + '派发小奖,满足条件的倍数数组:' + JSON.stringify([minArr[index]]))
         gameDao.handCardsByMuls(config.gameId, muls , hitFree, hitBonus, result.winItem.winJackpot,(cardRow) =>{
             const cards = cardRow ? cardRow.map(it => JSON.parse(it.card)) : [];
-            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result, lastTimeRecord.nWinLinesDetail, config.nGameMagicCardIndex, config, lastTimeRecord)
+            isWinHandle(config.userId, hitFree, hitBonus, result.winItem.winJackpot, cards, config.freeCards, config.jackpotCard, config.blankCard, config.openBoxCard,  config.iconTypeBind, minMulCards, config.gameId, config.newHandFlag, result)
             cardsHandle(config, result, user)
             afterLottery(config, gameInfo, result, callback);
         })
@@ -628,7 +629,7 @@ function afterLottery(config, gameInfo, result, callback){
         // 正常结算
         let winscore = StringUtil.addTNumbers(win, winJackpot, openBoxCardWin)
         // 本局记录,是否需要特殊结算
-        lastTimeRecord(config, gameInfo.userList[config.userId], dictAnalyseResult.getFreeTime['bFlag'], dictAnalyseResult.getOpenBox['bFlag'] , config.nGameLines, config.freeCards, dictAnalyseResult.nMultiple, dictAnalyseResult.nWinLinesDetail, user.freeCount, result)
+        lastTimeRecord(config, gameInfo.userList[config.userId], dictAnalyseResult, user.freeCount, result)
 
         reduceBalanceGold(config, winscore, win, winJackpot, openBoxCardWin, async (r) => {
             // 本局获得免费次数
@@ -658,13 +659,18 @@ function afterLottery(config, gameInfo, result, callback){
 
 }
 
-function lastTimeRecord(config, user, free, openBox, nGameLines, freeCards, actualMul, nWinLinesDetail, freeCount, result){
-    actualMul = StringUtil.divNumbers(actualMul , nGameLines.length, 1);
+function lastTimeRecord(config, user, dictAnalyseResult, freeCount, result){
+    const nGameLines = config.nGameLines;
+    const free = dictAnalyseResult.getFreeTime['bFlag'];
+    const openBox = dictAnalyseResult.getOpenBox['bFlag'];
+
+    const actualMul = StringUtil.divNumbers(dictAnalyseResult.nMultiple , nGameLines.length, 1);
+    const win = dictAnalyseResult['win'];
     const expectMulSection = result.expectMulSection.map(element => element - actualMul);
-    user.setLastTimeRecord({free: free, openBox: openBox, lastHandCard: result.nHandCards , actualMul: actualMul, expectMulSection: expectMulSection,  nWinLinesDetail: nWinLinesDetail });
+    user.setLastTimeRecord({free: free, openBox: openBox, lastHandCard: result.nHandCards , actualMul: actualMul, expectMulSection: expectMulSection, win: win });
 }
 
-function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, newHandFlag, result,  nWinLinesDetail, nGameMagicCardIndex, config, lastTimeRecord){
+function isWinHandle(userId, hitFree, hitBonus, winJackpot, cards, freeCards, jackpotCard, blankCard, openBoxCard, iconTypeBind, minMulCards, gameId, newHandFlag, result){
     if(iconTypeBind && iconTypeBind.length > 0){
         // 如果开了配牌器
         log.info('配牌器开关已打开,配牌:' + JSON.stringify(iconTypeBind));

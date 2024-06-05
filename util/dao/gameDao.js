@@ -344,7 +344,7 @@ exports.handCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot,
     const sql = 'select card from  la_ba.cards_'+ gameId +' where mul in (?) and `free` = ? and jackpot = ? and openBox = ?';
 
     let valuse = [];
-    valuse.push(muls)
+    valuse.push(muls.length > 0 ? muls : [0])
     valuse.push(hitFree ? 1 : 0)
     valuse.push(winJackpot > 0 ? 1 : 0)
     valuse.push(hitBonus ? 1 : 0)

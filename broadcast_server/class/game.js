@@ -3,16 +3,17 @@ const gameConfig = require("./../config/gameConfig");
 const TypeEnum = require('../../util/enum/type')
 const CacheUtil = require('../../util/cache_util')
 const ErrorCode = require("../../util/ErrorCode");
-const http_bc = require("../../util/http_broadcast");
 const StringUtil = require('../../util/string_util')
 
 const GameInfo = function () {
     let _gameinfo = "";
     const Game = function () {
-        this.serverId = gameConfig.serverId;
         //初始化游戏
         this.init = function () {
             console.log('####init game!####');
+            this.serverId = gameConfig.serverId;
+            this.gameName = gameConfig.gameName;
+            this.gameId = gameConfig.gameId;
             //初始化用户列表
             this.userList = {};
             this.messageList = [];
@@ -78,18 +79,20 @@ const GameInfo = function () {
                                 }
                             }]
                             // 全服发送跑马灯
-                            self._io.sockets.emit("noticeMsg", noticeMsg[0]);
+                            if(self._io){
+                                self._io.sockets.emit("noticeMsg", noticeMsg[0]);
+                                console.log(noticeMsg[0])
+                            }
                             count ++;
                             if(count >= 2 && Date.now() - lastTime < 60000){
                                 sendFlag = false;
                             }
-                            console.log(noticeMsg[0])
+
                         }
                     }
                     if(Date.now() - lastTime > 60000){
                         lastTime = Date.now();
                         sendFlag = true;
-                        console.log('一分钟重置')
                     }
                 });
             })
@@ -116,7 +119,6 @@ const GameInfo = function () {
 
         this.disconnectAllUser = function () {
             this._io.sockets.disconnect();
-            log.info("服务器开启维护，连接广播服务的玩家已经全部离线");
         };
         //运行初始化
         this.init();

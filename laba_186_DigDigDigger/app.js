@@ -10,6 +10,7 @@ const Urls = require("../util/config/url_config");
 const Lottery = require("../util/lottery");
 const CacheUtil = require('../util/cache_util');
 const SampleUtil = require("../util/sample_util");
+const miniGame = require('../util/mini_game');
 
 const Csocket = Cio(Urls.hall_url);
 
@@ -181,6 +182,15 @@ io.on('connection', function (socket) {
         const nBetSum = Number(data.nBetList[0]);
         // 执行摇奖
         Lottery.doLottery(socket, nBetSum, gameInfo);
+    });
+
+
+    // 猜花色
+    socket.on('guessColor', async function (data) {
+        const d = JSON.parse(data);
+        const color = Number(d.color);
+        // 执行摇奖
+        await miniGame.guessColor(socket, color, gameInfo);
     });
 
 

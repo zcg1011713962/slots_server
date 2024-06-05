@@ -2231,7 +2231,19 @@ function changleCard(nHandCards, config, nBet, result, comboNum){
     return cards;
 }
 
+const categories = {
+    '黑色': ['黑桃', '黑梅花'],
+    '红色': ['红心', '红方块']
+};
 
+const mainCategories = Object.keys(categories);
+
+// 随机选择花色
+exports.getRandomColor = function () {
+    const allSuits = mainCategories.flatMap(category => categories[category]);
+    const randomIndex = Math.floor(Math.random() * allSuits.length);
+    return allSuits[randomIndex];
+}
 
 
 function isSubset(subset, array) {

@@ -987,34 +987,37 @@ exports.addDiamond = function(userId, diamondToAdd, type, callback){
 }
 
 // 给用户减金币
-exports.reduceGoldCoin = function(userId, coinsToReduce, type, callback){
-    this.getGoldCoin(userId).then(goldCoin =>{
-        if(goldCoin >= coinsToReduce){
-            dao.reduceAccountScore(userId, coinsToReduce, ret =>{
-                if (!ret) {
-                    log.err(userId + '减少金币失败,数量:'+ coinsToReduce + '类型:' +  type);
-                    callback(0)
-                    return;
-                }
-                RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', -coinsToReduce, (err, val) => {
-                    if (err) {
-                        log.err(userId + '减少金币' + err);
-                        callback(0)
-                    } else {
-                        const currGoldCoin = StringUtil.toFixed(val, 2);
-                        log.info(userId + '减少金币:' + coinsToReduce + '类型:' + type +'当前金币:' + currGoldCoin);
-                        const beforeGoldCoins = goldCoin;
-                        // 金币记录
-                        dao.scoreChangeLog(userId, beforeGoldCoins, -coinsToReduce,  currGoldCoin, type, 1)
-                        callback(1, beforeGoldCoins, currGoldCoin)
+exports.reduceGoldCoin = function(userId, coinsToReduce, type){
+    const self = this;
+    return new Promise((resolve, reject) => {
+        self.getGoldCoin(userId).then(beforeGoldCoins => {
+            if (beforeGoldCoins >= coinsToReduce) {
+                dao.reduceAccountScore(userId, coinsToReduce, ret => {
+                    if (!ret) {
+                        log.err(userId + '减少金币失败,数量:' + coinsToReduce + '类型:' + type);
+                        reject(0)
+                        return;
                     }
-                });
-            })
-        }else{
-            callback(0)
-        }
+                    RedisUtil.client.hincrbyfloat(`${userInfoKey}:${userId}`, 'score', -coinsToReduce, (err, val) => {
+                        if (err) {
+                            log.err(userId + '减少金币' + err);
+                            reject(0)
+                            return;
+                        }
+                        const currGoldCoin = StringUtil.toFixed(val, 2);
+                        log.info(userId + '减少金币:' + coinsToReduce + '类型:' + type + '当前金币:' + currGoldCoin);
+                        // 金币记录
+                        dao.scoreChangeLog(userId, beforeGoldCoins, -coinsToReduce, currGoldCoin, type, 1)
+                        resolve(currGoldCoin)
+                    });
+                })
+            } else {
+                self.getGoldCoin(userId).then(currGoldCoin =>{
+                    resolve(currGoldCoin)
+                })
+            }
+        })
     })
-
 }
 
 // 扣费用
@@ -1022,27 +1025,25 @@ exports.feeCost = function(gameId, userId, nBetSum, type, callback){
     const self = this;
     self.getFreeCount(userId).then(freeCount =>{
         freeCount = freeCount == null ? 0 : parseInt(freeCount)
-        self.getGoldCoin(userId).then(goldCoin =>{
-            if(freeCount > 0){
+        self.getGoldCoin(userId).then(async goldCoin => {
+            if (freeCount > 0) {
                 // 扣免费次数
-                self.reduceFreeCount(gameId, userId, 1, (ret, beforeFreeCount, currFreeCount) =>{
-                    if(ret){
+                self.reduceFreeCount(gameId, userId, 1, (ret, beforeFreeCount, currFreeCount) => {
+                    if (ret) {
                         callback(1, beforeFreeCount, currFreeCount, goldCoin)
-                    }else{
+                    } else {
                         callback(0, 0, 0, 0)
                     }
                 });
-            }else{
+            } else {
                 // 扣金币
-                if(goldCoin > 0 && goldCoin >= nBetSum){
-                    self.reduceGoldCoin(userId, nBetSum, type,(ret) =>{
-                        if(ret){
-                            callback(1, freeCount, freeCount, goldCoin)
-                        }else{
-                            callback(0, 0, 0, 0)
-                        }
-                    });
-                }else{
+                if (goldCoin > 0 && goldCoin >= nBetSum) {
+                    await self.reduceGoldCoin(userId, nBetSum, type).then(currGoldCoin => {
+                        callback(1, freeCount, freeCount, goldCoin)
+                    }).catch(e => {
+                        callback(0, 0, 0, 0)
+                    })
+                } else {
                     callback(0, 0, 0, 0)
                 }
             }
