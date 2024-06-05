@@ -218,7 +218,7 @@ CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.gameId).then(config => {
     const server = http.listen(app.get('port'), function () {
         log.info('start at port:' + server.address().port);
     });
-    SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
+    // SampleUtil.init(gameConfig.gameName, gameConfig.gameId);
     log.info("拉霸_" + gameConfig.gameId + "_" + gameConfig.gameName + "服务器启动");
 })
 

@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const gameInfo = require('./class/game').getInstand;
 const gameConfig = require('./config/gameConfig');
 const Urls = require("../util/config/url_config");
+const CacheUtil = require("../util/cache_util");
 
 const Csocket = Cio(Urls.hall_url);
 app.use(bodyParser.urlencoded({extended: false}));
@@ -34,19 +35,18 @@ app.post('/addMessage', function (req, response) {
    response.end();
 });
 
+CacheUtil.getGameConfig(gameInfo.gameName, gameInfo.gameId).then(config => {
+    gameInfo.setIo(io, Csocket);
 
-gameInfo.setIo(io, Csocket);
+    io.on('connection', function (socket) {
+        socket.emit('connected', 'connect bc server');
+    });
+    app.set('port', process.env.PORT || config.port);
+    const server = http.listen(app.get('port'), function () {
+        log.info('start at port:' + server.address().port);
+        log.info(gameConfig.gameName + "服务器启动");
+    });
+})
 
-io.on('connection', function (socket) {
-    socket.emit('connected', 'connect bc server');
-});
 
-
-app.set('port', process.env.PORT || 23001);
-
-const server = http.listen(app.get('port'), function () {
-    log.info('start at port:' + server.address().port);
-});
-
-log.info(gameConfig.gameName + "服务器启动");
 

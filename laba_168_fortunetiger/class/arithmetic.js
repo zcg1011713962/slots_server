@@ -72,10 +72,6 @@ arithmetic = function (_idx) {
         }
     }
 
-    this.init = function () {
-        //初始化水位和库存
-        this.initGamblingGame();
-    }
 
     this.initGamblingGame = function () {
         const self = this;

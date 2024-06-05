@@ -1,3 +1,11 @@
+const ColorType = {
+    blackSpade: 0, // 黑桃
+    blackPlub: 1,  // 黑梅花
+    redHeart: 2, // 红心
+    redDiamond: 3 // 红方块
+};
+
+
 const LangType = {
     English: 0, // 英语
     Portugal: 1,    // 葡萄牙
@@ -137,6 +145,7 @@ const ScoreChangeType = {
     withdrawGoodsBuy: 23,  // 解锁提现商品
     exchange: 24,  // 银币兑换金币
     monthCardBuy: 25, //月卡购买
+    guessColor: 26, //游戏猜花色
 };
 
 
@@ -252,6 +261,7 @@ const RankType = {
     bigwin: 2 // 大富豪排行
 };
 
+
 module.exports = {
     GoodsType,
     CurrencyType,
@@ -280,5 +290,6 @@ module.exports = {
     RankType,
     SilverCoinChangeType,
     CountryType,
-    DotNameEnum
+    DotNameEnum,
+    ColorType
 };

@@ -28,6 +28,10 @@ const http_bc = require("../../util/http_broadcast");
 var GameInfo = function () {
     var _gameinfo = "";
     const Game = function () {
+        this.serverId = gameConfig.serverId;
+        this.gameName = gameConfig.gameName;
+        this.gameId = gameConfig.gameId;
+
         //初始化游戏
         this.init = function () {
             //初始化用户列表
@@ -969,8 +973,8 @@ var GameInfo = function () {
                                                 "orderStatus": 1,
                                                 "orderNo": "77158f8f87b444b2ac7ec5b3db9baecc",
                                                 "merOrderNo": orderId,
-                                                "amount": 0,
-                                                "currency": "BRL",
+                                                "amount": amount,
+                                                "currency": currencyType,
                                                 "createTime": 0,
                                                 "updateTime": 0,
                                                 "sign": "",
@@ -4743,7 +4747,7 @@ var GameInfo = function () {
         }
 
         // 银行转入金币
-        this.hallGoldIntoBank = function (socket, gold, callback) {
+        this.hallGoldIntoBank = async function (socket, gold, callback) {
             const userId = socket.userId;
             if (!gold || isNaN(gold) || gold < 0) {
                 callback(0, '输入有误')
@@ -4756,11 +4760,7 @@ var GameInfo = function () {
                 return;
             }
             // 减少金币
-            CacheUtil.reduceGoldCoin(userId, Number(gold), TypeEnum.ScoreChangeType.hallGoldIntoBank, (code, beforeGoldCoins, currGoldCoin) => {
-                if (!code) {
-                    callback(0, '账户余额不足')
-                    return;
-                }
+            await CacheUtil.reduceGoldCoin(userId, Number(gold), TypeEnum.ScoreChangeType.hallGoldIntoBank).then(currGoldCoin =>{
                 // 增加银行积分
                 this.userList[socket.userId].bankScore = StringUtil.addNumbers(this.userList[socket.userId].bankScore, gold);
                 const result = {
@@ -4768,6 +4768,8 @@ var GameInfo = function () {
                     gold: currGoldCoin
                 }
                 callback(1, ErrorCode.SUCCESS.msg, result)
+            }).catch(e =>{
+                callback(0, '账户余额不足')
             })
         }
 
@@ -5038,10 +5040,10 @@ var GameInfo = function () {
                                     if (code && bankPwd && Number(bankPwd) === Number(pwd)) {  // 校验银行密码成功
                                         const orderId = StringUtil.generateOrderId();  // 生成提现订单
                                         const callbackUrl =  urlConfig.hallUrl + '/withdrawCallBack?userId=' + userId + '&orderId=' + orderId;
-                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, ifsc, bankName , callbackUrl, orderId, 0, currencyType, ret => {
+                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, callbackUrl, orderId, 0, currencyType, async ret => {
                                             if (ret) {
-                                                const withdrawGlodCoin = StringUtil.rideNumbers( withdrawAmount, withdrawProportion, 2);
-                                                CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply,ret =>{
+                                                const withdrawGlodCoin = StringUtil.rideNumbers(withdrawAmount, withdrawProportion, 2);
+                                                await CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply).then(currGoldCoin =>{
                                                     dao.AddUsedWithdrawLimit(userId, withdrawAmount, ret =>{
                                                         // 获取玩家当前金币
                                                         CacheUtil.getGoldCoin(userId).then(goldCoin =>{

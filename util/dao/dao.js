@@ -1362,36 +1362,6 @@ exports.checkTotalCharge = function (userId, callback) {
     });
 };
 
-// 查询提现额度
-exports.searchWithdrawLimit = function (userId, callback) {
-    const sql = 'select withdrawLimit from userinfo_imp where userId = ?';
-    let values = [];
-
-    values.push(userId);
-    pool.getConnection(function (err, connection) {
-        if(err){
-            log.err('获取数据库连接失败' + err);
-            connection.release();
-            callback(0);
-            return;
-        }
-        connection.query({sql: sql, values: values}, function (err, rows) {
-            connection.release();
-            if (err) {
-                console.log("查询提现额度");
-                console.log(err);
-                callback(0);
-            } else {
-                if (rows && rows.length > 0) {
-                    callback(1, rows[0]);
-                } else {
-                    callback(0);
-                }
-            }
-        });
-        values = [];
-    });
-};
 
 // 查询银币数量
 exports.searchSilverCoin = function (userId, callback) {
@@ -3649,7 +3619,7 @@ exports.searchWithdrawRecordByOrdeId = function searchWithdrawRecordByOrdeId(use
 
 // 查询提现总额度
 exports.searchTotalWithdraw = function (userId, callback) {
-    const sql = "SELECT SUM(withdrawLimit) AS totalWithdrawLimit FROM ( select sum(promoteWithdrawLimit) withdrawLimit from pay_order po where userId = ? UNION ALL select sum(promoteWithdrawLimit) withdrawLimit from bet_record po where userId = ?) AS withdrawLimit";
+    const sql = "SELECT SUM(withdrawLimit) AS totalWithdrawLimit FROM ( select sum(promoteWithdrawLimit) withdrawLimit from pay_order po where status = 2 and userId = ? UNION ALL select sum(promoteWithdrawLimit) withdrawLimit from bet_record po where userId = ?) AS withdrawLimit";
     let values = [];
     values.push(userId);
     values.push(userId);
