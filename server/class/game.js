@@ -1061,10 +1061,11 @@ var GameInfo = function () {
                                         self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
                                             // 回调socket
                                             if (serverId === 0) { // 大厅
-                                                self.sendHallShopCallBack(userId, shopType, serverId, msg, data)
+                                                self.sendHallShopCallBack(userId, shopType, serverId, 1, msg, data)
                                             } else if (serverId !== 0) { // 游戏内
-                                                self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
+                                                self.sendGameShopCallBack(userId, shopType, serverId, 1, msg, data)
                                             }
+
                                             if(Number(shopType) === TypeEnum.ShopType.firstRecharge){
                                                 // 充值成功打点
                                                 self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.first_recharge_arrive,code =>{
@@ -1127,9 +1128,9 @@ var GameInfo = function () {
                                     self.shoppingCallBack(userId, orderId, orderStatus, (code, msg, data, shopType, service, serverId) => {
                                         // 回调socket
                                         if (serverId === 0) { // 大厅
-                                            self.sendHallShopCallBack(userId, shopType, serverId, msg, data)
+                                            self.sendHallShopCallBack(userId, shopType, serverId, 1, msg, data)
                                         } else if (serverId !== 0) { // 游戏内
-                                            self.sendGameShopCallBack(userId, shopType, serverId, msg, data)
+                                            self.sendGameShopCallBack(userId, shopType, serverId, 1, msg, data)
                                         }
                                         // 充值成功打点
                                         self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,TypeEnum.DotNameEnum.recharge_arrive, code =>{

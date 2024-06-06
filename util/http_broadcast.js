@@ -1,7 +1,6 @@
 const httpUtil = require('../util/http_util');
 const url_config = require('./config/url_config');
 const CacheUtil = require("./cache_util");
-const {getInstand: gameInfo} = require("../broadcast_server/class/game");
 const log = require('../CClass/class/loginfo').getInstand
 
 module.exports.sendNoticeMsg = function (noticeMsg) {

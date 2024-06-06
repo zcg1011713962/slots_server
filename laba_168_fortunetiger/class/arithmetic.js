@@ -93,7 +93,6 @@ arithmetic = function (_idx) {
             console.log("大奖幸运概率:" + self.nGamblingBigWinLuck);
         });
     }
-    this.init();
 }
 
 module.exports = arithmetic;
