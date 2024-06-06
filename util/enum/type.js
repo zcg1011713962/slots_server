@@ -2,7 +2,9 @@ const ColorType = {
     blackSpade: 0, // 黑桃
     blackPlub: 1,  // 黑梅花
     redHeart: 2, // 红心
-    redDiamond: 3 // 红方块
+    redDiamond: 3, // 红方块
+    red: 4, // 红
+    black: 5 // 黑
 };
 
 
