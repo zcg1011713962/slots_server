@@ -79,6 +79,7 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
                                             socket.emit('lotteryResult', {ResultCode: TypeEnum.LotteryResultCode.popDiscount});
                                             return;
                                         }
+                                        beforeLottery(userId, gameInfo, config);
                                         // 进行摇奖
                                         Lottery(config, gameInfo, (result) =>{
                                             try {
@@ -112,6 +113,15 @@ exports.doLottery  = function doLottery(socket, nBetSum, gameInfo){
             })
         })
     });
+}
+
+
+function beforeLottery(userId, gameInfo, config){
+    const user = gameInfo.userList[userId];
+    if(config.gameId === 286){
+        // 初始化猜花色赢奖
+        user.initBWin();
+    }
 }
 
 function recordBetFlow(config, dao){

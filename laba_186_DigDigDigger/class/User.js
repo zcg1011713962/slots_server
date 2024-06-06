@@ -9,6 +9,7 @@ User = function(userInfo,_socket){
 	this._islogin = false;     // 是否登录过
 	this.freeSymbolList = [];
 	this.lastTimeRecord = {free: false, openBox: false, lastHandCard: [], actualMul: 0, expectMulSection: [], win: 0 }; // 上局记录
+	this.bWin = 0; // 猜花色赢
 
 	this.init = function (_userInfo, _socket) {
 		this._userId = _userInfo.userid;
@@ -60,6 +61,18 @@ User = function(userInfo,_socket){
 
 	this.setFreeSymbolList = function (m) {
 		this.freeSymbolList = m;
+	};
+
+	this.initBWin = function () {
+		this.bWin = 0;
+	};
+
+	this.setBWin = function (win) {
+		this.bWin = win;
+	};
+
+	this.getBWin = function () {
+		return this.bWin;
 	};
 
 	this.init(userInfo,_socket);
