@@ -15,7 +15,7 @@ exports.guessColor  = async function (socket, color, gameInfo) {
     let relColorName = '';
     let relColor = -1;
 
-    if(num < 10 && color !== TypeEnum.ColorType.red && color !== TypeEnum.ColorType.black){
+    if(num < 5 && color !== TypeEnum.ColorType.red && color !== TypeEnum.ColorType.black){
         // 中四倍奖励
         user.setBWin(StringUtil.rideNumbers(4 , bWin, 2));
         bWin =  StringUtil.reduceNumbers((4 * bWin), bWin);
@@ -23,7 +23,7 @@ exports.guessColor  = async function (socket, color, gameInfo) {
         relColor = color;
         relColorName = getColorName (relColor);
         await CacheUtil.addGoldCoin(userId, bWin, TypeEnum.ScoreChangeType.guessColor)
-    }else if(num < 100 && color === TypeEnum.ColorType.red ||  num < 6 && color === TypeEnum.ColorType.black){
+    }else if(num < 20 && color === TypeEnum.ColorType.red ||  num < 6 && color === TypeEnum.ColorType.black){
         user.setBWin(StringUtil.rideNumbers(2 , bWin, 2));
         bWin =  StringUtil.reduceNumbers((2 * bWin), bWin);
         console.log('猜花色赢:' + user.getBWin())

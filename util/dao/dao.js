@@ -3890,6 +3890,7 @@ function getEmail(typeParam, toUserId, connection) {
             promises.push(new Promise((resolve, reject) => {
                 // 执行查询
                 connection.query(query, (err, results) => {
+                    log.err('查询邮件异常' + err)
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -3905,6 +3906,7 @@ function getEmail(typeParam, toUserId, connection) {
                 resolve(mergedResults);
             })
             .catch(err => {
+                log.err('查询邮件异常' + err)
                 connection.release();
                 reject(err)
             });
