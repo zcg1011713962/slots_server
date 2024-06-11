@@ -213,7 +213,7 @@ var GameInfo = function () {
                                                 log.info(userInfo.Id + '登录大厅成功，打点失败')
                                             }
                                         })
-                                        log.info(userInfo.Id + '登录大厅结果' + JSON.stringify(result));
+                                        // log.info(userInfo.Id + '登录大厅结果' + JSON.stringify(result));
                                         socket.emit('loginResult', result);
                                         callback(null, result);
                                     }
@@ -1336,10 +1336,10 @@ var GameInfo = function () {
                             const withdrawProportion = config.withdraw_proportion; // 提现金币比例
                             const glodCoin = StringUtil.rideNumbers(withdrawProportion, withdrawAmount, 2);
                             // 插入提现失败表
-                            dao.withdrawFailedRecord(userId, glodCoin, newUserId =>{
+                            dao.withdrawFailedRecord(userId, orderId, glodCoin, newUserId =>{
                                 if(newUserId){
                                     // 发邮件提醒
-                                    this.saveEmail(LanguageItem.withdraw_failed_title, TypeEnum.EmailType.withdrawFailed, userId, 0, LanguageItem.withdraw_apply_content, newUserId, TypeEnum.GoodsType.gold)
+                                    this.saveEmail(LanguageItem.withdraw_failed_title, TypeEnum.EmailType.withdrawFailed, userId, 0, LanguageItem.withdraw_failed_content, newUserId, TypeEnum.GoodsType.gold)
                                 }
                             });
                             dao.ReduceUsedWithdrawLimit(userId, withdrawAmount, ret =>{
@@ -3145,7 +3145,7 @@ var GameInfo = function () {
                                                 rewardDiamondVal: rewardDiamondVal
                                             })
                                             --len;
-                                            log.info(userId + '获取月卡持续奖励邮件银币:' + rewardDiamondVal)
+                                            log.info(userId + '领取月卡持续奖励邮件银币:' + rewardDiamondVal)
                                             self.getEmailAwardCallBack(len, socket, awards);
                                         })
                                     })
@@ -3153,6 +3153,19 @@ var GameInfo = function () {
                                     awards.push({id: id, type: type, rewardGoldVal: 0, rewardDiamondVal: 0})
                                     --len;
                                     this.getEmailAwardCallBack(len, socket, awards);
+                                }
+                            })
+                            break;
+                        case TypeEnum.EmailType.withdrawFailed:
+                            dao.searchEmailWithdrawFailed(otherId, row =>{
+                                const goldVal = row.goldVal;
+                                const status = row.status;
+                                if (status === 0) {
+                                    dao.updateWithdrawFailedStatus(otherId, async r => {
+                                        await CacheUtil.addGoldCoin(userId, goldVal, TypeEnum.ScoreChangeType.withdrawApplyBack).then(async (currGoldCoin) => {
+                                            log.info(userId + '领取提现失败退金币:' + goldVal)
+                                        });
+                                    })
                                 }
                             })
                             break;
@@ -5041,7 +5054,7 @@ var GameInfo = function () {
                                     if (code && bankPwd && Number(bankPwd) === Number(pwd)) {  // 校验银行密码成功
                                         const orderId = StringUtil.generateOrderId();  // 生成提现订单
                                         const callbackUrl =  urlConfig.hallUrl + '/withdrawCallBack?userId=' + userId + '&orderId=' + orderId;
-                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, callbackUrl, orderId, 0, currencyType, async ret => {
+                                        dao.withdrawApplyRecord(userId, withdrawAmount, account, bankType, name, cpf, ifsc, bankName, callbackUrl, orderId, 0, currencyType, async ret => {
                                             if (ret) {
                                                 const withdrawGlodCoin = StringUtil.rideNumbers(withdrawAmount, withdrawProportion, 2);
                                                 await CacheUtil.reduceGoldCoin(userId, withdrawGlodCoin, TypeEnum.ScoreChangeType.withdrawApply).then(currGoldCoin =>{

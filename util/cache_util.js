@@ -662,7 +662,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
     try {
         const key = protocol + '_' + userId;
         const setResult = await RedisUtil.setNxAsync(key, new Date().getTime());
-        log.info('协议调用:' + key + '状态:' + setResult)
+        // log.info('协议调用:' + key + '状态:' + setResult)
         if (setResult === 1) {
             // 如果设置成功，则设置过期时间
             await RedisUtil.expire(key, userSocketProtocolExpireSecond);
@@ -676,7 +676,7 @@ exports.recordUserProtocol  = async function (userId, protocol){
 // 删除用户调用协议记录
 exports.delUserProtocol  = async function (userId, protocol){
     const key = protocol + '_' + userId;
-    log.info('协议释放:' + key)
+    // log.info('协议释放:' + key)
     await RedisUtil.del(key);
 }
 
@@ -1382,7 +1382,7 @@ exports.getRankAwardConfig = function(callback){
             const coinRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(coinRankWeight, totalWeight, 2), 2)
             const rechargeRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(rechargeRankWeight, totalWeight, 2), 2)
             const bigWinRankJackpot= StringUtil.rideNumbers(rankJackpot, StringUtil.divNumbers(bigWinWeight, totalWeight, 2), 2)
-            log.info('排行榜配置: 排行榜奖池:'+ rankJackpot+' 金币排行奖池:' + coinRankJackpot + '充值排行奖池:' + rechargeRankJackpot +'大富豪排行奖池:' + bigWinRankJackpot + '前几名奖池占比:' + rankRatioList)
+            // log.info('排行榜配置: 排行榜奖池:'+ rankJackpot+' 金币排行奖池:' + coinRankJackpot + '充值排行奖池:' + rechargeRankJackpot +'大富豪排行奖池:' + bigWinRankJackpot + '前几名奖池占比:' + rankRatioList)
             callback(coinRankJackpot, rechargeRankJackpot, bigWinRankJackpot, rankRatioList)
         })
     })

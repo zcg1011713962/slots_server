@@ -1091,10 +1091,10 @@ io.on('connection', function (socket) {
         const userId = socket.userId;
         const ret = await CacheUtil.recordUserProtocol(userId, "withdraw");
         if (ret) {
+            log.info(userId + '发起提现申请');
             gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(ErrorCode.WITHDRAW_SUCCESS.code === code){
-                    log.info(userId + '发起提现申请成功');
                     gameInfo.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null , TypeEnum.DotNameEnum.withdraw,code =>{
                         if(code){
                             log.info(userId + '提现提交订单打点成功')
@@ -1111,7 +1111,7 @@ io.on('connection', function (socket) {
         }
     })
 
-    // 提现记录查询
+    // 查询提现记录
     socket.on('withdrawRecord', function () {
         const userId = socket.userId;
         gameInfo.withdrawRecord(userId, (rows) => {
@@ -1416,6 +1416,7 @@ io.on('connection', function (socket) {
 
     // 领取邮件奖励
     socket.on("getEmailAward", function (data) {
+        log.info(socket.userId + '领取邮件奖励')
         if (gameInfo.IsPlayerOnline(socket.userId)) {
             gameInfo.getEmailAward(socket, data);
         }

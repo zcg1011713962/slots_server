@@ -3709,10 +3709,11 @@ exports.ReduceUsedWithdrawLimit = function (userId, usedWithdrawLimit, callback)
 }
 
 // 提现失败记录
-exports.withdrawFailedRecord = function (userId, glodCoin, callback) {
-    const sql = "INSERT INTO gameaccount.withdraw_failed (userId, goldVal) values (?,?)";
+exports.withdrawFailedRecord = function (userId, orderId, glodCoin, callback) {
+    const sql = "INSERT INTO gameaccount.withdraw_failed (userId, orderId, goldVal) values (?,?,?)";
     let values = [];
     values.push(userId);
+    values.push(orderId);
     values.push(glodCoin);
 
     pool.getConnection(function (err, connection) {
@@ -3878,10 +3879,10 @@ function getEmail(typeParam, toUserId, connection) {
                     query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.val rewardGoldVal, 0 rewardDiamondVal, r.status, r.type rankType, r.\`rank\`, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.rank_award r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 3 AND e.to_userid = ${toUserId}`;
                     break;
                 case '4':
-                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, 0 rewardGoldVal, 0 rewardDiamondVal, 0 status, 0 rankType, 0 \`rank\`, r.orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_success r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 4 AND e.to_userid = ${toUserId}`;
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, 0 rewardGoldVal, 0 rewardDiamondVal, r.status, 0 rankType, 0 \`rank\`, r.orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_success r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 4 AND e.to_userid = ${toUserId}`;
                     break;
                 case '5':
-                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.goldVal rewardGoldVal, 0 rewardDiamondVal, 0 status, 0 rankType, 0 \`rank\`, null orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_failed r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 5 AND e.to_userid = ${toUserId}`;
+                    query = `SELECT e.id, e.isRead, e.title_id titleId, e.content_id contentId, e.type, e.createTime, e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.goldVal rewardGoldVal, 0 rewardDiamondVal, r.status, 0 rankType, 0 \`rank\`, r.orderId FROM gameaccount.email e LEFT JOIN gameaccount.withdraw_failed r ON e.otherId = r.id LEFT JOIN gameaccount.newuseraccounts n ON e.from_userid = n.Id WHERE e.type = 5 AND e.to_userid = ${toUserId}`;
                     break;
                 default:
                     break;
@@ -3890,8 +3891,10 @@ function getEmail(typeParam, toUserId, connection) {
             promises.push(new Promise((resolve, reject) => {
                 // 执行查询
                 connection.query(query, (err, results) => {
-                    log.err('查询邮件异常' + err)
-                    if (err) reject(err);
+                    if (err){
+                        log.err('查询邮件异常' + err)
+                        reject(err);
+                    }
                     resolve(results);
                 });
             }));
@@ -4145,6 +4148,33 @@ exports.updateEmailRankAwardStatus = function (ids, callback) {
 }
 
 
+// 更新提现失败奖励领取状态
+exports.updateWithdrawFailedStatus = function (ids, callback) {
+    const sql = "update withdraw_failed set status = 1 where id in (?) ";
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('更新排行榜奖励领取状态' + err);
+            connection.release();
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: [ids]}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('更新提现失败奖励领取状态' + err);
+                callback(0);
+            } else {
+                if(rows){
+                    callback(1);
+                }else{
+                    callback(0);
+                }
+            }
+        });
+    });
+}
+
+
 // 更新首充奖励奖励领取状态
 exports.updateFirstRechargeAwardStatus = function (ids, callback) {
     const sql = "update first_recharge_award set status = 1 where id in (?) ";
@@ -4245,6 +4275,37 @@ exports.searchEmailRankAward = function (otherId, callback) {
             connection.release();
             if (err) {
                 log.err('查询首充持续奖励类型邮件' + err);
+                callback(0);
+            } else {
+                if(rows && rows.length > 0){
+                    callback(rows[0]);
+                }else{
+                    callback(0);
+                }
+            }
+
+        });
+        values = [];
+    });
+}
+
+
+// 查询提现失败类型邮件
+exports.searchEmailWithdrawFailed = function (otherId, callback) {
+    const sql = "select r.`goldVal` goldVal , r.status  from gameaccount.email e left join gameaccount.withdraw_failed  r on e.otherId = r.id where e.`type` = 5  and e.otherId = ?";
+    let values = [];
+    values.push(otherId);
+
+    pool.getConnection(function (err, connection) {
+        if(err){
+            log.err('查询提现失败类型邮件' + err);
+            callback(0);
+            return;
+        }
+        connection.query({sql: sql, values: values}, function (err, rows) {
+            connection.release();
+            if (err) {
+                log.err('查询提现失败类型邮件' + err);
                 callback(0);
             } else {
                 if(rows && rows.length > 0){

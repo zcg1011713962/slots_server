@@ -46,7 +46,7 @@ exports.initDayJob = function (){
 
                 const currentDate = new Date();
                 const currentDateTimestamp = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
-                log.info('金币排行榜结束日期:' + coinRankEndTimestamp + '充值排行榜结束日期:' + rechargeRankEndTimestamp + '大富豪排行榜结束日期:' + bigWinEndTimestamp + '当前日期:' + currentDateTimestamp)
+                // log.info('金币排行榜结束日期:' + coinRankEndTimestamp + '充值排行榜结束日期:' + rechargeRankEndTimestamp + '大富豪排行榜结束日期:' + bigWinEndTimestamp + '当前日期:' + currentDateTimestamp)
 
                 CacheUtil.getRankConfig().then(config =>{
                     CacheUtil.getRankAwardConfig((coinRankJackpot, rechargeRankJackpot, bigWinRankJackpot, rankRatioList) =>{
