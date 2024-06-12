@@ -4153,7 +4153,7 @@ exports.updateWithdrawFailedStatus = function (ids, callback) {
     const sql = "update withdraw_failed set status = 1 where id in (?) ";
     pool.getConnection(function (err, connection) {
         if(err){
-            log.err('更新排行榜奖励领取状态' + err);
+            log.err('更新提现失败奖励领取状态' + err);
             connection.release();
             callback(0);
             return;

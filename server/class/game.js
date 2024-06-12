@@ -3995,7 +3995,7 @@ var GameInfo = function () {
                         buy_discount_ratio: firstRechargeGoods.buy_discount_ratio,
                         buy_icon_type: firstRechargeGoods.buy_icon_type,
                         currTime: new Date().getTime(),
-                        endTime: endTime
+                        endTime: new Date().getTime()
                     }])
                 })
             })
