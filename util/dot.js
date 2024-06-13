@@ -38,7 +38,7 @@ exports.bxDotRequest  = async function (gps, adid, apptoken, key, money) {
 
 
 // 打点请求
-exports.ydDotRequest  = async function (gps, adid, apptoken, eventName, money) {
+exports.ydDotRequest  = async function (gps, adid, afid, apptoken, eventName, money) {
     try {
         const commonCache = await CacheUtil.getCommonCache();
         const url = commonCache.dotUrls.url;
@@ -52,6 +52,7 @@ exports.ydDotRequest  = async function (gps, adid, apptoken, eventName, money) {
             eventName: eventName,
             amount: `${money}`,
             environment: environment,
+            afid: afid
         };
 
         const headers = {

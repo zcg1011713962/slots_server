@@ -206,7 +206,7 @@ var GameInfo = function () {
                                     if (ret1 && ret2) {
                                         result.Obj.token = token;
                                         result.win_pool = gameJackpot;
-                                        self.dot(userInfo.Id, null, null, null, null, null , TypeEnum.DotNameEnum.total_login_success, ret =>{
+                                        self.dot(userInfo.Id, null, null, null, null, null, null , TypeEnum.DotNameEnum.total_login_success, ret =>{
                                             if(ret){
                                                 log.info(userInfo.Id + '登录大厅成功，打点成功')
                                             }else{
@@ -1011,10 +1011,10 @@ var GameInfo = function () {
                     const orderType = row.payType;
                     const productId = row.productId;
                     if(!ret){
-                        // 查询一次失败后， 定时10秒再查
+                        // 查询一次失败后， 定时30秒再查
                         const interval = setInterval(() => {
                             self.searchOrderUpdate(userId, orderId, payType, (code) =>{
-                                const timeOut = elapsedTime >= 60 * 60;
+                                const timeOut = elapsedTime >= 30 * 60;
                                 if (code || timeOut) {
                                     // 条件满足时清除定时器
                                     clearInterval(interval);
@@ -1029,8 +1029,8 @@ var GameInfo = function () {
                                     }
                                 }
                             })
-                            elapsedTime += 10; // 每次操作后增加10秒
-                        }, 10000); // 间隔10秒执行一次
+                            elapsedTime += 30; // 每次操作后增加30秒
+                        }, 30000); // 间隔30秒执行一次
                     }else{
                         CacheUtil.delOrderCache(userId, productId, amount, orderType).then(r =>{})
                         log.info(userId + '订单完成orderId:' + orderId);
@@ -1068,7 +1068,7 @@ var GameInfo = function () {
 
                                             if(Number(shopType) === TypeEnum.ShopType.firstRecharge){
                                                 // 充值成功打点
-                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.first_recharge_arrive,code =>{
+                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null, amount , TypeEnum.DotNameEnum.first_recharge_arrive,code =>{
                                                     if(code){
                                                         log.info(userId + '首充打点成功,充值金额:' + amount)
                                                     }else{
@@ -1077,7 +1077,7 @@ var GameInfo = function () {
                                                 })
                                             }else{
                                                 // 充值成功打点
-                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount , TypeEnum.DotNameEnum.recharge_arrive,code =>{
+                                                self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null, amount , TypeEnum.DotNameEnum.recharge_arrive,code =>{
                                                     if(code){
                                                         log.info(userId + '复充打点成功,充值金额:' + amount)
                                                     }else{
@@ -1133,7 +1133,7 @@ var GameInfo = function () {
                                             self.sendGameShopCallBack(userId, shopType, serverId, 1, msg, data)
                                         }
                                         // 充值成功打点
-                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, amount ,TypeEnum.DotNameEnum.recharge_arrive, code =>{
+                                        self.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null, amount ,TypeEnum.DotNameEnum.recharge_arrive, code =>{
                                             if(code){
                                                 log.info(userId + '充值成功打点成功,充值金额:' + amount)
                                             }else{
@@ -1323,7 +1323,7 @@ var GameInfo = function () {
                             self.saveEmail(LanguageItem.withdraw_apply_title, TypeEnum.EmailType.withdraw, userId, 0, LanguageItem.withdraw_apply_content, -1, -1)
                             log.info(userId + '提现成功，跑马灯通知')
                         })
-                        self.dot(userId, null,  null, null, null, withdrawAmount , TypeEnum.DotNameEnum.withdraw_arrive,code =>{
+                        self.dot(userId, null,  null, null, null, null, withdrawAmount , TypeEnum.DotNameEnum.withdraw_arrive,code =>{
                             if(code){
                                 log.info(userId + '提现成功打点成功')
                             }else{
@@ -3229,18 +3229,18 @@ var GameInfo = function () {
 
 
         // 存储打点数据
-        this.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
-            dao.saveDot(userId, adid, gps, apptoken, gameInfo, callback);
+        this.saveDot = function (userId, adid, afid, gps, apptoken, gameInfo, callback) {
+            dao.saveDot(userId, adid, afid, gps, apptoken, gameInfo, callback);
         }
 
         // 存储打点数据
-        this.updateDot = function (userId, adid, gps, apptoken, callback) {
-            dao.updateDot(userId, adid, gps, apptoken, callback);
+        this.updateDot = function (userId, adid, afid, gps, apptoken, callback) {
+            dao.updateDot(userId, adid, afid, gps, apptoken, callback);
         }
 
 
         // 客户端打点
-        this.dot = function (userId, key, gps, adid, apptoken, money, dotName, callback) {
+        this.dot = function (userId, key, gps, adid, afid, apptoken, money, dotName, callback) {
             CacheUtil.paySwitch().then(ok =>{
                 if(ok){
                     dao.searchDotByUserId(userId, row =>{
@@ -3248,6 +3248,8 @@ var GameInfo = function () {
                             money=  !!money ? money : null;
                             gps =  !!gps ? gps : row.gps;
                             adid = !!adid  ? adid : row.adid;
+                            afid = !!afid  ? afid : row.afid;
+
                             apptoken = !!apptoken ? apptoken : row.apptoken;
 
                             CacheUtil.getCommonCache().then(commonCache =>{
@@ -3274,7 +3276,7 @@ var GameInfo = function () {
                                     if(dotName === null){
                                         return;
                                     }
-                                    dot.ydDotRequest(gps, adid, apptoken, dotName, money).then(data =>{
+                                    dot.ydDotRequest(gps, adid, afid, apptoken, dotName, money).then(data =>{
                                         try{
                                             const d = JSON.parse(data);
                                             if(d.code === 0){

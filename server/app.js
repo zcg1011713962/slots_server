@@ -412,13 +412,13 @@ app.get('/Shopping', async function (req, res) {
             if(code){
                 log.info(userId + '购买商品下单成功');
                 if(TypeEnum.ShopType.firstRecharge === Number(shopType)){
-                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.first_recharge, ret =>{
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null,null, null , TypeEnum.DotNameEnum.first_recharge, ret =>{
                         if(ret){
                             log.info(userId + '首充提交订单打点成功');
                         }
                     })
                 }else{
-                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge, null, null, null, null, null , TypeEnum.DotNameEnum.recharge, ret =>{
                         if(ret){
                             log.info(userId + '复充提交订单打点成功');
                         }
@@ -522,18 +522,19 @@ app.get('/bankrupt', function (req, res) {
 app.get('/dotBase', function (req, res) {
     const userId = req.query.userId;
     const adid = req.query.adid  === undefined ? '': req.query.adid ;
+    const afid = req.query.afid  === undefined ? '': req.query.afid ;
     const gps = req.query.gps === undefined ? '' : req.query.gps;
     const apptoken = req.query.apptoken  === undefined ? '' : req.query.apptoken ;
-    log.info(userId + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken)
+    log.info(userId + '打点基础数据 adid:' + adid + 'afid' + afid + ' gps:' + gps + ' apptoken:' + apptoken)
     if(!userId){
         return;
     }
-    gameInfo.saveDot(userId, adid, gps, apptoken, gameInfo, row =>{
+    gameInfo.saveDot(userId, adid, afid, gps, apptoken, gameInfo, row =>{
         if (row) {
-            log.info(userId + '保存打点基础数据成功' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+            log.info(userId + '保存打点基础数据成功' + '打点基础数据 adid:' + adid + 'afid' + afid + ' gps:' + gps + ' apptoken:' + apptoken )
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
         }else{
-            log.info(userId + '保存打点基础数据失败' + '打点基础数据 adid:' + adid + ' gps:' + gps + ' apptoken:' + apptoken )
+            log.info(userId + '保存打点基础数据失败' + '打点基础数据 adid:' + adid + 'afid' + afid + ' gps:' + gps + ' apptoken:' + apptoken )
         }
     });
 });
@@ -545,12 +546,13 @@ app.get('/dot', function (req, res) {
     const gps = req.query.gps;
     const adid = req.query.adid;
     const apptoken = req.query.apptoken;
+    const afid = req.query.afid;
 
     log.info(userId + '客户端打点 key:' + key + 'gps:' + gps + 'adid:' + adid + 'apptoken:' + apptoken)
     if(!userId || !key){
         return;
     }
-    gameInfo.dot(userId, key,  gps, adid, apptoken, null , '', code =>{
+    gameInfo.dot(userId, key,  gps, adid, afid, apptoken, null , '', code =>{
         if(code){
             log.info(userId + '客户端打点 key:' + key + '成功')
             res.send({code: ErrorCode.SUCCESS.code, msg: ErrorCode.SUCCESS.msg});
@@ -620,7 +622,7 @@ io.on('connection', function (socket) {
                         socket.emit('loginResult', {code: ErrorCode.LOGIN_FAILED_INFO_ERROR.code, msg: ErrorCode.LOGIN_FAILED_INFO_ERROR.msg});
                         return;
                     }
-                    gameInfo.dot(data.Id, null, null, null, null, null , TypeEnum.DotNameEnum.login, ret =>{
+                    gameInfo.dot(data.Id, null, null, null, null, null, null , TypeEnum.DotNameEnum.login, ret =>{
                         if(ret){
                             log.info(data.Id + '登录打点成功')
                         }else{
@@ -666,7 +668,7 @@ io.on('connection', function (socket) {
             //让这个用户进入该游戏
             const encoin = ServerInfo.getServerEnterCoinByProt(userId);
             CacheUtil.getUserInfo(userId, (ret, user) =>{
-                gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.login_game,code =>{
+                gameInfo.dot(userId, null,  null, null, null, null, null , TypeEnum.DotNameEnum.login_game,code =>{
                     if(code){
                         log.info(userId + '进入游戏打点成功')
                     }else{
@@ -1067,7 +1069,7 @@ io.on('connection', function (socket) {
         if(gameInfo.IsPlayerOnline(userId)){
             gameInfo.bindBankCard(userId, d.account, d.bankType, d.name, d.cpf, d.ifsc , d.bankName, d.phone,d.email,(code, msg) => {
                 if (code) {
-                    gameInfo.dot(userId, null,  null, null, null, null , TypeEnum.DotNameEnum.bind_card,code =>{
+                    gameInfo.dot(userId, null,  null, null, null, null, null , TypeEnum.DotNameEnum.bind_card,code =>{
                         if(code){
                             log.info(userId + '提现提交订单打点成功')
                         }else{
@@ -1095,7 +1097,7 @@ io.on('connection', function (socket) {
             gameInfo.withdrawApply(userId, d.pwd, d.amount, d.account, d.currencyType, (code, msg, data) => {
                 CacheUtil.delUserProtocol(userId, "withdraw")
                 if(ErrorCode.WITHDRAW_SUCCESS.code === code){
-                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null, null, null, null , TypeEnum.DotNameEnum.withdraw,code =>{
+                    gameInfo.dot(userId, TypeEnum.dotEnum.recharge_arrive,  null,  null, null, null, null , TypeEnum.DotNameEnum.withdraw,code =>{
                         if(code){
                             log.info(userId + '提现提交订单打点成功')
                         }else{

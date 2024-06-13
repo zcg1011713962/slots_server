@@ -2985,7 +2985,7 @@ exports.searchAccountByDeviceCode = function (deviceCode, callback) {
 
 
 // 保存打点基础数据
-exports.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
+exports.saveDot = function (userId, adid, afid, gps, apptoken, gameInfo, callback) {
     pool.getConnection(function (err, connection) {
         // 先查询 userId 是否存在
         connection.query('SELECT userId FROM dot_base_data WHERE userId = ?', [userId], function (error, results, fields) {
@@ -2996,7 +2996,7 @@ exports.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
             }
             // 如果 userId 存在，则更新数据
             if (results.length > 0) {
-                connection.query('UPDATE dot_base_data SET adid = ?, gps = ?, apptoken = ? WHERE userId = ?', [adid, gps, apptoken, userId], function (error, results, fields) {
+                connection.query('UPDATE dot_base_data SET adid = ?, afid= ?, gps = ?, apptoken = ? WHERE userId = ?', [adid, afid, gps, apptoken, userId], function (error, results, fields) {
                     connection.release();
                     if (error) {
                         callback(0)
@@ -3007,14 +3007,14 @@ exports.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
                 });
             } else {
                 // 如果 userId 不存在，则插入新数据
-                connection.query('INSERT INTO dot_base_data (userId, adid, gps, apptoken) VALUES (?, ?, ?, ?)', [userId, adid, gps, apptoken], function (error, results, fields) {
+                connection.query('INSERT INTO dot_base_data (userId, adid, afid, gps, apptoken) VALUES (?, ?, ?, ?, ?)', [userId, adid, afid, gps, apptoken], function (error, results, fields) {
                     connection.release();
                     if (error) {
                         callback(0)
                         return;
                     }
                     // 客户端第一次进来保存打点认为是注册，注册时候没有adid等，在这里打点
-                    gameInfo.dot(userId, null, null, null, null, null , TypeEnum.DotNameEnum.register, ret =>{
+                    gameInfo.dot(userId, null, null, null, null, null, null , TypeEnum.DotNameEnum.register, ret =>{
                         if(ret){
                             log.info(userId + '游客注册打点成功');
                         }else{
@@ -3032,10 +3032,11 @@ exports.saveDot = function (userId, adid, gps, apptoken, gameInfo, callback) {
 
 
 // 更新打点基础数据
-exports.updateDot = function (userId, adid, gps, apptoken, callback) {
-    const sql = "update dot_base_data set adid = ? ,gps = ?,apptoken = ? where userId = ?";
+exports.updateDot = function (userId, adid, afid, gps, apptoken, callback) {
+    const sql = "update dot_base_data set adid = ? , afid = ?, gps = ?,apptoken = ? where userId = ?";
     let values = [];
     values.push(adid);
+    values.push(afid);
     values.push(gps);
     values.push(apptoken);
     values.push(userId);
@@ -3067,7 +3068,7 @@ exports.updateDot = function (userId, adid, gps, apptoken, callback) {
 
 // 通过用户ID 查询打点基础数据
 exports.searchDotByUserId = function (userId, callback) {
-    const sql = "select userId, adid, gps, apptoken from dot_base_data where userId = ?";
+    const sql = "select userId, adid, afid, gps, apptoken from dot_base_data where userId = ?";
     let values = [];
     values.push(userId);
 
