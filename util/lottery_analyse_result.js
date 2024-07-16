@@ -84,7 +84,7 @@ exports.winNoticeMsg  = function (config, user, dictAnalyseResult, result){
                     }
                 }]
                 http_bc.sendNoticeMsg(noticeMsg);
-                log.info(config.userId + '中奖大于配置，侧边栏展示')
+                log.info(config.userId + '中奖大于配置，侧边栏展示，赢分:' + result.winItem.finVal)
             }
         });
     }catch (e){

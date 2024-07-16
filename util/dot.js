@@ -43,7 +43,14 @@ exports.ydDotRequest  = async function (gps, adid, afid, apptoken, eventName, mo
         const commonCache = await CacheUtil.getCommonCache();
         const url = commonCache.dotUrls.url;
         const environment = commonCache.dotUrls.environment;
-        const token = commonCache.dotUrls.token;
+        const tokens = commonCache.dotUrls.tokens;
+        const tokenItem = tokens.filter(t => apptoken === t.app_token)
+
+        if(!tokenItem || !tokenItem[0]){
+            log.err('打点请求找不到token配置');
+            return;
+        }
+        const token = tokenItem[0].token;
 
         const body = {
             app_token: token,

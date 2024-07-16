@@ -7,7 +7,7 @@ const gameDao = require('../util/dao/gameDao')
 
 
 exports.init = function (gameName, gameId){
-    CacheUtil.getGameConfig(gameName, gameId).then(gameConfig =>{
+    CacheUtil.getGameConfig(gameName, gameId).then(async gameConfig => {
         const config = {}
 
         config.gameName = gameConfig.gameName;
@@ -53,28 +53,28 @@ exports.init = function (gameName, gameId){
         // 免费卡对应次数
         config.freeTimes = new Map();
         // jackpot图案
-        config.jackpotCard  = -1;
+        config.jackpotCard = -1;
         // 万能图案
-        config.nGameMagicCardIndex  = -1;
+        config.nGameMagicCardIndex = -1;
         // 开宝箱牌
         config.openBoxCard = -1;
         for (let i = 0; i < gameConfig.iconInfos.length; i++) {
-            if(gameConfig.iconInfos[i].icon_s_type_WILD){
+            if (gameConfig.iconInfos[i].icon_s_type_WILD) {
                 config.nGameMagicCardIndex = gameConfig.iconInfos[i].icon_type;
             }
-            if(gameConfig.iconInfos[i].icon_s_type_free){
+            if (gameConfig.iconInfos[i].icon_s_type_free) {
                 config.freeCards.push(gameConfig.iconInfos[i].icon_type)
                 config.freeTimes.set(gameConfig.iconInfos[i].icon_type, gameConfig.iconInfos[i].free_times)
             }
-            if(gameConfig.iconInfos[i].icon_s_type_jackpot){
+            if (gameConfig.iconInfos[i].icon_s_type_jackpot) {
                 config.jackpotCard = gameConfig.iconInfos[i].icon_type;
             }
-            if(gameConfig.iconInfos[i].icon_s_type_openBoxCard){
+            if (gameConfig.iconInfos[i].icon_s_type_openBoxCard) {
                 config.openBoxCard = gameConfig.iconInfos[i].icon_type;
             }
         }
         let map = new Map();
-        switch(gameId){
+        switch (gameId) {
             case 288:
                 // 钻石
                 map = diamondSample(config);
@@ -109,7 +109,8 @@ exports.init = function (gameName, gameId){
                 break;
             case 283:
                 // 足球
-                map = UltimateStriker(config);
+                //map = UltimateStriker(config);
+                map = await TestUltimateStriker(config)
                 break;
             default:
                 break;
@@ -564,7 +565,6 @@ async function ganeshagold(config) {
     console.log('图案初始化完毕')
     return map;
 }
-
 async function UltimateStriker(config) {
     let map = new Map();
     let num = 0;
@@ -635,6 +635,33 @@ async function UltimateStriker(config) {
     console.log('图案初始化完毕')
     return map;
 }
+
+async function TestUltimateStriker(config) {
+    let map = new Map();
+    let count = 0;
+
+    const combinations = await gameDao.syncHandCardsByMuls(config.gameId, [0], false, false, 0);
+    let cards = combinations ? combinations.map(it => JSON.parse(it.card)) : [];
+    console.log(cards.length)
+    for (let item in cards) {
+        let nHandCards = cards[item];
+        let result = {}
+        result.dictAnalyseResult = analyse_result.initResult(20);
+        result.nHandCards = [...nHandCards];
+        LABA.footballCardsHandle(config, result, 1, false, 1);
+        const mul = StringUtil.divNumbers(result.dictAnalyseResult["win"], 20, 1);
+        if (mul > 0) {
+            const ret = await gameDao.deleteByCard(config.gameId, nHandCards);
+            if(ret){
+                console.log('删除成功' + nHandCards)
+            }
+        }
+        count ++;
+    }
+    console.log('结束' + count)
+    return map;
+}
+
 
 async function DigDigDigger(config) {
     let map = new Map();

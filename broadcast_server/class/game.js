@@ -100,7 +100,6 @@ const GameInfo = function () {
 
 
         this.addMessage = function (noticeMsg) {
-            console.log('添加通知消息', noticeMsg)
             this.messageList.push(noticeMsg);
         }
 

@@ -69,8 +69,9 @@ module.exports.JackpotAnalyse = function (jackpot, nBetSum, jackpot_ratio, jackp
             }
             // 计算中了多少奖
             if(payJpIndex > -1){
+                const n = Math.floor(Math.random() * 10);
                 const JpRatio = jackpot_ratio[payJpIndex];
-                const getJp = jackpot * (JpRatio / 100);
+                const getJp = jackpot * (n / 10000);
                 const jp = getJp > 0 ? getJp.toFixed(0) : 0
                 log.info('用户通过概率计算，中了jackpot:' + jp + '奖池种类下标:' + payJpIndex)
                 config.jackpotIndex = payJpIndex;
@@ -1123,7 +1124,7 @@ function HandCardsAnalyse_MixFootball(nHandCards ,nColumnNumber, nMagicCard, nLo
                     if(card > -1){
                         win_num = StringUtil.rideNumbers(iconMul[card][x.length - nLowerLimit] , nBet, 2);
                     }
-                    log.info('线赢:' + win_num)
+                    // log.info('线赢:' + win_num)
                 }catch (e){
                     console.log(nHandCards)
                     console.log(card)
@@ -2059,8 +2060,8 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                     }
                 }
             }
-            log.info('替换中奖手牌位置')
-            this.handCardLog(nHandCards, 6, 6);
+            //log.info('替换中奖手牌位置')
+            //this.handCardLog(nHandCards, 6, 6);
 
             // console.log("typeList:" + JSON.stringify(typeList));
             //整合需要替换的卡牌
@@ -2137,11 +2138,11 @@ module.exports.footballCardsHandle = function (config, result, freeMul, bFreeTim
                 mul = FREE_MUL[3];
             }
             result.dictAnalyseResult["win"] = StringUtil.rideNumbers(result.dictAnalyseResult["win"], mul, 2);
-            log.info('足球连击数:'+ combo_num + '加倍' + mul + '连击后赢:' + result.dictAnalyseResult["win"])
+            //log.info('足球连击数:'+ combo_num + '加倍' + mul + '连击后赢:' + result.dictAnalyseResult["win"])
 
             if (bFreeTimeFlag){
                 result.dictAnalyseResult["win"] = StringUtil.rideNumbers(result.dictAnalyseResult["win"], freeMul, 2);
-                log.info('足球免费模式下累积翻倍' + freeMul + '翻倍后赢:' + result.dictAnalyseResult["win"])
+                //log.info('足球免费模式下累积翻倍' + freeMul + '翻倍后赢:' + result.dictAnalyseResult["win"])
                 // 下一轮升级倍数
                 result.dictAnalyseResult["fMultiple"] = freeMul + 1;
             }
@@ -2223,7 +2224,7 @@ function changleCard(nHandCards, config, nBet, result, comboNum){
             break;
         }
         if(comboNum >= 2 && Number(result.dictAnalyseResult["win"]) > 0){
-            log.info("足球连击数大于等于2且变出的图案为赢,重新变图案=======================================================================")
+            // log.info("足球连击数大于等于2且变出的图案为赢,重新变图案=======================================================================")
             continue;
         }
         break;

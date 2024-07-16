@@ -375,12 +375,40 @@ exports.handCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot,
 
 
 
+
+exports.deleteByCard = function (gameId, card) {
+    return new Promise((resolve, reject) => {
+        const sql = 'delete from la_ba.cards_' + gameId + ' where card = ?';
+        let valuse = [];
+        valuse.push(JSON.stringify(card))
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                log.err('deleteByCard' + err);
+                connection.release();
+                reject(0);
+                return;
+            }
+            connection.query({sql: sql, values: valuse}, function (err, rows) {
+                connection.release();
+                if (err) {
+                    log.err("deleteByCard" + err);
+                    reject(0);
+                } else {
+                    resolve(1);
+                }
+                valuse = [];
+            })
+        });
+    })
+}
+
+
+
 exports.syncHandCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJackpot) {
     return new Promise((resolve, reject) => {
         const sql = 'select card from  la_ba.cards_' + gameId + ' where mul in (?) and `free` = ? and jackpot = ? and openBox = ?';
-
         let valuse = [];
-        valuse.push(muls)
+        valuse.push(muls.length > 0 ? muls : [0])
         valuse.push(hitFree ? 1 : 0)
         valuse.push(winJackpot > 0 ? 1 : 0)
         valuse.push(hitBonus ? 1 : 0)
@@ -388,8 +416,8 @@ exports.syncHandCardsByMuls = function (gameId, muls, hitFree, hitBonus, winJack
         pool.getConnection(function (err, connection) {
             if (err) {
                 log.err('handCardsByMuls' + err);
-                reject(0);
                 connection.release();
+                reject(0);
                 return;
             }
             connection.query({sql: sql, values: valuse}, function (err, rows) {
