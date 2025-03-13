@@ -1021,7 +1021,7 @@ UNLOCK TABLES;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO ' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `AddBankCard`(userIdx int(11),accountx VARCHAR(30),namex VARCHAR(30),bankTypex VARCHAR(30), cpfx VARCHAR(30),ifscx VARCHAR(100), bankNamex VARCHAR(30),phonex VARCHAR(30), emailx VARCHAR(100))
 BEGIN
@@ -1324,7 +1324,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO ' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `BatchUpdateAccount`(IN user_data JSON)
 BEGIN
@@ -1605,158 +1605,307 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO ' */ ;
 DELIMITER ;;
 CREATE DEFINER=`skip-grants user`@`skip-grants host` PROCEDURE `GetEmail`(type_parm VARCHAR(255), _to_userid INT )
-begin
-
-	set @i = 1;
-
-	
-
-	
-
-    SET @len = (SELECT LENGTH(type_parm) - LENGTH(REPLACE(type_parm, ',', '')) + 1);
-
-   
-
-   
-
-    SET @temp_table_name = CONCAT('gameaccount.temp_email_result_', _to_userid);
-
-   
-
-   
-
-    SET @create_table_sql = CONCAT('CREATE TEMPORARY TABLE IF NOT EXISTS ', @temp_table_name, ' (
-        id INT,
-        isRead INT,
-        titleId VARCHAR(255),
-        contentId VARCHAR(255),
-        type INT,
-        createTime DATETIME,
-        goodsType INT,
-        userId INT,
-        nickname VARCHAR(255),
-        headimgurl VARCHAR(255),
-        rewardGoldVal decimal(20,2) DEFAULT 0,
-		rewardDiamondVal decimal(20,2) DEFAULT 0,
-		status INT,
-		rankType INT,
-		rank INT,
-		orderId VARCHAR(100)
-    )');
-
-   
-
-   
-
-    PREPARE stmt FROM @create_table_sql;
-
-    EXECUTE stmt;
-
-    DEALLOCATE PREPARE stmt;
-
-    
-
-    
-
-    WHILE @i <= @len DO
-
-        SET @type = SUBSTRING_INDEX(SUBSTRING_INDEX(type_parm, ',', @i), ',', -1);
-
-       	if @type = '0' then
-
-       		
-
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.transfer_bank_score rewardGoldVal, 0, e.isRead, -1, -1,null  from gameaccount.email e left join gameaccount.log_bank_transfer b on e.to_userid = b.to_userid  and e.otherId = b.id left join gameaccount.newuseraccounts n on e.from_userid  = n.Id where  e.type = 0 and e.to_userid =', _to_userid);
-
-			PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;
-
-       	elseif @type = '1' then
-
-			
-
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.rebate_glod  rewardGoldVal, 0, e.isRead, -1, -1,null  from gameaccount.email e left join ym_manage.agent_rebate  b on e.otherId = b.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 1 and  e.to_userid =', _to_userid);
-
-       		PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;
-        elseif @type = '2' then
-
-		
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.rewardGoldVal, r.rewardDiamondVal, r.status, -1, -1,null   from gameaccount.email e left join gameaccount.first_recharge_award  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 2 and  e.to_userid =', _to_userid);
-
-       		PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;
-           
-		elseif @type = '3' then
-
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.val rewardGoldVal,0,r.status, r.type, r.rank,null   from gameaccount.email e left join gameaccount.rank_award r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 3 and  e.to_userid =', _to_userid);
-
-       		PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;
-         elseif @type = '4' then
-
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, 0,0,0, 0, 0,r.orderId   from gameaccount.email e left join gameaccount.withdraw_success  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 4 and  e.to_userid =', _to_userid);
-
-       		PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;      
-        elseif @type = '5' then
-
-       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.goldVal rewardGoldVal,0,0, 0, 0,null   from gameaccount.email e left join gameaccount.withdraw_failed  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 5 and  e.to_userid =', _to_userid);
-
-       		PREPARE stmt FROM @insert_query;
-
-            EXECUTE stmt;
-
-            DEALLOCATE PREPARE stmt;   
-           
-       	end if;
-
-    
-
-        set @i = @i + 1;
-
-    END WHILE;
-
-   
-
-	
-
-    SET @query = CONCAT('SELECT * FROM ', @temp_table_name);
-
-	PREPARE stmt FROM @query;
-
-    EXECUTE stmt;
-
-    DEALLOCATE PREPARE stmt;
-
-    
-
-    SET @del = CONCAT('DROP TEMPORARY TABLE IF EXISTS ', @temp_table_name);
-
-   	PREPARE stmt FROM @del;
-
-    EXECUTE stmt;
-
-    DEALLOCATE PREPARE stmt;
-
+begin
+
+
+
+	set @i = 1;
+
+
+
+	
+
+
+
+	
+
+
+
+    SET @len = (SELECT LENGTH(type_parm) - LENGTH(REPLACE(type_parm, ',', '')) + 1);
+
+
+
+   
+
+
+
+   
+
+
+
+    SET @temp_table_name = CONCAT('gameaccount.temp_email_result_', _to_userid);
+
+
+
+   
+
+
+
+   
+
+
+
+    SET @create_table_sql = CONCAT('CREATE TEMPORARY TABLE IF NOT EXISTS ', @temp_table_name, ' (
+
+        id INT,
+
+        isRead INT,
+
+        titleId VARCHAR(255),
+
+        contentId VARCHAR(255),
+
+        type INT,
+
+        createTime DATETIME,
+
+        goodsType INT,
+
+        userId INT,
+
+        nickname VARCHAR(255),
+
+        headimgurl VARCHAR(255),
+
+        rewardGoldVal decimal(20,2) DEFAULT 0,
+
+		rewardDiamondVal decimal(20,2) DEFAULT 0,
+
+		status INT,
+
+		rankType INT,
+
+		rank INT,
+
+		orderId VARCHAR(100)
+
+    )');
+
+
+
+   
+
+
+
+   
+
+
+
+    PREPARE stmt FROM @create_table_sql;
+
+
+
+    EXECUTE stmt;
+
+
+
+    DEALLOCATE PREPARE stmt;
+
+
+
+    
+
+
+
+    
+
+
+
+    WHILE @i <= @len DO
+
+
+
+        SET @type = SUBSTRING_INDEX(SUBSTRING_INDEX(type_parm, ',', @i), ',', -1);
+
+
+
+       	if @type = '0' then
+
+
+
+       		
+
+
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.transfer_bank_score rewardGoldVal, 0, e.isRead, -1, -1,null  from gameaccount.email e left join gameaccount.log_bank_transfer b on e.to_userid = b.to_userid  and e.otherId = b.id left join gameaccount.newuseraccounts n on e.from_userid  = n.Id where  e.type = 0 and e.to_userid =', _to_userid);
+
+
+
+			PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;
+
+
+
+       	elseif @type = '1' then
+
+
+
+			
+
+
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, b.rebate_glod  rewardGoldVal, 0, e.isRead, -1, -1,null  from gameaccount.email e left join ym_manage.agent_rebate  b on e.otherId = b.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 1 and  e.to_userid =', _to_userid);
+
+
+
+       		PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;
+
+        elseif @type = '2' then
+
+
+
+		
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.rewardGoldVal, r.rewardDiamondVal, r.status, -1, -1,null   from gameaccount.email e left join gameaccount.first_recharge_award  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 2 and  e.to_userid =', _to_userid);
+
+
+
+       		PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;
+
+           
+
+		elseif @type = '3' then
+
+
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.val rewardGoldVal,0,r.status, r.type, r.rank,null   from gameaccount.email e left join gameaccount.rank_award r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 3 and  e.to_userid =', _to_userid);
+
+
+
+       		PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;
+
+         elseif @type = '4' then
+
+
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, 0,0,0, 0, 0,r.orderId   from gameaccount.email e left join gameaccount.withdraw_success  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 4 and  e.to_userid =', _to_userid);
+
+
+
+       		PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;      
+
+        elseif @type = '5' then
+
+
+
+       		SET @insert_query = CONCAT('INSERT INTO ', @temp_table_name, ' select e.id, e.isRead, e.title_id  titleId , e.content_id contentId , e.`type`, e.createTime ,e.goods_type goodsType, n.id userId, n.nickname, n.headimgurl, r.goldVal rewardGoldVal,0,0, 0, 0,null   from gameaccount.email e left join gameaccount.withdraw_failed  r on e.otherId = r.id left join gameaccount.newuseraccounts n on e.from_userid = n.Id where e.type = 5 and  e.to_userid =', _to_userid);
+
+
+
+       		PREPARE stmt FROM @insert_query;
+
+
+
+            EXECUTE stmt;
+
+
+
+            DEALLOCATE PREPARE stmt;   
+
+           
+
+       	end if;
+
+
+
+    
+
+
+
+        set @i = @i + 1;
+
+
+
+    END WHILE;
+
+
+
+   
+
+
+
+	
+
+
+
+    SET @query = CONCAT('SELECT * FROM ', @temp_table_name);
+
+
+
+	PREPARE stmt FROM @query;
+
+
+
+    EXECUTE stmt;
+
+
+
+    DEALLOCATE PREPARE stmt;
+
+
+
+    
+
+
+
+    SET @del = CONCAT('DROP TEMPORARY TABLE IF EXISTS ', @temp_table_name);
+
+
+
+   	PREPARE stmt FROM @del;
+
+
+
+    EXECUTE stmt;
+
+
+
+    DEALLOCATE PREPARE stmt;
+
+
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1837,7 +1986,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO ' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `LoginByGoogle`(_uid VARCHAR(50),nickname VARCHAR(40),_email VARCHAR(50))
 BEGIN
@@ -2036,7 +2185,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO ' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `RegisterByGoogle`(_uid VARCHAR(50),_email VARCHAR(50),_account VARCHAR(50),_pwd VARCHAR(64),_nickname VARCHAR(128),_king VARCHAR(20))
 begin
